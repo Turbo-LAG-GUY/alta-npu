@@ -181,7 +181,7 @@ before running it. The root steps change the system.
 
 - **The fix:** [upstream/etnaviv-reset-runtime-pm](upstream/etnaviv-reset-runtime-pm) is an RFC patch,
   "drm/etnaviv: keep the core in reset across runtime power-down", against v7.4-rc1. Mainline has the same gap on
-  every A311D board. It is drafted but not sent: Jordan will review it, sign it off and send it.
+  every A311D board. It is drafted but not sent: I will review it, sign it off and send it soon.
 - **Already in mainline:** patches 0001-0003 and the optional reset support.
 - **Not submitted:** the SH_EU clock-gating fix for revision 0x7120.
 
