@@ -205,9 +205,9 @@ before running it. The root steps change the system.
   power-register fix.
 - **Amlogic's galcore driver** was the reference for the reset sequence.
 - **This work:** Jordan ([Turbo-LAG-GUY](https://github.com/Turbo-LAG-GUY)) with Claude Code (Anthropic's Claude Opus
-  5.5) running on the board. Claude wrote most of the code and documents here, including the analysis, the patches,
-  the scripts and the notes, and ran the tests through the kit. Jordan approved every NPU test, ran every root step
-  and made the calls.
+  5.5) running on the board. Code was generated with AI for certain documents, including the analysis, the patches,
+  the scripts and the notes, and the test ran. I still approved every NPU test, ran every root step
+  and made the calls and wrote the frame of code/project and conducted most of the research.
 
 ## License
 
