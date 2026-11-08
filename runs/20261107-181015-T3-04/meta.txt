@@ -1,0 +1,10 @@
+label: T3-04
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify-steps.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-07T18:10:15-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: out-of-tree module, no marker (taint=O) - confirm it is the 0x7120 build; srcversion=
+mem_available_mb: 2168
+deadline_s: 120
+journal_cursor: s=daad8579b83a4f48b85b603a8e3192a7;i=add84;b=c40e6c74acac43fda82eb14086ae36c9;m=290edf02;t=65fb6772c47ba;x=668f120f833e8ace
+end: 2026-11-07T18:10:18-05:00  rc: 0  wall_s: 3

@@ -1,0 +1,10 @@
+T3-01 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.60
+T3-02 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=8.05
+T3-03 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.27
+T3-04 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.31
+T3-05 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.18
+T3-06 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.43
+T3-07 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.21
+T3-08 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.10
+T3-09 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.25
+T3-10 rc=0 PASS top1=653 score=0.7188 shared=5/5 median_ms=7.31

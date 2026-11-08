@@ -1,0 +1,4 @@
+[ 1792.994140] pid=33544 start: runtime=ai_edge_litert delegate=/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so model=models/mobilenet_v1_mesa.tflite | npu=active active_ms=1783379 irqs=363
+[ 1792.997056] pid=33544 load_delegate: begin (opens the NPU render node) | npu=active active_ms=1783382 irqs=363
+[ 1793.025383] pid=33544 load_delegate: done | npu=active active_ms=1783410 irqs=363
+[ 1793.030197] pid=33544 Interpreter(): begin (the delegate is applied to the graph) | npu=active active_ms=1783415 irqs=363

@@ -1,0 +1,42 @@
+{
+ "runtime": "ai_edge_litert",
+ "delegate": "cpu",
+ "model": "models/mobilenet_v1_mesa.tflite",
+ "image": "models/grace_hopper.bmp",
+ "setup_ms": 148.4,
+ "invoke_ms": [
+  44.53,
+  39.09,
+  38.93,
+  39.44,
+  38.83
+ ],
+ "invoke_ms_median": 39.09,
+ "top5": [
+  {
+   "index": 653,
+   "score": 0.703125,
+   "label": "military uniform"
+  },
+  {
+   "index": 668,
+   "score": 0.070312,
+   "label": "mortarboard"
+  },
+  {
+   "index": 907,
+   "score": 0.058594,
+   "label": "Windsor tie"
+  },
+  {
+   "index": 820,
+   "score": 0.023438,
+   "label": "stage"
+  },
+  {
+   "index": 401,
+   "score": 0.015625,
+   "label": "academic gown, academic robe, judge's robe"
+  }
+ ]
+}

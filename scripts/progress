@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# progress - append one line to PROGRESS.md and force it to disk before returning, so the line
+# survives a hard reset that comes right after. Safe to call as jordan, or via sudo from a root step.
+# Usage: scripts/progress STEP STATUS "details"      (STATUS: STARTING | DONE | FAILED | NOTE)
+set -u
+here="$(cd "$(dirname "$0")/.." && pwd)"
+F="${ALTA_PROGRESS:-$here/PROGRESS.md}"
+printf -- '- %s boot=%s up=%ss | %s | %s | %s\n' "$(date -Is)" "$(cut -c1-8 /proc/sys/kernel/random/boot_id)" \
+  "$(cut -d' ' -f1 /proc/uptime)" "${1:-?}" "${2:-?}" "${3:-}" >> "$F"
+sync "$F" 2>/dev/null || sync

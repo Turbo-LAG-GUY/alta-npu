@@ -1,0 +1,109 @@
+[  562.154485] pid=7592 start: runtime=ai_edge_litert delegate=/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so model=models/mobilenet_v1_mesa.tflite | npu=suspended active_ms=414371 irqs=0
+[  562.157966] pid=7592 load_delegate: begin (opens the NPU render node) | npu=suspended active_ms=414371 irqs=0
+[  562.284246] pid=7592 load_delegate: done | npu=suspended active_ms=414371 irqs=0
+[  562.302770] pid=7592 Interpreter(): begin (the delegate is applied to the graph) | npu=suspended active_ms=414371 irqs=0
+[  563.564266] pid=7592 Interpreter(): done | npu=suspended active_ms=414371 irqs=0
+[  563.581070] pid=7592 allocate_tensors: begin (Teflon compiles the graph for the NPU) | npu=suspended active_ms=414371 irqs=0
+[  563.600896] pid=7592 allocate_tensors: done (setup 1298.1 ms) | npu=suspended active_ms=414371 irqs=0
+[  563.652429] pid=7592 input set | npu=suspended active_ms=414371 irqs=0
+[  563.664206] pid=7592 invoke 1/50: begin | npu=suspended active_ms=414371 irqs=0
+[  563.715292] pid=7592 invoke 1/50: done (41.00 ms) | npu=active active_ms=414413 irqs=3
+[  573.741142] pid=7592 invoke 2/50: begin | npu=suspended active_ms=414652 irqs=3
+[  573.825800] pid=7592 invoke 2/50: done (47.26 ms) | npu=active active_ms=414699 irqs=5
+[  583.841350] pid=7592 invoke 3/50: begin | npu=suspended active_ms=414943 irqs=5
+[  583.910666] pid=7592 invoke 3/50: done (43.53 ms) | npu=active active_ms=414986 irqs=7
+[  593.921399] pid=7592 invoke 4/50: begin | npu=suspended active_ms=415232 irqs=7
+[  593.977015] pid=7592 invoke 4/50: done (39.90 ms) | npu=active active_ms=415272 irqs=9
+[  603.997440] pid=7592 invoke 5/50: begin | npu=suspended active_ms=415514 irqs=9
+[  604.054858] pid=7592 invoke 5/50: done (44.32 ms) | npu=active active_ms=415558 irqs=11
+[  614.060900] pid=7592 invoke 6/50: begin | npu=suspended active_ms=415796 irqs=11
+[  614.117479] pid=7592 invoke 6/50: done (39.36 ms) | npu=active active_ms=415835 irqs=13
+[  624.132392] pid=7592 invoke 7/50: begin | npu=suspended active_ms=416083 irqs=13
+[  624.190941] pid=7592 invoke 7/50: done (39.74 ms) | npu=active active_ms=416123 irqs=15
+[  634.212322] pid=7592 invoke 8/50: begin | npu=suspended active_ms=416380 irqs=15
+[  634.270750] pid=7592 invoke 8/50: done (40.08 ms) | npu=active active_ms=416419 irqs=17
+[  644.282090] pid=7592 invoke 9/50: begin | npu=suspended active_ms=416647 irqs=17
+[  644.337334] pid=7592 invoke 9/50: done (39.91 ms) | npu=active active_ms=416687 irqs=19
+[  654.351286] pid=7592 invoke 10/50: begin | npu=suspended active_ms=416937 irqs=19
+[  654.447293] pid=7592 invoke 10/50: done (41.26 ms) | npu=active active_ms=416978 irqs=21
+[  664.470730] pid=7592 invoke 11/50: begin | npu=suspended active_ms=417181 irqs=21
+[  664.558131] pid=7592 invoke 11/50: done (43.17 ms) | npu=active active_ms=417224 irqs=23
+[  674.571309] pid=7592 invoke 12/50: begin | npu=suspended active_ms=417469 irqs=23
+[  674.627493] pid=7592 invoke 12/50: done (43.26 ms) | npu=active active_ms=417511 irqs=25
+[  684.639348] pid=7592 invoke 13/50: begin | npu=suspended active_ms=417757 irqs=25
+[  684.701463] pid=7592 invoke 13/50: done (42.88 ms) | npu=active active_ms=417800 irqs=27
+[  694.729365] pid=7592 invoke 14/50: begin | npu=suspended active_ms=418049 irqs=27
+[  694.794221] pid=7592 invoke 14/50: done (45.59 ms) | npu=active active_ms=418094 irqs=29
+[  704.814274] pid=7592 invoke 15/50: begin | npu=suspended active_ms=418343 irqs=29
+[  704.880608] pid=7592 invoke 15/50: done (40.67 ms) | npu=active active_ms=418384 irqs=31
+[  714.891962] pid=7592 invoke 16/50: begin | npu=suspended active_ms=418632 irqs=31
+[  714.968608] pid=7592 invoke 16/50: done (45.53 ms) | npu=active active_ms=418678 irqs=33
+[  724.984911] pid=7592 invoke 17/50: begin | npu=suspended active_ms=418910 irqs=33
+[  725.051563] pid=7592 invoke 17/50: done (47.37 ms) | npu=active active_ms=418957 irqs=35
+[  735.072287] pid=7592 invoke 18/50: begin | npu=suspended active_ms=419186 irqs=35
+[  735.130856] pid=7592 invoke 18/50: done (39.84 ms) | npu=active active_ms=419226 irqs=37
+[  745.150601] pid=7592 invoke 19/50: begin | npu=suspended active_ms=419472 irqs=37
+[  745.210719] pid=7592 invoke 19/50: done (40.37 ms) | npu=active active_ms=419512 irqs=39
+[  755.228000] pid=7592 invoke 20/50: begin | npu=suspended active_ms=419758 irqs=39
+[  755.284166] pid=7592 invoke 20/50: done (41.30 ms) | npu=active active_ms=419800 irqs=41
+[  765.309170] pid=7592 invoke 21/50: begin | npu=suspended active_ms=420045 irqs=41
+[  765.371321] pid=7592 invoke 21/50: done (44.29 ms) | npu=active active_ms=420090 irqs=43
+[  775.391304] pid=7592 invoke 22/50: begin | npu=suspended active_ms=420295 irqs=43
+[  775.447617] pid=7592 invoke 22/50: done (39.58 ms) | npu=active active_ms=420335 irqs=45
+[  785.465782] pid=7592 invoke 23/50: begin | npu=suspended active_ms=420574 irqs=45
+[  785.530897] pid=7592 invoke 23/50: done (40.46 ms) | npu=active active_ms=420615 irqs=47
+[  795.548363] pid=7592 invoke 24/50: begin | npu=suspended active_ms=420863 irqs=47
+[  795.631087] pid=7592 invoke 24/50: done (45.90 ms) | npu=active active_ms=420910 irqs=49
+[  805.644042] pid=7592 invoke 25/50: begin | npu=suspended active_ms=421157 irqs=49
+[  805.709480] pid=7592 invoke 25/50: done (45.89 ms) | npu=active active_ms=421204 irqs=51
+[  815.727391] pid=7592 invoke 26/50: begin | npu=suspended active_ms=421430 irqs=51
+[  815.791242] pid=7592 invoke 26/50: done (39.99 ms) | npu=active active_ms=421470 irqs=53
+[  825.808976] pid=7592 invoke 27/50: begin | npu=suspended active_ms=421722 irqs=53
+[  825.880741] pid=7592 invoke 27/50: done (39.38 ms) | npu=active active_ms=421762 irqs=55
+[  835.896393] pid=7592 invoke 28/50: begin | npu=suspended active_ms=422000 irqs=55
+[  835.950998] pid=7592 invoke 28/50: done (39.10 ms) | npu=active active_ms=422039 irqs=57
+[  845.973204] pid=7592 invoke 29/50: begin | npu=suspended active_ms=422263 irqs=57
+[  846.034101] pid=7592 invoke 29/50: done (40.52 ms) | npu=active active_ms=422304 irqs=59
+[  856.058025] pid=7592 invoke 30/50: begin | npu=suspended active_ms=422549 irqs=59
+[  856.128147] pid=7592 invoke 30/50: done (45.78 ms) | npu=active active_ms=422595 irqs=61
+[  866.158394] pid=7592 invoke 31/50: begin | npu=suspended active_ms=422844 irqs=61
+[  866.230914] pid=7592 invoke 31/50: done (42.16 ms) | npu=active active_ms=422886 irqs=63
+[  876.300816] pid=7592 invoke 32/50: begin | npu=suspended active_ms=423108 irqs=63
+[  876.367060] pid=7592 invoke 32/50: done (39.57 ms) | npu=active active_ms=423147 irqs=65
+[  886.374186] pid=7592 invoke 33/50: begin | npu=suspended active_ms=423351 irqs=65
+[  886.427403] pid=7592 invoke 33/50: done (38.89 ms) | npu=active active_ms=423390 irqs=67
+[  896.483724] pid=7592 invoke 34/50: begin | npu=suspended active_ms=423637 irqs=67
+[  896.547960] pid=7592 invoke 34/50: done (40.84 ms) | npu=active active_ms=423678 irqs=69
+[  906.559404] pid=7592 invoke 35/50: begin | npu=suspended active_ms=423927 irqs=69
+[  906.641594] pid=7592 invoke 35/50: done (45.78 ms) | npu=active active_ms=423972 irqs=71
+[  916.688383] pid=7592 invoke 36/50: begin | npu=suspended active_ms=424213 irqs=71
+[  916.758424] pid=7592 invoke 36/50: done (42.64 ms) | npu=active active_ms=424256 irqs=73
+[  926.785376] pid=7592 invoke 37/50: begin | npu=suspended active_ms=424483 irqs=73
+[  926.847428] pid=7592 invoke 37/50: done (42.00 ms) | npu=active active_ms=424525 irqs=75
+[  936.883061] pid=7592 invoke 38/50: begin | npu=suspended active_ms=424770 irqs=75
+[  936.951506] pid=7592 invoke 38/50: done (42.73 ms) | npu=active active_ms=424813 irqs=77
+[  946.968392] pid=7592 invoke 39/50: begin | npu=suspended active_ms=425064 irqs=77
+[  947.057856] pid=7592 invoke 39/50: done (42.34 ms) | npu=active active_ms=425106 irqs=79
+[  957.093377] pid=7592 invoke 40/50: begin | npu=suspended active_ms=425352 irqs=79
+[  957.157999] pid=7592 invoke 40/50: done (43.26 ms) | npu=active active_ms=425396 irqs=81
+[  967.174114] pid=7592 invoke 41/50: begin | npu=suspended active_ms=425610 irqs=81
+[  967.241410] pid=7592 invoke 41/50: done (42.68 ms) | npu=active active_ms=425653 irqs=83
+[  977.285105] pid=7592 invoke 42/50: begin | npu=suspended active_ms=425901 irqs=83
+[  977.344321] pid=7592 invoke 42/50: done (40.94 ms) | npu=active active_ms=425942 irqs=85
+[  987.366197] pid=7592 invoke 43/50: begin | npu=suspended active_ms=426181 irqs=85
+[  987.424272] pid=7592 invoke 43/50: done (41.29 ms) | npu=active active_ms=426223 irqs=87
+[  997.450575] pid=7592 invoke 44/50: begin | npu=suspended active_ms=426455 irqs=87
+[  997.510795] pid=7592 invoke 44/50: done (41.58 ms) | npu=active active_ms=426497 irqs=89
+[ 1007.521750] pid=7592 invoke 45/50: begin | npu=suspended active_ms=426710 irqs=89
+[ 1007.577397] pid=7592 invoke 45/50: done (39.18 ms) | npu=active active_ms=426749 irqs=91
+[ 1017.599402] pid=7592 invoke 46/50: begin | npu=suspended active_ms=426987 irqs=91
+[ 1017.667184] pid=7592 invoke 46/50: done (39.49 ms) | npu=active active_ms=427027 irqs=93
+[ 1027.686637] pid=7592 invoke 47/50: begin | npu=suspended active_ms=427268 irqs=93
+[ 1027.740746] pid=7592 invoke 47/50: done (40.81 ms) | npu=active active_ms=427309 irqs=95
+[ 1037.756301] pid=7592 invoke 48/50: begin | npu=suspended active_ms=427555 irqs=95
+[ 1037.817368] pid=7592 invoke 48/50: done (44.94 ms) | npu=active active_ms=427600 irqs=97
+[ 1047.832076] pid=7592 invoke 49/50: begin | npu=suspended active_ms=427848 irqs=97
+[ 1047.900872] pid=7592 invoke 49/50: done (40.11 ms) | npu=active active_ms=427889 irqs=99
+[ 1057.925595] pid=7592 invoke 50/50: begin | npu=suspended active_ms=428091 irqs=99
+[ 1057.987559] pid=7592 invoke 50/50: done (44.57 ms) | npu=active active_ms=428136 irqs=101
+[ 1058.008471] pid=7592 finished: top-1 index 653 | npu=active active_ms=428157 irqs=101

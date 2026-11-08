@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# npu-t3-detached - start T3 (scripts/npu-t3) as a transient systemd user service, outside the Claude Code
+# session, so a session crash or exit can't kill it halfway (that is what cut off T3-01 on 2026-11-07).
+# The status indicator's --watch view (every 0.5 s) is recorded next to the runs.
+# Follow it with:  tail ~/alta-npu/PROGRESS.md;  systemctl --user status <unit>;  journalctl --user -u <unit>
+# Usage: scripts/npu-t3-detached [N]      (prints the unit name)
+set -eu
+here="$(cd "$(dirname "$0")/.." && pwd)"
+UNIT="alta-t3-$(date +%Y%m%d-%H%M%S)"
+W="$here/runs/$UNIT-indicator-watch.txt"
+IND=/home/jordan/Documents/AI_Projects/npu-status/npu_status.py
+systemd-run --user --quiet --unit="$UNIT" --collect --working-directory="$here" \
+  /bin/bash -c "/usr/bin/python3 '$IND' --watch --interval 0.5 > '$W' 2>&1 & IW=\$!; '$here/scripts/npu-t3' ${1:-20}; rc=\$?; kill \$IW 2>/dev/null; exit \$rc"
+"$here/scripts/progress" T3-launch NOTE "started detached as systemd user unit $UNIT (indicator view: $W)"
+echo "$UNIT"

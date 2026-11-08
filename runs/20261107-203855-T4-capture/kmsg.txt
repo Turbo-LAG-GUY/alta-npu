@@ -1,0 +1,8 @@
+# kmsg-catch start 2026-11-07T20:38:55-0500 uptime=1213.85
+[ 1220.484537] <4> panfrost_gem_shrinker_scan: 2 callbacks suppressed
+[ 1220.484548] <6> Purging 544768 bytes
+[ 1220.929721] <6> Purging 524288 bytes
+[ 1220.931237] <6> Purging 524288 bytes
+[ 1220.931888] <6> Purging 2166784 bytes
+[ 1220.932190] <6> Purging 704512 bytes
+# kmsg-catch end uptime=1249.39

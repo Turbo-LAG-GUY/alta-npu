@@ -1,0 +1,27 @@
+From b87fd483985c0d0d7bd32f34092e2dfc988f66e2 Mon Sep 17 00:00:00 2001
+From: Turbo-LAG-GUY <jordandwj@gmail.com>
+Date: Mon, 13 Apr 2026 02:42:45 -0400
+Subject: [PATCH] drm/etnaviv: disable SH_EU clock gating for GC8000 rev 7120
+ (A311D)
+
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 88a33f486f88..bc2a29f2b12c 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -675,7 +675,8 @@ static void etnaviv_gpu_enable_mlcg(struct etnaviv_gpu *gpu)
+ 		       VIVS_PM_MODULE_CONTROLS_DISABLE_MODULE_CLOCK_GATING_RA;
+ 
+ 	/* Disable SH_EU clock gating on affected core revisions. */
+-	if (etnaviv_is_model_rev(gpu, 0x8000, 0x7200) ||
++	if (etnaviv_is_model_rev(gpu, 0x8000, 0x7120) ||
++	    etnaviv_is_model_rev(gpu, 0x8000, 0x7200) ||
+ 	    etnaviv_is_model_rev(gpu, 0x8000, 0x8002) ||
+ 	    etnaviv_is_model_rev(gpu, 0x9200, 0x6304))
+ 		pmc |= VIVS_PM_MODULE_CONTROLS_DISABLE_MODULE_CLOCK_GATING_SH_EU;
+-- 
+2.43.0
+

@@ -1,0 +1,270 @@
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 0(u8) 30(u8) 29(i32) out: 31(u8) ReLU6
+  1 DWCONV          v1  supported   in: 31(u8) 32(u8) 20(i32) out: 33(u8) ReLU6
+  2 CONV            v1  supported   in: 33(u8) 34(u8) 19(i32) out: 35(u8) ReLU6
+  3 DWCONV          v1  supported   in: 35(u8) 36(u8) 18(i32) out: 37(u8) ReLU6
+  4 CONV            v1  supported   in: 37(u8) 38(u8) 17(i32) out: 39(u8) ReLU6
+  5 DWCONV          v1  supported   in: 39(u8) 40(u8) 16(i32) out: 41(u8) ReLU6
+  6 CONV            v1  supported   in: 41(u8) 42(u8) 15(i32) out: 43(u8) ReLU6
+  7 DWCONV          v1  supported   in: 43(u8) 44(u8) 14(i32) out: 45(u8) ReLU6
+  8 CONV            v1  supported   in: 45(u8) 46(u8) 13(i32) out: 47(u8) ReLU6
+  9 DWCONV          v1  supported   in: 47(u8) 48(u8) 12(i32) out: 49(u8) ReLU6
+ 10 CONV            v1  supported   in: 49(u8) 50(u8) 11(i32) out: 51(u8) ReLU6
+ 11 DWCONV          v1  supported   in: 51(u8) 52(u8) 10(i32) out: 53(u8) ReLU6
+ 12 CONV            v1  supported   in: 53(u8) 54(u8) 9(i32) out: 55(u8) ReLU6
+ 13 DWCONV          v1  supported   in: 55(u8) 56(u8) 8(i32) out: 57(u8) ReLU6
+ 14 CONV            v1  supported   in: 57(u8) 58(u8) 7(i32) out: 59(u8) ReLU6
+ 15 DWCONV          v1  supported   in: 59(u8) 60(u8) 6(i32) out: 61(u8) ReLU6
+ 16 CONV            v1  supported   in: 61(u8) 62(u8) 5(i32) out: 63(u8) ReLU6
+ 17 DWCONV          v1  supported   in: 63(u8) 64(u8) 4(i32) out: 65(u8) ReLU6
+ 18 CONV            v1  supported   in: 65(u8) 66(u8) 3(i32) out: 67(u8) ReLU6
+ 19 DWCONV          v1  supported   in: 67(u8) 68(u8) 28(i32) out: 69(u8) ReLU6
+ 20 CONV            v1  supported   in: 69(u8) 70(u8) 27(i32) out: 71(u8) ReLU6
+ 21 DWCONV          v1  supported   in: 71(u8) 72(u8) 26(i32) out: 73(u8) ReLU6
+ 22 CONV            v1  supported   in: 73(u8) 74(u8) 25(i32) out: 75(u8) ReLU6
+ 23 DWCONV          v1  supported   in: 75(u8) 76(u8) 24(i32) out: 77(u8) ReLU6
+ 24 CONV            v1  supported   in: 77(u8) 78(u8) 23(i32) out: 79(u8) ReLU6
+ 25 DWCONV          v1  supported   in: 79(u8) 80(u8) 22(i32) out: 81(u8) ReLU6
+ 26 CONV            v1  supported   in: 81(u8) 82(u8) 21(i32) out: 83(u8) ReLU6
+ 27 AVGPOOL         v1  unsupported in: 83(u8) out: 84(u8)
+ 28 CONV            v1  supported   in: 84(u8) 85(u8) 2(i32) out: 86(u8)
+ 29 RESHAPE         v1  supported   in: 86(u8) 1(i32) out: 87(u8)
+ 30 SOFTMAX         v1  unsupported in: 87(u8) out: 88(u8)
+
+teflon: compiling graph: 89 tensors 27 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.007812  80 no       1x224x224x3
+  1 0.000000   0 yes      1x1x1x2
+  2 0.000117   0 yes      1x1x1x1001
+  3 0.000183   0 yes      1x1x1x512
+  4 0.000667   0 yes      1x1x1x512
+  5 0.000117   0 yes      1x1x1x512
+  6 0.001003   0 yes      1x1x1x512
+  7 0.000125   0 yes      1x1x1x512
+  8 0.000869   0 yes      1x1x1x512
+  9 0.000216   0 yes      1x1x1x512
+ 10 0.000317   0 yes      1x1x1x256
+ 11 0.000151   0 yes      1x1x1x256
+ 12 0.000966   0 yes      1x1x1x256
+ 13 0.000179   0 yes      1x1x1x256
+ 14 0.000394   0 yes      1x1x1x128
+ 15 0.000324   0 yes      1x1x1x128
+ 16 0.001424   0 yes      1x1x1x128
+ 17 0.000356   0 yes      1x1x1x128
+ 18 0.009477   0 yes      1x1x1x64
+ 19 0.000716   0 yes      1x1x1x64
+ 20 0.006875   0 yes      1x1x1x32
+ 21 0.000425   0 yes      1x1x1x1024
+ 22 0.002969   0 yes      1x1x1x1024
+ 23 0.000192   0 yes      1x1x1x1024
+ 24 0.000184   0 yes      1x1x1x512
+ 25 0.000128   0 yes      1x1x1x512
+ 26 0.000456   0 yes      1x1x1x512
+ 27 0.000227   0 yes      1x1x1x512
+ 28 0.000572   0 yes      1x1x1x512
+ 29 0.000171   0 yes      1x1x1x32
+ 30 0.021827  97 yes      32x3x3x3
+ 31 0.023528   0 no       1x112x112x32
+ 32 0.292199  6e yes      1x3x3x32
+ 33 0.023528   0 no       1x112x112x32
+ 34 0.030421  79 yes      64x1x1x32
+ 35 0.023528   0 no       1x112x112x64
+ 36 0.402773  82 yes      1x3x3x64
+ 37 0.023528   0 no       1x56x56x64
+ 38 0.015148  68 yes      128x1x1x64
+ 39 0.023528   0 no       1x56x56x128
+ 40 0.060537  a0 yes      1x3x3x128
+ 41 0.023528   0 no       1x56x56x128
+ 42 0.013755  5e yes      128x1x1x128
+ 43 0.023528   0 no       1x56x56x128
+ 44 0.016758  7b yes      1x3x3x128
+ 45 0.023528   0 no       1x28x28x128
+ 46 0.007602  97 yes      256x1x1x128
+ 47 0.023528   0 no       1x28x28x256
+ 48 0.041055  81 yes      1x3x3x256
+ 49 0.023528   0 no       1x28x28x256
+ 50 0.006432  7a yes      256x1x1x256
+ 51 0.023528   0 no       1x28x28x256
+ 52 0.013461  7a yes      1x3x3x256
+ 53 0.023528   0 no       1x14x14x256
+ 54 0.009171  6d yes      512x1x1x256
+ 55 0.023528   0 no       1x14x14x512
+ 56 0.036935  84 yes      1x3x3x512
+ 57 0.023528   0 no       1x14x14x512
+ 58 0.005300  8c yes      512x1x1x512
+ 59 0.023528   0 no       1x14x14x512
+ 60 0.042610  5e yes      1x3x3x512
+ 61 0.023528   0 no       1x14x14x512
+ 62 0.004963  7f yes      512x1x1x512
+ 63 0.023528   0 no       1x14x14x512
+ 64 0.028359  7f yes      1x3x3x512
+ 65 0.023528   0 no       1x14x14x512
+ 66 0.007771  59 yes      512x1x1x512
+ 67 0.023528   0 no       1x14x14x512
+ 68 0.024329  86 yes      1x3x3x512
+ 69 0.023528   0 no       1x14x14x512
+ 70 0.009659  63 yes      512x1x1x512
+ 71 0.023528   0 no       1x14x14x512
+ 72 0.019367  6a yes      1x3x3x512
+ 73 0.023528   0 no       1x14x14x512
+ 74 0.005447  99 yes      512x1x1x512
+ 75 0.023528   0 no       1x14x14x512
+ 76 0.007836  7e yes      1x3x3x512
+ 77 0.023528   0 no       1x7x7x512
+ 78 0.008179  82 yes      1024x1x1x512
+ 79 0.023528   0 no       1x7x7x1024
+ 80 0.126169  d3 yes      1x3x3x1024
+ 81 0.023528   0 no       1x7x7x1024
+ 82 0.018048  5f yes      1024x1x1x1024
+ 83 0.023528   0 no       1x7x7x1024
+ 84 0.023528   0 no       1x1x1x1024
+ 85 0.004987  4a yes      1001x1x1x1024
+ 86 0.166099  42 no       1x1x1x1001
+ 87 0.166099  42 no       1x1x1x1001
+ 88 0.003906   0 no       1x1x1x1001
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,30,29              31                  
+  1 DWCONV          31,32,20             33                  
+  2 CONV            33,34,19             35                  
+  3 DWCONV          35,36,18             37                  
+  4 CONV            37,38,17             39                  
+  5 DWCONV          39,40,16             41                  
+  6 CONV            41,42,15             43                  
+  7 DWCONV          43,44,14             45                  
+  8 CONV            45,46,13             47                  
+  9 DWCONV          47,48,12             49                  
+ 10 CONV            49,50,11             51                  
+ 11 DWCONV          51,52,10             53                  
+ 12 CONV            53,54,9              55                  
+ 13 DWCONV          55,56,8              57                  
+ 14 CONV            57,58,7              59                  
+ 15 DWCONV          59,60,6              61                  
+ 16 CONV            61,62,5              63                  
+ 17 DWCONV          63,64,4              65                  
+ 18 CONV            65,66,3              67                  
+ 19 DWCONV          67,68,28             69                  
+ 20 CONV            69,70,27             71                  
+ 21 DWCONV          71,72,26             73                  
+ 22 CONV            73,74,25             75                  
+ 23 DWCONV          75,76,24             77                  
+ 24 CONV            77,78,23             79                  
+ 25 DWCONV          79,80,22             81                  
+ 26 CONV            81,82,21             83                  
+
+teflon: compiled graph, took 1772 ms
+
+teflon: compiling graph: 89 tensors 2 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.007812  80 no       1x224x224x3
+  1 0.000000   0 yes      1x1x1x2
+  2 0.000117   0 yes      1x1x1x1001
+  3 0.000183   0 yes      1x1x1x512
+  4 0.000667   0 yes      1x1x1x512
+  5 0.000117   0 yes      1x1x1x512
+  6 0.001003   0 yes      1x1x1x512
+  7 0.000125   0 yes      1x1x1x512
+  8 0.000869   0 yes      1x1x1x512
+  9 0.000216   0 yes      1x1x1x512
+ 10 0.000317   0 yes      1x1x1x256
+ 11 0.000151   0 yes      1x1x1x256
+ 12 0.000966   0 yes      1x1x1x256
+ 13 0.000179   0 yes      1x1x1x256
+ 14 0.000394   0 yes      1x1x1x128
+ 15 0.000324   0 yes      1x1x1x128
+ 16 0.001424   0 yes      1x1x1x128
+ 17 0.000356   0 yes      1x1x1x128
+ 18 0.009477   0 yes      1x1x1x64
+ 19 0.000716   0 yes      1x1x1x64
+ 20 0.006875   0 yes      1x1x1x32
+ 21 0.000425   0 yes      1x1x1x1024
+ 22 0.002969   0 yes      1x1x1x1024
+ 23 0.000192   0 yes      1x1x1x1024
+ 24 0.000184   0 yes      1x1x1x512
+ 25 0.000128   0 yes      1x1x1x512
+ 26 0.000456   0 yes      1x1x1x512
+ 27 0.000227   0 yes      1x1x1x512
+ 28 0.000572   0 yes      1x1x1x512
+ 29 0.000171   0 yes      1x1x1x32
+ 30 0.021827  97 yes      32x3x3x3
+ 31 0.023528   0 no       1x112x112x32
+ 32 0.292199  6e yes      1x3x3x32
+ 33 0.023528   0 no       1x112x112x32
+ 34 0.030421  79 yes      64x1x1x32
+ 35 0.023528   0 no       1x112x112x64
+ 36 0.402773  82 yes      1x3x3x64
+ 37 0.023528   0 no       1x56x56x64
+ 38 0.015148  68 yes      128x1x1x64
+ 39 0.023528   0 no       1x56x56x128
+ 40 0.060537  a0 yes      1x3x3x128
+ 41 0.023528   0 no       1x56x56x128
+ 42 0.013755  5e yes      128x1x1x128
+ 43 0.023528   0 no       1x56x56x128
+ 44 0.016758  7b yes      1x3x3x128
+ 45 0.023528   0 no       1x28x28x128
+ 46 0.007602  97 yes      256x1x1x128
+ 47 0.023528   0 no       1x28x28x256
+ 48 0.041055  81 yes      1x3x3x256
+ 49 0.023528   0 no       1x28x28x256
+ 50 0.006432  7a yes      256x1x1x256
+ 51 0.023528   0 no       1x28x28x256
+ 52 0.013461  7a yes      1x3x3x256
+ 53 0.023528   0 no       1x14x14x256
+ 54 0.009171  6d yes      512x1x1x256
+ 55 0.023528   0 no       1x14x14x512
+ 56 0.036935  84 yes      1x3x3x512
+ 57 0.023528   0 no       1x14x14x512
+ 58 0.005300  8c yes      512x1x1x512
+ 59 0.023528   0 no       1x14x14x512
+ 60 0.042610  5e yes      1x3x3x512
+ 61 0.023528   0 no       1x14x14x512
+ 62 0.004963  7f yes      512x1x1x512
+ 63 0.023528   0 no       1x14x14x512
+ 64 0.028359  7f yes      1x3x3x512
+ 65 0.023528   0 no       1x14x14x512
+ 66 0.007771  59 yes      512x1x1x512
+ 67 0.023528   0 no       1x14x14x512
+ 68 0.024329  86 yes      1x3x3x512
+ 69 0.023528   0 no       1x14x14x512
+ 70 0.009659  63 yes      512x1x1x512
+ 71 0.023528   0 no       1x14x14x512
+ 72 0.019367  6a yes      1x3x3x512
+ 73 0.023528   0 no       1x14x14x512
+ 74 0.005447  99 yes      512x1x1x512
+ 75 0.023528   0 no       1x14x14x512
+ 76 0.007836  7e yes      1x3x3x512
+ 77 0.023528   0 no       1x7x7x512
+ 78 0.008179  82 yes      1024x1x1x512
+ 79 0.023528   0 no       1x7x7x1024
+ 80 0.126169  d3 yes      1x3x3x1024
+ 81 0.023528   0 no       1x7x7x1024
+ 82 0.018048  5f yes      1024x1x1x1024
+ 83 0.023528   0 no       1x7x7x1024
+ 84 0.023528   0 no       1x1x1x1024
+ 85 0.004987  4a yes      1001x1x1x1024
+ 86 0.166099  42 no       1x1x1x1001
+ 87 0.166099  42 no       1x1x1x1001
+ 88 0.003906   0 no       1x1x1x1001
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            84,85,2              86                  
+  1 RESHAPE         86,1                 87                  
+
+teflon: compiled graph, took 20 ms
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+teflon: invoked graph, took 46 ms
+teflon: invoked graph, took 0 ms
+teflon: invoked graph, took 48 ms
+teflon: invoked graph, took 0 ms
+teflon: invoked graph, took 47 ms
+teflon: invoked graph, took 0 ms
+teflon: invoked graph, took 48 ms
+teflon: invoked graph, took 1 ms
+teflon: invoked graph, took 48 ms
+teflon: invoked graph, took 0 ms

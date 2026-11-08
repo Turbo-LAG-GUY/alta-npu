@@ -1,0 +1,33 @@
+# Kept on the board only (README.md, "What's not in this repo", says why).
+
+# Machine inventories: hostnames, package lists, device details
+/audit/
+
+# Third-party models and test images (README.md says where to get them)
+/models/
+
+# Build outputs and copied kernel sources: keep only the build record and the diff
+/build/*
+!/build/etnaviv-*/
+/build/etnaviv-*/*
+!/build/etnaviv-*/BUILDINFO.txt
+!/build/etnaviv-*/ALTA-etnaviv_gpu.diff
+*.ko
+*.o
+
+# Whole-boot kernel logs and journals (each incident keeps its README, summaries and job captures)
+/incidents/**/journal-*.txt
+/incidents/**/kernel-boot*.txt
+/incidents/**/kernel-thisboot.txt
+
+# Tray-indicator recordings (0.5 s samples, several MB)
+*indicator-watch.txt
+
+# Live NPU state, not history
+/runs/STOP
+
+# Backups and caches
+*.orig-*
+__pycache__/
+*.pyc
+.claude/settings.local.json

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# alta-claude - start Claude Code inside a memory-capped systemd user scope.
+# Everything Claude Code spawns (builds, tests, NPU jobs) inherits the cap, so a runaway job is
+# OOM-killed inside the scope instead of freezing the whole 4 GB board.
+# Run it from tmux in an SSH session:  ssh alta  ->  tmux new -As alta  ->  ~/alta-npu/scripts/alta-claude
+set -eu
+: "${ALTA_MEM_HIGH:=2200M}"   # above this the scope is throttled and reclaimed
+: "${ALTA_MEM_MAX:=2800M}"    # hard cap: the kernel OOM-kills inside this scope only
+: "${ALTA_SWAP_MAX:=1G}"
+: "${ALTA_TASKS_MAX:=512}"
+export MAKEFLAGS="${MAKEFLAGS:--j2}"
+command -v systemd-run >/dev/null || { echo "alta-claude: systemd-run not found" >&2; exit 1; }
+command -v claude >/dev/null || { echo "alta-claude: claude not on PATH" >&2; exit 1; }
+cd "${ALTA_PROJECT_DIR:-$HOME/alta-npu}"
+exec systemd-run --user --scope --quiet --unit="alta-claude-$(date +%H%M%S)" \
+  -p MemoryHigh="$ALTA_MEM_HIGH" -p MemoryMax="$ALTA_MEM_MAX" \
+  -p MemorySwapMax="$ALTA_SWAP_MAX" -p TasksMax="$ALTA_TASKS_MAX" \
+  claude "$@"

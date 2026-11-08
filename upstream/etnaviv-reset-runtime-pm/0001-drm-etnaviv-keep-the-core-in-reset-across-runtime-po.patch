@@ -1,0 +1,213 @@
+From 4332131c80b51011e7d2e7add55b6671a494ef24 Mon Sep 17 00:00:00 2001
+From: Turbo-LAG-GUY <jordandwj@gmail.com>
+Date: Sun, 8 Nov 2026 02:10:35 -0500
+Subject: [RFC PATCH] drm/etnaviv: keep the core in reset across runtime
+ power-down
+
+On the Amlogic A311D, the NPU (VIPNano-QI, GC8000 rev 0x7120) has its
+own power domain, NNA, which meson-ee-pwrc switches off when the NPU is
+runtime suspended and back on at resume. The domain has no reset of its
+own, and etnaviv releases the core's reset only once, in
+etnaviv_gpu_init(). Runtime resume just re-runs etnaviv_gpu_hw_init(),
+so after every power cycle the core starts from whatever state its logic
+came up in.
+
+On a Libre Computer AML-A311D-CC ("Alta") running Mesa's Teflon
+delegate, this now and then hard-locks the SoC at the first job after a
+power-up. Nothing reaches the kernel log; only the hardware watchdog
+brings the board back. It happened in 3 of 15 program starts, each of
+which began with a power-up, and never in about 2,000 jobs submitted
+while the NPU was already powered.
+
+Amlogic's own driver never switches the NPU domain off in normal
+operation. When its reset path does cycle the power, it keeps the reset
+asserted throughout, waits 10 ms after power-up before releasing it,
+and waits 20 ms after.
+
+Do the same across runtime PM. Assert the reset in runtime suspend once
+the clocks are off, so that the domain goes down and comes back up with
+the core held in reset. On resume, release it with the waits from
+Amlogic's driver, and soft-reset the core as etnaviv_gpu_init() does
+before running etnaviv_gpu_hw_init().
+
+With this change, 70 runtime resumes on the A311D (50 in one process,
+each after at least 10 s powered down, and 20 separate program starts)
+gave correct results without a lockup. The waits add about 30 ms to
+every runtime resume, and to driver init, on cores that have a reset
+line. They come from Amlogic's driver and are not tuned.
+
+The fix uses the reset line handling added by the commit below, which
+releases the reset at init but never asserts it again.
+
+The analysis, this patch and its description were written with an AI
+coding assistant (Claude Opus 5.5 in Claude Code); see the notes below
+the --- line. I reproduced the problem and tested the fix on my board,
+and I have reviewed the patch.
+
+Fixes: 6bde14ba5f7e ("drm/etnaviv: add optional reset support")
+---
+RFC, for these reasons:
+
+- Only built and run as a backport, on the Libre Computer 6.12.73
+  kernel (6.12.y-lc) with 6bde14ba5f7e, c182a2ae1388, 1006d1f7c03d and
+  4720915ab482 backported, plus a local patch that disables SH_EU clock
+  gating on 0x7120. This patch applies to v7.4-rc1 (base below), where
+  etnaviv_gpu.c is unchanged since v7.3, but it has not been built or
+  run there. The tested build also had a local module parameter that
+  keeps the core powered after init. For the 70 resumes above it was
+  overridden at runtime by writing "auto" to power/control; apart from
+  that parameter, this patch is that build.
+- The 10 ms / 20 ms waits are Amlogic's values. Are shorter waits known
+  to be enough, or should the long ones be limited to the SoCs that
+  need them?
+- Should this live in meson-ee-pwrc instead, the way it handles the VPU
+  domain's resets? etnaviv already owns the reset line, so a reset in
+  the domain driver would have to share it.
+- Only the combination was tested: the reset held across the power
+  cycle, the waits, and the soft reset on resume. I don't know which
+  part is needed.
+
+Not done: the lockup itself was never captured (no serial console, and
+nothing reached the journal), so the failing state is a guess. One
+candidate: this core runs with sec_mode == ETNA_SEC_KERNEL, and
+etnaviv_iommuv2_restore_sec() skips all MMU setup when
+VIVS_MMUv2_SEC_CONTROL already reads back as enabled, which after a
+power-up without a reset comes down to chance.
+
+Keeping the NPU powered, as Amlogic's driver does, also avoids the
+lockups. With a local pm_runtime_forbid() right after
+etnaviv_gpu_init(), 53 program starts and a 2,000-job soak ran without
+one. Writing "on" to power/control after boot works too, but the write
+itself still goes through one power-up without a reset.
+
+Amlogic's driver here is galcore from
+https://github.com/khadas/android_vendor_amlogic_npu (branch
+khadas-vim3-pie), hal/os/linux/kernel/platform/amlogic/
+gc_hal_kernel_platform_amlogic.c, _Reset(). Its platform ops have no
+setPower, so the NPU domain stays on after probe.
+
+Test setup: Mesa 26.1.0-devel (Teflon), ai_edge_litert, the quantized
+MobileNet v1 from the Teflon docs, with every result checked against a
+CPU run. hw_job_limit=1 was set; it was an earlier attempt to avoid the
+lockups and didn't help.
+
+AI assistance (Documentation/process/generated-content.rst): Claude Opus
+5.5 (Anthropic), in Claude Code on the board, with access to the kernel
+sources and logs. My prompts were, in short, "find out why the NPU
+freezes the board, check upstream for fixes, and fix it", plus approval
+of each test, build and install step. It wrote the analysis, the patch
+and this text, and ran the tests through a test kit; I ran all root
+steps.
+
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 50 +++++++++++++++++++++------
+ 1 file changed, 40 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 5c23182..47c1e65 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -179,21 +179,25 @@ static int etnaviv_gpu_reset_deassert(struct etnaviv_gpu *gpu)
+ {
+ 	int ret;
+ 
++	if (!gpu->rst)
++		return 0;
++
+ 	/*
+-	 * 32 core clock cycles (slowest clock) required before deassertion
+-	 * 1 microsecond might match all implementations without computation
++	 * 32 core clock cycles (slowest clock) required before deassertion.
++	 * Wait 10 ms, as the Amlogic vendor driver does after powering up the
++	 * A311D NPU, which also gives the power domain time to settle.
+ 	 */
+-	usleep_range(1, 2);
++	usleep_range(10000, 11000);
+ 
+ 	ret = reset_control_deassert(gpu->rst);
+ 	if (ret)
+ 		return ret;
+ 
+ 	/*
+-	 * 128 core clock cycles (slowest clock) required before any activity on AHB
+-	 * 1 microsecond might match all implementations without computation
++	 * 128 core clock cycles (slowest clock) required before any activity on AHB.
++	 * Wait 20 ms, as the Amlogic vendor driver does.
+ 	 */
+-	usleep_range(1, 2);
++	msleep(20);
+ 
+ 	return 0;
+ }
+@@ -1750,11 +1754,20 @@ static int etnaviv_gpu_hw_resume(struct etnaviv_gpu *gpu)
+ 		return ret;
+ 
+ 	etnaviv_gpu_update_clock(gpu);
+-	etnaviv_gpu_hw_init(gpu);
++
++	/*
++	 * The core may have been powered off while suspended. Reset it as
++	 * etnaviv_gpu_init() does before programming it, so that no state from
++	 * the power cycle is left behind: an MMU that reads back as enabled,
++	 * for example, makes the MMU restore skip programming the page tables.
++	 */
++	ret = etnaviv_hw_reset(gpu);
++	if (!ret)
++		etnaviv_gpu_hw_init(gpu);
+ 
+ 	mutex_unlock(&gpu->lock);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ static int
+@@ -2002,6 +2015,7 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+ {
+ 	struct etnaviv_gpu *gpu = dev_get_drvdata(dev);
+ 	u32 idle, mask;
++	int ret;
+ 
+ 	/* If there are any jobs in the HW queue, we're not idle */
+ 	if (atomic_read(&gpu->sched.credit_count))
+@@ -2021,7 +2035,20 @@ static int etnaviv_gpu_rpm_suspend(struct device *dev)
+ 
+ 	gpu->state = ETNA_GPU_STATE_IDENTIFIED;
+ 
+-	return etnaviv_gpu_clk_disable(gpu);
++	ret = etnaviv_gpu_clk_disable(gpu);
++	if (ret)
++		return ret;
++
++	/*
++	 * Hold the core in reset while it is suspended, so that it comes back
++	 * up in reset if its power domain is switched off in the meantime.
++	 * Some domains, like the NNA domain of the Amlogic G12B, have no reset
++	 * of their own. Runtime resume releases the reset again.
++	 */
++	if (reset_control_assert(gpu->rst))
++		dev_warn(dev, "failed to assert reset\n");
++
++	return 0;
+ }
+ 
+ static int etnaviv_gpu_rpm_resume(struct device *dev)
+@@ -2035,9 +2062,12 @@ static int etnaviv_gpu_rpm_resume(struct device *dev)
+ 
+ 	/* Re-initialise the basic hardware state */
+ 	if (gpu->state == ETNA_GPU_STATE_IDENTIFIED) {
+-		ret = etnaviv_gpu_hw_resume(gpu);
++		ret = etnaviv_gpu_reset_deassert(gpu);
++		if (!ret)
++			ret = etnaviv_gpu_hw_resume(gpu);
+ 		if (ret) {
+ 			etnaviv_gpu_clk_disable(gpu);
++			reset_control_assert(gpu->rst);
+ 			return ret;
+ 		}
+ 	}
+
+base-commit: 6628e7d4c6b25c8d18f1345e3a20d21829aae7e4
+
+-- 
+2.43.0
+

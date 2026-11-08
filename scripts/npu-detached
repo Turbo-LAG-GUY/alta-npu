@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# npu-detached - start an NPU test script (scripts/npu-t4, ...) as a transient systemd user service, outside the
+# Claude Code session, so a session crash or exit can't kill it halfway (that is what cut off T3-01 on
+# 2026-11-07). The status indicator's --watch view (every 0.5 s) is recorded next to the runs.
+# Follow it with:  tail ~/alta-npu/PROGRESS.md;  systemctl --user status 'alta-*';  journalctl --user -u <unit>
+# Usage: scripts/npu-detached NAME -- command [args...]      (prints the unit name)
+set -eu
+here="$(cd "$(dirname "$0")/.." && pwd)"
+if [ $# -lt 3 ] || [ "$2" != "--" ]; then echo "usage: npu-detached NAME -- command [args...]" >&2; exit 2; fi
+NAME="$1"; shift 2
+UNIT="alta-$NAME-$(date +%Y%m%d-%H%M%S)"
+W="$here/runs/$UNIT-indicator-watch.txt"
+IND=/home/jordan/Documents/AI_Projects/npu-status/npu_status.py
+# In bash -c, $0 is the indicator, $1 the watch file, and the rest the command.
+systemd-run --user --quiet --unit="$UNIT" --collect --working-directory="$here" /bin/bash -c \
+  '/usr/bin/python3 "$0" --watch --interval 0.5 > "$1" 2>&1 & IW=$!; shift; "$@"; rc=$?; kill $IW 2>/dev/null; exit $rc' \
+  "$IND" "$W" "$@"
+"$here/scripts/progress" "$NAME-launch" NOTE "started detached as systemd user unit $UNIT (indicator view: $W)"
+echo "$UNIT"

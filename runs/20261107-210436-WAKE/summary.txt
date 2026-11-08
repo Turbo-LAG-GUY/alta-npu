@@ -1,0 +1,1 @@
+temps before: cpu 35C ddr 39C

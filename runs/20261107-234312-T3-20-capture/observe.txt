@@ -1,0 +1,19 @@
+# npu-observe start 2026-11-07T23:43:12-05:00 duration=300s interval=1s
+23:43:12 up=976.41 npu=active active_ms=966806 npu_irqs=209 cma_free_kb=1872 memavail_mb=2351 temps_c=cpu:34,ddr:37
+23:43:13 up=977.51 npu=active active_ms=967911 npu_irqs=209 cma_free_kb=1872 memavail_mb=2350 temps_c=cpu:33,ddr:35
+23:43:14 up=978.61 npu=active active_ms=969008 npu_irqs=209 cma_free_kb=1872 memavail_mb=2352 temps_c=cpu:33,ddr:35
+23:43:15 up=979.70 npu=active active_ms=970102 npu_irqs=209 cma_free_kb=1872 memavail_mb=2353 temps_c=cpu:33,ddr:36
+23:43:16 up=980.81 npu=active active_ms=971214 npu_irqs=209 cma_free_kb=1872 memavail_mb=2353 temps_c=cpu:33,ddr:35
+23:43:17 up=981.90 npu=active active_ms=972301 npu_irqs=209 cma_free_kb=1872 memavail_mb=2350 temps_c=cpu:37,ddr:38
+23:43:18 up=983.00 npu=active active_ms=973407 npu_irqs=209 cma_free_kb=1872 memavail_mb=2280 temps_c=cpu:40,ddr:39
+23:43:19 up=984.10 npu=active active_ms=974501 npu_irqs=220 cma_free_kb=1872 memavail_mb=2277 temps_c=cpu:38,ddr:39
+23:43:21 up=985.26 npu=active active_ms=975660 npu_irqs=220 cma_free_kb=1872 memavail_mb=2319 temps_c=cpu:34,ddr:37
+23:43:22 up=986.41 npu=active active_ms=976818 npu_irqs=220 cma_free_kb=1872 memavail_mb=2323 temps_c=cpu:34,ddr:36
+23:43:23 up=987.59 npu=active active_ms=977992 npu_irqs=220 cma_free_kb=1872 memavail_mb=2325 temps_c=cpu:34,ddr:36
+23:43:24 up=988.72 npu=active active_ms=979124 npu_irqs=220 cma_free_kb=1872 memavail_mb=2326 temps_c=cpu:33,ddr:36
+23:43:25 up=989.82 npu=active active_ms=980225 npu_irqs=220 cma_free_kb=1872 memavail_mb=2328 temps_c=cpu:33,ddr:36
+23:43:26 up=990.92 npu=active active_ms=981320 npu_irqs=220 cma_free_kb=1872 memavail_mb=2331 temps_c=cpu:33,ddr:36
+23:43:27 up=992.04 npu=active active_ms=982439 npu_irqs=220 cma_free_kb=1872 memavail_mb=2332 temps_c=cpu:33,ddr:35
+23:43:28 up=993.14 npu=active active_ms=983548 npu_irqs=220 cma_free_kb=1872 memavail_mb=2335 temps_c=cpu:33,ddr:36
+23:43:30 up=994.25 npu=active active_ms=984651 npu_irqs=220 cma_free_kb=1872 memavail_mb=2340 temps_c=cpu:34,ddr:36
+/home/jordan/alta-npu/scripts/npu-observe: line 14: echo: write error: Broken pipe

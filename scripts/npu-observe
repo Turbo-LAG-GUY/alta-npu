@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# npu-observe - READ-ONLY sampler for the minutes around an npu-run job. Never opens the NPU.
+# Every INTERVAL seconds it logs the NPU runtime-PM state, its IRQ count, CmaFree and MemAvailable,
+# then runs `sync`. The sync also flushes the journal, so after a hard freeze both this log and the
+# kernel log survive up to the last sample instead of losing the final ~30 s of page cache.
+# Usage (start it in the background, then run the npu-run job):
+#   scripts/npu-observe [SECONDS] [INTERVAL] >> runs/observe-<stamp>-<label>.txt
+set -u
+DUR="${1:-180}"
+INT="${2:-3}"
+P=/sys/devices/platform/ff100000.npu/power
+up() { cut -d. -f1 /proc/uptime; }  # monotonic seconds: immune to wall-clock steps (no RTC; NTP jumps)
+temps() { local z s=""; for z in /sys/class/thermal/thermal_zone*; do
+            s="$s${s:+,}$(sed 's/[-_]thermal$//' "$z/type"):$(( $(cat "$z/temp") / 1000 ))"; done; echo "$s"; }
+end=$(( $(up) + DUR ))
+echo "# npu-observe start $(date -Is) duration=${DUR}s interval=${INT}s"
+while [ "$(up)" -lt "$end" ]; do
+  printf '%s up=%s npu=%s active_ms=%s npu_irqs=%s cma_free_kb=%s memavail_mb=%s temps_c=%s\n' "$(date +%T)" \
+    "$(cut -d' ' -f1 /proc/uptime)" "$(cat "$P/runtime_status" 2>/dev/null)" "$(cat "$P/runtime_active_time" 2>/dev/null)" \
+    "$(awk '/ff100000\.npu/ {s = 0; for (i = 2; i <= 7; i++) s += $i; print s}' /proc/interrupts)" \
+    "$(awk '/^CmaFree:/ {print $2}' /proc/meminfo)" "$(awk '/^MemAvailable:/ {print int($2 / 1024)}' /proc/meminfo)" "$(temps)"
+  sync
+  sleep "$INT"
+done
+echo "# npu-observe end $(date -Is)"

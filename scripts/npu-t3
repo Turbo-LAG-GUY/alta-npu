@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# npu-t3 - handoff T3 (repeatability): N separate NPU runs (default 20), one at a time, each through
+# scripts/npu-attempt (progress log, crash capture, npu-run). It stops at the first failure: npu-run
+# exits non-zero, or a result doesn't match the CPU reference (top-1 must be equal and at least 4 of
+# the top 5 shared). Pass: N/N. Afterwards it runs a 5-minute read-only watch for a delayed freeze.
+# Usage (from anywhere): scripts/npu-t3 [N] [CPU_REFERENCE_JSON]
+set -u
+here="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$here" || exit 2
+. ./.alta-env
+N="${1:-20}"
+REF="${2:-results/T1b-cpu-mesa.json}"
+MODEL=models/mobilenet_v1_mesa.tflite
+OUT="runs/$(date +%Y%m%d-%H%M%S)-T3"
+mkdir -p "$OUT"
+scripts/progress T3 STARTING "$N separate NPU runs via npu-attempt, stopping at the first failure; summary: $OUT/summary.txt"
+pass=0
+for i in $(seq -w 1 "$N"); do
+  scripts/npu-attempt "T3-$i" -- "$PY" -I scripts/npu-classify-steps.py -m "$MODEL" -i "$I" -l "$L" -e "$TEFLON" -n 5 \
+    > "results/T3-$i.json"
+  rc=$?
+  verdict=$(python3 -I - "results/T3-$i.json" "$REF" <<'EOF'
+import json, sys
+try:
+    n = json.load(open(sys.argv[1]))
+    c = json.load(open(sys.argv[2]))
+except Exception:
+    print("FAIL no-result")
+    sys.exit()
+tn = [t["index"] for t in n["top5"]]
+tc = [t["index"] for t in c["top5"]]
+ok = tn[0] == tc[0] and len(set(tn) & set(tc)) >= 4
+print("%s top1=%d score=%.4f shared=%d/5 median_ms=%.2f" % (
+    "PASS" if ok else "FAIL", tn[0], n["top5"][0]["score"], len(set(tn) & set(tc)), n["invoke_ms_median"]))
+EOF
+)
+  echo "T3-$i rc=$rc $verdict" | tee -a "$OUT/summary.txt"
+  sync "$OUT/summary.txt"
+  if [ "$rc" -ne 0 ] || [ "${verdict%% *}" != PASS ]; then
+    scripts/progress T3 FAILED "stopped at run $i (rc=$rc, $verdict); $pass/$N passed; summary: $OUT/summary.txt"
+    exit 1
+  fi
+  pass=$((pass + 1))
+done
+scripts/progress T3 DONE "$pass/$N PASS; summary: $OUT/summary.txt"
+scripts/progress T3-postwatch STARTING "5 min read-only watch after T3 (kmsg-catch + npu-observe into $OUT)"
+python3 -I scripts/kmsg-catch "$OUT/kmsg-post.txt" 300 &
+scripts/npu-observe 300 3 > "$OUT/observe-post.txt" 2>&1 &
+wait
+scripts/progress T3-postwatch DONE "board stayed up for the 5 min after T3"

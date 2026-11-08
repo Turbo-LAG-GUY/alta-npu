@@ -1,0 +1,42 @@
+{
+ "runtime": "ai_edge_litert",
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "models/mobilenet_v1_1.0_224_quant.tflite",
+ "image": "models/grace_hopper.bmp",
+ "setup_ms": 1803.7,
+ "invoke_ms": [
+  46.86,
+  48.71,
+  48.08,
+  48.71,
+  49.28
+ ],
+ "invoke_ms_median": 48.71,
+ "top5": [
+  {
+   "index": 624,
+   "score": 0.003906,
+   "label": "letter opener, paper knife, paperknife"
+  },
+  {
+   "index": 112,
+   "score": 0.003906,
+   "label": "nematode, nematode worm, roundworm"
+  },
+  {
+   "index": 920,
+   "score": 0.003906,
+   "label": "street sign"
+  },
+  {
+   "index": 524,
+   "score": 0.003906,
+   "label": "crutch"
+  },
+  {
+   "index": 886,
+   "score": 0.003906,
+   "label": "velvet"
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+# /etc/systemd/system/alta-npu-load.service  (only used with root-steps/050)
+[Unit]
+Description=Load etnaviv (A311D NPU) after udev rules are active and before the display manager
+After=systemd-udevd.service systemd-udev-trigger.service systemd-modules-load.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/modprobe etnaviv
+ExecStartPost=-/usr/bin/udevadm settle --timeout=10
+
+[Install]
+WantedBy=multi-user.target

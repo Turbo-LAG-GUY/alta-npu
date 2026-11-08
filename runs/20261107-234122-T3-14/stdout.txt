@@ -1,0 +1,42 @@
+{
+ "runtime": "ai_edge_litert",
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "models/mobilenet_v1_mesa.tflite",
+ "image": "models/grace_hopper.bmp",
+ "setup_ms": 1202.1,
+ "invoke_ms": [
+  7.72,
+  7.23,
+  7.43,
+  7.5,
+  7.5
+ ],
+ "invoke_ms_median": 7.5,
+ "top5": [
+  {
+   "index": 653,
+   "score": 0.71875,
+   "label": "military uniform"
+  },
+  {
+   "index": 668,
+   "score": 0.070312,
+   "label": "mortarboard"
+  },
+  {
+   "index": 907,
+   "score": 0.050781,
+   "label": "Windsor tie"
+  },
+  {
+   "index": 820,
+   "score": 0.027344,
+   "label": "stage"
+  },
+  {
+   "index": 401,
+   "score": 0.019531,
+   "label": "academic gown, academic robe, judge's robe"
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+# npu-observe start 2026-11-07T21:04:36-05:00 duration=1080s interval=1s
+21:04:36 up=2755.26 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=436 memavail_mb=2229 temps_c=cpu:39,ddr:41
+21:04:37 up=2756.35 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=436 memavail_mb=2230 temps_c=cpu:35,ddr:38
+21:04:38 up=2757.44 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=0 memavail_mb=2214 temps_c=cpu:35,ddr:39
+21:04:39 up=2758.54 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=0 memavail_mb=2214 temps_c=cpu:34,ddr:38
+21:04:40 up=2759.64 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=0 memavail_mb=2204 temps_c=cpu:38,ddr:41
+21:04:42 up=2760.74 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=2064 memavail_mb=2225 temps_c=cpu:38,ddr:41
+21:04:43 up=2761.83 npu=suspended active_ms=16902 npu_irqs=4001 cma_free_kb=2548 memavail_mb=2190 temps_c=cpu:39,ddr:44

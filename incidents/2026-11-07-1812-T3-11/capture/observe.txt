@@ -1,0 +1,8 @@
+# npu-observe start 2026-11-07T18:12:22-05:00 duration=300s interval=1s
+18:12:22 up=6682.87 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1132 memavail_mb=2147
+18:12:23 up=6683.95 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2149
+18:12:24 up=6685.02 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2150
+18:12:25 up=6686.10 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2151
+18:12:26 up=6687.18 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2152
+18:12:27 up=6688.25 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2150
+18:12:28 up=6689.31 npu=suspended active_ms=3334 npu_irqs=111 cma_free_kb=1136 memavail_mb=2068

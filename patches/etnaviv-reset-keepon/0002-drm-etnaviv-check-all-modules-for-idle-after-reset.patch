@@ -1,0 +1,39 @@
+From d7f167fb7f3717347ae4c5af6938879e89fc0fe7 Mon Sep 17 00:00:00 2001
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 11 May 2026 08:51:47 +0000
+Subject: [PATCH 2/4] drm/etnaviv: check all modules for idle after reset
+
+While the FE is an important part of the GPU, which needs to be idle
+after reset, all other modules should be idle after a proper reset.
+Check all present modules for being idle to determine whether the
+reset was successful.
+
+Reviewed-by: Christian Gmeiner <cgmeiner@igalia.com>
+Link: https://patch.msgid.link/20260511085148.652256-1-l.stach@pengutronix.de
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+
+[ Backported to the Libre Computer 6.12.73 tree for the Alta NPU: upstream commit 1006d1f7c03d92b28c252333836635df8e165401, applied unchanged apart from line offsets. ]
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index 57686aa..c1a78ab 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -602,9 +602,9 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 		/* read idle register. */
+ 		idle = gpu_read(gpu, VIVS_HI_IDLE_STATE);
+ 
+-		/* try resetting again if FE is not idle */
+-		if ((idle & VIVS_HI_IDLE_STATE_FE) == 0) {
+-			dev_dbg(gpu->dev, "FE is not idle\n");
++		/* try resetting again if any module is not idle */
++		if ((idle & gpu->idle_mask) != gpu->idle_mask) {
++			dev_dbg(gpu->dev, "GPU modules not idle\n");
+ 			continue;
+ 		}
+ 
+-- 
+2.43.0
+

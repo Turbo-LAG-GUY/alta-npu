@@ -1,0 +1,19 @@
+[  497.738267] pid=11478 start: runtime=ai_edge_litert delegate=/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so model=models/mobilenet_v1_mesa.tflite | npu=active active_ms=488477 irqs=66
+[  497.741253] pid=11478 load_delegate: begin (opens the NPU render node) | npu=active active_ms=488479 irqs=66
+[  497.767908] pid=11478 load_delegate: done | npu=active active_ms=488506 irqs=66
+[  497.770880] pid=11478 Interpreter(): begin (the delegate is applied to the graph) | npu=active active_ms=488509 irqs=66
+[  498.961584] pid=11478 Interpreter(): done | npu=active active_ms=489700 irqs=66
+[  498.967787] pid=11478 allocate_tensors: begin (Teflon compiles the graph for the NPU) | npu=active active_ms=489706 irqs=66
+[  498.973261] pid=11478 allocate_tensors: done (setup 1202.4 ms) | npu=active active_ms=489712 irqs=66
+[  498.995301] pid=11478 input set | npu=active active_ms=489734 irqs=66
+[  499.000872] pid=11478 invoke 1/5: begin | npu=active active_ms=489739 irqs=66
+[  499.011146] pid=11478 invoke 1/5: done (7.82 ms) | npu=active active_ms=489749 irqs=69
+[  499.017061] pid=11478 invoke 2/5: begin | npu=active active_ms=489755 irqs=69
+[  499.031038] pid=11478 invoke 2/5: done (9.96 ms) | npu=active active_ms=489769 irqs=71
+[  499.036475] pid=11478 invoke 3/5: begin | npu=active active_ms=489775 irqs=71
+[  499.048389] pid=11478 invoke 3/5: done (7.51 ms) | npu=active active_ms=489787 irqs=73
+[  499.054451] pid=11478 invoke 4/5: begin | npu=active active_ms=489793 irqs=73
+[  499.065311] pid=11478 invoke 4/5: done (7.50 ms) | npu=active active_ms=489804 irqs=75
+[  499.068628] pid=11478 invoke 5/5: begin | npu=active active_ms=489807 irqs=75
+[  499.078807] pid=11478 invoke 5/5: done (7.27 ms) | npu=active active_ms=489817 irqs=77
+[  499.084321] pid=11478 finished: top-1 index 653 | npu=active active_ms=489823 irqs=77

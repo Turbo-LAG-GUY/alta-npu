@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""kmsg-catch - copy new kernel log records from /dev/kmsg to OUTFILE as they arrive, forcing each
+one to disk. READ-ONLY: it never touches the NPU. Run it around an NPU job. If the board freezes,
+every kernel message the CPU managed to print before the freeze is already on disk, including ones
+journald had not written yet. Needs kernel.dmesg_restrict=0, which is the case on this board.
+Usage: scripts/kmsg-catch OUTFILE [SECONDS]      (default 300 s; SIGTERM ends it cleanly)
+"""
+import errno
+import os
+import select
+import signal
+import sys
+import time
+
+out = os.open(sys.argv[1], os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
+duration = float(sys.argv[2]) if len(sys.argv) > 2 else 300.0
+
+
+def put(data):
+    os.write(out, data if isinstance(data, bytes) else data.encode("utf-8", "replace"))
+    os.fsync(out)
+
+
+def uptime():
+    with open("/proc/uptime") as f:
+        return f.read().split()[0]
+
+
+def finish(*_):
+    put("# kmsg-catch end uptime=%s\n" % uptime())
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, finish)
+kmsg = os.open("/dev/kmsg", os.O_RDONLY | os.O_NONBLOCK)
+os.lseek(kmsg, 0, os.SEEK_END)  # skip the backlog: only messages from now on
+put("# kmsg-catch start %s uptime=%s\n" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), uptime()))
+poller = select.poll()
+poller.register(kmsg, select.POLLIN)
+end = time.monotonic() + duration
+while time.monotonic() < end:
+    if not poller.poll(500):
+        continue
+    while True:
+        try:
+            rec = os.read(kmsg, 8192)
+        except BlockingIOError:
+            break
+        except OSError as e:
+            if e.errno == errno.EPIPE:  # the ring buffer wrapped past us; carry on
+                put("# kmsg-catch: some records were overwritten before they could be read\n")
+                continue
+            raise
+        if not rec:
+            break
+        head, _, body = rec.partition(b";")  # "prio,seq,usec,flags;text\n[ KEY=value\n...]"
+        fields = head.split(b",")
+        try:
+            level, ts = int(fields[0]) & 7, int(fields[2]) / 1e6
+        except (IndexError, ValueError):
+            level, ts = -1, 0.0
+        put(b"[%12.6f] <%d> %s\n" % (ts, level, body.split(b"\n", 1)[0]))
+finish()

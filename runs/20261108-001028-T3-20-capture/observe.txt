@@ -1,0 +1,19 @@
+# npu-observe start 2026-11-08T00:10:28-05:00 duration=300s interval=1s
+00:10:28 up=742.37 npu=active active_ms=733116 npu_irqs=209 cma_free_kb=984 memavail_mb=2344 temps_c=cpu:35,ddr:36
+00:10:29 up=743.47 npu=active active_ms=734223 npu_irqs=209 cma_free_kb=984 memavail_mb=2346 temps_c=cpu:33,ddr:36
+00:10:31 up=744.56 npu=active active_ms=735316 npu_irqs=209 cma_free_kb=984 memavail_mb=2347 temps_c=cpu:33,ddr:36
+00:10:32 up=745.65 npu=active active_ms=736411 npu_irqs=209 cma_free_kb=984 memavail_mb=2349 temps_c=cpu:33,ddr:35
+00:10:33 up=746.76 npu=active active_ms=737519 npu_irqs=209 cma_free_kb=984 memavail_mb=2351 temps_c=cpu:33,ddr:35
+00:10:34 up=747.86 npu=active active_ms=738617 npu_irqs=209 cma_free_kb=984 memavail_mb=2351 temps_c=cpu:36,ddr:37
+00:10:35 up=748.94 npu=active active_ms=739698 npu_irqs=209 cma_free_kb=984 memavail_mb=2284 temps_c=cpu:40,ddr:39
+00:10:36 up=750.03 npu=active active_ms=740784 npu_irqs=220 cma_free_kb=984 memavail_mb=2252 temps_c=cpu:38,ddr:40
+00:10:37 up=751.14 npu=active active_ms=741897 npu_irqs=220 cma_free_kb=988 memavail_mb=2333 temps_c=cpu:34,ddr:37
+00:10:38 up=752.24 npu=active active_ms=742992 npu_irqs=220 cma_free_kb=988 memavail_mb=2332 temps_c=cpu:34,ddr:38
+00:10:39 up=753.34 npu=active active_ms=744093 npu_irqs=220 cma_free_kb=988 memavail_mb=2334 temps_c=cpu:34,ddr:36
+00:10:40 up=754.46 npu=active active_ms=745223 npu_irqs=220 cma_free_kb=988 memavail_mb=2334 temps_c=cpu:33,ddr:36
+00:10:42 up=755.58 npu=active active_ms=746336 npu_irqs=220 cma_free_kb=988 memavail_mb=2335 temps_c=cpu:33,ddr:35
+00:10:43 up=756.69 npu=active active_ms=747448 npu_irqs=220 cma_free_kb=988 memavail_mb=2335 temps_c=cpu:33,ddr:35
+00:10:44 up=757.82 npu=active active_ms=748571 npu_irqs=220 cma_free_kb=988 memavail_mb=2336 temps_c=cpu:33,ddr:36
+00:10:45 up=758.93 npu=active active_ms=749684 npu_irqs=220 cma_free_kb=988 memavail_mb=2337 temps_c=cpu:33,ddr:36
+00:10:46 up=760.03 npu=active active_ms=750790 npu_irqs=220 cma_free_kb=988 memavail_mb=2340 temps_c=cpu:33,ddr:36
+00:10:47 up=761.14 npu=active active_ms=751896 npu_irqs=220 cma_free_kb=988 memavail_mb=2343 temps_c=cpu:33,ddr:36

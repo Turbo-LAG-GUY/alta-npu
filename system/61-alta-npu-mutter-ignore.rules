@@ -1,0 +1,8 @@
+# /etc/udev/rules.d/61-alta-npu-mutter-ignore.rules
+# The A311D NPU (VeriSilicon VIPNano-QI.7120) is driven by etnaviv and shows up as a DRM card plus a
+# render node with no display outputs. Tag both so GNOME's compositor (mutter) never treats it as a GPU.
+# Same mechanism mutter's own 61-mutter.rules uses for vkms. Named 61-* so it runs after 60-drm.rules
+# (which imports ID_PATH). Three equivalent matches for robustness; tags are a set, duplicates are harmless.
+SUBSYSTEM=="drm", KERNEL=="card*|renderD*", ENV{ID_PATH}=="platform-etnaviv", TAG+="mutter-device-ignore"
+SUBSYSTEM=="drm", KERNEL=="card*|renderD*", ENV{DEVPATH}=="/devices/platform/etnaviv/*", TAG+="mutter-device-ignore"
+SUBSYSTEM=="drm", KERNEL=="card*|renderD*", DRIVERS=="etnaviv", TAG+="mutter-device-ignore"

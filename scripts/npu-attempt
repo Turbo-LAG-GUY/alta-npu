@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# npu-attempt - ONE NPU attempt with crash-proof bookkeeping, wrapped around scripts/npu-run:
+#  1. logs STARTING to PROGRESS.md (forced to disk) before anything touches the NPU;
+#  2. starts kmsg-catch (live kernel log to disk) and npu-observe (1 s samples) in a capture directory;
+#  3. runs npu-run with NPU_STEPS_FILE pointing into that directory (for npu-classify-steps.py);
+#  4. waits for late kernel messages, stops the helpers, and logs DONE or FAILED.
+# If the board dies mid-run, PROGRESS.md ends with this attempt's STARTING line, which names the capture dir.
+# Usage (from ~/alta-npu): scripts/npu-attempt LABEL -- command [args...]
+# stdout is the command's stdout, exactly as npu-run passes it through; the exit code is npu-run's.
+set -u
+here="$(cd "$(dirname "$0")/.." && pwd)"
+if [ $# -lt 3 ] || [ "$2" != "--" ]; then echo "usage: npu-attempt LABEL -- command [args...]" >&2; exit 2; fi
+LABEL="$1"; shift 2
+DL="${NPU_DEADLINE:-120}"                  # npu-run deadline in s (T4 uses 900); the helpers outlast it
+CAP="${NPU_CAPTURE_ROOT:-$here/runs}/$(date +%Y%m%d-%H%M%S)-$LABEL-capture"
+mkdir -p "$CAP"
+"$here/scripts/progress" "$LABEL" STARTING "NPU attempt via npu-run (deadline ${DL}s); capture: $CAP; cmd: $*"
+python3 -I "$here/scripts/kmsg-catch" "$CAP/kmsg.txt" $((DL + 280)) &
+KPID=$!
+"$here/scripts/npu-observe" $((DL + 180)) 1 > "$CAP/observe.txt" 2>&1 &
+OPID=$!
+sleep 5                                    # baseline samples before the job
+NPU_STEPS_FILE="$CAP/steps.txt" "$here/scripts/npu-run" -t "$DL" -n "$LABEL" -- "$@"
+RC=$?
+sleep 10                                   # let late kernel messages land
+kill "$KPID" "$OPID" 2>/dev/null
+wait "$KPID" "$OPID" 2>/dev/null
+if [ "$RC" -eq 0 ]; then ST=DONE; else ST=FAILED; fi
+"$here/scripts/progress" "$LABEL" "$ST" "npu-run rc=$RC; capture: $CAP"
+exit "$RC"

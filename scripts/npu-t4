@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# npu-t4 - handoff T4 (soak): ONE process doing N back-to-back classifications on the NPU (default 2000),
+# through scripts/npu-attempt (progress log, crash capture, npu-run with the handoff's 900 s deadline).
+# Pass: npu-run rc 0 (no kernel messages, no deadline) and the result matches the CPU reference (top-1 equal,
+# at least 4 of the top 5 shared). Records temperatures before and after, then runs a 5-minute read-only watch
+# for a delayed freeze. Uses the Mesa-docs model (the .alta-env $M coral model MMU-faults with this Teflon).
+# Run on 2026-11-07 as a diagnostic before T3 passed (Jordan's call): one NPU power-up, then ~15-20 s of
+# continuous work. A freeze partway through points at long activity; getting through points at the power-up.
+# Usage (from anywhere): scripts/npu-t4 [N] [CPU_REFERENCE_JSON]
+set -u
+here="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$here" || exit 2
+. ./.alta-env
+N="${1:-2000}"
+REF="${2:-results/T1b-cpu-mesa.json}"
+MODEL=models/mobilenet_v1_mesa.tflite
+OUT="runs/$(date +%Y%m%d-%H%M%S)-T4"
+mkdir -p "$OUT"
+temps() { local z s=""; for z in /sys/class/thermal/thermal_zone*; do
+            s="$s${s:+ }$(sed 's/[-_]thermal$//' "$z/type") $(( $(cat "$z/temp") / 1000 ))C"; done; echo "$s"; }
+echo "temps before: $(temps)" > "$OUT/summary.txt"
+scripts/progress T4 STARTING "one process, $N back-to-back NPU classifications (Mesa-docs model), deadline 900 s; NPU power/control=$(cat /sys/devices/platform/ff100000.npu/power/control); temps before: $(temps); summary: $OUT/summary.txt"
+NPU_DEADLINE=900 scripts/npu-attempt T4 -- "$PY" -I scripts/npu-classify-steps.py -m "$MODEL" -i "$I" -l "$L" -e "$TEFLON" \
+  -n "$N" --mark-every 50 > results/T4.json
+rc=$?
+verdict=$(python3 -I - results/T4.json "$REF" <<'EOF'
+import json, statistics, sys
+try:
+    n = json.load(open(sys.argv[1]))
+    c = json.load(open(sys.argv[2]))
+except Exception:
+    print("FAIL no-result")
+    sys.exit()
+tn = [t["index"] for t in n["top5"]]
+tc = [t["index"] for t in c["top5"]]
+ok = tn[0] == tc[0] and len(set(tn) & set(tc)) >= 4
+ms = n["invoke_ms"]
+print("%s top1=%d score=%.4f shared=%d/5 invokes=%d median_ms=%.2f min_ms=%.2f max_ms=%.2f "
+      "first100_median=%.2f last100_median=%.2f compute_s=%.1f" % (
+    "PASS" if ok else "FAIL", tn[0], n["top5"][0]["score"], len(set(tn) & set(tc)), len(ms),
+    statistics.median(ms), min(ms), max(ms), statistics.median(ms[:100]), statistics.median(ms[-100:]),
+    sum(ms) / 1000))
+EOF
+)
+echo "T4 rc=$rc $verdict" | tee -a "$OUT/summary.txt"
+echo "temps after: $(temps)" >> "$OUT/summary.txt"
+sync "$OUT/summary.txt"
+if [ "$rc" -ne 0 ] || [ "${verdict%% *}" != PASS ]; then
+  scripts/progress T4 FAILED "rc=$rc, $verdict; temps after: $(temps); summary: $OUT/summary.txt"
+  exit 1
+fi
+scripts/progress T4 DONE "$verdict; temps after: $(temps)"
+scripts/progress T4-postwatch STARTING "5 min read-only watch after T4 (kmsg-catch + npu-observe into $OUT)"
+python3 -I scripts/kmsg-catch "$OUT/kmsg-post.txt" 300 &
+scripts/npu-observe 300 3 > "$OUT/observe-post.txt" 2>&1 &
+wait
+scripts/progress T4-postwatch DONE "board stayed up for the 5 min after T4; temps: $(temps)"

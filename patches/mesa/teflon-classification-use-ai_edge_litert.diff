@@ -1,0 +1,13 @@
+diff --git a/src/gallium/frontends/teflon/tests/classification.py b/src/gallium/frontends/teflon/tests/classification.py
+index efe954fe7a4..9d335cc6fbf 100644
+--- a/src/gallium/frontends/teflon/tests/classification.py
++++ b/src/gallium/frontends/teflon/tests/classification.py
+@@ -19,7 +19,7 @@ import time
+ 
+ import numpy as np
+ from PIL import Image
+-import tflite_runtime.interpreter as tflite
++import ai_edge_litert.interpreter as tflite
+ 
+ 
+ def load_labels(filename):

@@ -1,0 +1,157 @@
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 87(u8) 7(u8) 5(i32) out: 6(u8)
+  1 DWCONV          v1  supported   in: 6(u8) 34(u8) 33(i32) out: 32(u8)
+  2 CONV            v1  supported   in: 32(u8) 37(u8) 35(i32) out: 36(u8)
+  3 DWCONV          v1  supported   in: 36(u8) 40(u8) 39(i32) out: 38(u8)
+  4 CONV            v1  supported   in: 38(u8) 43(u8) 41(i32) out: 42(u8)
+  5 DWCONV          v1  supported   in: 42(u8) 46(u8) 45(i32) out: 44(u8)
+  6 CONV            v1  supported   in: 44(u8) 49(u8) 47(i32) out: 48(u8)
+  7 DWCONV          v1  supported   in: 48(u8) 52(u8) 51(i32) out: 50(u8)
+  8 CONV            v1  supported   in: 50(u8) 55(u8) 53(i32) out: 54(u8)
+  9 DWCONV          v1  supported   in: 54(u8) 58(u8) 57(i32) out: 56(u8)
+ 10 CONV            v1  supported   in: 56(u8) 61(u8) 59(i32) out: 60(u8)
+ 11 DWCONV          v1  supported   in: 60(u8) 64(u8) 63(i32) out: 62(u8)
+ 12 CONV            v1  supported   in: 62(u8) 67(u8) 65(i32) out: 66(u8)
+ 13 DWCONV          v1  supported   in: 66(u8) 70(u8) 69(i32) out: 68(u8)
+ 14 CONV            v1  supported   in: 68(u8) 73(u8) 71(i32) out: 72(u8)
+ 15 DWCONV          v1  supported   in: 72(u8) 76(u8) 75(i32) out: 74(u8)
+ 16 CONV            v1  supported   in: 74(u8) 79(u8) 77(i32) out: 78(u8)
+ 17 DWCONV          v1  supported   in: 78(u8) 82(u8) 81(i32) out: 80(u8)
+ 18 CONV            v1  supported   in: 80(u8) 85(u8) 83(i32) out: 84(u8)
+ 19 DWCONV          v1  supported   in: 84(u8) 10(u8) 9(i32) out: 8(u8)
+ 20 CONV            v1  supported   in: 8(u8) 13(u8) 11(i32) out: 12(u8)
+ 21 DWCONV          v1  supported   in: 12(u8) 16(u8) 15(i32) out: 14(u8)
+ 22 CONV            v1  supported   in: 14(u8) 19(u8) 17(i32) out: 18(u8)
+ 23 DWCONV          v1  supported   in: 18(u8) 22(u8) 21(i32) out: 20(u8)
+ 24 CONV            v1  supported   in: 20(u8) 25(u8) 23(i32) out: 24(u8)
+ 25 DWCONV          v1  supported   in: 24(u8) 28(u8) 27(i32) out: 26(u8)
+ 26 CONV            v1  supported   in: 26(u8) 31(u8) 29(i32) out: 30(u8)
+ 27 AVGPOOL         v1  unsupported in: 30(u8) out: 0(u8)
+ 28 CONV            v1  supported   in: 0(u8) 3(u8) 2(i32) out: 1(u8)
+ 29 SQUEEZE         v1  unsupported in: 1(u8) out: 4(u8)
+ 30 SOFTMAX         v1  unsupported in: 4(u8) out: 86(u8)
+
+teflon: compiling graph: 88 tensors 27 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.023528   0 no       1x1x1x1024
+  1 0.166099  42 no       1x1x1x1001
+  2 0.000117   0 yes      1x1x1x1001
+  3 0.004967  49 yes      1001x1x1x1024
+  4 0.166099  42 no       1x1x1x1001
+  5 0.000171   0 yes      1x1x1x32
+  6 0.023528   0 no       1x112x112x32
+  7 0.021741  96 yes      32x3x3x3
+  8 0.023528   0 no       1x14x14x512
+  9 0.000570   0 yes      1x1x1x512
+ 10 0.024234  86 yes      1x3x3x512
+ 11 0.000226   0 yes      1x1x1x512
+ 12 0.023528   0 no       1x14x14x512
+ 13 0.009621  62 yes      512x1x1x512
+ 14 0.023528   0 no       1x14x14x512
+ 15 0.000454   0 yes      1x1x1x512
+ 16 0.019291  6a yes      1x3x3x512
+ 17 0.000128   0 yes      1x1x1x512
+ 18 0.023528   0 no       1x14x14x512
+ 19 0.005426  99 yes      512x1x1x512
+ 20 0.023528   0 no       1x7x7x512
+ 21 0.000184   0 yes      1x1x1x512
+ 22 0.007805  7d yes      1x3x3x512
+ 23 0.000192   0 yes      1x1x1x1024
+ 24 0.023528   0 no       1x7x7x1024
+ 25 0.008147  81 yes      1024x1x1x512
+ 26 0.023528   0 no       1x7x7x1024
+ 27 0.002957   0 yes      1x1x1x1024
+ 28 0.125675  d3 yes      1x3x3x1024
+ 29 0.000423   0 yes      1x1x1x1024
+ 30 0.023528   0 no       1x7x7x1024
+ 31 0.017977  5e yes      1024x1x1x1024
+ 32 0.023528   0 no       1x112x112x32
+ 33 0.006848   0 yes      1x1x1x32
+ 34 0.291053  6e yes      1x3x3x32
+ 35 0.000713   0 yes      1x1x1x64
+ 36 0.023528   0 no       1x112x112x64
+ 37 0.030302  79 yes      64x1x1x32
+ 38 0.023528   0 no       1x56x56x64
+ 39 0.009439   0 yes      1x1x1x64
+ 40 0.401193  82 yes      1x3x3x64
+ 41 0.000355   0 yes      1x1x1x128
+ 42 0.023528   0 no       1x56x56x128
+ 43 0.015089  67 yes      128x1x1x64
+ 44 0.023528   0 no       1x56x56x128
+ 45 0.001419   0 yes      1x1x1x128
+ 46 0.060300  9f yes      1x3x3x128
+ 47 0.000322   0 yes      1x1x1x128
+ 48 0.023528   0 no       1x56x56x128
+ 49 0.013702  5d yes      128x1x1x128
+ 50 0.023528   0 no       1x28x28x128
+ 51 0.000393   0 yes      1x1x1x128
+ 52 0.016692  7b yes      1x3x3x128
+ 53 0.000178   0 yes      1x1x1x256
+ 54 0.023528   0 no       1x28x28x256
+ 55 0.007572  97 yes      256x1x1x128
+ 56 0.023528   0 no       1x28x28x256
+ 57 0.000962   0 yes      1x1x1x256
+ 58 0.040894  81 yes      1x3x3x256
+ 59 0.000151   0 yes      1x1x1x256
+ 60 0.023528   0 no       1x28x28x256
+ 61 0.006406  79 yes      256x1x1x256
+ 62 0.023528   0 no       1x14x14x256
+ 63 0.000315   0 yes      1x1x1x256
+ 64 0.013408  79 yes      1x3x3x256
+ 65 0.000215   0 yes      1x1x1x512
+ 66 0.023528   0 no       1x14x14x512
+ 67 0.009135  6c yes      512x1x1x256
+ 68 0.023528   0 no       1x14x14x512
+ 69 0.000866   0 yes      1x1x1x512
+ 70 0.036790  84 yes      1x3x3x512
+ 71 0.000124   0 yes      1x1x1x512
+ 72 0.023528   0 no       1x14x14x512
+ 73 0.005279  8b yes      512x1x1x512
+ 74 0.023528   0 no       1x14x14x512
+ 75 0.000999   0 yes      1x1x1x512
+ 76 0.042443  5d yes      1x3x3x512
+ 77 0.000116   0 yes      1x1x1x512
+ 78 0.023528   0 no       1x14x14x512
+ 79 0.004944  7f yes      512x1x1x512
+ 80 0.023528   0 no       1x14x14x512
+ 81 0.000665   0 yes      1x1x1x512
+ 82 0.028248  7f yes      1x3x3x512
+ 83 0.000182   0 yes      1x1x1x512
+ 84 0.023528   0 no       1x14x14x512
+ 85 0.007740  58 yes      512x1x1x512
+ 86 0.003906   0 no       1x1x1x1001
+ 87 0.007843  80 no       1x224x224x3
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            87,7,5               6                   
+  1 DWCONV          6,34,33              32                  
+  2 CONV            32,37,35             36                  
+  3 DWCONV          36,40,39             38                  
+  4 CONV            38,43,41             42                  
+  5 DWCONV          42,46,45             44                  
+  6 CONV            44,49,47             48                  
+  7 DWCONV          48,52,51             50                  
+  8 CONV            50,55,53             54                  
+  9 DWCONV          54,58,57             56                  
+ 10 CONV            56,61,59             60                  
+ 11 DWCONV          60,64,63             62                  
+ 12 CONV            62,67,65             66                  
+ 13 DWCONV          66,70,69             68                  
+ 14 CONV            68,73,71             72                  
+ 15 DWCONV          72,76,75             74                  
+ 16 CONV            74,79,77             78                  
+ 17 DWCONV          78,82,81             80                  
+ 18 CONV            80,85,83             84                  
+ 19 DWCONV          84,10,9              8                   
+ 20 CONV            8,13,11              12                  
+ 21 DWCONV          12,16,15             14                  
+ 22 CONV            14,19,17             18                  
+ 23 DWCONV          18,22,21             20                  
+ 24 CONV            20,25,23             24                  
+ 25 DWCONV          24,28,27             26                  
+ 26 CONV            26,31,29             30                  
+

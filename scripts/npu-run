@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# npu-run - run exactly ONE NPU job: global lock, hard deadline, kernel-log check, run record.
+# Usage: scripts/npu-run [-t SECONDS] [-n LABEL] -- command [args...]
+# Exit : the command's code | 124 deadline hit | 75 another job running | 77 refused | 90 kernel errors
+# Any kernel error or deadline sets the STOP latch ($NPU_RUN_DIR/STOP); every later run is refused
+# until Jordan reboots, reviews the named run, and deletes the latch by hand.
+# Timing uses /proc/uptime and the kernel-log check uses a journal cursor. A wall-clock step (the board has
+# no RTC, and NTP has jumped the clock by days) can then neither fire nor disable the deadline, nor hide
+# kernel messages from the check. Original: scripts/npu-run.orig-20261107.
+set -u
+TIMEOUT=120
+LABEL=job
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -t) TIMEOUT="$2"; shift 2 ;;
+    -n) LABEL="$2"; shift 2 ;;
+    --) shift; break ;;
+    *)  break ;;
+  esac
+done
+[ $# -gt 0 ] || { echo "usage: npu-run [-t SECONDS] [-n LABEL] -- cmd ..." >&2; exit 2; }
+
+ROOT="${NPU_RUN_DIR:-$HOME/alta-npu/runs}"
+mkdir -p "$ROOT"
+refuse() { echo "npu-run: REFUSED: $*" >&2; exit 77; }
+klog()   { journalctl -k --no-pager -q "$@" 2>/dev/null; }
+up_s()   { cut -d. -f1 /proc/uptime; }   # monotonic whole seconds since boot
+
+# 0. Stop latch.
+[ -e "$ROOT/STOP" ] && refuse "STOP latch present ($(head -1 "$ROOT/STOP")). Reboot, review that run, then: rm $ROOT/STOP"
+
+# 1. Kernel log must be readable or hangs cannot be detected.
+[ -n "$(klog -n 1)" ] || refuse "cannot read the kernel log (add the user to group systemd-journal or adm, log in again)"
+
+# 2. The patched etnaviv must be the one that is loaded.
+[ -d /sys/module/etnaviv ] || refuse "etnaviv is not loaded"
+TAINT="$(cat /sys/module/etnaviv/taint 2>/dev/null)"
+if klog -b 0 | grep -q 'alta: SH_EU clock gating disabled'; then
+  PATCHSTATE="patched (marker in kernel log)"
+elif klog -b 0 | grep -q 'alta: reset on every power-up'; then
+  # build of root step 110: 0x7120 SH_EU fix + reset on power-up + upstream reset fixes (patches/etnaviv-reset-keepon)
+  PATCHSTATE="patched: 0x7120 + reset on power-up ($(klog -b 0 | grep -o 'alta: reset on every power-up.*' | tail -1); power/control=$(cat /sys/devices/platform/ff100000.npu/power/control 2>/dev/null))"
+elif [ "${TAINT#*O}" != "$TAINT" ]; then
+  PATCHSTATE="out-of-tree module, no marker (taint=$TAINT) - confirm it is the 0x7120 build"
+else
+  refuse "stock in-tree etnaviv is loaded (no 'alta: SH_EU' marker, taint='$TAINT'): the 0x7120 clock-gating fix is NOT active"
+fi
+
+# 3. Do not start on a board that is already in trouble or short of memory.
+klog -b 0 | grep -qiE 'recover hung gpu|failed to reset|mmu fault' && refuse "this boot already logged an etnaviv hang or MMU fault - reboot first"
+AVAIL_MB="$(awk '/^MemAvailable:/ {print int($2/1024)}' /proc/meminfo)"
+[ "$AVAIL_MB" -ge "${NPU_MIN_AVAIL_MB:-600}" ] || refuse "only ${AVAIL_MB} MB available (< ${NPU_MIN_AVAIL_MB:-600} MB) - stop builds first"
+
+# 4. One NPU job at a time.
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/alta-npu.lock"
+exec 9>"$LOCK"
+flock -n 9 || { echo "npu-run: another NPU job holds $LOCK" >&2; exit 75; }
+
+RUN="$ROOT/$(date +%Y%m%d-%H%M%S)-$LABEL"
+mkdir -p "$RUN"
+START="$(up_s)"
+WALLSTART="$(date +%s)"   # only for the fallback below
+CURSOR="$(klog -n 1 --show-cursor | sed -n 's/^-- cursor: //p')"   # kernel-log position just before the job
+{
+  echo "label: $LABEL"
+  echo "cmd: $*"
+  echo "cwd: $PWD"
+  echo "start: $(date -Is)"
+  echo "kernel: $(uname -r)"
+  echo "etnaviv: $PATCHSTATE; srcversion=$(cat /sys/module/etnaviv/srcversion 2>/dev/null)"
+  echo "mem_available_mb: $AVAIL_MB"
+  echo "deadline_s: $TIMEOUT"
+  echo "journal_cursor: ${CURSOR:-none}"
+  env | grep -E '^(TEFLON_|ETNA_|MESA_)' || true
+} > "$RUN/meta.txt"
+
+# 5. Run with our own deadline (survives a child stuck in D state, unlike plain `timeout`).
+"$@" > "$RUN/stdout.txt" 2> "$RUN/stderr.txt" &
+PID=$!
+RC=""
+while kill -0 "$PID" 2>/dev/null; do
+  if [ $(( $(up_s) - START )) -ge "$TIMEOUT" ]; then
+    pkill -TERM -P "$PID" 2>/dev/null; kill -TERM "$PID" 2>/dev/null; sleep 5
+    pkill -KILL -P "$PID" 2>/dev/null; kill -KILL "$PID" 2>/dev/null; sleep 2
+    if kill -0 "$PID" 2>/dev/null; then
+      echo "pid $PID unkillable (state $(awk '{print $3}' "/proc/$PID/stat" 2>/dev/null)) - NPU likely wedged" >> "$RUN/meta.txt"
+    fi
+    RC=124
+    break
+  fi
+  sleep 0.5
+done
+if [ -z "$RC" ]; then wait "$PID"; RC=$?; fi
+sleep 1  # let late kernel messages land
+echo "end: $(date -Is)  rc: $RC  wall_s: $(( $(up_s) - START ))" >> "$RUN/meta.txt"
+if [ -n "$CURSOR" ]; then
+  klog --after-cursor "$CURSOR" -o short-monotonic > "$RUN/kernel.txt"
+else
+  klog --since "@$((WALLSTART - 1))" -o short-monotonic > "$RUN/kernel.txt"   # fallback: wall clock
+fi
+
+# 6. Verdict. During a healthy run etnaviv logs nothing at all.
+BAD='recover hung gpu|failed to reset|mmu fault|not yet idle|not idle|timed? ?out|out of memory|oom-kill|soft lockup|hung_task|rcu.*stall|Internal error|Oops|BUG:'
+if grep -iE 'etnaviv|ff100000\.npu' "$RUN/kernel.txt" | grep -viE 'alta: SH_EU' | grep -q . \
+   || grep -qiE "$BAD" "$RUN/kernel.txt"; then
+  printf '%s %s (kernel messages)\n' "$(date -Is)" "$RUN" > "$ROOT/STOP"
+  echo "npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: $RUN/kernel.txt" >&2
+  head -20 "$RUN/kernel.txt" >&2
+  exit 90
+fi
+if [ "$RC" -eq 124 ]; then
+  printf '%s %s (deadline)\n' "$(date -Is)" "$RUN" > "$ROOT/STOP"
+  echo "npu-run: DEADLINE (${TIMEOUT}s) hit -> STOP latch set. Evidence: $RUN" >&2
+fi
+cat "$RUN/stdout.txt"
+[ -s "$RUN/stderr.txt" ] && tail -20 "$RUN/stderr.txt" >&2
+echo "npu-run: rc=$RC record=$RUN" >&2
+exit "$RC"

@@ -1,0 +1,3 @@
+temps before: cpu 36C ddr 39C
+WAKE rc=0 PASS invokes=50 wakeups_confirmed=50/50 wrong_top1=0 top1=653 score=0.7188 shared=5/5 median_ms=41.30 first_ms=41.00 max_ms=47.37
+temps after: cpu 33C ddr 36C

@@ -1,0 +1,9 @@
+label: T2b
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-07T14:05:05-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: out-of-tree module, no marker (taint=O) - confirm it is the 0x7120 build; srcversion=
+mem_available_mb: 2373
+deadline_s: 120
+TEFLON_DEBUG=verbose

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# npu-wake - wake-up test (diagnostic, 2026-11-07, Jordan's go): ONE process, N classifications (default 50). Before
+# each one after the first, it waits OFF seconds (default 10, close to T3's ~17 s gaps) until the NPU has powered
+# down, so every classification wakes it: 1 new-program wake-up, then N-1 wake-ups inside the same program.
+# Purpose: T3 froze at the first job of its 11th program, and T4 (one program, one wake-up, 2000 jobs) passed. This
+# separates "the NPU waking up freezes the board" from "a new program starting on the NPU freezes it".
+# Pass: npu-run rc 0, all N classifications gave the CPU's top-1, the final top 5 shares >= 4 with the CPU's, and
+# at least N-5 started from a powered-down NPU (otherwise INVALID: it didn't test wake-ups). Then a 5-minute watch.
+# Usage (from anywhere): scripts/npu-wake [N] [OFF_SECONDS] [CPU_REFERENCE_JSON]
+set -u
+here="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$here" || exit 2
+. ./.alta-env
+N="${1:-50}"
+OFF="${2:-10}"
+REF="${3:-results/T1b-cpu-mesa.json}"
+MODEL=models/mobilenet_v1_mesa.tflite
+OUT="runs/$(date +%Y%m%d-%H%M%S)-WAKE"
+mkdir -p "$OUT"
+DL=$(( N * (${OFF%.*} + 2) + 300 ))   # npu-run deadline, s
+temps() { local z s=""; for z in /sys/class/thermal/thermal_zone*; do
+            s="$s${s:+ }$(sed 's/[-_]thermal$//' "$z/type") $(( $(cat "$z/temp") / 1000 ))C"; done; echo "$s"; }
+echo "temps before: $(temps)" > "$OUT/summary.txt"
+scripts/progress WAKE STARTING "one process, $N classifications, each after >= ${OFF}s with the NPU powered down (1 new-program wake-up + $((N - 1)) in-program wake-ups); deadline ${DL}s; NPU power/control=$(cat /sys/devices/platform/ff100000.npu/power/control); temps before: $(temps); summary: $OUT/summary.txt"
+NPU_DEADLINE="$DL" scripts/npu-attempt WAKE -- "$PY" -I scripts/npu-classify-steps.py -m "$MODEL" -i "$I" -l "$L" -e "$TEFLON" \
+  -n "$N" --off-seconds "$OFF" --check-each > results/WAKE.json
+rc=$?
+verdict=$(python3 -I - results/WAKE.json "$REF" "$N" <<'EOF'
+import json, statistics, sys
+try:
+    n = json.load(open(sys.argv[1]))
+    c = json.load(open(sys.argv[2]))
+except Exception:
+    print("FAIL no-result")
+    sys.exit()
+N = int(sys.argv[3])
+ref1 = c["top5"][0]["index"]
+tn = [t["index"] for t in n["top5"]]
+tc = [t["index"] for t in c["top5"]]
+each = n.get("top1_each", [])
+wrong = sum(x != ref1 for x in each)
+woke = n.get("wakeups_confirmed", 0)
+ms = n["invoke_ms"]
+ok = len(each) == N and wrong == 0 and tn[0] == ref1 and len(set(tn) & set(tc)) >= 4
+state = "PASS" if ok and woke >= N - 5 else ("INVALID" if ok else "FAIL")
+print("%s invokes=%d wakeups_confirmed=%d/%d wrong_top1=%d top1=%d score=%.4f shared=%d/5 median_ms=%.2f "
+      "first_ms=%.2f max_ms=%.2f" % (state, len(each), woke, N, wrong, tn[0], n["top5"][0]["score"],
+      len(set(tn) & set(tc)), statistics.median(ms), ms[0], max(ms)))
+EOF
+)
+echo "WAKE rc=$rc $verdict" | tee -a "$OUT/summary.txt"
+echo "temps after: $(temps)" >> "$OUT/summary.txt"
+sync "$OUT/summary.txt"
+v="${verdict%% *}"
+if [ "$rc" -ne 0 ] || [ "$v" != PASS ]; then
+  [ "$rc" -eq 0 ] && [ "$v" = INVALID ] && st=INVALID || st=FAILED
+  scripts/progress WAKE "$st" "rc=$rc, $verdict; temps after: $(temps); summary: $OUT/summary.txt"
+  exit 1
+fi
+scripts/progress WAKE DONE "$verdict; temps after: $(temps)"
+scripts/progress WAKE-postwatch STARTING "5 min read-only watch after WAKE (kmsg-catch + npu-observe into $OUT)"
+python3 -I scripts/kmsg-catch "$OUT/kmsg-post.txt" 300 &
+scripts/npu-observe 300 3 > "$OUT/observe-post.txt" 2>&1 &
+wait
+scripts/progress WAKE-postwatch DONE "board stayed up for the 5 min after WAKE; temps: $(temps)"

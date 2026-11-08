@@ -1,0 +1,10 @@
+label: T3-08
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify-steps.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-07T23:54:52-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2267
+deadline_s: 120
+journal_cursor: s=87f874fe44b5490ab5715eba481612a1;i=b3184;b=211472be2ae74b9c98662a6369c65986;m=ac4db66;t=65fbc4c28c444;x=af8c5d3e75de3aa6
+end: 2026-11-07T23:54:55-05:00  rc: 0  wall_s: 3

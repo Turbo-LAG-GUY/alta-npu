@@ -1,0 +1,50 @@
+From 3fabaf0aec7a529ff7dada6bb9b730e2318f2576 Mon Sep 17 00:00:00 2001
+From: Lucas Stach <l.stach@pengutronix.de>
+Date: Mon, 11 May 2026 08:51:48 +0000
+Subject: [PATCH 3/4] drm/etnaviv: check MMUv2 status after reset
+
+A full GPU reset is the only way to disable the MMUv2 and the
+driver depends on the MMU being disabled after a reset to be able
+to properly restart the GPU. Validate this assumption by checking
+that the reset actually did disable the MMU.
+
+Reviewed-by: Christian Gmeiner <cgmeiner@igalia.com>
+Link: https://patch.msgid.link/20260511085148.652256-2-l.stach@pengutronix.de
+Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+
+[ Backported to the Libre Computer 6.12.73 tree for the Alta NPU: upstream commit 4720915ab48282429f9e22ad5984b7870e4e962c. The added check is unchanged; only its trailing context differs, because 6.12 predates ca0593a29e9e ("unconditionally enable debug registers") and still disables the debug registers at this point. ]
+---
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+index c1a78ab..6af5d9b 100644
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.c
+@@ -618,6 +618,23 @@ static int etnaviv_hw_reset(struct etnaviv_gpu *gpu)
+ 			continue;
+ 		}
+ 
++		/* try resetting again if MMUv2 is not disabled */
++		if (gpu->identity.minor_features1 & chipMinorFeatures1_MMU_VERSION) {
++			if (gpu->sec_mode == ETNA_SEC_KERNEL) {
++				if (gpu_read(gpu, VIVS_MMUv2_SEC_CONTROL) &
++				    VIVS_MMUv2_SEC_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			} else {
++				if (gpu_read(gpu, VIVS_MMUv2_CONTROL) &
++				    VIVS_MMUv2_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			}
++		}
++
+ 		/* disable debug registers, as they are not normally needed */
+ 		control |= VIVS_HI_CLOCK_CONTROL_DISABLE_DEBUG_REGISTERS;
+ 		gpu_write(gpu, VIVS_HI_CLOCK_CONTROL, control);
+-- 
+2.43.0
+

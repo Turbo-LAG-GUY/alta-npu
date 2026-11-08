@@ -1,0 +1,21 @@
+[28536.446111] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000001
+[28536.446583] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (slave not present) addr 0x1f238600
+[28536.458926] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: failed to allocate devcoredump file
+[28536.458955] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[28536.459654] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_1.0_224_quant.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5)
+[28536.492798] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000001
+[28536.495205] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (slave not present) addr 0x1f238600
+[28536.504290] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[28536.508297] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_1.0_224_quant.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5)
+[28536.541263] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000001
+[28536.543824] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (slave not present) addr 0x1f238600
+[28536.551843] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[28536.556978] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_1.0_224_quant.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5)
+[28536.589659] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000001
+[28536.592444] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (slave not present) addr 0x1f238600
+[28536.600401] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[28536.605560] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_1.0_224_quant.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5)
+[28536.638716] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000001
+[28536.641069] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (slave not present) addr 0x1f238600
+[28536.650282] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[28536.654202] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify.py -m models/mobilenet_v1_1.0_224_quant.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so -n 5)

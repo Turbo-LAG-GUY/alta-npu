@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# 100 - keep the NPU powered on until the next reboot, to test whether the hard freezes come from the NPU
+# waking up. Normally the driver powers the NPU down 200 ms after its last job and back up for the next one.
+# T2b and T3 run 11 both froze at a run's first NPU job, the moment it powers back up (incidents
+# 2026-11-07-1405-T2b and 2026-11-07-1812-T3-11). With the NPU kept on, the runs no longer wake it.
+# What it does: writes "on" to the NPU's power/control (runtime power management "auto" -> "on"). The NPU
+# powers up once, right then, and stays up. Nothing is written to disk: the next boot is back to "auto",
+# including the boot after a watchdog reset.
+# Risk: this write wakes the NPU, the moment the freezes may come from, so it can freeze the board itself.
+# The hardware watchdog (root step 090) then reboots it within ~80 s. A "100 | STARTING" line with no DONE
+# after it in PROGRESS.md means that happened.
+# Run:    sudo bash root-steps/100-npu-keep-powered.sh
+# Revert: echo auto | sudo tee /sys/devices/platform/ff100000.npu/power/control     (or reboot)
+# Verify: cat /sys/devices/platform/ff100000.npu/power/{control,runtime_status}     (expect: on, active)
+#         The indicator then reads "Idle · kept powered on".
+set -euxo pipefail
+here="$(cd "$(dirname "$0")/.." && pwd)"
+D=/sys/devices/platform/ff100000.npu
+P="$D/power"
+die() { "$here/scripts/progress" 100 FAILED "$*"; echo "100: $*" >&2; exit 1; }
+trap '"$here/scripts/progress" 100 FAILED "root step stopped at line $LINENO"' ERR
+[ "$(id -u)" -eq 0 ] || { echo "100: run it with sudo" >&2; exit 1; }
+[ -e "$P/control" ] || die "no $P/control"
+[ "$(basename "$(readlink -f "$D/driver")")" = etnaviv-gpu ] || die "ff100000.npu is not bound to etnaviv"
+wd="$(systemctl show -p RuntimeWatchdogUSec --value)"
+[ -n "$wd" ] && [ "$wd" != 0 ] || die "the hardware watchdog is not armed (root step 090); it is this step's safety net"
+if [ "$(cat "$P/control")" = on ]; then
+  "$here/scripts/progress" 100 NOTE "already kept on (control=on, runtime_status=$(cat "$P/runtime_status"))"
+  exit 0
+fi
+"$here/scripts/progress" 100 STARTING "keep the NPU powered on (power/control auto -> on); this wakes the NPU once, now. Before: runtime_status=$(cat "$P/runtime_status") active_ms=$(cat "$P/runtime_active_time")"
+echo on > "$P/control"
+sleep 5   # a freeze during the wake-up lands here, before DONE is written
+st="$(cat "$P/runtime_status")"
+[ "$st" = active ] || die "control=on but runtime_status=$st"
+"$here/scripts/progress" 100 DONE "NPU kept powered on (control=$(cat "$P/control"), runtime_status=$st). Undo: echo auto > $P/control, or reboot"
+echo "Done: the NPU stays powered on until the next reboot."
