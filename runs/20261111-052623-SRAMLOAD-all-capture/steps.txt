@@ -1,0 +1,25 @@
+[ 7262.880284] pid=72408 start: runtime=ai_edge_litert delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=models/mobilenet_v1_mesa.tflite | npu=active active_ms=7251313 irqs=4354
+[ 7262.884759] pid=72408 load_delegate: begin (opens the NPU render node) | npu=active active_ms=7251317 irqs=4354
+[ 7262.912818] pid=72408 load_delegate: done | npu=active active_ms=7251345 irqs=4354
+[ 7262.915560] pid=72408 Interpreter(): begin (the delegate is applied to the graph) | npu=active active_ms=7251348 irqs=4354
+[ 7263.324961] pid=72408 Interpreter(): done | npu=active active_ms=7251757 irqs=4354
+[ 7263.329479] pid=72408 allocate_tensors: begin (Teflon compiles the graph for the NPU) | npu=active active_ms=7251762 irqs=4354
+[ 7263.334283] pid=72408 allocate_tensors: done (setup 418.7 ms) | npu=active active_ms=7251766 irqs=4354
+[ 7263.355376] pid=72408 input set | npu=active active_ms=7251788 irqs=4354
+[ 7263.358875] pid=72408 invoke 1/300: begin | npu=active active_ms=7251791 irqs=4354
+[ 7263.370268] pid=72408 invoke 1/300: done (8.31 ms) | npu=active active_ms=7251803 irqs=4357
+[ 7263.373289] pid=72408 invoke 2/300: begin | npu=active active_ms=7251805 irqs=4357
+[ 7263.385567] pid=72408 invoke 2/300: done (8.91 ms) | npu=active active_ms=7251818 irqs=4359
+[ 7263.779172] pid=72408 invoke 50/300: begin | npu=active active_ms=7252211 irqs=4453
+[ 7263.789940] pid=72408 invoke 50/300: done (8.31 ms) | npu=active active_ms=7252222 irqs=4455
+[ 7264.235033] pid=72408 invoke 100/300: begin | npu=active active_ms=7252667 irqs=4553
+[ 7264.245413] pid=72408 invoke 100/300: done (7.37 ms) | npu=active active_ms=7252678 irqs=4555
+[ 7264.650580] pid=72408 invoke 150/300: begin | npu=active active_ms=7253083 irqs=4653
+[ 7264.663218] pid=72408 invoke 150/300: done (7.87 ms) | npu=active active_ms=7253096 irqs=4655
+[ 7265.069687] pid=72408 invoke 200/300: begin | npu=active active_ms=7253502 irqs=4753
+[ 7265.080921] pid=72408 invoke 200/300: done (8.07 ms) | npu=active active_ms=7253513 irqs=4755
+[ 7265.509955] pid=72408 invoke 250/300: begin | npu=active active_ms=7253942 irqs=4853
+[ 7265.520277] pid=72408 invoke 250/300: done (7.65 ms) | npu=active active_ms=7253953 irqs=4855
+[ 7265.921692] pid=72408 invoke 300/300: begin | npu=active active_ms=7254354 irqs=4953
+[ 7265.938425] pid=72408 invoke 300/300: done (8.12 ms) | npu=active active_ms=7254371 irqs=4955
+[ 7265.944795] pid=72408 finished: top-1 index 653 | npu=active active_ms=7254377 irqs=4955

@@ -1,0 +1,5 @@
+etnaviv/ml: AXI SRAM: placed 28 of 29 intermediate tensors, using 980 of 1024 KiB
+etnaviv/ml: disk cache: 0 hits, 27 misses, 27 stored; holding 26.1 MiB, limit 12814 MiB; weight compiler f4f99dff
+etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 4 of 1024 KiB
+etnaviv/ml: disk cache: 0 hits, 28 misses, 28 stored; holding 27.1 MiB, limit 12815 MiB; weight compiler f4f99dff
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.

@@ -1,0 +1,42 @@
+{
+ "runtime": "ai_edge_litert",
+ "delegate": "/tmp/claude-1000/-home-jordan-Documents-AI-Projects/216cd570-520a-4518-857f-909573987407/scratchpad/libteflon-B.so",
+ "model": "models/mobilenet_v1_mesa.tflite",
+ "image": "models/grace_hopper.bmp",
+ "setup_ms": 1569.1,
+ "invoke_ms": [
+  8.89,
+  7.95,
+  8.04,
+  8.81,
+  9.74
+ ],
+ "invoke_ms_median": 8.81,
+ "top5": [
+  {
+   "index": 653,
+   "score": 0.71875,
+   "label": "military uniform"
+  },
+  {
+   "index": 668,
+   "score": 0.070312,
+   "label": "mortarboard"
+  },
+  {
+   "index": 907,
+   "score": 0.050781,
+   "label": "Windsor tie"
+  },
+  {
+   "index": 820,
+   "score": 0.027344,
+   "label": "stage"
+  },
+  {
+   "index": 401,
+   "score": 0.019531,
+   "label": "academic gown, academic robe, judge's robe"
+  }
+ ]
+}

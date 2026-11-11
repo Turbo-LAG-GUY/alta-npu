@@ -1,0 +1,12 @@
+label: KEY-rebuilt-verify
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify-steps.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /tmp/claude-1000/-home-jordan-Documents-AI-Projects/216cd570-520a-4518-857f-909573987407/scratchpad/libteflon-C.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-11T05:36:23-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1908
+deadline_s: 120
+journal_cursor: s=c449583414424e6394385edb6ddd41ce;i=d8008;b=1710eadaba37443db2bf1d30a414a127;m=1d3316332;t=65ffdc319203a;x=3b71c54e82208d34
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_DISK_CACHE=verify
+end: 2026-11-11T05:36:27-05:00  rc: 0  wall_s: 4

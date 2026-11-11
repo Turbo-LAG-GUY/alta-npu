@@ -1,18 +1,18 @@
 alta: on-disk cache of compressed NPU weights, with a size limit that follows free disk space
 On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply after 0002 and 0003.
+The key names the code that compiles weights by a hash of its source text (embedded with .incbin), so rebuilds that don't touch that code keep the cache.
 
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
-@@ -8,6 +8,8 @@
+@@ -8,6 +8,7 @@
  #include "pipe/p_state.h"
  #include <sys/time.h>
  
-+#include "util/build_id.h"
 +#include "util/mesa-blake3.h"
  #include "util/u_inlines.h"
  
  #include "etnaviv_context.h"
-@@ -17,6 +19,7 @@
+@@ -17,6 +18,7 @@
  #include "etnaviv_ml_tp.h"
  #include "etnaviv_ml.h"
  #include "etnaviv_ml_axi_sram.h"
@@ -20,14 +20,14 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
  #include "etnaviv_screen.h"
  
  struct etna_ml_tensor *
-@@ -739,6 +742,227 @@
+@@ -739,6 +741,269 @@
     return supported;
  }
  
 +/*
 + * alta: on-disk cache of compressed weights. Compressing them is most of what
 + * compiling a model costs, and the result depends only on the model, the chip
-+ * and this driver build. On by default in this build. ETNA_ML_DISK_CACHE=0 turns
++ * and the code that compiles weights. On by default in this build. ETNA_ML_DISK_CACHE=0 turns
 + * it off, =verbose reports its use, and =verify also recompiles every hit and
 + * aborts on any difference, before anything reaches the NPU.
 + */
@@ -80,18 +80,54 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
 +   _mesa_blake3_compute(data, size, digest);
 +}
 +
++/* Bump when the key or the stored blob changes in a way the hashed data doesn't show. */
++#define ML_CACHE_KEY_SCHEME "alta-ml-cache-key-2 " PACKAGE_VERSION
++
++/*
++ * The source text of the code that compiles weights (see etnaviv_ml_nn.h). Its
++ * hash stands in the key where the library's build ID used to, so only a change
++ * to these files, or a new Mesa version, makes old entries unreachable.
++ */
++static const struct {
++   const char *name;
++   const uint8_t *start, *end;
++} ml_cache_sources[] = {
++   { "etnaviv_ml_nn_v7.c", etna_ml_src_nn_v7_c, etna_ml_src_nn_v7_c_end },
++   { "etnaviv_ml_nn_v8.c", etna_ml_src_nn_v8_c, etna_ml_src_nn_v8_c_end },
++   { "etnaviv_ml_nn.c", etna_ml_src_nn_c, etna_ml_src_nn_c_end },
++   { "etnaviv_ml.h", etna_ml_src_ml_h, etna_ml_src_ml_h_end },
++   { "etnaviv_ml_nn.h", etna_ml_src_nn_h, etna_ml_src_nn_h_end },
++   { "etna_core_info.h", etna_ml_src_core_info_h, etna_ml_src_core_info_h_end },
++};
++
++static void
++ml_cache_compiler_fingerprint(blake3_hash digest)
++{
++   blake3_hasher ctx;
++
++   _mesa_blake3_init(&ctx);
++   _mesa_blake3_update(&ctx, ML_CACHE_KEY_SCHEME, sizeof(ML_CACHE_KEY_SCHEME));
++   for (unsigned i = 0; i < ARRAY_SIZE(ml_cache_sources); i++) {
++      uint64_t size = ml_cache_sources[i].end - ml_cache_sources[i].start;
++
++      _mesa_blake3_update(&ctx, ml_cache_sources[i].name, strlen(ml_cache_sources[i].name) + 1);
++      _mesa_blake3_update(&ctx, &size, sizeof(size));
++      _mesa_blake3_update(&ctx, ml_cache_sources[i].start, size);
++   }
++   _mesa_blake3_final(&ctx, digest);
++}
++
 +static bool
 +ml_cache_key(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
 +             char hex[NPU_CACHE_KEY_CHARS])
 +{
-+   const struct build_id_note *note = build_id_find_nhdr_for_addr(ml_cache_key);
++   blake3_hash compiler;
 +   struct etna_screen *screen = subgraph->screen;
 +   struct etna_operation scrubbed;
 +   blake3_hasher ctx;
 +   blake3_hash digest;
 +
-+   if (!note)
-+      return false;
++   ml_cache_compiler_fingerprint(compiler); /* about 100 KiB of text: well under a millisecond */
 +
 +   /* Hash the whole operation so a field can't be forgotten, minus its pointers, which change every run. */
 +   memcpy(&scrubbed, operation, sizeof(scrubbed));
@@ -100,7 +136,7 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
 +   scrubbed.bias_tensor = NULL;
 +
 +   _mesa_blake3_init(&ctx);
-+   _mesa_blake3_update(&ctx, build_id_data(note), build_id_length(note));
++   _mesa_blake3_update(&ctx, compiler, sizeof(compiler));
 +   _mesa_blake3_update(&ctx, screen->info, sizeof(*screen->info));
 +   _mesa_blake3_update(&ctx, etna_ml_get_core_info(screen), sizeof(struct etna_core_npu_info));
 +   _mesa_blake3_update(&ctx, &screen->specs.nn_core_version, sizeof(screen->specs.nn_core_version));
@@ -239,16 +275,22 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
 +   const char *dir = ml_cache_dir();
 +   struct npu_cache_stats stats = {0};
 +
-+   if (dir && ml_cache_mode() >= ML_CACHE_VERBOSE && npu_cache_trim(dir, 0, &stats))
-+      fprintf(stderr, "etnaviv/ml: disk cache: %u hits, %u misses, %u stored; holding %.1f MiB, limit %.0f MiB\n",
++   if (dir && ml_cache_mode() >= ML_CACHE_VERBOSE && npu_cache_trim(dir, 0, &stats)) {
++      blake3_hash compiler;
++
++      ml_cache_compiler_fingerprint(compiler);
++      fprintf(stderr, "etnaviv/ml: disk cache: %u hits, %u misses, %u stored; holding %.1f MiB, limit %.0f MiB; "
++                      "weight compiler %02x%02x%02x%02x\n",
 +              ml_cache_counts.hits, ml_cache_counts.misses, ml_cache_counts.stored,
-+              stats.used / 1048576.0, stats.budget / 1048576.0);
++              stats.used / 1048576.0, stats.budget / 1048576.0,
++              compiler[0], compiler[1], compiler[2], compiler[3]);
++   }
 +}
 +
  /* alta: flag from the matching etnaviv kernel build, not upstream UAPI. */
  #define DRM_ETNA_GEM_ALTA_AXI_SRAM 0x00200000
  #define AXI_SRAM_SIZE (1024 * 1024)
-@@ -891,6 +1115,7 @@
+@@ -891,6 +1156,7 @@
        return NULL;
     memset(util_dynarray_begin(&subgraph->tensors), 0, subgraph->tensors.size);
  
@@ -256,7 +298,7 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
     lower_operations(subgraph, poperations, count, &operations);
     place_tensors_in_axi_sram(subgraph, &operations);
  
-@@ -913,6 +1138,8 @@
+@@ -913,6 +1179,8 @@
        util_dynarray_append(&subgraph->operations, instruction);
     }
  
@@ -285,7 +327,20 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
  unsigned etna_ml_get_offset(struct etna_ml_subgraph *subgraph, unsigned idx);
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
-@@ -1283,19 +1283,42 @@
+@@ -13,6 +13,12 @@
+ #include "etnaviv_ml.h"
+ #include "etnaviv_ml_nn.h"
+ 
++/* alta: see etnaviv_ml_nn.h. This file includes all three headers. */
++ETNA_ML_EMBED_SOURCE(etna_ml_src_nn_c, "etnaviv_ml_nn.c");
++ETNA_ML_EMBED_SOURCE(etna_ml_src_ml_h, "etnaviv_ml.h");
++ETNA_ML_EMBED_SOURCE(etna_ml_src_nn_h, "etnaviv_ml_nn.h");
++ETNA_ML_EMBED_SOURCE(etna_ml_src_core_info_h, "etna_core_info.h");
++
+ #define ETNA_NN_INT8 0
+ 
+ #define SRAM_CACHE_MODE_NO_CACHE 0x0
+@@ -1283,19 +1289,42 @@
     return bo;
  }
  
@@ -335,7 +390,42 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
     assert(input);
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
-@@ -16,6 +16,9 @@
+@@ -6,6 +6,34 @@
+ #include "etnaviv_ml.h"
+ #include "etnaviv_context.h"
+ 
++/*
++ * alta: the weight cache's key names the code that compiles weights by its source
++ * text, not by the library's build ID, so a rebuild that doesn't touch that code
++ * keeps the cache. ETNA_ML_EMBED_SOURCE puts one source file's text into the
++ * library; etnaviv_ml.c hashes all of them into every key.
++ *
++ * Rule: embed a file only from a .c file that is that file or #includes it. The
++ * build system doesn't know about the embedding, so that is what gets the text
++ * re-read when it changes. The assembler finds the file through the -I paths.
++ * Every file whose text decides what etna_ml_create_coeffs_v7/v8 return must be
++ * embedded and listed in ml_cache_sources[] in etnaviv_ml.c.
++ */
++#define ETNA_ML_EMBED_SOURCE(sym, file)                                      \
++   __asm__(".pushsection .rodata.etna_ml_src,\"a\",%progbits\n"              \
++           ".global " #sym "\n.hidden " #sym "\n" #sym ":\n"                  \
++           ".incbin \"" file "\"\n"                                          \
++           ".global " #sym "_end\n.hidden " #sym "_end\n" #sym "_end:\n"      \
++           ".popsection\n")
++
++#define ETNA_ML_SOURCE_DECL(sym) extern const uint8_t sym[], sym##_end[]
++
++ETNA_ML_SOURCE_DECL(etna_ml_src_nn_v7_c);
++ETNA_ML_SOURCE_DECL(etna_ml_src_nn_v8_c);
++ETNA_ML_SOURCE_DECL(etna_ml_src_nn_c);
++ETNA_ML_SOURCE_DECL(etna_ml_src_ml_h);
++ETNA_ML_SOURCE_DECL(etna_ml_src_nn_h);
++ETNA_ML_SOURCE_DECL(etna_ml_src_core_info_h);
++
+ void
+ etna_ml_calc_addition_sizes(unsigned *input_width, unsigned *input_height, unsigned *input_channels,
+                             unsigned *output_width, unsigned *output_height, unsigned *output_channels);
+@@ -16,6 +44,9 @@
  struct etna_bo *
  etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size);
  
@@ -345,6 +435,28 @@ On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply afte
  unsigned
  etna_ml_calculate_tiling_v8(struct etna_screen *screen, const struct etna_operation *operation, unsigned *tile_width_out, unsigned *tile_height_out);
  
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -8,6 +8,8 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_screen.h"
+ 
++ETNA_ML_EMBED_SOURCE(etna_ml_src_nn_v7_c, "etnaviv_ml_nn_v7.c"); /* alta: see etnaviv_ml_nn.h */
++
+ static void *
+ map_resource(struct pipe_resource *resource)
+ {
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v8.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v8.c
+@@ -13,6 +13,8 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_screen.h"
+ 
++ETNA_ML_EMBED_SOURCE(etna_ml_src_nn_v8_c, "etnaviv_ml_nn_v8.c"); /* alta: see etnaviv_ml_nn.h */
++
+ static void *
+ map_resource(struct pipe_resource *resource)
+ {
 --- /dev/null
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_disk_cache.h
 @@ -0,0 +1,361 @@
