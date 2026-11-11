@@ -1,0 +1,167 @@
+alta: expose the A311D NPU's 1 MiB AXI SRAM as an etnaviv buffer object
+
+Adds ETNA_BO_ALTA_AXI_SRAM to DRM_IOCTL_ETNAVIV_GEM_NEW. The buffer is backed
+by physical 0xff000000, the address Amlogic's galcore driver uses for it
+(platform file for the VIM3, same SoC), and is reachable only by the NPU through
+its MMU. Refused unless /sys/module/etnaviv/parameters/axi_sram is 1, which is
+0 at every boot. Not for upstream as it stands: hard-coded address, private flag.
+
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+@@ -285,6 +285,11 @@
+ {
+ 	struct drm_etnaviv_gem_new *args = data;
+ 
++	if (args->flags & ETNA_BO_ALTA_AXI_SRAM)
++		return etnaviv_gem_new_axi_sram_handle(dev, file, args->size,
++				args->flags & ~ETNA_BO_ALTA_AXI_SRAM,
++				&args->handle);
++
+ 	if (args->flags & ~(ETNA_BO_CACHED | ETNA_BO_WC | ETNA_BO_UNCACHED |
+ 			    ETNA_BO_FORCE_MMU))
+ 		return -EINVAL;
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.h
+@@ -28,6 +28,12 @@
+ 
+ #define ETNAVIV_SOFTPIN_START_ADDRESS	SZ_4M /* must be >= SUBALLOC_SIZE */
+ 
++/*
++ * alta: not upstream UAPI. Asks for a buffer backed by the NPU's AXI SRAM. Only
++ * the matching Mesa build on this board passes it.
++ */
++#define ETNA_BO_ALTA_AXI_SRAM	0x00200000
++
+ struct etnaviv_file_private {
+ 	int id;
+ 	struct etnaviv_iommu_context	*mmu;
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.c
+@@ -5,6 +5,9 @@
+ 
+ #include <drm/drm_prime.h>
+ #include <linux/dma-mapping.h>
++#include <linux/moduleparam.h>
++#include <linux/of.h>
++#include <linux/scatterlist.h>
+ #include <linux/shmem_fs.h>
+ #include <linux/spinlock.h>
+ #include <linux/vmalloc.h>
+@@ -711,6 +714,106 @@
+ 	return -EINVAL;
+ }
+ 
++/*
++ * alta: a buffer backed by the 1 MiB SRAM behind the NPU's AXI port on the
++ * Amlogic A311D, at the address Amlogic's own galcore driver uses for it. Only
++ * the NPU reaches it, through its MMU: there is no CPU mapping. It is off unless
++ * /sys/module/etnaviv/parameters/axi_sram is 1, and that resets at boot.
++ */
++static bool etnaviv_axi_sram;
++module_param_named(axi_sram, etnaviv_axi_sram, bool, 0644);
++MODULE_PARM_DESC(axi_sram, "alta: allow NPU buffers in the A311D's AXI SRAM (default: off)");
++
++#define ALTA_AXI_SRAM_PHYS	0xff000000UL
++#define ALTA_AXI_SRAM_SIZE	SZ_1M
++
++static struct lock_class_key etnaviv_axi_sram_lock_class;
++
++static int etnaviv_gem_axi_sram_get_pages(struct etnaviv_gem_object *etnaviv_obj)
++{
++	return -ENXIO;	/* pages and sgt are set up at creation */
++}
++
++static void etnaviv_gem_axi_sram_release(struct etnaviv_gem_object *etnaviv_obj)
++{
++	if (etnaviv_obj->sgt) {
++		sg_free_table(etnaviv_obj->sgt);
++		kfree(etnaviv_obj->sgt);
++	}
++	kvfree(etnaviv_obj->pages);
++}
++
++static void *etnaviv_gem_axi_sram_vmap(struct etnaviv_gem_object *etnaviv_obj)
++{
++	return NULL;
++}
++
++static int etnaviv_gem_axi_sram_mmap(struct etnaviv_gem_object *etnaviv_obj,
++				     struct vm_area_struct *vma)
++{
++	return -ENXIO;
++}
++
++static const struct etnaviv_gem_ops etnaviv_gem_axi_sram_ops = {
++	.get_pages = etnaviv_gem_axi_sram_get_pages,
++	.release = etnaviv_gem_axi_sram_release,
++	.vmap = etnaviv_gem_axi_sram_vmap,
++	.mmap = etnaviv_gem_axi_sram_mmap,
++};
++
++int etnaviv_gem_new_axi_sram_handle(struct drm_device *dev, struct drm_file *file,
++	u32 size, u32 flags, u32 *handle)
++{
++	struct etnaviv_gem_object *etnaviv_obj;
++	struct sg_table *sgt;
++	int ret;
++
++	if (!READ_ONCE(etnaviv_axi_sram) || !of_machine_is_compatible("amlogic,a311d"))
++		return -ENODEV;
++	if (size != ALTA_AXI_SRAM_SIZE || (flags & ~ETNA_BO_CACHE_MASK))
++		return -EINVAL;
++
++	ret = etnaviv_gem_new_private(dev, size, flags, &etnaviv_gem_axi_sram_ops,
++				      &etnaviv_obj);
++	if (ret)
++		return ret;
++
++	lockdep_set_class(&etnaviv_obj->lock, &etnaviv_axi_sram_lock_class);
++
++	/* Before anything can fail: freeing the object unlinks it from this list. */
++	etnaviv_gem_obj_add(dev, &etnaviv_obj->base);
++
++	/*
++	 * The SRAM has no struct pages. Nothing dereferences this array: CPU
++	 * access is refused above, and a non-NULL pages pointer plus a ready
++	 * sgt make etnaviv_gem_get_pages() use the sgt as it is.
++	 */
++	etnaviv_obj->pages = kvcalloc(size >> PAGE_SHIFT, sizeof(struct page *), GFP_KERNEL);
++	sgt = kzalloc(sizeof(*sgt), GFP_KERNEL);
++	if (!etnaviv_obj->pages || !sgt) {
++		kfree(sgt);
++		ret = -ENOMEM;
++		goto fail;
++	}
++
++	ret = sg_alloc_table(sgt, 1, GFP_KERNEL);
++	if (ret) {
++		kfree(sgt);
++		goto fail;
++	}
++	sg_dma_address(sgt->sgl) = ALTA_AXI_SRAM_PHYS;
++	sg_dma_len(sgt->sgl) = size;
++	etnaviv_obj->sgt = sgt;
++
++	ret = drm_gem_handle_create(file, &etnaviv_obj->base, handle);
++
++	/* drop reference from allocate - handle holds it now */
++fail:
++	drm_gem_object_put(&etnaviv_obj->base);
++
++	return ret;
++}
++
+ static const struct etnaviv_gem_ops etnaviv_gem_userptr_ops = {
+ 	.get_pages = etnaviv_gem_userptr_get_pages,
+ 	.release = etnaviv_gem_userptr_release,
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gem.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gem.h
+@@ -113,6 +113,8 @@
+ int etnaviv_gem_new_private(struct drm_device *dev, size_t size, u32 flags,
+ 	const struct etnaviv_gem_ops *ops, struct etnaviv_gem_object **res);
+ void etnaviv_gem_obj_add(struct drm_device *dev, struct drm_gem_object *obj);
++int etnaviv_gem_new_axi_sram_handle(struct drm_device *dev, struct drm_file *file,
++	u32 size, u32 flags, u32 *handle);
+ struct page **etnaviv_gem_get_pages(struct etnaviv_gem_object *obj);
+ void etnaviv_gem_put_pages(struct etnaviv_gem_object *obj);
+ 

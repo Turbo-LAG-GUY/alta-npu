@@ -1,0 +1,711 @@
+alta: on-disk cache of compressed NPU weights, with a size limit that follows free disk space
+On by default in this build; ETNA_ML_DISK_CACHE=0 | verbose | verify. Apply after 0002 and 0003.
+
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -8,6 +8,8 @@
+ #include "pipe/p_state.h"
+ #include <sys/time.h>
+ 
++#include "util/build_id.h"
++#include "util/mesa-blake3.h"
+ #include "util/u_inlines.h"
+ 
+ #include "etnaviv_context.h"
+@@ -17,6 +19,7 @@
+ #include "etnaviv_ml_tp.h"
+ #include "etnaviv_ml.h"
+ #include "etnaviv_ml_axi_sram.h"
++#include "etnaviv_ml_disk_cache.h"
+ #include "etnaviv_screen.h"
+ 
+ struct etna_ml_tensor *
+@@ -739,6 +742,227 @@
+    return supported;
+ }
+ 
++/*
++ * alta: on-disk cache of compressed weights. Compressing them is most of what
++ * compiling a model costs, and the result depends only on the model, the chip
++ * and this driver build. On by default in this build. ETNA_ML_DISK_CACHE=0 turns
++ * it off, =verbose reports its use, and =verify also recompiles every hit and
++ * aborts on any difference, before anything reaches the NPU.
++ */
++enum ml_cache_mode { ML_CACHE_OFF, ML_CACHE_ON, ML_CACHE_VERBOSE, ML_CACHE_VERIFY };
++
++struct ml_cache_blob_header {
++   uint32_t bo_size;
++   uint32_t cache_size;
++   uint32_t data_size;
++   uint32_t reserved;
++};
++
++static struct {
++   unsigned hits, misses, stored;
++} ml_cache_counts;
++
++static enum ml_cache_mode
++ml_cache_mode(void)
++{
++   static int mode = -1;
++
++   if (mode < 0) {
++      const char *env = getenv("ETNA_ML_DISK_CACHE");
++
++      if (env && (!strcmp(env, "0") || !strcmp(env, "off")))
++         mode = ML_CACHE_OFF;
++      else if (env && !strcmp(env, "verbose"))
++         mode = ML_CACHE_VERBOSE;
++      else if (env && !strcmp(env, "verify"))
++         mode = ML_CACHE_VERIFY;
++      else
++         mode = ML_CACHE_ON;
++   }
++   return (enum ml_cache_mode)mode;
++}
++
++static const char *
++ml_cache_dir(void)
++{
++   static char dir[PATH_MAX];
++
++   if (ml_cache_mode() == ML_CACHE_OFF || (!dir[0] && !npu_cache_default_dir(dir, sizeof(dir))))
++      return NULL;
++   return dir;
++}
++
++static void
++ml_cache_digest(const void *data, size_t size, uint8_t digest[NPU_CACHE_DIGEST_SIZE])
++{
++   _mesa_blake3_compute(data, size, digest);
++}
++
++static bool
++ml_cache_key(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++             char hex[NPU_CACHE_KEY_CHARS])
++{
++   const struct build_id_note *note = build_id_find_nhdr_for_addr(ml_cache_key);
++   struct etna_screen *screen = subgraph->screen;
++   struct etna_operation scrubbed;
++   blake3_hasher ctx;
++   blake3_hash digest;
++
++   if (!note)
++      return false;
++
++   /* Hash the whole operation so a field can't be forgotten, minus its pointers, which change every run. */
++   memcpy(&scrubbed, operation, sizeof(scrubbed));
++   memset(&scrubbed.link, 0, sizeof(scrubbed.link));
++   scrubbed.weight_tensor = NULL;
++   scrubbed.bias_tensor = NULL;
++
++   _mesa_blake3_init(&ctx);
++   _mesa_blake3_update(&ctx, build_id_data(note), build_id_length(note));
++   _mesa_blake3_update(&ctx, screen->info, sizeof(*screen->info));
++   _mesa_blake3_update(&ctx, etna_ml_get_core_info(screen), sizeof(struct etna_core_npu_info));
++   _mesa_blake3_update(&ctx, &screen->specs.nn_core_version, sizeof(screen->specs.nn_core_version));
++   _mesa_blake3_update(&ctx, &scrubbed, sizeof(scrubbed));
++   if (operation->weight_tensor)
++      _mesa_blake3_update(&ctx, operation->weight_tensor, operation->weight_tensor_size);
++   if (operation->bias_tensor)
++      _mesa_blake3_update(&ctx, operation->bias_tensor, operation->bias_tensor_size);
++   _mesa_blake3_final(&ctx, digest);
++
++   for (unsigned i = 0; i < NPU_CACHE_DIGEST_SIZE; i++)
++      snprintf(hex + i * 2, 3, "%02x", digest[i]);
++
++   return true;
++}
++
++struct etna_bo *
++etna_ml_disk_cache_load(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                        unsigned *cache_size)
++{
++   const char *dir = ml_cache_dir();
++   char hex[NPU_CACHE_KEY_CHARS];
++   struct ml_cache_blob_header header;
++   size_t size = 0;
++
++   if (!dir || !ml_cache_key(subgraph, operation, hex))
++      return NULL;
++
++   uint8_t *payload = npu_cache_read(dir, hex, ml_cache_digest, &size);
++
++   if (payload && size >= sizeof(header))
++      memcpy(&header, payload, sizeof(header));
++   if (!payload || size < sizeof(header) || size != sizeof(header) + header.data_size ||
++       header.data_size > header.bo_size) {
++      free(payload);
++      ml_cache_counts.misses++;
++      return NULL;
++   }
++
++   struct etna_bo *bo = etna_ml_create_bo(subgraph->screen, header.bo_size); /* zeroed */
++
++   etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
++   memcpy(etna_bo_map(bo), payload + sizeof(header), header.data_size);
++   etna_bo_cpu_fini(bo);
++   free(payload);
++
++   *cache_size = header.cache_size;
++   ml_cache_counts.hits++;
++
++   return bo;
++}
++
++void
++etna_ml_disk_cache_store(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                         struct etna_bo *bo, unsigned cache_size)
++{
++   const char *dir = ml_cache_dir();
++   char hex[NPU_CACHE_KEY_CHARS];
++   struct ml_cache_blob_header header = { .bo_size = etna_bo_size(bo), .cache_size = cache_size };
++
++   if (!dir || !ml_cache_key(subgraph, operation, hex) || !npu_cache_mkdirs(dir))
++      return;
++
++   uint8_t *payload = malloc(sizeof(header) + header.bo_size);
++   if (!payload)
++      return;
++
++   uint8_t *data = payload + sizeof(header);
++
++   etna_bo_cpu_prep(bo, DRM_ETNA_PREP_READ);
++   memcpy(data, etna_bo_map(bo), header.bo_size);
++   etna_bo_cpu_fini(bo);
++
++   /* The buffer starts zeroed, so its zero tail needn't be stored. */
++   header.data_size = header.bo_size;
++   while (header.data_size > 0 && data[header.data_size - 1] == 0)
++      header.data_size--;
++   memcpy(payload, &header, sizeof(header));
++
++   size_t payload_size = sizeof(header) + header.data_size;
++
++   if (npu_cache_trim(dir, payload_size + NPU_CACHE_FILE_OVERHEAD, NULL) &&
++       npu_cache_write(dir, hex, ml_cache_digest, payload, payload_size))
++      ml_cache_counts.stored++;
++
++   free(payload);
++}
++
++bool
++etna_ml_disk_cache_verifying(void)
++{
++   return ml_cache_mode() == ML_CACHE_VERIFY;
++}
++
++void
++etna_ml_disk_cache_check(struct etna_bo *cached, unsigned cached_cache_size,
++                         struct etna_bo *fresh, unsigned fresh_cache_size)
++{
++   uint32_t size = etna_bo_size(fresh);
++   bool same;
++
++   etna_bo_cpu_prep(cached, DRM_ETNA_PREP_READ);
++   etna_bo_cpu_prep(fresh, DRM_ETNA_PREP_READ);
++   same = etna_bo_size(cached) == size && cached_cache_size == fresh_cache_size &&
++          memcmp(etna_bo_map(cached), etna_bo_map(fresh), size) == 0;
++   etna_bo_cpu_fini(fresh);
++   etna_bo_cpu_fini(cached);
++
++   if (!same) {
++      fprintf(stderr, "etnaviv/ml: disk cache verify FAILED: a cached entry differs from a fresh compile\n");
++      abort();
++   }
++}
++
++/* Shrinks the cache if the disk has filled up since the last program ran. */
++static void
++ml_cache_trim(void)
++{
++   const char *dir = ml_cache_dir();
++   struct npu_cache_stats stats = {0};
++
++   static bool warned;
++
++   if (dir && npu_cache_trim(dir, 0, &stats) && stats.low_space && !warned) {
++      warned = true; /* once per program, not once per subgraph */
++      fprintf(stderr, "etnaviv/ml: WARNING: disk space is low: %.1f GiB free, under 10 GiB. The NPU weight cache "
++                      "(%.1f MiB) won't grow until space is freed%s\n",
++              stats.avail / 1073741824.0, stats.used / 1048576.0,
++              stats.evicted ? "; older entries were evicted" : "");
++   }
++}
++
++static void
++ml_cache_report(void)
++{
++   const char *dir = ml_cache_dir();
++   struct npu_cache_stats stats = {0};
++
++   if (dir && ml_cache_mode() >= ML_CACHE_VERBOSE && npu_cache_trim(dir, 0, &stats))
++      fprintf(stderr, "etnaviv/ml: disk cache: %u hits, %u misses, %u stored; holding %.1f MiB, limit %.0f MiB\n",
++              ml_cache_counts.hits, ml_cache_counts.misses, ml_cache_counts.stored,
++              stats.used / 1048576.0, stats.budget / 1048576.0);
++}
++
+ /* alta: flag from the matching etnaviv kernel build, not upstream UAPI. */
+ #define DRM_ETNA_GEM_ALTA_AXI_SRAM 0x00200000
+ #define AXI_SRAM_SIZE (1024 * 1024)
+@@ -891,6 +1115,7 @@
+       return NULL;
+    memset(util_dynarray_begin(&subgraph->tensors), 0, subgraph->tensors.size);
+ 
++   ml_cache_trim();
+    lower_operations(subgraph, poperations, count, &operations);
+    place_tensors_in_axi_sram(subgraph, &operations);
+ 
+@@ -913,6 +1138,8 @@
+       util_dynarray_append(&subgraph->operations, instruction);
+    }
+ 
++   ml_cache_report();
++
+    list_for_each_entry_safe(struct etna_operation, operation, &operations, link) {
+       free(operation->weight_tensor);
+       free(operation->bias_tensor);
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -151,6 +151,15 @@
+ 
+ unsigned etna_ml_allocate_tensor(struct etna_ml_subgraph *subgraph);
+ void etna_ml_create_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned size);
++
++/* alta: on-disk cache of compressed weights, see etnaviv_ml_disk_cache.h */
++struct etna_bo *etna_ml_disk_cache_load(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                                        unsigned *cache_size);
++void etna_ml_disk_cache_store(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                              struct etna_bo *bo, unsigned cache_size);
++bool etna_ml_disk_cache_verifying(void);
++void etna_ml_disk_cache_check(struct etna_bo *cached, unsigned cached_cache_size,
++                              struct etna_bo *fresh, unsigned fresh_cache_size);
+ struct etna_ml_tensor *etna_ml_get_tensor(struct etna_ml_subgraph *subgraph, unsigned idx);
+ struct pipe_resource *etna_ml_get_resource(struct etna_ml_subgraph *subgraph, unsigned idx);
+ unsigned etna_ml_get_offset(struct etna_ml_subgraph *subgraph, unsigned idx);
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -1283,19 +1283,42 @@
+    return bo;
+ }
+ 
++/* alta: compressed weights from the disk cache when possible, compiling and storing them when not. */
++struct etna_bo *
++etna_ml_nn_get_coefficients(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                            unsigned *cache_size)
++{
++   unsigned nn_core_version = subgraph->screen->specs.nn_core_version;
++   unsigned cached_size = 0;
++   struct etna_bo *cached = etna_ml_disk_cache_load(subgraph, operation, &cached_size);
++
++   if (cached && !etna_ml_disk_cache_verifying()) {
++      *cache_size = cached_size;
++      return cached;
++   }
++
++   struct etna_bo *bo = nn_core_version == 7 ? etna_ml_create_coeffs_v7(subgraph, operation, cache_size)
++                                             : etna_ml_create_coeffs_v8(subgraph, operation, cache_size);
++
++   if (cached) {
++      etna_ml_disk_cache_check(cached, cached_size, bo, *cache_size);
++      etna_bo_del(cached);
++   } else {
++      etna_ml_disk_cache_store(subgraph, operation, bo, *cache_size);
++   }
++
++   return bo;
++}
++
+ void
+ etna_ml_compile_operation_nn(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
+                              struct etna_vip_instruction *instruction)
+ {
+-   unsigned nn_core_version = subgraph->screen->specs.nn_core_version;
+    unsigned coef_cache_size;
+ 
+    instruction->type = ETNA_JOB_TYPE_NN;
+ 
+-   if (nn_core_version == 7)
+-      instruction->coefficients = etna_ml_create_coeffs_v7(subgraph, operation, &coef_cache_size);
+-   else
+-      instruction->coefficients = etna_ml_create_coeffs_v8(subgraph, operation, &coef_cache_size);
++   instruction->coefficients = etna_ml_nn_get_coefficients(subgraph, operation, &coef_cache_size);
+ 
+    struct pipe_resource *input = etna_ml_get_resource(subgraph, operation->input_tensors[0]);
+    assert(input);
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
+@@ -16,6 +16,9 @@
+ struct etna_bo *
+ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size);
+ 
++struct etna_bo *
++etna_ml_nn_get_coefficients(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size);
++
+ unsigned
+ etna_ml_calculate_tiling_v8(struct etna_screen *screen, const struct etna_operation *operation, unsigned *tile_width_out, unsigned *tile_height_out);
+ 
+--- /dev/null
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_disk_cache.h
+@@ -0,0 +1,361 @@
++/*
++ * alta: on-disk cache of compiled NPU weights, and the policy that keeps it from
++ * filling the disk. Free of Mesa types, so the idle trimmer and the unit test can
++ * build it on their own.
++ *
++ * Each entry is one file, <key>.npucache: a header, then the payload. Files are
++ * written under a temporary name and renamed, and checked when read, because
++ * this board gets hard resets and a damaged blob could hang the NPU.
++ *
++ * SPDX-License-Identifier: MIT
++ */
++
++#ifndef H_ETNAVIV_ML_DISK_CACHE
++#define H_ETNAVIV_ML_DISK_CACHE
++
++#include <dirent.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <limits.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/stat.h>
++#include <sys/statvfs.h>
++#include <time.h>
++#include <unistd.h>
++
++#define NPU_CACHE_DIGEST_SIZE 32
++#define NPU_CACHE_KEY_CHARS (NPU_CACHE_DIGEST_SIZE * 2 + 1) /* hex digits and NUL */
++#define NPU_CACHE_SUFFIX ".npucache"
++#define NPU_CACHE_TMP_PREFIX ".tmp."
++#define NPU_CACHE_MAGIC "NPUCACH1"
++#define NPU_CACHE_MIN_RESERVE (2ull << 30)   /* always leave at least this free */
++#define NPU_CACHE_NO_GROW_BELOW (10ull << 30) /* with less free than this, the cache stops growing */
++#define NPU_CACHE_MAX_ENTRY (512ull << 20)
++#define NPU_CACHE_STALE_TMP_SECONDS 3600
++
++struct npu_cache_file_header {
++   char magic[8];
++   uint64_t payload_size;
++   uint8_t digest[NPU_CACHE_DIGEST_SIZE];
++};
++
++#define NPU_CACHE_FILE_OVERHEAD (sizeof(struct npu_cache_file_header))
++
++typedef void (*npu_cache_digest_fn)(const void *data, size_t size,
++                                    uint8_t digest[NPU_CACHE_DIGEST_SIZE]);
++
++struct npu_cache_stats {
++   uint64_t total;   /* size of the filesystem */
++   uint64_t avail;   /* free space on it, after any eviction */
++   uint64_t used;    /* bytes the cache holds, after any eviction */
++   uint64_t budget;  /* bytes the cache may hold right now */
++   unsigned entries; /* entries left */
++   unsigned evicted; /* entries removed by this call */
++   bool low_space;   /* under NPU_CACHE_NO_GROW_BELOW free: the cache may not grow */
++};
++
++/*
++ * How many bytes the cache may hold. Its own files count as space it could give
++ * back, so the limit doesn't fall just because the cache grew. It leaves the
++ * larger of 5% of the disk or 2 GiB free, takes at most a quarter of what's
++ * beyond that, with no fixed ceiling. As the disk fills the limit falls, to
++ * zero once the reserve is reached; as space comes back it rises again.
++ * With less than 10 GiB free the cache may also not grow past its present size:
++ * a new entry is then stored only by evicting older ones to make room for it.
++ */
++static inline uint64_t
++npu_cache_budget(uint64_t total, uint64_t avail, uint64_t used)
++{
++   uint64_t reserve = total / 20 > NPU_CACHE_MIN_RESERVE ? total / 20 : NPU_CACHE_MIN_RESERVE;
++   uint64_t pool = avail + used > reserve ? avail + used - reserve : 0;
++
++   uint64_t budget = pool / 4;
++
++   if (avail < NPU_CACHE_NO_GROW_BELOW && used < budget)
++      budget = used;
++
++   return budget;
++}
++
++/* $ETNA_ML_DISK_CACHE_DIR, else $XDG_CACHE_HOME/teflon-npu, else ~/.cache/teflon-npu. */
++static inline bool
++npu_cache_default_dir(char *buf, size_t n)
++{
++   const char *dir = getenv("ETNA_ML_DISK_CACHE_DIR");
++   const char *xdg = getenv("XDG_CACHE_HOME");
++   const char *home = getenv("HOME");
++   int len;
++
++   if (dir && dir[0])
++      len = snprintf(buf, n, "%s", dir);
++   else if (xdg && xdg[0])
++      len = snprintf(buf, n, "%s/teflon-npu", xdg);
++   else if (home && home[0])
++      len = snprintf(buf, n, "%s/.cache/teflon-npu", home);
++   else
++      return false;
++
++   return len > 0 && (size_t)len < n;
++}
++
++static inline bool
++npu_cache_mkdirs(const char *dir)
++{
++   char path[PATH_MAX];
++   size_t len = strlen(dir);
++
++   if (len == 0 || len >= sizeof(path))
++      return false;
++   memcpy(path, dir, len + 1);
++
++   for (char *p = path + 1; *p; p++) {
++      if (*p == '/') {
++         *p = 0;
++         if (mkdir(path, 0700) && errno != EEXIST)
++            return false;
++         *p = '/';
++      }
++   }
++   return !mkdir(path, 0700) || errno == EEXIST;
++}
++
++static inline bool
++npu_cache_read_all(int fd, void *buf, size_t size)
++{
++   uint8_t *p = (uint8_t *)buf;
++
++   while (size) {
++      ssize_t n = read(fd, p, size);
++      if (n < 0 && errno == EINTR)
++         continue;
++      if (n <= 0)
++         return false;
++      p += n;
++      size -= (size_t)n;
++   }
++   return true;
++}
++
++static inline bool
++npu_cache_write_all(int fd, const void *buf, size_t size)
++{
++   const uint8_t *p = (const uint8_t *)buf;
++
++   while (size) {
++      ssize_t n = write(fd, p, size);
++      if (n < 0 && errno == EINTR)
++         continue;
++      if (n <= 0)
++         return false;
++      p += n;
++      size -= (size_t)n;
++   }
++   return true;
++}
++
++/*
++ * Returns the payload (malloc'd) and marks the entry as just used, or NULL if
++ * it's missing. A damaged entry is deleted and reported as missing.
++ */
++static inline void *
++npu_cache_read(const char *dir, const char *key, npu_cache_digest_fn digest, size_t *size)
++{
++   char path[PATH_MAX];
++   struct npu_cache_file_header header;
++   uint8_t computed[NPU_CACHE_DIGEST_SIZE];
++   struct stat st;
++   void *payload = NULL;
++   bool ok = false;
++   int len = snprintf(path, sizeof(path), "%s/%s%s", dir, key, NPU_CACHE_SUFFIX);
++
++   if (len <= 0 || (size_t)len >= sizeof(path))
++      return NULL;
++
++   int fd = open(path, O_RDONLY | O_CLOEXEC);
++   if (fd < 0)
++      return NULL;
++
++   if (fstat(fd, &st) == 0 && (uint64_t)st.st_size >= sizeof(header) &&
++       npu_cache_read_all(fd, &header, sizeof(header)) &&
++       memcmp(header.magic, NPU_CACHE_MAGIC, sizeof(header.magic)) == 0 &&
++       header.payload_size <= NPU_CACHE_MAX_ENTRY &&
++       (uint64_t)st.st_size == sizeof(header) + header.payload_size &&
++       (payload = malloc(header.payload_size ? header.payload_size : 1)) != NULL &&
++       npu_cache_read_all(fd, payload, header.payload_size)) {
++      digest(payload, header.payload_size, computed);
++      ok = memcmp(computed, header.digest, sizeof(computed)) == 0;
++   }
++
++   if (ok) {
++      futimens(fd, NULL);
++      *size = header.payload_size;
++   } else {
++      free(payload);
++      payload = NULL;
++      unlink(path);
++   }
++   close(fd);
++
++   return payload;
++}
++
++/* Publishes the entry atomically. On any failure, such as a full disk, nothing is left behind. */
++static inline bool
++npu_cache_write(const char *dir, const char *key, npu_cache_digest_fn digest,
++                const void *payload, size_t size)
++{
++   char tmp[PATH_MAX], path[PATH_MAX];
++   struct npu_cache_file_header header;
++   int tmp_len = snprintf(tmp, sizeof(tmp), "%s/" NPU_CACHE_TMP_PREFIX "%d.%s", dir, (int)getpid(), key);
++   int path_len = snprintf(path, sizeof(path), "%s/%s%s", dir, key, NPU_CACHE_SUFFIX);
++
++   if (tmp_len <= 0 || (size_t)tmp_len >= sizeof(tmp) || path_len <= 0 ||
++       (size_t)path_len >= sizeof(path) || size > NPU_CACHE_MAX_ENTRY || !npu_cache_mkdirs(dir))
++      return false;
++
++   memcpy(header.magic, NPU_CACHE_MAGIC, sizeof(header.magic));
++   header.payload_size = size;
++   digest(payload, size, header.digest);
++
++   int fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC, 0600);
++   if (fd < 0)
++      return false;
++
++   bool ok = npu_cache_write_all(fd, &header, sizeof(header)) &&
++             npu_cache_write_all(fd, payload, size);
++   if (close(fd))
++      ok = false;
++   if (!ok || rename(tmp, path)) {
++      unlink(tmp);
++      return false;
++   }
++   return true;
++}
++
++struct npu_cache_entry {
++   uint64_t size;
++   struct timespec used_at;
++   char name[NPU_CACHE_KEY_CHARS + sizeof(NPU_CACHE_SUFFIX)];
++};
++
++static inline int
++npu_cache_oldest_first(const void *pa, const void *pb)
++{
++   const struct npu_cache_entry *a = (const struct npu_cache_entry *)pa;
++   const struct npu_cache_entry *b = (const struct npu_cache_entry *)pb;
++
++   if (a->used_at.tv_sec != b->used_at.tv_sec)
++      return a->used_at.tv_sec < b->used_at.tv_sec ? -1 : 1;
++   if (a->used_at.tv_nsec != b->used_at.tv_nsec)
++      return a->used_at.tv_nsec < b->used_at.tv_nsec ? -1 : 1;
++   return strcmp(a->name, b->name);
++}
++
++/*
++ * Evicts least recently used entries until the cache, plus `incoming` new bytes,
++ * fits the budget for this much disk. Returns whether `incoming` fits. Something
++ * that can never fit evicts nothing on its behalf. total and avail are parameters
++ * so that tests can act out a filling disk.
++ */
++static inline bool
++npu_cache_trim_with(const char *dir, uint64_t total, uint64_t avail, uint64_t incoming,
++                    struct npu_cache_stats *stats)
++{
++   struct npu_cache_entry *entries = NULL;
++   size_t count = 0, capacity = 0, i = 0;
++   uint64_t used = 0;
++   unsigned evicted = 0;
++   bool fits = true;
++   DIR *d = opendir(dir);
++
++   if (d) {
++      struct dirent *e;
++      time_t now = time(NULL);
++
++      while ((e = readdir(d))) {
++         struct stat st;
++         size_t len = strlen(e->d_name);
++         const size_t name_len = NPU_CACHE_KEY_CHARS - 1 + sizeof(NPU_CACHE_SUFFIX) - 1;
++
++         if (fstatat(dirfd(d), e->d_name, &st, AT_SYMLINK_NOFOLLOW) || !S_ISREG(st.st_mode))
++            continue;
++         if (strncmp(e->d_name, NPU_CACHE_TMP_PREFIX, strlen(NPU_CACHE_TMP_PREFIX)) == 0) {
++            /* Left by a program that died mid-write. */
++            if (now - st.st_mtime > NPU_CACHE_STALE_TMP_SECONDS)
++               unlinkat(dirfd(d), e->d_name, 0);
++            continue;
++         }
++         if (len != name_len || strcmp(e->d_name + len - strlen(NPU_CACHE_SUFFIX), NPU_CACHE_SUFFIX))
++            continue;
++
++         if (count == capacity) {
++            size_t grown = capacity ? capacity * 2 : 64;
++            struct npu_cache_entry *more = (struct npu_cache_entry *)realloc(entries, grown * sizeof(*entries));
++            if (!more) {
++               free(entries);
++               closedir(d);
++               return false;
++            }
++            entries = more;
++            capacity = grown;
++         }
++         entries[count].size = (uint64_t)st.st_size;
++         entries[count].used_at = st.st_mtim;
++         memcpy(entries[count].name, e->d_name, len + 1);
++         used += entries[count].size;
++         count++;
++      }
++   }
++
++   uint64_t budget = npu_cache_budget(total, avail, used);
++   bool low_space = avail < NPU_CACHE_NO_GROW_BELOW;
++
++   if (incoming > budget) {
++      fits = false;
++      incoming = 0;
++   }
++
++   if (count)
++      qsort(entries, count, sizeof(*entries), npu_cache_oldest_first);
++   for (; i < count && used + incoming > budget; i++) {
++      unlinkat(dirfd(d), entries[i].name, 0);
++      used -= entries[i].size;
++      avail += entries[i].size;
++      evicted++;
++   }
++
++   if (stats) {
++      stats->total = total;
++      stats->avail = avail;
++      stats->used = used;
++      stats->budget = budget;
++      stats->entries = (unsigned)(count - i);
++      stats->evicted = evicted;
++      stats->low_space = low_space;
++   }
++
++   free(entries);
++   if (d)
++      closedir(d);
++
++   return fits;
++}
++
++/* The same, measuring the real filesystem. False if it can't be measured. */
++static inline bool
++npu_cache_trim(const char *dir, uint64_t incoming, struct npu_cache_stats *stats)
++{
++   struct statvfs fs;
++
++   if (statvfs(dir, &fs))
++      return false;
++
++   return npu_cache_trim_with(dir, (uint64_t)fs.f_blocks * fs.f_frsize,
++                              (uint64_t)fs.f_bavail * fs.f_frsize, incoming, stats);
++}
++
++#endif

@@ -1,0 +1,53 @@
+etnaviv/ml: don't read past the weight and bias tensors in the V7 compressor
+
+When output channels don't divide evenly between the NN cores, the last core gets
+kernels past the end of both tensors (MobileNet V1's 1001 outputs on 8 cores: 7 of
+them). Valgrind shows the out-of-bounds reads, and the compiled weights then differ
+from run to run. Pad those unused kernels with zero weights and biases. Upstream main
+(checked 2026-11-08) still has this. Base: Mesa c5423d3e273.
+
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -522,6 +522,31 @@
+    unsigned zrl_bits;
+    unsigned max_core_size = 0;
+    unsigned bo_size;
++   unsigned total_kernels = DIV_ROUND_UP(output_channels, cores_used) * cores_used;
++   struct etna_operation padded;
++
++   /*
++    * alta: when the channels don't divide evenly between the cores, the last
++    * core gets kernels past the end of the weight and bias tensors, and those
++    * were read out of bounds. Give these unused kernels zero weights and biases,
++    * so the result doesn't depend on whatever is in memory after the tensors.
++    */
++   if (total_kernels > output_channels) {
++      size_t kernel_size = operation->weight_width * operation->weight_height * input_channels;
++
++      memcpy(&padded, operation, sizeof(padded));
++      padded.weight_tensor = malloc(total_kernels * kernel_size);
++      memcpy(padded.weight_tensor, operation->weight_tensor, output_channels * kernel_size);
++      memset(padded.weight_tensor + output_channels * kernel_size, operation->weight_zero_point,
++             (total_kernels - output_channels) * kernel_size);
++      padded.weight_tensor_size = total_kernels * kernel_size;
++
++      padded.bias_tensor = calloc(total_kernels, sizeof(uint32_t));
++      memcpy(padded.bias_tensor, operation->bias_tensor, output_channels * sizeof(uint32_t));
++      padded.bias_tensor_size = total_kernels * sizeof(uint32_t);
++
++      operation = &padded;
++   }
+ 
+    bo_size = calculate_weight_bo_size(subgraph, operation);
+    zrl_bits = calculate_zrl_bits(subgraph, operation);
+@@ -557,5 +582,10 @@
+ 
+    *cache_size = max_core_size * cores_used;
+ 
++   if (operation == &padded) {
++      free(padded.weight_tensor);
++      free(padded.bias_tensor);
++   }
++
+    return compressed;
+ }

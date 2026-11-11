@@ -1,0 +1,6 @@
+Backend: NPU (Teflon)  |  7.7 ms/inference
+  0.863  military uniform
+  0.031  Windsor tie
+  0.016  mortarboard
+  0.008  bow tie, bow-tie, bowtie
+  0.008  academic gown, academic robe, judge's robe

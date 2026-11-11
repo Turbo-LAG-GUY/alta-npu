@@ -1,17 +1,17 @@
 {
  "runtime": "ai_edge_litert",
- "delegate": "/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so",
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so",
  "model": "models/mobilenet_v1_mesa.tflite",
  "image": "models/grace_hopper.bmp",
- "setup_ms": 1232.9,
+ "setup_ms": 422.9,
  "invoke_ms": [
-  42.7,
-  7.32,
-  7.17,
-  7.77,
-  7.17
+  8.02,
+  7.63,
+  8.23,
+  7.36,
+  7.68
  ],
- "invoke_ms_median": 7.32,
+ "invoke_ms_median": 7.68,
  "top5": [
   {
    "index": 653,

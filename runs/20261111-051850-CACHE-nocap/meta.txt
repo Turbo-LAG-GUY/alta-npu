@@ -1,0 +1,12 @@
+label: CACHE-nocap
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify-steps.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-11T05:18:50-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1879
+deadline_s: 120
+journal_cursor: s=c449583414424e6394385edb6ddd41ce;i=d7c8a;b=1710eadaba37443db2bf1d30a414a127;m=1314fefa1;t=65ffd2137aca7;x=ccbcb83de1398c87
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_DISK_CACHE=verbose
+end: 2026-11-11T05:18:54-05:00  rc: 0  wall_s: 5

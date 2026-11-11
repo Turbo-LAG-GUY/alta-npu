@@ -1,0 +1,11 @@
+label: GLMARK-NPU
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/worker.py --backend npu:/home/jordan/Documents/AI_Projects/npu-upscale/models/detail_n8_960x540.tflite:/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap --idle-exit 45
+cwd: /home/jordan/alta-npu
+start: 2026-11-11T04:15:35-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1978
+deadline_s: 420
+journal_cursor: s=c449583414424e6394385edb6ddd41ce;i=d7b33;b=1710eadaba37443db2bf1d30a414a127;m=aafc3bc4;t=65ffc9ae3f8cc;x=782cf59c697b5897
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-11T04:16:22-05:00  rc: 0  wall_s: 47

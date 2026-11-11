@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-11T04:10:41-05:00 duration=300s interval=1s
+04:10:41 up=2715.05 npu=active active_ms=2703494 npu_irqs=0 cma_free_kb=176 memavail_mb=1952 temps_c=cpu:37,ddr:40
+04:10:42 up=2716.17 npu=active active_ms=2704622 npu_irqs=0 cma_free_kb=176 memavail_mb=1951 temps_c=cpu:36,ddr:39
+04:10:43 up=2717.26 npu=active active_ms=2705715 npu_irqs=0 cma_free_kb=176 memavail_mb=1952 temps_c=cpu:36,ddr:39
+04:10:44 up=2718.36 npu=active active_ms=2706805 npu_irqs=0 cma_free_kb=176 memavail_mb=1951 temps_c=cpu:36,ddr:39
+04:10:46 up=2719.48 npu=active active_ms=2707929 npu_irqs=0 cma_free_kb=180 memavail_mb=1952 temps_c=cpu:36,ddr:39
+04:10:47 up=2720.58 npu=active active_ms=2709029 npu_irqs=0 cma_free_kb=180 memavail_mb=1949 temps_c=cpu:38,ddr:42
+04:10:48 up=2721.69 npu=active active_ms=2710144 npu_irqs=0 cma_free_kb=180 memavail_mb=1942 temps_c=cpu:38,ddr:42
+04:10:49 up=2722.79 npu=active active_ms=2711241 npu_irqs=6 cma_free_kb=344 memavail_mb=1957 temps_c=cpu:37,ddr:40
+04:10:50 up=2724.03 npu=active active_ms=2712474 npu_irqs=6 cma_free_kb=344 memavail_mb=1954 temps_c=cpu:37,ddr:40
+04:10:51 up=2725.13 npu=active active_ms=2713577 npu_irqs=6 cma_free_kb=820 memavail_mb=1962 temps_c=cpu:37,ddr:40
+04:10:52 up=2726.27 npu=active active_ms=2714716 npu_irqs=6 cma_free_kb=4124 memavail_mb=1975 temps_c=cpu:36,ddr:39
+04:10:54 up=2727.41 npu=active active_ms=2715861 npu_irqs=6 cma_free_kb=4184 memavail_mb=1975 temps_c=cpu:36,ddr:40
+04:10:55 up=2728.55 npu=active active_ms=2716993 npu_irqs=6 cma_free_kb=4376 memavail_mb=1977 temps_c=cpu:36,ddr:39
+04:10:56 up=2729.69 npu=active active_ms=2718134 npu_irqs=6 cma_free_kb=4376 memavail_mb=1976 temps_c=cpu:36,ddr:40
+04:10:57 up=2730.82 npu=active active_ms=2719274 npu_irqs=6 cma_free_kb=4376 memavail_mb=1976 temps_c=cpu:36,ddr:39
+04:10:58 up=2731.92 npu=active active_ms=2720361 npu_irqs=6 cma_free_kb=4376 memavail_mb=1976 temps_c=cpu:36,ddr:39
+04:10:59 up=2733.04 npu=active active_ms=2721494 npu_irqs=6 cma_free_kb=4376 memavail_mb=1976 temps_c=cpu:36,ddr:39

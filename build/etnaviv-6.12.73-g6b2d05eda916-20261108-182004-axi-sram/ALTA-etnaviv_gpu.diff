@@ -1,0 +1,226 @@
+--- orig/etnaviv_gpu.c	2026-04-14 00:27:57.000000000 -0400
++++ etnaviv_gpu.c	2026-11-08 18:20:04.631047252 -0500
+@@ -34,6 +34,15 @@
+ };
+ 
+ /*
++ * alta: keep the core powered from init on, as Amlogic's own NPU driver does:
++ * it powers the NPU up once and never power-cycles it in normal use. Writing
++ * "auto" to the device's power/control hands it back to runtime PM.
++ */
++static bool etnaviv_keep_powered = true;
++module_param_named(keep_powered, etnaviv_keep_powered, bool, 0444);
++MODULE_PARM_DESC(keep_powered, "Keep the core powered after init instead of runtime-suspending it (default: true)");
++
++/*
+  * Driver functions:
+  */
+ 
+@@ -197,21 +206,26 @@
+ {
+ 	int ret;
+ 
++	if (!gpu->rst)
++		return 0;
++
+ 	/*
+-	 * 32 core clock cycles (slowest clock) required before deassertion
+-	 * 1 microsecond might match all implementations without computation
++	 * 32 core clock cycles (slowest clock) required before deassertion.
++	 * alta: wait 10 ms instead, with the clocks running, as Amlogic's NPU
++	 * driver does after powering the NPU up (platform/amlogic, _Reset). It
++	 * also lets the power domain settle; the domain driver waits 2 x 20 us.
+ 	 */
+-	usleep_range(1, 2);
++	usleep_range(10000, 11000);
+ 
+ 	ret = reset_control_deassert(gpu->rst);
+ 	if (ret)
+ 		return ret;
+ 
+ 	/*
+-	 * 128 core clock cycles (slowest clock) required before any activity on AHB
+-	 * 1 microsecond might match all implementations without computation
++	 * 128 core clock cycles (slowest clock) required before any activity on AHB.
++	 * alta: wait 20 ms, as Amlogic's driver does after releasing the reset.
+ 	 */
+-	usleep_range(1, 2);
++	msleep(20);
+ 
+ 	return 0;
+ }
+@@ -563,13 +577,13 @@
+ 		u32 pulse_eater = 0x01590880;
+ 
+ 		/* disable clock gating */
+-		gpu_write_power(gpu, VIVS_PM_POWER_CONTROLS, 0x0);
++		gpu_write_power_sync(gpu, VIVS_PM_POWER_CONTROLS, 0x0);
+ 
+ 		/* disable pulse eater */
+ 		pulse_eater |= BIT(17);
+ 		gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
+ 		pulse_eater |= BIT(0);
+-		gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
++		gpu_write_power_sync(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
+ 
+ 		/* enable clock */
+ 		control = VIVS_HI_CLOCK_CONTROL_FSCALE_VAL(fscale);
+@@ -602,9 +616,9 @@
+ 		/* read idle register. */
+ 		idle = gpu_read(gpu, VIVS_HI_IDLE_STATE);
+ 
+-		/* try resetting again if FE is not idle */
+-		if ((idle & VIVS_HI_IDLE_STATE_FE) == 0) {
+-			dev_dbg(gpu->dev, "FE is not idle\n");
++		/* try resetting again if any module is not idle */
++		if ((idle & gpu->idle_mask) != gpu->idle_mask) {
++			dev_dbg(gpu->dev, "GPU modules not idle\n");
+ 			continue;
+ 		}
+ 
+@@ -618,6 +632,23 @@
+ 			continue;
+ 		}
+ 
++		/* try resetting again if MMUv2 is not disabled */
++		if (gpu->identity.minor_features1 & chipMinorFeatures1_MMU_VERSION) {
++			if (gpu->sec_mode == ETNA_SEC_KERNEL) {
++				if (gpu_read(gpu, VIVS_MMUv2_SEC_CONTROL) &
++				    VIVS_MMUv2_SEC_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			} else {
++				if (gpu_read(gpu, VIVS_MMUv2_CONTROL) &
++				    VIVS_MMUv2_CONTROL_ENABLE) {
++					dev_dbg(gpu->dev, "MMU is not disabled\n");
++					continue;
++				}
++			}
++		}
++
+ 		/* disable debug registers, as they are not normally needed */
+ 		control |= VIVS_HI_CLOCK_CONTROL_DISABLE_DEBUG_REGISTERS;
+ 		gpu_write(gpu, VIVS_HI_CLOCK_CONTROL, control);
+@@ -663,7 +694,7 @@
+ 	    gpu->identity.revision == 0x4302)
+ 		ppc |= VIVS_PM_POWER_CONTROLS_DISABLE_STALL_MODULE_CLOCK_GATING;
+ 
+-	gpu_write_power(gpu, VIVS_PM_POWER_CONTROLS, ppc);
++	gpu_write_power_sync(gpu, VIVS_PM_POWER_CONTROLS, ppc);
+ 
+ 	pmc = gpu_read_power(gpu, VIVS_PM_MODULE_CONTROLS);
+ 
+@@ -708,7 +739,7 @@
+ 	pmc |= VIVS_PM_MODULE_CONTROLS_DISABLE_MODULE_CLOCK_GATING_RA_HZ;
+ 	pmc |= VIVS_PM_MODULE_CONTROLS_DISABLE_MODULE_CLOCK_GATING_RA_EZ;
+ 
+-	gpu_write_power(gpu, VIVS_PM_MODULE_CONTROLS, pmc);
++	gpu_write_power_sync(gpu, VIVS_PM_MODULE_CONTROLS, pmc);
+ }
+ 
+ void etnaviv_gpu_start_fe(struct etnaviv_gpu *gpu, u32 address, u16 prefetch)
+@@ -774,7 +805,7 @@
+ 		pulse_eater |= BIT(18);
+ 	}
+ 
+-	gpu_write_power(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
++	gpu_write_power_sync(gpu, VIVS_PM_PULSE_EATER, pulse_eater);
+ }
+ 
+ static void etnaviv_gpu_hw_init(struct etnaviv_gpu *gpu)
+@@ -938,6 +969,16 @@
+ 	etnaviv_gpu_hw_init(gpu);
+ 	mutex_unlock(&gpu->lock);
+ 
++	/*
++	 * alta: with keep_powered, take the core out of runtime PM now, while it
++	 * is still powered from the reset above, so it is never power-cycled.
++	 */
++	if (etnaviv_keep_powered)
++		pm_runtime_forbid(gpu->dev);
++	dev_info(gpu->dev, "alta: reset on every power-up, %s\n",
++		 etnaviv_keep_powered ? "kept powered (keep_powered=1)" :
++					"runtime PM (keep_powered=0)");
++
+ 	pm_runtime_mark_last_busy(gpu->dev);
+ 	pm_runtime_put_autosuspend(gpu->dev);
+ 
+@@ -1753,11 +1794,20 @@
+ 		return ret;
+ 
+ 	etnaviv_gpu_update_clock(gpu);
+-	etnaviv_gpu_hw_init(gpu);
++
++	/*
++	 * alta: the core has been powered off. Reset it as at init before
++	 * programming it, so nothing left over from the power cycle survives,
++	 * e.g. an MMU that reads back as enabled, which makes the MMU restore
++	 * skip programming the page tables.
++	 */
++	ret = etnaviv_hw_reset(gpu);
++	if (!ret)
++		etnaviv_gpu_hw_init(gpu);
+ 
+ 	mutex_unlock(&gpu->lock);
+ 
+-	return 0;
++	return ret;
+ }
+ 
+ static int
+@@ -1869,6 +1919,9 @@
+ 	etnaviv_sched_fini(gpu);
+ 
+ 	if (IS_ENABLED(CONFIG_PM)) {
++		/* alta: undo keep_powered, so the core is powered down as before */
++		if (etnaviv_keep_powered)
++			pm_runtime_allow(gpu->dev);
+ 		pm_runtime_get_sync(gpu->dev);
+ 		pm_runtime_put_sync_suspend(gpu->dev);
+ 	} else {
+@@ -1999,6 +2052,7 @@
+ {
+ 	struct etnaviv_gpu *gpu = dev_get_drvdata(dev);
+ 	u32 idle, mask;
++	int ret;
+ 
+ 	/* If there are any jobs in the HW queue, we're not idle */
+ 	if (atomic_read(&gpu->sched.credit_count))
+@@ -2018,7 +2072,20 @@
+ 
+ 	gpu->state = ETNA_GPU_STATE_IDENTIFIED;
+ 
+-	return etnaviv_gpu_clk_disable(gpu);
++	ret = etnaviv_gpu_clk_disable(gpu);
++	if (ret)
++		return ret;
++
++	/*
++	 * alta: hold the core in reset while its power domain is off, so it
++	 * powers back up in reset rather than in a random state. Amlogic's NPU
++	 * driver only ever power-cycles the NPU with its reset asserted, and the
++	 * power domain driver has no reset for the NNA domain. Resume releases it.
++	 */
++	if (reset_control_assert(gpu->rst))
++		dev_warn(dev, "alta: could not assert the reset before power-down\n");
++
++	return 0;
+ }
+ 
+ static int etnaviv_gpu_rpm_resume(struct device *dev)
+@@ -2032,9 +2099,13 @@
+ 
+ 	/* Re-initialise the basic hardware state */
+ 	if (gpu->state == ETNA_GPU_STATE_IDENTIFIED) {
+-		ret = etnaviv_gpu_hw_resume(gpu);
++		/* alta: release the reset held since the suspend */
++		ret = etnaviv_gpu_reset_deassert(gpu);
++		if (!ret)
++			ret = etnaviv_gpu_hw_resume(gpu);
+ 		if (ret) {
+ 			etnaviv_gpu_clk_disable(gpu);
++			reset_control_assert(gpu->rst);
+ 			return ret;
+ 		}
+ 	}

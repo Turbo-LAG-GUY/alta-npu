@@ -1,0 +1,253 @@
+alta: optional placement of intermediate tensors in the A311D NPU's AXI SRAM
+Opt-in with ETNA_ML_AXI_SRAM=<max tensors>|all; needs the etnaviv build from patches/etnaviv-axi-sram with axi_sram=1.
+Base: Mesa c5423d3e273. Local experiment, not for upstream as it stands.
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 4060a1c93e1..dc9390e6d54 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -16,6 +16,7 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_ml_tp.h"
+ #include "etnaviv_ml.h"
++#include "etnaviv_ml_axi_sram.h"
+ #include "etnaviv_screen.h"
+ 
+ struct etna_ml_tensor *
+@@ -738,6 +739,128 @@ etna_ml_operation_supported(struct pipe_ml_device *pdevice,
+    return supported;
+ }
+ 
++/* alta: flag from the matching etnaviv kernel build, not upstream UAPI. */
++#define DRM_ETNA_GEM_ALTA_AXI_SRAM 0x00200000
++#define AXI_SRAM_SIZE (1024 * 1024)
++#define AXI_SRAM_PAGE 4096
++
++static struct pipe_resource *
++create_axi_sram_resource(struct etna_ml_subgraph *subgraph)
++{
++   struct etna_screen *screen = subgraph->screen;
++   struct etna_bo *bo = etna_bo_new(screen->dev, AXI_SRAM_SIZE,
++                                    DRM_ETNA_GEM_CACHE_WC | DRM_ETNA_GEM_ALTA_AXI_SRAM);
++   if (!bo)
++      return NULL;
++
++   struct pipe_resource *res = pipe_buffer_create(&screen->base, 0, PIPE_USAGE_DEFAULT, AXI_SRAM_SIZE);
++   struct etna_buffer_resource *buffer = etna_buffer_resource(res);
++   etna_bo_del(buffer->bo);
++   buffer->bo = bo;
++
++   return res;
++}
++
++/*
++ * alta: opt-in with ETNA_ML_AXI_SRAM=<max tensors> or =all. Moves intermediate
++ * tensors into the NPU's AXI SRAM, so they stop going through DDR. Graph inputs
++ * and outputs stay in RAM because the CPU touches them, and aliased tensors stay
++ * because they share a buffer. Each invoke is one submit, so tensors can't be
++ * clobbered between operations.
++ */
++static void
++place_tensors_in_axi_sram(struct etna_ml_subgraph *subgraph, struct list_head *operations)
++{
++   const char *env = getenv("ETNA_ML_AXI_SRAM");
++   unsigned max_placed = !env ? 0 : (!strcmp(env, "all") ? UINT_MAX : (unsigned)atoi(env));
++
++   if (!max_placed)
++      return;
++
++   unsigned tensor_count = util_dynarray_num_elements(&subgraph->tensors, struct etna_ml_tensor *);
++   struct etna_ml_tensor **tensors = util_dynarray_begin(&subgraph->tensors);
++   int *writer = malloc(tensor_count * sizeof(*writer));
++   int *last_reader = malloc(tensor_count * sizeof(*last_reader));
++   bool *excluded = calloc(tensor_count, sizeof(*excluded));
++   struct axi_sram_item *items = calloc(tensor_count, sizeof(*items));
++   unsigned *item_tensor = calloc(tensor_count, sizeof(*item_tensor));
++   unsigned n = 0, op = 0;
++
++   for (unsigned t = 0; t < tensor_count; t++)
++      writer[t] = last_reader[t] = -1;
++
++   list_for_each_entry(struct etna_operation, operation, operations, link) {
++      bool plain = operation->type == ETNA_JOB_TYPE_NN || operation->type == ETNA_JOB_TYPE_TP;
++
++      /* Some lowerings leave a count at 0 when there is one tensor. */
++      for (unsigned i = 0; i < MAX2(operation->input_count, 1); i++) {
++         unsigned t = operation->input_tensors[i];
++         if (plain)
++            last_reader[t] = op;
++         else
++            excluded[t] = true;
++      }
++      for (unsigned i = 0; i < MAX2(operation->output_count, 1); i++) {
++         unsigned t = operation->output_tensors[i];
++         if (!plain || writer[t] >= 0)
++            excluded[t] = true;
++         else
++            writer[t] = op;
++      }
++      op++;
++   }
++
++   for (unsigned t = 0; t < tensor_count; t++) {
++      bool shared = false;
++
++      if (!tensors[t] || !tensors[t]->resource || excluded[t] || writer[t] < 0 ||
++          last_reader[t] <= writer[t])
++         continue;
++      for (unsigned u = 0; u < tensor_count && !shared; u++)
++         shared = u != t && tensors[u] && tensors[u]->resource == tensors[t]->resource;
++      if (shared)
++         continue;
++
++      unsigned k = n++;
++      while (k > 0 && items[k - 1].first_use > (unsigned)writer[t]) {
++         items[k] = items[k - 1];
++         item_tensor[k] = item_tensor[k - 1];
++         k--;
++      }
++      items[k] = (struct axi_sram_item){ .size = align(tensors[t]->size, AXI_SRAM_PAGE),
++                                         .first_use = writer[t], .last_use = last_reader[t] };
++      item_tensor[k] = t;
++   }
++
++   unsigned placed = axi_sram_assign(items, n, AXI_SRAM_SIZE, max_placed);
++   struct pipe_resource *sram = placed ? create_axi_sram_resource(subgraph) : NULL;
++
++   if (sram) {
++      unsigned top = 0;
++
++      for (unsigned k = 0; k < n; k++) {
++         if (items[k].offset < 0)
++            continue;
++         struct etna_ml_tensor *tensor = tensors[item_tensor[k]];
++         pipe_resource_reference(&tensor->resource, sram);
++         tensor->offset = items[k].offset;
++         top = MAX2(top, items[k].offset + items[k].size);
++      }
++      subgraph->axi_sram = sram;
++      pipe_resource_reference(&sram, NULL); /* the tensors hold references now */
++      fprintf(stderr, "etnaviv/ml: AXI SRAM: placed %u of %u intermediate tensors, using %u of %u KiB\n",
++              placed, n, top / 1024, AXI_SRAM_SIZE / 1024);
++   } else if (placed) {
++      fprintf(stderr, "etnaviv/ml: AXI SRAM not available (is /sys/module/etnaviv/parameters/axi_sram 1?), using RAM\n");
++   }
++
++   free(writer);
++   free(last_reader);
++   free(excluded);
++   free(items);
++   free(item_tensor);
++}
++
+ struct pipe_ml_subgraph *
+ etna_ml_subgraph_create(struct pipe_ml_device *pdevice,
+                         const struct pipe_ml_operation *poperations,
+@@ -769,6 +892,7 @@ etna_ml_subgraph_create(struct pipe_ml_device *pdevice,
+    memset(util_dynarray_begin(&subgraph->tensors), 0, subgraph->tensors.size);
+ 
+    lower_operations(subgraph, poperations, count, &operations);
++   place_tensors_in_axi_sram(subgraph, &operations);
+ 
+    list_for_each_entry(struct etna_operation, operation, &operations, link) {
+       struct etna_vip_instruction instruction = {0};
+@@ -1040,6 +1164,11 @@ etna_ml_subgraph_read_outputs(struct pipe_context *context, struct pipe_ml_subgr
+ 
+    for (int i = 0; i < outputs_count; i++) {
+       struct pipe_resource *res = etna_ml_get_resource(subgraph, output_idxs[i]);
++      if (res == subgraph->axi_sram) {
++         fprintf(stderr, "etnaviv/ml: output tensor %u is in the AXI SRAM, which the CPU can't read. Unset ETNA_ML_AXI_SRAM.\n",
++                 output_idxs[i]);
++         abort();
++      }
+       if (is_signed[i]) {
+          struct pipe_transfer *src_transfer;
+          uint8_t *src_map;
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index 718765ba694..93952eea4e8 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -63,6 +63,9 @@ struct etna_ml_subgraph {
+ 
+    /* Indexed by tensor index */
+    struct util_dynarray tensors; /* Contains struct etna_ml_tensor */
++
++   /* alta: the AXI SRAM buffer, if any. Not a reference: the tensors hold those. */
++   struct pipe_resource *axi_sram;
+ };
+ 
+ struct etna_vip_instruction {
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_axi_sram.h b/src/gallium/drivers/etnaviv/etnaviv_ml_axi_sram.h
+new file mode 100644
+index 00000000000..346177b6ef8
+--- /dev/null
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_axi_sram.h
+@@ -0,0 +1,68 @@
++/*
++ * alta: placement of intermediate tensors in the NPU's AXI SRAM. A first-fit
++ * linear scan, kept free of Mesa types so it can be tested on its own.
++ *
++ * SPDX-License-Identifier: MIT
++ */
++
++#ifndef H_ETNAVIV_ML_AXI_SRAM
++#define H_ETNAVIV_ML_AXI_SRAM
++
++#include <stdbool.h>
++
++struct axi_sram_item {
++   unsigned size;      /* bytes, already rounded up to whole pages */
++   unsigned first_use; /* index of the operation that writes it */
++   unsigned last_use;  /* index of the last operation that reads it */
++   int offset;         /* result: byte offset in the SRAM, -1 if it stays in RAM */
++};
++
++/*
++ * Items must be sorted by first_use. Two items whose [first_use, last_use]
++ * ranges touch are live at once: an operation reads its input while it writes
++ * its output. Returns how many items were placed, at most max_placed.
++ */
++static inline unsigned
++axi_sram_assign(struct axi_sram_item *items, unsigned count, unsigned capacity, unsigned max_placed)
++{
++   unsigned placed = 0;
++
++   for (unsigned i = 0; i < count; i++) {
++      unsigned best = ~0u;
++
++      items[i].offset = -1;
++      if (placed >= max_placed || items[i].size > capacity)
++         continue;
++
++      /* The lowest free spot starts at 0 or right after a live block. */
++      for (int c = -1; c < (int)i; c++) {
++         unsigned start = 0;
++         bool clash = false;
++
++         if (c >= 0) {
++            if (items[c].offset < 0 || items[c].last_use < items[i].first_use)
++               continue;
++            start = (unsigned)items[c].offset + items[c].size;
++         }
++         if (start >= best || start + items[i].size > capacity)
++            continue;
++
++         for (unsigned j = 0; j < i && !clash; j++) {
++            clash = items[j].offset >= 0 && items[j].last_use >= items[i].first_use &&
++                    start < (unsigned)items[j].offset + items[j].size &&
++                    (unsigned)items[j].offset < start + items[i].size;
++         }
++         if (!clash)
++            best = start;
++      }
++
++      if (best != ~0u) {
++         items[i].offset = (int)best;
++         placed++;
++      }
++   }
++
++   return placed;
++}
++
++#endif

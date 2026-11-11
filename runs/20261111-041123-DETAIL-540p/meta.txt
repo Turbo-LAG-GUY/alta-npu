@@ -1,0 +1,11 @@
+label: DETAIL-540p
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/npu_detail_test.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/detail_n8_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/reference_n8_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-11T04:11:23-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1965
+deadline_s: 120
+journal_cursor: s=c449583414424e6394385edb6ddd41ce;i=d7b1a;b=1710eadaba37443db2bf1d30a414a127;m=a23b5174;t=65ffc92230e7a;x=db28ee05ebd7ca41
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-11T04:11:26-05:00  rc: 0  wall_s: 3

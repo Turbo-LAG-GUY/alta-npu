@@ -1,0 +1,2 @@
+worker ready
+worker frames=4330 median_ms=21.34 p95_ms=30.48 max_ms=44.46

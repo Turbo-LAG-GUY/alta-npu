@@ -1,0 +1,3 @@
+temps before: cpu 36C ddr 40C
+T4 rc=0 PASS top1=653 score=0.7188 shared=5/5 invokes=2000 median_ms=7.79 min_ms=7.02 max_ms=17.52 first100_median=7.76 last100_median=7.80 compute_s=15.9
+temps after: cpu 35C ddr 37C

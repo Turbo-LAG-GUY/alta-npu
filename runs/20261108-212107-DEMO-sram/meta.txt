@@ -1,0 +1,10 @@
+label: DEMO-sram
+cmd: /home/jordan/Documents/AI_Projects/npu-demo/.venv/bin/python /home/jordan/Documents/AI_Projects/npu-demo/classify.py -n 4
+cwd: /home/jordan/alta-npu
+start: 2026-11-08T21:21:07-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2253
+deadline_s: 120
+journal_cursor: s=8a72829d23e841a2b6878a013050f704;i=b793d;b=81bcabe67126421fb37658c5c2534f00;m=ee4e910e;t=65fce5d3a6967;x=d67e628d9640c29e
+end: 2026-11-08T21:21:10-05:00  rc: 0  wall_s: 3

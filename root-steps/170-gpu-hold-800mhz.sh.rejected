@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# 170 - hold the Mali GPU at its top clock (800 MHz) until the next boot, to test whether clock management costs FPS.
+# Why: glmark2 ran about 1.6x faster with Steam open than closed (refract at 540p: 62-65 FPS against 34-40), and a tiny
+# background GPU load also raised it. The governor (simple_ondemand, the only one this kernel has) drops the clock
+# whenever it sees the GPU idle for a moment, so a benchmark that waits on each frame may keep paying for clock changes.
+# What it does: writes 800 MHz to the GPU's minimum-clock file, so the governor can't go lower. Nothing is written to disk.
+# Risk: low. 800 MHz is already the highest clock the GPU uses under load, and voltage and maximum don't change. The GPU
+# simply stays at that clock when idle too, so expect a little more heat and power until it's undone. The NPU isn't touched.
+# Run:    sudo bash root-steps/170-gpu-hold-800mhz.sh
+# Revert: reboot, or sudo bash root-steps/170-gpu-hold-800mhz.sh off
+# Verify: cat /sys/class/devfreq/ffe40000.gpu/min_freq   (expect 799999987 when on, 124999998 when off)
+set -euxo pipefail
+here="$(cd "$(dirname "$0")/.." && pwd)"
+D=/sys/class/devfreq/ffe40000.gpu
+F="$D/min_freq"
+TOP=799999987
+die() { "$here/scripts/progress" 170 FAILED "$*"; echo "170: $*" >&2; exit 1; }
+trap '"$here/scripts/progress" 170 FAILED "root step stopped at line $LINENO"' ERR
+[ "$(id -u)" -eq 0 ] || { echo "170: run it with sudo" >&2; exit 1; }
+[ "$(basename "$(readlink -f "$D/device/driver")")" = panfrost ] || die "ffe40000.gpu is not bound to panfrost"
+[ -w "$F" ] || die "$F is missing or not writable"
+grep -qw "$TOP" "$D/available_frequencies" || die "$TOP Hz is not one of this GPU's clocks"
+case "${1:-on}" in
+  on)
+    "$here/scripts/progress" 170 STARTING "hold GPU at $TOP Hz until the next boot (min_freq was $(cat "$F"))"
+    echo "$TOP" > "$F"
+    [ "$(cat "$F")" = "$TOP" ] || die "min_freq reads $(cat "$F"), expected $TOP"
+    "$here/scripts/progress" 170 DONE "GPU held at $TOP Hz until the next boot. Undo: reboot, or this script with off"
+    echo "Done: the GPU stays at 800 MHz until the next boot."
+    ;;
+  off)
+    "$here/scripts/progress" 170 STARTING "release the GPU clock hold (min_freq was $(cat "$F"))"
+    echo 0 > "$F"
+    "$here/scripts/progress" 170 DONE "GPU clock hold released, min_freq now $(cat "$F")"
+    echo "Done: the GPU picks its own clock again."
+    ;;
+  *)
+    die "unknown argument: $1 (use on or off)"
+    ;;
+esac

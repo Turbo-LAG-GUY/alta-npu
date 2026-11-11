@@ -1,3 +1,4 @@
-export TEFLON=/home/jordan/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so
+export TEFLON=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so
+export ETNA_ML_AXI_SRAM="${ETNA_ML_AXI_SRAM:-all}"   # use the NPU's 1 MiB on-chip memory; set to 0 to run without it
 export PY=/home/jordan/Documents/AI_Projects/.venv/bin/python
 export M=models/mobilenet_v1_1.0_224_quant.tflite I=models/grace_hopper.bmp L=models/imagenet_labels.txt

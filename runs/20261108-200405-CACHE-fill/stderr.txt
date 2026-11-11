@@ -1,0 +1,3 @@
+etnaviv/ml: disk cache: 0 hits, 27 misses, 27 stored; holding 4.4 MiB, limit 1024 MiB
+etnaviv/ml: disk cache: 0 hits, 28 misses, 28 stored; holding 5.4 MiB, limit 1024 MiB
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.

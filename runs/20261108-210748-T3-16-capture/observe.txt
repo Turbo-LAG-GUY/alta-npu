@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-08T21:07:48-05:00 duration=300s interval=1s
+21:07:48 up=4274.67 npu=active active_ms=4262839 npu_irqs=220 cma_free_kb=1264 memavail_mb=2274 temps_c=cpu:34,ddr:38
+21:07:49 up=4275.78 npu=active active_ms=4263950 npu_irqs=220 cma_free_kb=1268 memavail_mb=2276 temps_c=cpu:33,ddr:36
+21:07:51 up=4276.99 npu=active active_ms=4265155 npu_irqs=220 cma_free_kb=1268 memavail_mb=2277 temps_c=cpu:33,ddr:36
+21:07:52 up=4278.17 npu=active active_ms=4266346 npu_irqs=220 cma_free_kb=1268 memavail_mb=2277 temps_c=cpu:33,ddr:35
+21:07:53 up=4279.39 npu=active active_ms=4267562 npu_irqs=220 cma_free_kb=1268 memavail_mb=2279 temps_c=cpu:33,ddr:36
+21:07:54 up=4280.59 npu=active active_ms=4268756 npu_irqs=220 cma_free_kb=1268 memavail_mb=2276 temps_c=cpu:36,ddr:39
+21:07:55 up=4281.75 npu=active active_ms=4269918 npu_irqs=231 cma_free_kb=1276 memavail_mb=2203 temps_c=cpu:36,ddr:39
+21:07:57 up=4282.90 npu=active active_ms=4271065 npu_irqs=231 cma_free_kb=1304 memavail_mb=2243 temps_c=cpu:34,ddr:37
+21:07:58 up=4284.05 npu=active active_ms=4272222 npu_irqs=231 cma_free_kb=1312 memavail_mb=2242 temps_c=cpu:33,ddr:36
+21:07:59 up=4285.22 npu=active active_ms=4273394 npu_irqs=231 cma_free_kb=1312 memavail_mb=2243 temps_c=cpu:33,ddr:36
+21:08:00 up=4286.36 npu=active active_ms=4274529 npu_irqs=231 cma_free_kb=1316 memavail_mb=2244 temps_c=cpu:33,ddr:36
+21:08:01 up=4287.49 npu=active active_ms=4275658 npu_irqs=231 cma_free_kb=1316 memavail_mb=2249 temps_c=cpu:33,ddr:35
+21:08:02 up=4288.63 npu=active active_ms=4276798 npu_irqs=231 cma_free_kb=1316 memavail_mb=2253 temps_c=cpu:33,ddr:36
+21:08:03 up=4289.78 npu=active active_ms=4277943 npu_irqs=231 cma_free_kb=1344 memavail_mb=2257 temps_c=cpu:33,ddr:36
+21:08:05 up=4290.90 npu=active active_ms=4279069 npu_irqs=231 cma_free_kb=1344 memavail_mb=2261 temps_c=cpu:33,ddr:36
+21:08:06 up=4292.06 npu=active active_ms=4280226 npu_irqs=231 cma_free_kb=1344 memavail_mb=2262 temps_c=cpu:33,ddr:36
+/home/jordan/alta-npu/scripts/npu-observe: line 14: echo: write error: Broken pipe

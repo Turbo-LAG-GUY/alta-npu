@@ -1,0 +1,15 @@
+date: 2026-11-08T18:20:25-05:00
+kernel: 6.12.73-g6b2d05eda916
+headers: /usr/src/linux-headers-6.12.73-g6b2d05eda916
+kernel compiler: Linux version 6.12.73-g6b2d05eda916 (autobuild@deb.libre.computer) (gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT_DYNAMIC Tue Feb 17 16:14:53 UTC 2026
+CC: gcc-14 14.2.0
+source: /home/jordan/alta-npu/build/src-lc-63bcbfd8cac6 (kernelversion 6.12.73)
+patches (sha256):
+884af3930118dbdd40d07d5b40609d449c1fec1e6dc9eb2e9e42d218234d8e16  patches/etnaviv-reset-keepon/0001-drm-etnaviv-force-flush-on-power-register-ops.patch
+2cc6b92c321ec191eebe86f436e893bee043bd7bb1df8680c302671f1d19479c  patches/etnaviv-reset-keepon/0002-drm-etnaviv-check-all-modules-for-idle-after-reset.patch
+82dddb6aad6278c15721a1b4e6864335727ad764c9d56976f82cd316bf15b0b0  patches/etnaviv-reset-keepon/0003-drm-etnaviv-check-MMUv2-status-after-reset.patch
+0a7de0a11e9163d71ece1bcedcfe2315da3fbdee47106253a512806923986319  patches/etnaviv-reset-keepon/0004-drm-etnaviv-alta-reset-the-NPU-on-every-power-up-kee.patch
+cce205344067908af44713595839871d58774a6cf3f0a7f54c66af73bbf9533d  patches/etnaviv-axi-sram/0005-drm-etnaviv-alta-NPU-AXI-SRAM-buffers.patch
+module sha256: e5a72dd9514b76b594557962d410891b03a60dd95b4851a1b06d9c3fc9361bcd
+module srcversion: 
+vermagic: 6.12.73-g6b2d05eda916 SMP preempt mod_unload aarch64

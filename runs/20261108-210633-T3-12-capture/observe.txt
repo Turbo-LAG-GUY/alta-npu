@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-08T21:06:33-05:00 duration=300s interval=1s
+21:06:33 up=4199.37 npu=active active_ms=4187536 npu_irqs=176 cma_free_kb=1668 memavail_mb=2265 temps_c=cpu:35,ddr:38
+21:06:34 up=4200.50 npu=active active_ms=4188669 npu_irqs=176 cma_free_kb=1672 memavail_mb=2269 temps_c=cpu:33,ddr:36
+21:06:35 up=4201.62 npu=active active_ms=4189792 npu_irqs=176 cma_free_kb=1672 memavail_mb=2269 temps_c=cpu:33,ddr:36
+21:06:36 up=4202.78 npu=active active_ms=4190952 npu_irqs=176 cma_free_kb=1672 memavail_mb=2270 temps_c=cpu:33,ddr:36
+21:06:38 up=4203.88 npu=active active_ms=4192051 npu_irqs=176 cma_free_kb=1672 memavail_mb=2271 temps_c=cpu:33,ddr:36
+21:06:39 up=4204.99 npu=active active_ms=4193162 npu_irqs=176 cma_free_kb=1676 memavail_mb=2269 temps_c=cpu:36,ddr:39
+21:06:40 up=4206.12 npu=active active_ms=4194289 npu_irqs=176 cma_free_kb=0 memavail_mb=2168 temps_c=cpu:38,ddr:39
+21:06:41 up=4207.24 npu=active active_ms=4195411 npu_irqs=187 cma_free_kb=4 memavail_mb=2229 temps_c=cpu:34,ddr:38
+21:06:42 up=4208.35 npu=active active_ms=4196517 npu_irqs=187 cma_free_kb=4 memavail_mb=2230 temps_c=cpu:34,ddr:36
+21:06:43 up=4209.50 npu=active active_ms=4197666 npu_irqs=187 cma_free_kb=4 memavail_mb=2230 temps_c=cpu:33,ddr:36
+21:06:44 up=4210.63 npu=active active_ms=4198797 npu_irqs=187 cma_free_kb=4 memavail_mb=2231 temps_c=cpu:33,ddr:36
+21:06:45 up=4211.76 npu=active active_ms=4199929 npu_irqs=187 cma_free_kb=4 memavail_mb=2234 temps_c=cpu:33,ddr:36
+21:06:47 up=4212.92 npu=active active_ms=4201091 npu_irqs=187 cma_free_kb=4 memavail_mb=2240 temps_c=cpu:33,ddr:35
+21:06:48 up=4214.11 npu=active active_ms=4202285 npu_irqs=187 cma_free_kb=4 memavail_mb=2247 temps_c=cpu:33,ddr:36
+21:06:49 up=4215.24 npu=active active_ms=4203409 npu_irqs=187 cma_free_kb=4 memavail_mb=2251 temps_c=cpu:33,ddr:36
+21:06:50 up=4216.36 npu=active active_ms=4204526 npu_irqs=187 cma_free_kb=4 memavail_mb=2257 temps_c=cpu:33,ddr:36
+21:06:51 up=4217.48 npu=active active_ms=4205651 npu_irqs=187 cma_free_kb=1160 memavail_mb=2259 temps_c=cpu:35,ddr:37

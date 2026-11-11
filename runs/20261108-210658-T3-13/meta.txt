@@ -1,0 +1,11 @@
+label: T3-13
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I scripts/npu-classify-steps.py -m models/mobilenet_v1_mesa.tflite -i models/grace_hopper.bmp -l models/imagenet_labels.txt -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-08T21:06:58-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2274
+deadline_s: 120
+journal_cursor: s=8a72829d23e841a2b6878a013050f704;i=b793d;b=81bcabe67126421fb37658c5c2534f00;m=ee4e910e;t=65fce5d3a6967;x=d67e628d9640c29e
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-08T21:07:00-05:00  rc: 0  wall_s: 2

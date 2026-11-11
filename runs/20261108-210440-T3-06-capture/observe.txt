@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-08T21:04:40-05:00 duration=300s interval=1s
+21:04:40 up=4086.40 npu=active active_ms=4074573 npu_irqs=110 cma_free_kb=1120 memavail_mb=2259 temps_c=cpu:34,ddr:38
+21:04:41 up=4087.58 npu=active active_ms=4075754 npu_irqs=110 cma_free_kb=1120 memavail_mb=2261 temps_c=cpu:33,ddr:36
+21:04:42 up=4088.71 npu=active active_ms=4076881 npu_irqs=110 cma_free_kb=1120 memavail_mb=2261 temps_c=cpu:33,ddr:35
+21:04:43 up=4089.81 npu=active active_ms=4077985 npu_irqs=110 cma_free_kb=1120 memavail_mb=2262 temps_c=cpu:33,ddr:36
+21:04:45 up=4090.97 npu=active active_ms=4079134 npu_irqs=110 cma_free_kb=1120 memavail_mb=2263 temps_c=cpu:33,ddr:36
+21:04:46 up=4092.04 npu=active active_ms=4080205 npu_irqs=110 cma_free_kb=1120 memavail_mb=2261 temps_c=cpu:36,ddr:39
+21:04:47 up=4093.19 npu=active active_ms=4081357 npu_irqs=110 cma_free_kb=84 memavail_mb=2160 temps_c=cpu:37,ddr:39
+21:04:48 up=4094.29 npu=active active_ms=4082462 npu_irqs=121 cma_free_kb=4 memavail_mb=2232 temps_c=cpu:34,ddr:37
+21:04:49 up=4095.43 npu=active active_ms=4083600 npu_irqs=121 cma_free_kb=8 memavail_mb=2231 temps_c=cpu:34,ddr:37
+21:04:50 up=4096.60 npu=active active_ms=4084777 npu_irqs=121 cma_free_kb=8 memavail_mb=2230 temps_c=cpu:33,ddr:37
+21:04:51 up=4097.76 npu=active active_ms=4085927 npu_irqs=121 cma_free_kb=8 memavail_mb=2232 temps_c=cpu:33,ddr:36
+21:04:52 up=4098.85 npu=active active_ms=4087028 npu_irqs=121 cma_free_kb=1000 memavail_mb=2237 temps_c=cpu:33,ddr:36
+21:04:54 up=4100.00 npu=active active_ms=4088175 npu_irqs=121 cma_free_kb=1000 memavail_mb=2241 temps_c=cpu:33,ddr:36
+21:04:55 up=4101.14 npu=active active_ms=4089318 npu_irqs=121 cma_free_kb=1000 memavail_mb=2244 temps_c=cpu:33,ddr:36
+21:04:56 up=4102.28 npu=active active_ms=4090452 npu_irqs=121 cma_free_kb=1000 memavail_mb=2248 temps_c=cpu:33,ddr:36
+21:04:57 up=4103.39 npu=active active_ms=4091558 npu_irqs=121 cma_free_kb=1004 memavail_mb=2252 temps_c=cpu:33,ddr:37
+21:04:58 up=4104.51 npu=active active_ms=4092686 npu_irqs=121 cma_free_kb=1004 memavail_mb=2254 temps_c=cpu:33,ddr:36

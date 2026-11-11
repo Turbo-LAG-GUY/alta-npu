@@ -16,7 +16,7 @@ import ai_edge_litert.interpreter as tflite
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DELEGATE = os.path.expanduser(
-    "~/Documents/AI_Projects/mesa/build/src/gallium/targets/teflon/libteflon.so")
+    "~/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so")
 
 
 def main():
@@ -28,6 +28,11 @@ def main():
     p.add_argument("--cpu", action="store_true", help="skip the NPU delegate")
     p.add_argument("-n", "--runs", type=int, default=20)
     a = p.parse_args()
+
+    # Keep the NPU's intermediate results in its 1 MiB of on-chip memory instead of RAM. This
+    # Teflon build falls back to RAM by itself when the driver's axi_sram switch is off.
+    # Run with ETNA_ML_AXI_SRAM=0 to go without it.
+    os.environ.setdefault("ETNA_ML_AXI_SRAM", "all")
 
     delegates = [] if a.cpu else [tflite.load_delegate(a.delegate)]
     interp = tflite.Interpreter(model_path=a.model, experimental_delegates=delegates,
