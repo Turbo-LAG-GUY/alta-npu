@@ -1,0 +1,5 @@
+000 [0080103c 00000800 40000040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.xxxx, void
+001 [01001001 15400800 40000010 00000008] add.s32.pack      t0._y__, u0.yyyy, void, t0.xxxx
+002 [02001032 15600c04 81540040 00000002] load.denorm.u32   t0.__z_, t0.yyyy, u0.zzzz, void
+003 [00801001 3fc00800 40000010 00000008] add.s32.pack      t0.x___, u0.wwww, void, t0.xxxx
+004 [00810033 00200c04 81540040 0000800a] store.denorm.u32  mem.x___, t0.xxxx, u0.zzzz, t0.zxxx	; dontcare bits in store: 00000000000000000000000000010000

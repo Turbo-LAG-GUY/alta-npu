@@ -1,0 +1,164 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.h b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.h
+index 4e7d858e983..2ad9d0e6dcd 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.h
+@@ -36,6 +36,7 @@ struct etna_compile {
+    nir_shader *nir;
+    nir_function_impl *impl;
+ #define is_fs(c) ((c)->nir->info.stage == MESA_SHADER_FRAGMENT)
++#define is_vs(c) ((c)->nir->info.stage == MESA_SHADER_VERTEX)
+    const struct etna_specs *specs;
+    struct etna_shader_variant *variant;
+ 
+@@ -55,12 +56,14 @@ struct etna_compile {
+    unsigned *live_map;
+    unsigned num_nodes;
+ 
++   nir_ssa_def *shared_slot;
++
+    /* There was an error during compilation */
+    bool error;
+ };
+ 
+ #define compile_error(ctx, args...) ({ \
+-   printf(args); \
++   fprintf(stderr, args); \
+    ctx->error = true; \
+    assert(0); \
+ })
+@@ -129,6 +132,32 @@ real_dest(nir_dest *dest, unsigned *swiz, unsigned *mask)
+    bool can_bypass_src = !list_length(&dest->ssa.if_uses);
+    nir_instr *p_instr = dest->ssa.parent_instr;
+ 
++   if (p_instr->type == nir_instr_type_intrinsic) {
++      nir_intrinsic_instr *intr = nir_instr_as_intrinsic(p_instr);
++      /* We are going to shove the result into a dest reg regardless of whether it is used or not */
++      if (intr->intrinsic == nir_intrinsic_global_atomic_add ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_add ||
++          intr->intrinsic == nir_intrinsic_global_atomic_and ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_and ||
++          intr->intrinsic == nir_intrinsic_global_atomic_or ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_or ||
++          intr->intrinsic == nir_intrinsic_global_atomic_xor ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_xor ||
++          intr->intrinsic == nir_intrinsic_global_atomic_exchange ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_exchange ||
++          intr->intrinsic == nir_intrinsic_global_atomic_comp_swap ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_comp_swap ||
++          intr->intrinsic == nir_intrinsic_global_atomic_imax ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_imax ||
++          intr->intrinsic == nir_intrinsic_global_atomic_imin ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_imin ||
++          intr->intrinsic == nir_intrinsic_global_atomic_umax ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_umax ||
++          intr->intrinsic == nir_intrinsic_global_atomic_umin ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_umin)
++         can_bypass_src = false;
++   }
++
+    /* if used by a vecN, the "real" destination becomes the vecN destination
+     * lower_alu guarantees that values used by a vecN are only used by that vecN
+     * we can apply the same logic to movs in a some cases too
+@@ -216,7 +245,33 @@ dest_for_instr(nir_instr *instr)
+           intr->intrinsic == nir_intrinsic_load_ubo ||
+           intr->intrinsic == nir_intrinsic_load_input ||
+           intr->intrinsic == nir_intrinsic_load_instance_id ||
+-          intr->intrinsic == nir_intrinsic_load_texture_rect_scaling)
++          intr->intrinsic == nir_intrinsic_load_texture_rect_scaling ||
++          intr->intrinsic == nir_intrinsic_load_global_ir3 ||
++          intr->intrinsic == nir_intrinsic_load_shared ||
++          intr->intrinsic == nir_intrinsic_load_global_invocation_id_zero_base ||
++          intr->intrinsic == nir_intrinsic_load_local_invocation_id ||
++          intr->intrinsic == nir_intrinsic_load_workgroup_id ||
++          intr->intrinsic == nir_intrinsic_image_size ||
++          intr->intrinsic == nir_intrinsic_global_atomic_add ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_add ||
++          intr->intrinsic == nir_intrinsic_global_atomic_and ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_and ||
++          intr->intrinsic == nir_intrinsic_global_atomic_or ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_or ||
++          intr->intrinsic == nir_intrinsic_global_atomic_xor ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_xor ||
++          intr->intrinsic == nir_intrinsic_global_atomic_exchange ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_exchange ||
++          intr->intrinsic == nir_intrinsic_global_atomic_comp_swap ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_comp_swap ||
++          intr->intrinsic == nir_intrinsic_global_atomic_imax ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_imax ||
++          intr->intrinsic == nir_intrinsic_global_atomic_imin ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_imin ||
++          intr->intrinsic == nir_intrinsic_global_atomic_umax ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_umax ||
++          intr->intrinsic == nir_intrinsic_global_atomic_umin ||
++          intr->intrinsic == nir_intrinsic_shared_atomic_umin)
+          dest = &intr->dest;
+    } break;
+    case nir_instr_type_deref:
+@@ -227,6 +282,44 @@ dest_for_instr(nir_instr *instr)
+    return real_dest(dest, NULL, NULL);
+ }
+ 
++static inline unsigned
++etna_type_from_nir(nir_alu_type nir_type)
++{
++   unsigned type = INST_TYPE_U32;
++
++   switch (nir_type) {
++      case nir_type_float16:
++         type = INST_TYPE_F16;
++         break;
++      case nir_type_float32:
++         type = INST_TYPE_F32;
++         break;
++      case nir_type_uint8:
++         type = INST_TYPE_U8;
++         break;
++      case nir_type_uint16:
++         type = INST_TYPE_U16;
++         break;
++      case nir_type_uint32:
++         type = INST_TYPE_U32;
++         break;
++      case nir_type_int8:
++         type = INST_TYPE_S8;
++         break;
++      case nir_type_int16:
++         type = INST_TYPE_S16;
++         break;
++      case nir_type_int32:
++         type = INST_TYPE_S32;
++         break;
++      default:
++         assert(false && "Unhandled type");
++         break;
++   }
++
++   return type;
++}
++
+ struct live_def {
+    nir_instr *instr;
+    nir_dest *dest; /* cached dest_for_instr */
+@@ -326,9 +419,12 @@ etna_ra_setup(void *mem_ctx);
+ void
+ etna_ra_assign(struct etna_compile *c, nir_shader *shader);
+ 
+-unsigned
++void
+ etna_ra_finish(struct etna_compile *c);
+ 
++unsigned
++etna_ra_get_num_temps(struct etna_compile *c);
++
+ static inline void
+ emit_inst(struct etna_compile *c, struct etna_inst *inst)
+ {
+@@ -337,7 +433,7 @@ emit_inst(struct etna_compile *c, struct etna_inst *inst)
+ 
+ void
+ etna_emit_alu(struct etna_compile *c, nir_op op, struct etna_inst_dst dst,
+-              struct etna_inst_src src[3], bool saturate);
++              struct etna_inst_src src[3], nir_alu_type type_override, bool saturate);
+ 
+ void
+ etna_emit_tex(struct etna_compile *c, nir_texop op, unsigned texid, unsigned dst_swiz,

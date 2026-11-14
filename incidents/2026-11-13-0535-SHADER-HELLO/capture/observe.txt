@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-13T05:35:03-05:00 duration=300s interval=1s
+05:35:03 up=14874.09 npu=active active_ms=14862213 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2142 temps_c=cpu:38,ddr:41
+05:35:04 up=14875.20 npu=active active_ms=14863338 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2143 temps_c=cpu:36,ddr:39
+05:35:05 up=14876.32 npu=active active_ms=14864447 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2142 temps_c=cpu:36,ddr:38
+05:35:06 up=14877.43 npu=active active_ms=14865558 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2142 temps_c=cpu:36,ddr:38
+05:35:07 up=14878.56 npu=active active_ms=14866683 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2144 temps_c=cpu:37,ddr:39
+05:35:09 up=14879.67 npu=active active_ms=14867789 npu_irqs=40975 cma_free_kb=38748 memavail_mb=2144 temps_c=cpu:39,ddr:41
+05:35:10 up=14880.76 npu=active active_ms=14868889 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2144 temps_c=cpu:37,ddr:40
+05:35:11 up=14881.92 npu=active active_ms=14870052 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2138 temps_c=cpu:37,ddr:40
+05:35:12 up=14883.04 npu=active active_ms=14871164 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2140 temps_c=cpu:37,ddr:39
+05:35:13 up=14884.14 npu=active active_ms=14872271 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2143 temps_c=cpu:36,ddr:39
+05:35:14 up=14885.26 npu=active active_ms=14873387 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2143 temps_c=cpu:37,ddr:40
+05:35:15 up=14886.37 npu=active active_ms=14874496 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2144 temps_c=cpu:37,ddr:40
+05:35:16 up=14887.50 npu=active active_ms=14875626 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2144 temps_c=cpu:37,ddr:39
+05:35:18 up=14888.63 npu=active active_ms=14876751 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2143 temps_c=cpu:37,ddr:39
+05:35:19 up=14889.75 npu=active active_ms=14877869 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2140 temps_c=cpu:37,ddr:39
+05:35:20 up=14890.86 npu=active active_ms=14878981 npu_irqs=40976 cma_free_kb=38748 memavail_mb=2140 temps_c=cpu:37,ddr:39

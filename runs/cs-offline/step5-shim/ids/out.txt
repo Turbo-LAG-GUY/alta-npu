@@ -1,0 +1,100 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: ids
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_workgroup_id
+    32x3   %1 = @load_global_invocation_id
+    32     %2 = mov %1.x
+    32x3   %3 = @load_local_invocation_id
+    32     %4 = mov %3.x
+    32x3   %5 = @load_num_workgroups
+    32     %6 = load_const (0x00000000)
+    32     %7 = @load_kernel_input (%6 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %8 = load_const (0x00000004)
+    32     %9 = @load_kernel_input (%8 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %10 = load_const (0x00000005)
+    32    %11 = ishl %2, %10 (0x5)
+    32    %12 = iadd %7, %11
+    32    %13 = mov %0.x
+    32    %14 = mov %0.y
+    32x4  %15 = vec4 %2, %4, %13, %14
+    32    %16 = mov %0.z
+    32    %17 = mov %5.x
+    32    %18 = mov %5.y
+    32    %19 = mov %5.z
+    32x4  %20 = vec4 %16, %17, %18, %19
+                @store_global (%15, %12) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+    32    %21 = load_const (0x00000010 = 16)
+    32    %22 = iadd %12, %21 (0x10)
+                @store_global (%20, %22) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: ids, shared 0 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: ids
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_workgroup_id
+    32x3   %1 = @load_global_invocation_id
+    32x3   %2 = @load_local_invocation_id
+    32x3   %3 = @load_num_workgroups
+    32     %4 = load_const (0x00000000)
+    32     %5 = @load_kernel_input (%4 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000020 = 32)
+    32     %7 = imul %1.x, %6 (0x20)
+    32     %8 = iadd %5, %7
+    32x4   %9 = vec4 %1.x, %2.x, %0.x, %0.y
+    32x4  %10 = vec4 %0.z, %3.x, %3.y, %3.z
+                @store_global (%9, %8) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+    32    %11 = load_const (0x00000010 = 16)
+    32    %12 = iadd %8, %11 (0x10)
+                @store_global (%10, %12) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 00001800 40000040 00000002] imullo0.s32.pack  t0.___w, t1.xxxx, u0.xxxx, void
+001 [04001001 15400800 40000010 003fc008] add.s32.pack      t0.___w, u0.yyyy, void, t0.wwww
+002 [00811009 00000000 00000000 00000018] mov.pack          t1.x___, void, void, t1.xxxx
+003 [01011009 00000000 00000000 00000028] mov.pack          t1._y__, void, void, t2.xxxx
+004 [06011009 00000000 00000000 00100008] mov.pack          t1.__zw, void, void, t0.xxxy
+005 [00821009 00000000 00000000 002a8008] mov.pack          t2.x___, void, void, t0.zzzz
+006 [07021009 00000000 00000000 20240018] mov.pack          t2._yzw, void, void, u1.xxyz
+007 [07830033 3fe00c04 81540040 0039001a] store.denorm.u32  mem, t0.wwww, u0.zzzz, t1.xyzw	; dontcare bits in store: 00000000000000000000000000030000
+008 [00801001 3fc00800 40000000 203fc008] add.s32.pack      t0.x___, t0.wwww, void, u0.wwww
+009 [07830033 00200c04 81540040 0039002a] store.denorm.u32  mem, t0.xxxx, u0.zzzz, t2.xyzw	; dontcare bits in store: 00000000000000000000000000030000
+num loops: 0
+num temps: 3
+immediates:
+ [0].x = 0.000000 (0x00000020) (1)
+ [0].y = 0.000000 (0x04000000) (12)
+ [0].z = 0.000000 (0x00000000) (1)
+ [0].w = 0.000000 (0x00000010) (1)
+ [1].x = 0.000000 (0x00000000) (13)
+ [1].y = 0.000000 (0x00000001) (13)
+ [1].z = 0.000000 (0x00000002) (13)
+ [1].w = 0.000000 (0x00000000) (0)
+workitem inputs: load_workgroup_id load_global_invocation_id load_local_invocation_id
+barriers: no
+GPU addresses: out 0xffff9000 in 0xffff7000 (8192 bytes each)
+out[0..3]: 0xdeadbeef 0xdeadbeef 0xdeadbeef 0xdeadbeef
+{"result": "OFFLINE", "kernel": "ids", "threads": 256, "workgroup": 64, "mismatches": 2048, "untouched": 2048, "first_mismatch": 0, "got": 3735928559, "want": 0, "launch_to_done_ms": 1.428, "median_ms": 1.428, "launches": 1}

@@ -1,0 +1,274 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_emit.c b/src/gallium/drivers/etnaviv/etnaviv_emit.c
+index ddf1397c22e..eb9229b5668 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_emit.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_emit.c
+@@ -210,6 +210,237 @@ emit_pre_halti5_state(struct etna_context *ctx)
+    etna_coalesce_end(stream, &coalesce);
+ }
+ 
++static unsigned
++etna_work_item_func_get_value_order(struct etna_shader_variant *variant)
++{
++   switch(variant->workitem_funcs[0]) {
++   case nir_intrinsic_load_global_invocation_id_zero_base: {
++      switch(variant->workitem_funcs[1]) {
++      case 0:
++      case nir_intrinsic_load_local_invocation_id:
++         return 0x3;
++      case nir_intrinsic_load_workgroup_id:
++         return 0x2;
++      default:
++         unreachable("An invalid op was passed?");
++      }
++   }
++   case nir_intrinsic_load_local_invocation_id: {
++      switch(variant->workitem_funcs[1]) {
++      case 0:
++      case nir_intrinsic_load_global_invocation_id_zero_base:
++         return 0x5;
++      case nir_intrinsic_load_workgroup_id:
++         return 0x0;
++      default:
++         unreachable("An invalid op was passed?");
++      }
++   }
++   case nir_intrinsic_load_workgroup_id: {
++      switch(variant->workitem_funcs[1]) {
++      case 0:
++      case nir_intrinsic_load_global_invocation_id_zero_base:
++         return 0x4;
++      case nir_intrinsic_load_local_invocation_id:
++         return 0x1;
++      default:
++         unreachable("An invalid op was passed?");
++      }
++   }
++   case 0:
++      return 0x0;
++   default:
++      unreachable("An invalid op was passed?");
++   }
++}
++
++void
++etna_emit_compute_state(struct etna_context *ctx, const struct pipe_grid_info *grid)
++{
++   struct etna_cmd_stream *stream = ctx->stream;
++   struct etna_shader *shader = ctx->shader.compute->shader;
++   unsigned shared_memory = shader->static_shared_mem + grid->variable_shared_mem;
++   unsigned num_groups = grid->grid[0];
++   unsigned num_workitems = grid->grid[0] * grid->block[0];
++   unsigned workgroup_size = grid->block[0];
++   static unsigned shader_idx = 0;
++
++   fprintf(stderr, "*** etna_emit_compute_state\n");
++
++   if (DBG_ENABLED(ETNA_DBG_DUMP_SHADERS)) {
++      char buffer[255];
++
++      snprintf(buffer, sizeof(buffer), "mesa-shader-%08u.bin", shader_idx++);
++      fprintf(stderr, "Dumping shader to %s\n", buffer);
++      FILE *f = fopen(buffer, "wb");
++      assert(f);
++      fwrite(etna_bo_map(ctx->shader.compute->bo), 4, ctx->shader.compute->code_size, f);
++      if( ferror(f) ) {
++         fprintf(stderr, "Error in writing to file: %s\n", strerror(errno));
++      }
++      fflush(f);
++      fclose(f);
++   }
++
++   if (grid->work_dim >= 2) {
++      num_groups *= grid->grid[1];
++      num_workitems *= grid->grid[1] * grid->block[1];
++      workgroup_size *= grid->block[1];
++   }
++
++   if (grid->work_dim >= 3) {
++      num_groups *= grid->grid[2];
++      num_workitems *= grid->grid[2] * grid->block[2];
++      workgroup_size *= grid->block[2];
++   }
++
++   if (shared_memory > 0) {
++      shader->shared_bo = etna_bo_new(ctx->screen->dev,
++                                      shared_memory * num_groups,
++                                      DRM_ETNA_GEM_CACHE_WC);
++
++      if (DBG_ENABLED(ETNA_DBG_ZERO)) {
++         void *map = etna_bo_map(shader->shared_bo);
++         etna_bo_cpu_prep(shader->shared_bo, DRM_ETNA_PREP_WRITE);
++         memset(map, 0, shared_memory * num_groups);
++         etna_bo_cpu_fini(shader->shared_bo);
++      }
++
++      etna_cmd_stream_ref_bo(stream, shader->shared_bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++   }
++
++   if (shader->nir->scratch_size) {
++      shader->scratch_bo = etna_bo_new(ctx->screen->dev,
++                                       shader->nir->scratch_size * num_workitems,
++                                       DRM_ETNA_GEM_CACHE_WC);
++
++      if (DBG_ENABLED(ETNA_DBG_ZERO)) {
++         void *map = etna_bo_map(shader->scratch_bo);
++         etna_bo_cpu_prep(shader->scratch_bo, DRM_ETNA_PREP_WRITE);
++         memset(map, 0, shader->nir->scratch_size * num_workitems);
++         etna_bo_cpu_fini(shader->scratch_bo);
++      }
++
++      etna_cmd_stream_ref_bo(stream, shader->scratch_bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++
++      shader->thread_counter_bo = etna_bo_new(ctx->screen->dev,
++                                              sizeof(uint32_t),
++                                              DRM_ETNA_GEM_CACHE_WC);
++
++      void *map = etna_bo_map(shader->thread_counter_bo);
++      etna_bo_cpu_prep(shader->thread_counter_bo, DRM_ETNA_PREP_WRITE);
++      memset(map, 0, sizeof(uint32_t));
++      etna_bo_cpu_fini(shader->thread_counter_bo);
++
++      etna_cmd_stream_ref_bo(stream, shader->thread_counter_bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++   }
++
++   etna_stall(stream, SYNC_RECIPIENT_FE, SYNC_RECIPIENT_PE);
++
++   etna_uniforms_write(ctx, ctx->shader.compute, ctx->constant_buffer[PIPE_SHADER_COMPUTE].cb, grid);
++
++   /* For any input buffers, we need to tell the kernel we will be reading and/or writing from them */
++   u_foreach_bit (i, ctx->global_bindings.enabled_mask) {
++      struct pipe_resource *prsc = ctx->global_bindings.buf[i];
++      etna_cmd_stream_ref_bo(stream, etna_resource(prsc)->bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++   }
++
++   etna_set_state(stream, VIVS_PA_VARYING_NUM_COMPONENTS(0), 0x0);
++   etna_set_state(stream, VIVS_PS_VARYING_NUM_COMPONENTS(0), 0x0);
++
++   etna_set_state(stream, 0x0109C, 0x0);
++
++   etna_set_state(stream, VIVS_PS_SAMPLER_BASE, 0x0);
++   etna_set_state(stream, VIVS_PS_UNIFORM_BASE, 0x0);
++
++   etna_set_state(stream, VIVS_PS_NEWRANGE_LOW, 0x0);
++   etna_set_state(stream, VIVS_PS_NEWRANGE_HIGH, ctx->shader.compute->code_size / 4);
++   assert(ctx->shader.compute->bo);
++
++   etna_set_state_reloc(stream, VIVS_PS_INST_ADDR, &(struct etna_reloc) {
++      .bo = ctx->shader.compute->bo,
++      .flags = ETNA_RELOC_READ,
++      .offset = 0x0,
++   });
++   etna_set_state(stream, VIVS_SH_CONFIG, VIVS_SH_CONFIG_RTNE_ROUNDING);
++   etna_set_state(stream, VIVS_VS_ICACHE_CONTROL, VIVS_VS_ICACHE_CONTROL_ENABLE);
++   etna_set_state(stream, VIVS_PS_ICACHE_COUNT, ctx->shader.compute->code_size / 4 - 1);
++
++   etna_emit_load_state(stream, VIVS_PS_INPUT_COUNT >> 2, 3, 0);
++   etna_cmd_stream_emit(stream, ctx->shader_state.PS_INPUT_COUNT);
++   etna_cmd_stream_emit(stream, ctx->shader_state.PS_TEMP_REGISTER_CONTROL);
++   etna_cmd_stream_emit(stream, VIVS_PS_CONTROL_RT_COUNT(7) | 0x00000800);
++
++   etna_set_state(stream, VIVS_VS_HALTI5_UNK008A0, 0x0);
++   etna_set_state(stream, VIVS_PA_ATTRIBUTE_ELEMENT_COUNT, ctx->shader_state.PA_ATTRIBUTE_ELEMENT_COUNT);
++   etna_set_state(stream, VIVS_GL_VARYING_TOTAL_COMPONENTS, 0x0);
++   etna_set_state(stream, VIVS_PS_CONTROL_EXT, 0x0);
++   etna_set_state(stream, VIVS_VS_LOAD_BALANCING, 0x0f3f0000);
++   etna_set_state(stream, VIVS_VS_OUTPUT_COUNT, 0x1);
++   etna_set_state(stream, VIVS_PA_VS_OUTPUT_COUNT, 0x0);
++   etna_set_state(stream, VIVS_GL_HALTI5_SH_SPECIALS, VIVS_GL_HALTI5_SH_SPECIALS_UNK16(0x7f));
++   etna_set_state(stream, VIVS_PS_ICACHE_PREFETCH, 0x0);
++   etna_set_state(stream, VIVS_GL_SHADER_INDEX, 0x0);
++   unsigned value_order = etna_work_item_func_get_value_order(ctx->shader.compute);
++   etna_set_state(stream, VIVS_CL_CONFIG, VIVS_CL_CONFIG_DIMENSIONS(grid->work_dim) |
++                                          VIVS_CL_CONFIG_VALUE_ORDER(value_order));
++
++   switch(workgroup_size) {
++   case 1:
++      etna_set_state(stream, VIVS_CL_UNK00924, 0x300000);
++      break;
++   case 2:
++      etna_set_state(stream, VIVS_CL_UNK00924, 0x100000);
++      break;
++   default:
++      etna_set_state(stream, VIVS_CL_UNK00924, 0x0);
++      break;
++   }
++
++   unsigned thread_allocation;
++   if (ctx->shader.compute->has_barriers) {
++      unsigned num_shader_cores = 1; /* TODO: Get this from a kernel feature */
++      thread_allocation = ALIGN_NPOT(workgroup_size, num_shader_cores * 4) / (num_shader_cores * 4);
++   } else
++      thread_allocation = 0x1;
++
++   if(thread_allocation > 0x4)
++      fprintf(stderr, "WARNING: thread_allocation %d not supported by kernel.\n", thread_allocation);
++
++   etna_set_state(stream, VIVS_CL_THREAD_ALLOCATION, thread_allocation);
++
++   etna_set_state(stream, VIVS_CL_GLOBAL_WORK_OFFSET_X, grid->grid_base[0]);
++   etna_set_state(stream, VIVS_CL_GLOBAL_WORK_OFFSET_Y, grid->grid_base[1]);
++   etna_set_state(stream, VIVS_CL_GLOBAL_WORK_OFFSET_Z, grid->grid_base[2]);
++   etna_set_state(stream, VIVS_CL_HALTI5_UNK00958, 0x1);
++   etna_set_state(stream, VIVS_CL_HALTI5_UNK0095C, 0x1);
++   etna_set_state(stream, VIVS_CL_HALTI5_UNK00960, 0x1);
++
++   etna_emit_load_state(stream, VIVS_CL_WORKGROUP_COUNT_X >> 2, 6, 0);
++
++   etna_cmd_stream_emit(stream, grid->grid[0] - 1);
++   etna_cmd_stream_emit(stream, grid->work_dim >= 2 ? grid->grid[1] - 1 : -1);
++   etna_cmd_stream_emit(stream, grid->work_dim >= 3 ? grid->grid[2] - 1 : -1);
++
++   /* TODO: Update the xml and headers. Only the low 10 bits are set for this. */
++   etna_cmd_stream_emit(stream, (grid->block[0] - 1) & 0x3ff);
++   etna_cmd_stream_emit(stream, (grid->work_dim >= 2 ? grid->block[1] - 1 : -1) & 0x3ff);
++   etna_cmd_stream_emit(stream, (grid->work_dim >= 3 ? grid->block[2] - 1 : -1) & 0x3ff);
++
++   etna_cmd_stream_emit(stream, VIV_FE_NOP_HEADER_OP_NOP);
++
++   etna_set_state(stream, VIVS_CL_KICKER, 0xbadabeeb);
++
++   etna_set_state(stream, VIVS_GL_FLUSH_CACHE, VIVS_GL_FLUSH_CACHE_TEXTURE | VIVS_GL_FLUSH_CACHE_SHADER_L1);
++
++   etna_stall(stream, SYNC_RECIPIENT_FE, SYNC_RECIPIENT_PE);
++
++   etna_cmd_stream_emit(stream, 0x0);
++   etna_cmd_stream_emit(stream, 0x0);
++
++   ctx->dirty = 0;
++}
++
+ /* Weave state before draw operation. This function merges all the compiled
+  * state blocks under the context into one device register state. Parts of
+  * this state that are changed since last call (dirty) will be uploaded as
+@@ -641,12 +872,12 @@ etna_emit_state(struct etna_context *ctx)
+       if (do_uniform_flush)
+          etna_set_state(stream, VIVS_VS_UNIFORM_CACHE, VIVS_VS_UNIFORM_CACHE_FLUSH);
+ 
+-      etna_uniforms_write(ctx, ctx->shader.vs, ctx->constant_buffer[PIPE_SHADER_VERTEX].cb);
++      etna_uniforms_write(ctx, ctx->shader.vs, ctx->constant_buffer[PIPE_SHADER_VERTEX].cb, NULL);
+ 
+       if (do_uniform_flush)
+          etna_set_state(stream, VIVS_VS_UNIFORM_CACHE, VIVS_VS_UNIFORM_CACHE_FLUSH | VIVS_VS_UNIFORM_CACHE_PS);
+ 
+-      etna_uniforms_write(ctx, ctx->shader.fs, ctx->constant_buffer[PIPE_SHADER_FRAGMENT].cb);
++      etna_uniforms_write(ctx, ctx->shader.fs, ctx->constant_buffer[PIPE_SHADER_FRAGMENT].cb, NULL);
+ 
+       if (screen->specs.halti >= 5) {
+          /* HALTI5 needs to be prompted to pre-fetch shaders */
+@@ -660,14 +891,14 @@ etna_emit_state(struct etna_context *ctx)
+          etna_set_state(stream, VIVS_VS_UNIFORM_CACHE, VIVS_VS_UNIFORM_CACHE_FLUSH);
+ 
+       if (dirty & (uniform_dirty_bits | ctx->shader.vs->uniforms_dirty_bits))
+-         etna_uniforms_write(ctx, ctx->shader.vs, ctx->constant_buffer[PIPE_SHADER_VERTEX].cb);
++         etna_uniforms_write(ctx, ctx->shader.vs, ctx->constant_buffer[PIPE_SHADER_VERTEX].cb, NULL);
+ 
+       /* ideally this cache would only be flushed if there are PS uniform changes */
+       if (do_uniform_flush)
+          etna_set_state(stream, VIVS_VS_UNIFORM_CACHE, VIVS_VS_UNIFORM_CACHE_FLUSH | VIVS_VS_UNIFORM_CACHE_PS);
+ 
+       if (dirty & (uniform_dirty_bits | ctx->shader.fs->uniforms_dirty_bits))
+-         etna_uniforms_write(ctx, ctx->shader.fs, ctx->constant_buffer[PIPE_SHADER_FRAGMENT].cb);
++         etna_uniforms_write(ctx, ctx->shader.fs, ctx->constant_buffer[PIPE_SHADER_FRAGMENT].cb, NULL);
+    }
+ /**** End of state update ****/
+ #undef EMIT_STATE

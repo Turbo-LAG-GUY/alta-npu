@@ -1,0 +1,22 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+kernel: fops, 24 instructions, num_temps 4 (driver programs 5), uniforms 16, shared 0 bytes per workgroup, barriers no
+  input t0: load_global_invocation_id
+  input t1: -
+  input t2: -
+  u0.x: constant    0x00000004
+  u0.y: constant    0x00000020
+  u0.z: kernel_arg  offset 4 size 4
+  u0.w: constant    0x00000000
+  u1.x: constant    0x000000ff
+  u1.y: constant    0x3d000000
+  u1.z: constant    0x3f400000
+  u1.w: constant    0x3e99999a
+  u2.x: constant    0xc0800000
+  u2.y: constant    0x3f000000
+  u2.z: constant    0x3f800000
+  u2.w: constant    0x40400000
+  u3.x: constant    0x3fb8aa3b
+  u3.y: constant    0x3e800000
+  u3.z: kernel_arg  offset 0 size 4
+  u3.w: constant    0x00000010
+wrote /home/jordan/alta-npu/runs/cs-offline/step6/fops.bin

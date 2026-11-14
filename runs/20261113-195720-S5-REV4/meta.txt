@@ -1,0 +1,11 @@
+label: S5-REV4
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel reverse -n 256 -w 4 --out /home/jordan/alta-npu/runs/cs5-195609/REV4
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T19:57:20-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1270
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8a20;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=be9e54fd1;t=66031fb39f65d;x=ddb85aad5b1e22c3
+ETNA_MESA_DEBUG=shaderdb,dump_shaders
+end: 2026-11-13T19:57:21-05:00  rc: 0  wall_s: 1

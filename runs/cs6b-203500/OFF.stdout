@@ -1,0 +1,27 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 175.4,
+ "invoke_ms": [
+  114.82,
+  96.69,
+  115.82,
+  106.35,
+  95.27,
+  97.74,
+  108.05,
+  104.21,
+  102.5,
+  99.78
+ ],
+ "invoke_ms_median": 103.35,
+ "invoke_ms_median_after_first": 102.5,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 1,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "match": true
+}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-203507-S6B-OFF

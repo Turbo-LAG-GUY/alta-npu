@@ -1,0 +1,48 @@
+[58978.082886] pid=479908 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap model=/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_960x28.tflite | npu=active irqs=369
+[58978.100554] pid=479908 load_delegate: begin | npu=active irqs=369
+[58978.134308] pid=479908 load_delegate: done | npu=active irqs=369
+[58978.137706] pid=479908 Interpreter(): begin | npu=active irqs=369
+[58978.148873] pid=479908 Interpreter(): done | npu=active irqs=369
+[58978.152342] pid=479908 allocate_tensors: begin | npu=active irqs=369
+[58978.156147] pid=479908 allocate_tensors: done (18.4 ms) | npu=active irqs=369
+[58978.161601] pid=479908 frame 1/20: begin (25 strips) | npu=active irqs=369
+[58978.214682] pid=479908 frame 1/20: done (44.04 ms, invokes 37.45 ms) | npu=active irqs=395
+[58978.229712] pid=479908 frame 2/20: begin (25 strips) | npu=active irqs=395
+[58978.274689] pid=479908 frame 2/20: done (41.69 ms, invokes 37.87 ms) | npu=active irqs=420
+[58978.283912] pid=479908 frame 3/20: begin (25 strips) | npu=active irqs=420
+[58978.336377] pid=479908 frame 3/20: done (42.70 ms, invokes 39.30 ms) | npu=active irqs=445
+[58978.345528] pid=479908 frame 4/20: begin (25 strips) | npu=active irqs=445
+[58978.395987] pid=479908 frame 4/20: done (41.15 ms, invokes 37.85 ms) | npu=active irqs=470
+[58978.409718] pid=479908 frame 5/20: begin (25 strips) | npu=active irqs=470
+[58978.462386] pid=479908 frame 5/20: done (46.66 ms, invokes 41.40 ms) | npu=active irqs=495
+[58978.475052] pid=479908 frame 6/20: begin (25 strips) | npu=active irqs=495
+[58978.534027] pid=479908 frame 6/20: done (42.35 ms, invokes 38.73 ms) | npu=active irqs=520
+[58978.539606] pid=479908 frame 7/20: begin (25 strips) | npu=active irqs=520
+[58978.584447] pid=479908 frame 7/20: done (38.19 ms, invokes 35.09 ms) | npu=active irqs=545
+[58978.604185] pid=479908 frame 8/20: begin (25 strips) | npu=active irqs=545
+[58978.659980] pid=479908 frame 8/20: done (47.54 ms, invokes 41.87 ms) | npu=active irqs=570
+[58978.674921] pid=479908 frame 9/20: begin (25 strips) | npu=active irqs=570
+[58978.722457] pid=479908 frame 9/20: done (43.32 ms, invokes 39.04 ms) | npu=active irqs=595
+[58978.725992] pid=479908 frame 10/20: begin (25 strips) | npu=active irqs=595
+[58978.784888] pid=479908 frame 10/20: done (55.30 ms, invokes 48.12 ms) | npu=active irqs=620
+[58978.803033] pid=479908 frame 11/20: begin (25 strips) | npu=active irqs=620
+[58978.872772] pid=479908 frame 11/20: done (50.42 ms, invokes 44.57 ms) | npu=active irqs=645
+[58978.877646] pid=479908 frame 12/20: begin (25 strips) | npu=active irqs=645
+[58978.948396] pid=479908 frame 12/20: done (59.32 ms, invokes 52.83 ms) | npu=active irqs=670
+[58978.963008] pid=479908 frame 13/20: begin (25 strips) | npu=active irqs=670
+[58979.039271] pid=479908 frame 13/20: done (62.35 ms, invokes 54.53 ms) | npu=active irqs=695
+[58979.047399] pid=479908 frame 14/20: begin (25 strips) | npu=active irqs=695
+[58979.091460] pid=479908 frame 14/20: done (40.61 ms, invokes 37.27 ms) | npu=active irqs=720
+[58979.104816] pid=479908 frame 15/20: begin (25 strips) | npu=active irqs=720
+[58979.165001] pid=479908 frame 15/20: done (52.90 ms, invokes 47.74 ms) | npu=active irqs=745
+[58979.172740] pid=479908 frame 16/20: begin (25 strips) | npu=active irqs=745
+[58979.227950] pid=479908 frame 16/20: done (49.47 ms, invokes 43.61 ms) | npu=active irqs=770
+[58979.243977] pid=479908 frame 17/20: begin (25 strips) | npu=active irqs=770
+[58979.299747] pid=479908 frame 17/20: done (49.89 ms, invokes 43.90 ms) | npu=active irqs=795
+[58979.320341] pid=479908 frame 18/20: begin (25 strips) | npu=active irqs=795
+[58979.371230] pid=479908 frame 18/20: done (41.23 ms, invokes 37.63 ms) | npu=active irqs=820
+[58979.389732] pid=479908 frame 19/20: begin (25 strips) | npu=active irqs=820
+[58979.454144] pid=479908 frame 19/20: done (54.71 ms, invokes 47.76 ms) | npu=active irqs=845
+[58979.457640] pid=479908 frame 20/20: begin (25 strips) | npu=active irqs=845
+[58979.517848] pid=479908 frame 20/20: done (43.22 ms, invokes 38.98 ms) | npu=active irqs=870
+[58979.568455] pid=479908 finished | npu=active irqs=870

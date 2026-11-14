@@ -1,0 +1,46 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+kernel: softmax, 336 instructions, num_temps 16 (driver programs 17), uniforms 40, shared 512 bytes per workgroup, barriers yes
+  input t0: load_workgroup_id
+  input t1: load_local_invocation_id
+  input t2: -
+  u0.x: group_count 0x00000000
+  u0.y: group_count 0x00000001
+  u0.z: group_count 0x00000002
+  u0.w: constant    0x00000200
+  u1.x: shared_addr 0x00000000
+  u1.y: constant    0x000003e9
+  u1.z: kernel_arg  offset 4 size 4
+  u1.w: kernel_arg  offset 0 size 4
+  u2.x: constant    0x000000fa
+  u2.y: constant    0x00000004
+  u2.z: constant    0x00000000
+  u2.w: constant    0x000000ff
+  u3.x: constant    0x000000fb
+  u3.y: constant    0x00000020
+  u3.z: constant    0x00000010
+  u3.w: constant    0x00000008
+  u4.x: constant    0x00000008
+  u4.y: constant    0x00000010
+  u4.z: constant    0x00000018
+  u4.w: constant    0x00000003
+  u5.x: constant    0x00000001
+  u5.y: constant    0x00000002
+  u5.z: constant    0x00000003
+  u5.w: constant    0x00000004
+  u6.x: constant    0x00000040
+  u6.y: constant    0x00000080
+  u6.z: constant    0x000000c0
+  u6.w: constant    0x3e7561b4
+  u7.x: constant    0x00000080
+  u7.y: constant    0x00000040
+  u7.z: constant    0x00000020
+  u7.w: constant    0x00000010
+  u8.x: constant    0x00000008
+  u8.y: constant    0x00000004
+  u8.z: constant    0x43800000
+  u8.w: constant    0x3f000000
+  u9.x: constant    0x437f0000
+  u9.y: constant    0x00000100
+  u9.z: constant    0x00010000
+  u9.w: constant    0x01000000
+wrote /home/jordan/alta-npu/runs/cs-offline/step6/softmax1001.bin

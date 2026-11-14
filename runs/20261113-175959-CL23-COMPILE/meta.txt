@@ -1,0 +1,11 @@
+label: CL23-COMPILE
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cl2023_copy --compile-only --out /home/jordan/alta-npu/runs/cl2023-175948/COMPILE
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T17:59:59-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2105
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8066;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=a51b39192;t=660306308381d;x=5ea3df4419d8137e
+ETNA_MESA_DEBUG=shaderdb,dump_shaders
+end: 2026-11-13T18:00:02-05:00  rc: 134  wall_s: 3

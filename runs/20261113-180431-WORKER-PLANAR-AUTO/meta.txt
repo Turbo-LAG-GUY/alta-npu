@@ -1,0 +1,11 @@
+label: WORKER-PLANAR-AUTO
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/worker_planar_check.py /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_960x540.tflite /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite auto /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so 50
+cwd: /home/jordan/Documents/AI_Projects/npu-upscale
+start: 2026-11-13T18:04:31-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2081
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f80fc;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=a60b4689b;t=6603072090f25;x=3605b2378d25b7ab
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-13T18:04:35-05:00  rc: 1  wall_s: 4

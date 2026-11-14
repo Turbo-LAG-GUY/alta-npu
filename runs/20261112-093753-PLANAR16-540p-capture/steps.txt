@@ -1,0 +1,49 @@
+[59420.123731] pid=485062 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap model=/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite | npu=active irqs=912
+[59420.139651] pid=485062 load_delegate: begin | npu=active irqs=912
+[59420.174880] pid=485062 load_delegate: done | npu=active irqs=912
+[59420.189499] pid=485062 Interpreter(): begin | npu=active irqs=912
+[59420.244284] pid=485062 Interpreter(): done | npu=active irqs=912
+[59420.259947] pid=485062 allocate_tensors: begin | npu=active irqs=912
+[59420.270017] pid=485062 allocate_tensors: done (80.5 ms) | npu=active irqs=912
+[59420.279629] pid=485062 input set | npu=active irqs=912
+[59420.287871] pid=485062 invoke 1/20: begin | npu=active irqs=912
+[59420.321132] pid=485062 invoke 1/20: done (28.84 ms) | npu=active irqs=914
+[59420.329324] pid=485062 invoke 2/20: begin | npu=active irqs=914
+[59420.357805] pid=485062 invoke 2/20: done (23.10 ms) | npu=active irqs=915
+[59420.367930] pid=485062 invoke 3/20: begin | npu=active irqs=915
+[59420.393780] pid=485062 invoke 3/20: done (22.53 ms) | npu=active irqs=916
+[59420.404096] pid=485062 invoke 4/20: begin | npu=active irqs=916
+[59420.450843] pid=485062 invoke 4/20: done (36.71 ms) | npu=active irqs=917
+[59420.467385] pid=485062 invoke 5/20: begin | npu=active irqs=917
+[59420.510506] pid=485062 invoke 5/20: done (34.03 ms) | npu=active irqs=918
+[59420.522538] pid=485062 invoke 6/20: begin | npu=active irqs=918
+[59420.563343] pid=485062 invoke 6/20: done (31.97 ms) | npu=active irqs=919
+[59420.573734] pid=485062 invoke 7/20: begin | npu=active irqs=919
+[59420.624160] pid=485062 invoke 7/20: done (35.55 ms) | npu=active irqs=920
+[59420.642632] pid=485062 invoke 8/20: begin | npu=active irqs=920
+[59420.684033] pid=485062 invoke 8/20: done (35.36 ms) | npu=active irqs=921
+[59420.689244] pid=485062 invoke 9/20: begin | npu=active irqs=921
+[59420.719817] pid=485062 invoke 9/20: done (26.12 ms) | npu=active irqs=922
+[59420.724051] pid=485062 invoke 10/20: begin | npu=active irqs=922
+[59420.753877] pid=485062 invoke 10/20: done (24.23 ms) | npu=active irqs=923
+[59420.767776] pid=485062 invoke 11/20: begin | npu=active irqs=923
+[59420.800764] pid=485062 invoke 11/20: done (25.48 ms) | npu=active irqs=924
+[59420.804265] pid=485062 invoke 12/20: begin | npu=active irqs=924
+[59420.843918] pid=485062 invoke 12/20: done (29.98 ms) | npu=active irqs=925
+[59420.853483] pid=485062 invoke 13/20: begin | npu=active irqs=925
+[59420.889216] pid=485062 invoke 13/20: done (26.37 ms) | npu=active irqs=926
+[59420.896349] pid=485062 invoke 14/20: begin | npu=active irqs=926
+[59420.925725] pid=485062 invoke 14/20: done (25.79 ms) | npu=active irqs=927
+[59420.933288] pid=485062 invoke 15/20: begin | npu=active irqs=927
+[59420.965063] pid=485062 invoke 15/20: done (28.13 ms) | npu=active irqs=928
+[59420.973065] pid=485062 invoke 16/20: begin | npu=active irqs=928
+[59421.006103] pid=485062 invoke 16/20: done (26.95 ms) | npu=active irqs=929
+[59421.018926] pid=485062 invoke 17/20: begin | npu=active irqs=929
+[59421.073536] pid=485062 invoke 17/20: done (29.69 ms) | npu=active irqs=930
+[59421.085186] pid=485062 invoke 18/20: begin | npu=active irqs=930
+[59421.125002] pid=485062 invoke 18/20: done (28.13 ms) | npu=active irqs=931
+[59421.138806] pid=485062 invoke 19/20: begin | npu=active irqs=931
+[59421.169507] pid=485062 invoke 19/20: done (21.97 ms) | npu=active irqs=932
+[59421.184285] pid=485062 invoke 20/20: begin | npu=active irqs=932
+[59421.217877] pid=485062 invoke 20/20: done (28.18 ms) | npu=active irqs=933
+[59421.274840] pid=485062 finished | npu=active irqs=933

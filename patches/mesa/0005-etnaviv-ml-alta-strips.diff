@@ -1,0 +1,391 @@
+alta: ETNA_ML_STRIPS=auto|<n> splits chains of stride-1 3x3 convolutions into strips that run one after another in
+the same submit, so each strip's in-between tensors stay in the AXI SRAM (needs 0002's ETNA_ML_AXI_SRAM).
+Row strips: tested, correct. Column strips (needed for a channels-first output): hung the NPU in their first
+test, off unless ETNA_ML_STRIPS_COLUMNS=1. Applies on top of 0002-0004.
+
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -141,6 +141,16 @@
+    unsigned pad_after_y;
+    unsigned pad_before_z;
+    unsigned pad_after_z;
++
++   /* alta: set on the convolutions that ETNA_ML_STRIPS makes (split_into_strips in etnaviv_ml.c). Rows are
++    * the TFLite height (the hardware's y), columns the TFLite width (its x). All zero otherwise, which
++    * changes nothing. */
++   bool strip;
++   bool strip_columns;             /* a strip of columns, not of rows */
++   int strip_offset;               /* hardware in_image_y_offset (rows) or _x_offset (columns): -1 pads, 0 reads real data */
++   unsigned strip_in_plane_rows;   /* rows per channel plane of the input buffer, if it isn't the input's own */
++   unsigned strip_in_row_pitch;    /* elements per row of the input buffer, if it isn't the input's own */
++   unsigned strip_out_row_pitch;   /* elements per row of the output buffer, if it isn't the output's own */
+ };
+ 
+ #define ML_DBG(fmt, ...)                                  \
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -1133,6 +1133,22 @@
+       }
+    }
+ 
++   if (operation->strip) {
++      /* alta: a strip pads only where the frame really ends; inside, it reads the real data beyond its edges,
++       * and its input may be a window into a bigger buffer (see split_into_strips). */
++      if (operation->strip_columns) {
++         map->in_image_x_offset = operation->strip_offset & 0x7;
++         map->in_image_x_offset_bit_3 = (operation->strip_offset >> 3) & 0x1;
++      } else {
++         map->in_image_y_offset = operation->strip_offset & 0x7;
++         map->in_image_y_offset_bit_3 = (operation->strip_offset >> 3) & 0x1;
++      }
++      if (operation->strip_in_plane_rows)
++         map->in_image_y_stride = operation->strip_in_plane_rows;
++      if (operation->strip_in_row_pitch)
++         map->in_image_x_stride = operation->strip_in_row_pitch;
++   }
++
+    struct pipe_resource *output = etna_ml_get_resource(subgraph, operation->output_tensors[0]);
+    offset = etna_ml_get_offset(subgraph, operation->output_tensors[0]);
+    map->out_image_address = etna_bo_gpu_va(etna_buffer_resource(output)->bo) + offset;
+@@ -1142,6 +1158,10 @@
+ 
+    map->out_image_x_stride = map->out_image_x_size;
+    map->out_image_y_stride = map->out_image_y_size;
++   /* alta: a column strip writes a window of a wider buffer. (A row window can't be written: the NN unit
++    * spaces the output planes by out_image_y_size and ignores out_image_y_stride, tested 2026-11-12.) */
++   if (operation->strip && operation->strip_out_row_pitch)
++      map->out_image_x_stride = operation->strip_out_row_pitch;
+ 
+    map->out_image_data_type = ETNA_NN_INT8;
+    map->out_image_data_type_bit_2 = ETNA_NN_INT8 >> 2;
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1126,6 +1126,320 @@
+    free(item_tensor);
+ }
+ 
++/*
++ * alta: ETNA_ML_STRIPS=auto or =<rows>, together with ETNA_ML_AXI_SRAM. Splits each chain of stride-1 3x3
++ * SAME convolutions of one size (with the transpose before it and the detranspose after it, if any) into
++ * strips of output rows. Each strip goes through the whole chain before the next one starts, so its
++ * in-between tensors are small enough for the AXI SRAM, where place_tensors_in_axi_sram then puts them,
++ * instead of every layer writing the whole frame to RAM and the next layer reading it back. Each layer
++ * computes the rows the next one needs (one more on each side per 3x3 layer, so neighbouring strips
++ * compute a few rows twice), and only the frame's real top and bottom rows are padded. Strips whose input
++ * or output is a channels-first buffer read or write a window of its planes. Everything stays in the one
++ * submit. "auto" uses the fewest strips whose in-between tensors fit, split evenly.
++ * ETNA_ML_STRIPS_VERBOSE=1 prints every strip operation.
++ */
++
++#define STRIP_MAX_CHAIN 16
++
++struct strip_link {
++   struct etna_operation *op;
++   int k;            /* rows of context it reads on each side: 1 for a 3x3 convolution, 0 for a transpose */
++   int h_in, h_out;  /* rows beyond a strip, on each side, needed at its input and at its output */
++   unsigned in_ch, out_ch;
++};
++
++static bool
++strip_conv_ok(const struct etna_operation *op, unsigned rows, unsigned width)
++{
++   return op->type == ETNA_JOB_TYPE_NN && !op->addition && !op->depthwise && !op->pointwise &&
++          !op->fully_connected && !op->pooling_first_pixel && !op->strip && op->stride == 1 &&
++          op->padding_same && op->weight_width == 3 && op->weight_height == 3 &&
++          op->input_count <= 1 && op->output_count <= 1 &&
++          op->input_width == rows && op->output_width == rows &&
++          op->input_height == width && op->output_height == width;
++}
++
++static bool
++strip_tp_ok(const struct etna_operation *op, enum etna_ml_tp_type type, unsigned rows, unsigned width)
++{
++   return op->type == ETNA_JOB_TYPE_TP && op->tp_type == type &&
++          op->input_width == rows && op->output_width == rows &&
++          op->input_height == width && op->output_height == width;
++}
++
++/* Do one strip's in-between tensors, `rows` output rows tall, all fit in the SRAM at once? */
++static bool
++strip_fits(const struct strip_link *chain, unsigned len, unsigned rows, unsigned height, unsigned width)
++{
++   struct axi_sram_item items[STRIP_MAX_CHAIN];
++
++   for (unsigned l = 0; l + 1 < len; l++) {
++      unsigned r = MIN2(rows + 2 * chain[l].h_out, height);
++      items[l] = (struct axi_sram_item){ .size = align(r * width * chain[l].out_ch, AXI_SRAM_PAGE),
++                                         .first_use = l, .last_use = l + 1 };
++   }
++   return axi_sram_assign(items, len - 1, AXI_SRAM_SIZE, UINT_MAX) == len - 1;
++}
++
++/* A new tensor for part of an existing one's buffer. */
++static unsigned
++strip_view(struct etna_ml_subgraph *subgraph, unsigned whole, unsigned offset, unsigned size)
++{
++   unsigned idx = etna_ml_allocate_tensor(subgraph);
++   struct etna_ml_tensor *view = etna_ml_get_tensor(subgraph, idx);
++   struct etna_ml_tensor *src = etna_ml_get_tensor(subgraph, whole);
++
++   pipe_resource_reference(&view->resource, src->resource);
++   view->offset = src->offset + offset;
++   view->size = size;
++   view->exp_layout = src->exp_layout;
++   view->act_layout = src->act_layout;
++   return idx;
++}
++
++/* Is the last byte a strip operation touches inside the tensor's buffer? It touches `cols` elements of `rows`
++ * rows of `channels` planes, in a buffer of `row_pitch` elements per row and `plane_rows` rows per plane. */
++static bool
++strip_in_bounds(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned row_pitch, unsigned plane_rows,
++                unsigned rows, unsigned cols, unsigned channels)
++{
++   struct etna_ml_tensor *t = etna_ml_get_tensor(subgraph, idx);
++   uint64_t span = ((uint64_t)(channels - 1) * plane_rows + (rows - 1)) * row_pitch + cols;
++
++   return t->resource && cols <= row_pitch && rows <= plane_rows && t->offset + span <= pipe_buffer_size(t->resource);
++}
++
++static void
++split_into_strips(struct etna_ml_subgraph *subgraph, struct list_head *operations)
++{
++   const char *env = getenv("ETNA_ML_STRIPS");
++   const char *sram = getenv("ETNA_ML_AXI_SRAM");
++   const char *verbose_env = getenv("ETNA_ML_STRIPS_VERBOSE");
++   bool verbose = verbose_env && atoi(verbose_env);
++
++   if (!env || !strcmp(env, "0"))
++      return;
++   if (!sram || !strcmp(sram, "0")) {
++      fprintf(stderr, "etnaviv/ml: strips: ETNA_ML_STRIPS needs ETNA_ML_AXI_SRAM, not splitting\n");
++      return;
++   }
++   if (subgraph->screen->specs.nn_core_version != 7) {
++      fprintf(stderr, "etnaviv/ml: strips: only tried on NN core version 7, not splitting\n");
++      return;
++   }
++   unsigned forced = strcmp(env, "auto") ? (unsigned)atoi(env) : 0;
++
++   unsigned n_ops = list_length(operations), n = 0;
++   struct etna_operation **ops = calloc(n_ops, sizeof(*ops));
++   list_for_each_entry(struct etna_operation, op, operations, link)
++      ops[n++] = op;
++
++   unsigned tensor_count = util_dynarray_num_elements(&subgraph->tensors, struct etna_ml_tensor *);
++   unsigned *readers = calloc(tensor_count, sizeof(*readers));
++   for (unsigned i = 0; i < n_ops; i++)
++      for (unsigned t = 0; t < MAX2(ops[i]->input_count, 1); t++)
++         readers[ops[i]->input_tensors[t]]++;
++
++   for (unsigned i = 0; i < n_ops; i++) {
++      struct etna_operation *first = ops[i];
++      bool lead_t = first->type == ETNA_JOB_TYPE_TP && first->tp_type == ETNA_ML_TP_TRANSPOSE;
++      unsigned height = first->input_width, width = first->input_height; /* TFLite H and W */
++
++      if (!lead_t && first->type != ETNA_JOB_TYPE_NN)
++         continue;
++      if (lead_t && !strip_tp_ok(first, ETNA_ML_TP_TRANSPOSE, height, width))
++         continue;
++
++      unsigned j = lead_t ? i + 1 : i;
++      while (j < n_ops && j - i < STRIP_MAX_CHAIN - 1 && strip_conv_ok(ops[j], height, width) &&
++             (j == i || (ops[j]->input_tensors[0] == ops[j - 1]->output_tensors[0] &&
++                         readers[ops[j - 1]->output_tensors[0]] == 1)))
++         j++;
++      if (j == i + (lead_t ? 1 : 0))
++         continue; /* no convolution */
++      if (j < n_ops && strip_tp_ok(ops[j], ETNA_ML_TP_DETRANSPOSE, height, width) &&
++          ops[j]->input_tensors[0] == ops[j - 1]->output_tensors[0] && readers[ops[j - 1]->output_tensors[0]] == 1)
++         j++;
++      unsigned len = j - i;
++      if (len < 2)
++         continue;
++
++      struct strip_link chain[STRIP_MAX_CHAIN];
++      for (unsigned l = 0; l < len; l++) {
++         struct etna_operation *op = ops[i + l];
++         chain[l].op = op;
++         chain[l].k = op->type == ETNA_JOB_TYPE_NN ? 1 : 0;
++         chain[l].in_ch = op->input_channels;
++         chain[l].out_ch = op->type == ETNA_JOB_TYPE_NN ? op->output_channels : op->input_channels;
++      }
++      for (int l = len - 1; l >= 0; l--) {
++         chain[l].h_out = l == (int)len - 1 ? 0 : chain[l + 1].h_in;
++         chain[l].h_in = chain[l].h_out + chain[l].k;
++      }
++
++      unsigned ext_in = chain[0].op->input_tensors[0];
++      unsigned ext_out = chain[len - 1].op->output_tensors[0];
++      bool planar_in = chain[0].op->type == ETNA_JOB_TYPE_NN;
++      bool planar_out = chain[len - 1].op->type == ETNA_JOB_TYPE_NN;
++      /* The NN unit can't write a window of rows (see create_nn_config), so a channels-first output is
++       * written by strips of columns, which then need a channels-first input as well. A transposed input
++       * or a detransposed output needs strips of rows, which are contiguous in a channels-last buffer. */
++      bool cols = planar_out;
++      const char *cols_env = getenv("ETNA_ML_STRIPS_COLUMNS");
++      if (cols && !(cols_env && atoi(cols_env))) {
++         /* Their first test hung the NPU on every invoke (incident 2026-11-12-1003-STRIPS-C64), probably because
++          * the tiling code made 64-wide tiles for 32-wide strips. */
++         fprintf(stderr, "etnaviv/ml: strips: a channels-first output needs column strips, which hung the NPU in their "
++                         "first test; not splitting (ETNA_ML_STRIPS_COLUMNS=1 tries them anyway)\n");
++         continue;
++      }
++      if (cols && !planar_in) {
++         fprintf(stderr, "etnaviv/ml: strips: a channels-first output after a transpose isn't supported, not splitting\n");
++         continue;
++      }
++      if (!etna_ml_get_resource(subgraph, ext_in) || !etna_ml_get_resource(subgraph, ext_out))
++         continue;
++      unsigned extent = cols ? width : height, other = cols ? height : width;
++
++      unsigned size = forced;
++      if (!size) {
++         if (strip_fits(chain, len, extent, extent, other))
++            continue; /* the whole frame fits already */
++         unsigned best = 0;
++         for (unsigned r = extent - 1; r >= 1 && !best; r--)
++            if (strip_fits(chain, len, r, extent, other))
++               best = r;
++         if (!best) {
++            fprintf(stderr, "etnaviv/ml: strips: not even 1-wide strips fit, not splitting\n");
++            continue;
++         }
++         size = DIV_ROUND_UP(extent, DIV_ROUND_UP(extent, best)); /* the same number of strips, made even */
++      }
++      if (size >= extent)
++         continue;
++      unsigned count = DIV_ROUND_UP(extent, size);
++
++      struct list_head strips;
++      unsigned strip_bytes = 0;
++      list_inithead(&strips);
++      for (unsigned s = 0; s < count; s++) {
++         int o0 = s * size, o1 = MIN2(extent, (s + 1) * size);
++         unsigned prev_out = 0;
++
++         for (unsigned l = 0; l < len; l++) {
++            const struct strip_link *c = &chain[l];
++            int q0 = MAX2(o0 - c->h_in, 0), q1 = MIN2(o1 + c->h_in, (int)extent);
++            int p0 = MAX2(o0 - c->h_out, 0), p1 = MIN2(o1 + c->h_out, (int)extent);
++            unsigned in_rows = cols ? height : q1 - q0, in_cols = cols ? q1 - q0 : width;
++            unsigned out_rows = cols ? height : p1 - p0, out_cols = cols ? p1 - p0 : width;
++            /* The buffer layouts, for the bounds check: elements per row and rows per plane. */
++            unsigned in_pitch = in_cols, in_plane_rows = in_rows, out_pitch = out_cols, out_plane_rows = out_rows;
++            bool in_nhwc = false, out_nhwc = false;
++            struct etna_operation *op = malloc(sizeof(*op));
++
++            memcpy(op, c->op, sizeof(*op));
++            if (c->op->weight_tensor) {
++               op->weight_tensor = malloc(c->op->weight_tensor_size);
++               memcpy(op->weight_tensor, c->op->weight_tensor, c->op->weight_tensor_size);
++            }
++            if (c->op->bias_tensor) {
++               op->bias_tensor = malloc(c->op->bias_tensor_size);
++               memcpy(op->bias_tensor, c->op->bias_tensor, c->op->bias_tensor_size);
++            }
++            op->input_width = in_rows; /* Mesa's "width" is the TFLite height */
++            op->input_height = in_cols;
++            op->output_width = out_rows;
++            op->output_height = out_cols;
++            op->input_tensor_sizes[0] = in_rows * in_cols * c->in_ch;
++            op->output_tensor_sizes[0] = out_rows * out_cols * c->out_ch;
++            op->strip_in_plane_rows = op->strip_in_row_pitch = op->strip_out_row_pitch = 0;
++
++            if (l > 0) {
++               op->input_tensors[0] = prev_out;
++            } else if (planar_in && cols) { /* columns q0..q1 of every row of every plane */
++               op->strip_in_row_pitch = in_pitch = width;
++               op->input_tensors[0] = strip_view(subgraph, ext_in, q0,
++                                                 ((c->in_ch - 1) * height + height - 1) * width + in_cols);
++            } else if (planar_in) { /* rows q0..q1 of every plane */
++               op->strip_in_plane_rows = in_plane_rows = height;
++               op->input_tensors[0] = strip_view(subgraph, ext_in, q0 * width, ((c->in_ch - 1) * height + in_rows) * width);
++            } else { /* rows q0..q1 of a channels-last buffer are contiguous */
++               in_nhwc = true;
++               op->input_tensors[0] = strip_view(subgraph, ext_in, q0 * width * c->in_ch, op->input_tensor_sizes[0]);
++            }
++
++            if (l + 1 < len) {
++               op->output_tensors[0] = etna_ml_allocate_tensor(subgraph);
++               etna_ml_create_tensor(subgraph, op->output_tensors[0], op->output_tensor_sizes[0]);
++               etna_ml_copy_layout(subgraph, op->output_tensors[0], c->op->output_tensors[0]);
++               if (s == 0)
++                  strip_bytes += align(op->output_tensor_sizes[0], AXI_SRAM_PAGE);
++            } else if (planar_out) { /* columns p0..p1 of every row of every plane; only column strips get here */
++               op->strip_out_row_pitch = out_pitch = width;
++               op->output_tensors[0] = strip_view(subgraph, ext_out, p0,
++                                                  ((c->out_ch - 1) * height + height - 1) * width + out_cols);
++            } else {
++               out_nhwc = true;
++               op->output_tensors[0] = strip_view(subgraph, ext_out, p0 * width * c->out_ch, op->output_tensor_sizes[0]);
++            }
++            prev_out = op->output_tensors[0];
++
++            if (op->type == ETNA_JOB_TYPE_NN) {
++               op->strip = true;
++               op->strip_columns = cols;
++               op->strip_offset = (p0 - c->k) - q0;
++            }
++
++            if (verbose)
++               fprintf(stderr, "etnaviv/ml: strips: strip %u op %u (%s): input %s %d..%d -> output %d..%d, offset %d, "
++                       "input plane rows %u pitch %u, output pitch %u, tensors %u (+%u) -> %u (+%u)\n",
++                       s, l, op->type == ETNA_JOB_TYPE_NN ? "conv" : (op->tp_type == ETNA_ML_TP_TRANSPOSE ? "transpose" : "detranspose"),
++                       cols ? "columns" : "rows", q0, q1, p0, p1, op->type == ETNA_JOB_TYPE_NN ? op->strip_offset : 0,
++                       op->strip_in_plane_rows, op->strip_in_row_pitch, op->strip_out_row_pitch,
++                       op->input_tensors[0], etna_ml_get_offset(subgraph, op->input_tensors[0]),
++                       op->output_tensors[0], etna_ml_get_offset(subgraph, op->output_tensors[0]));
++
++            /* A geometry mistake here would point the NPU outside a buffer: stop before anything runs. */
++            bool in_ok = in_nhwc ? strip_in_bounds(subgraph, op->input_tensors[0], in_cols * c->in_ch, in_rows, in_rows,
++                                                   in_cols * c->in_ch, 1)
++                                 : strip_in_bounds(subgraph, op->input_tensors[0], in_pitch, in_plane_rows, in_rows, in_cols, c->in_ch);
++            bool out_ok = out_nhwc ? strip_in_bounds(subgraph, op->output_tensors[0], out_cols * c->out_ch, out_rows, out_rows,
++                                                     out_cols * c->out_ch, 1)
++                                   : strip_in_bounds(subgraph, op->output_tensors[0], out_pitch, out_plane_rows, out_rows, out_cols, c->out_ch);
++            if (!in_ok || !out_ok || q1 <= q0 || p1 <= p0 ||
++                (op->type == ETNA_JOB_TYPE_NN && (op->strip_offset < -1 || op->strip_offset > 0))) {
++               fprintf(stderr, "etnaviv/ml: strips: strip %u op %u is out of bounds or has a bad offset, aborting\n", s, l);
++               abort();
++            }
++            list_addtail(&op->link, &strips);
++         }
++      }
++
++      struct list_head *before = j < n_ops ? &ops[j]->link : operations;
++      list_for_each_entry_safe(struct etna_operation, op, &strips, link) {
++         list_del(&op->link);
++         list_addtail(&op->link, before);
++      }
++      for (unsigned l = 0; l < len; l++) {
++         struct etna_operation *op = chain[l].op;
++         if (l + 1 < len)
++            etna_ml_destroy_tensor(subgraph, op->output_tensors[0]); /* the whole-frame in-between tensor */
++         list_del(&op->link);
++         free(op->weight_tensor);
++         free(op->bias_tensor);
++         free(op);
++      }
++      fprintf(stderr, "etnaviv/ml: strips: %u operations at %ux%u (WxH) in %u strips of %u %s, %u KiB of in-between "
++              "tensors per strip, input %s, output %s\n", len, width, height, count, size, cols ? "columns" : "rows",
++              strip_bytes / 1024, planar_in ? "channels-first" : "transposed per strip",
++              planar_out ? "channels-first" : "detransposed per strip");
++      i = j - 1;
++   }
++
++   free(readers);
++   free(ops);
++}
++
+ struct pipe_ml_subgraph *
+ etna_ml_subgraph_create(struct pipe_ml_device *pdevice,
+                         const struct pipe_ml_operation *poperations,
+@@ -1158,6 +1472,7 @@
+ 
+    ml_cache_trim();
+    lower_operations(subgraph, poperations, count, &operations);
++   split_into_strips(subgraph, &operations);
+    place_tensors_in_axi_sram(subgraph, &operations);
+ 
+    list_for_each_entry(struct etna_operation, operation, &operations, link) {

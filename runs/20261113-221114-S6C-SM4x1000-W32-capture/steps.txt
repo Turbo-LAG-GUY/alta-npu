@@ -1,0 +1,15 @@
+[ 1015.910422] pid=4555 open: begin
+[ 1015.921892] pid=4555 context: done
+[ 1015.932659] pid=4555 compute state: created
+[ 1015.936886] pid=4555 launch 1: begin
+[ 1015.942728] pid=4555 launch: begin
+[ 1015.947635] pid=4555 launch: begin
+[ 1015.949264] pid=4555 launch: begin
+[ 1015.951359] pid=4555 launch: begin
+[ 1015.956976] pid=4555 launch: begin
+[ 1015.963435] pid=4555 launch: begin
+[ 1015.969865] pid=4555 launch: begin
+[ 1015.975713] pid=4555 launch: begin
+[ 1015.980755] pid=4555 launch: begin
+[ 1015.987092] pid=4555 launches: done
+[ 1015.994166] pid=4555 finished

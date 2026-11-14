@@ -1,0 +1,20 @@
+[55670.548122] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55670.548195] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55671.610962] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55671.611077] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55672.170931] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55672.170991] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55672.734317] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55672.734430] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55673.290994] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55673.291125] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55673.851105] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55673.851216] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55674.410983] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55674.411099] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55674.973483] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55674.973593] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55675.530969] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55675.531040] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)
+[55676.091079] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[55676.091189] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001)

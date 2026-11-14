@@ -1,0 +1,6 @@
+[44445.574321] pid=56270 open: begin
+[44445.588176] pid=56270 context: done
+[44445.591492] pid=56270 compute state: created
+[44445.596073] pid=56270 launch: begin
+[44445.600173] pid=56270 launch: done
+[44445.602127] pid=56270 finished

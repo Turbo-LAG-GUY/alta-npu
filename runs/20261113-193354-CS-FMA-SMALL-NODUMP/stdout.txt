@@ -1,0 +1,6 @@
+DRM etnaviv 1.4
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+GPU addresses: out 0xffffa000 in 0xffff9000 (1024 bytes each)
+out[0..3]: 0.015881 0.764796 0.238292 0.987206
+{"result": "PASS", "kernel": "fma", "threads": 64, "workgroup": 64, "fma_per_thread": 16, "mismatches": 0, "untouched": 0, "worst_abs_error": 5.96e-07, "first_launch_ms": 0.541, "median_ms": 0.108, "launches": 10, "gflops": 0.076}

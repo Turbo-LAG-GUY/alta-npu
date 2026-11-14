@@ -1,0 +1,653 @@
+DRM etnaviv 1.4
+/dev/dri/renderD129: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: etna_ml_avgpool
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:    // preds:
+    32      %0 = load_const (0x00000000)
+    32      %1 = @load_kernel_input (%0 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32      %2 = load_const (0x00000004)
+    32      %3 = @load_kernel_input (%2 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3    %4 = @load_global_invocation_id
+    32      %5 = mov %4.x
+    32      %6 = load_const (0x000000ff = 255)
+    32      %7 = umin %5, %6 (0xff)
+    32      %8 = load_const (0x000000c4 = 196)
+    32      %9 = imul %7, %8 (0xc4)
+    32     %10 = iadd %3, %9
+    32     %11 = @load_global (%10) (access=none, align_mul=4, align_offset=0)
+    32     %12 = load_const (0x00ff00ff = 16711935)
+    32     %13 = iand %11, %12 (0xff00ff)
+    32     %14 = load_const (0x00000008)
+    32     %15 = ushr %11, %14 (0x8)
+    32     %16 = load_const (0x00ff00ff = 16711935)
+    32     %17 = iand %15, %16 (0xff00ff)
+    32     %18 = iadd %13, %17
+    32     %19 = load_const (0x00000004)
+    32     %20 = iadd %10, %19 (0x4)
+    32     %21 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32     %22 = load_const (0x00ff00ff = 16711935)
+    32     %23 = iand %21, %22 (0xff00ff)
+    32     %24 = load_const (0x00000008)
+    32     %25 = ushr %21, %24 (0x8)
+    32     %26 = load_const (0x00ff00ff = 16711935)
+    32     %27 = iand %25, %26 (0xff00ff)
+    32     %28 = iadd %23, %27
+    32     %29 = iadd %18, %28
+    32     %30 = load_const (0x00000008)
+    32     %31 = iadd %10, %30 (0x8)
+    32     %32 = @load_global (%31) (access=none, align_mul=4, align_offset=0)
+    32     %33 = load_const (0x00ff00ff = 16711935)
+    32     %34 = iand %32, %33 (0xff00ff)
+    32     %35 = load_const (0x00000008)
+    32     %36 = ushr %32, %35 (0x8)
+    32     %37 = load_const (0x00ff00ff = 16711935)
+    32     %38 = iand %36, %37 (0xff00ff)
+    32     %39 = iadd %34, %38
+    32     %40 = iadd %29, %39
+    32     %41 = load_const (0x0000000c = 12)
+    32     %42 = iadd %10, %41 (0xc)
+    32     %43 = @load_global (%42) (access=none, align_mul=4, align_offset=0)
+    32     %44 = load_const (0x00ff00ff = 16711935)
+    32     %45 = iand %43, %44 (0xff00ff)
+    32     %46 = load_const (0x00000008)
+    32     %47 = ushr %43, %46 (0x8)
+    32     %48 = load_const (0x00ff00ff = 16711935)
+    32     %49 = iand %47, %48 (0xff00ff)
+    32     %50 = iadd %45, %49
+    32     %51 = iadd %40, %50
+    32     %52 = load_const (0x00000010 = 16)
+    32     %53 = iadd %10, %52 (0x10)
+    32     %54 = @load_global (%53) (access=none, align_mul=4, align_offset=0)
+    32     %55 = load_const (0x00ff00ff = 16711935)
+    32     %56 = iand %54, %55 (0xff00ff)
+    32     %57 = load_const (0x00000008)
+    32     %58 = ushr %54, %57 (0x8)
+    32     %59 = load_const (0x00ff00ff = 16711935)
+    32     %60 = iand %58, %59 (0xff00ff)
+    32     %61 = iadd %56, %60
+    32     %62 = iadd %51, %61
+    32     %63 = load_const (0x00000014 = 20)
+    32     %64 = iadd %10, %63 (0x14)
+    32     %65 = @load_global (%64) (access=none, align_mul=4, align_offset=0)
+    32     %66 = load_const (0x00ff00ff = 16711935)
+    32     %67 = iand %65, %66 (0xff00ff)
+    32     %68 = load_const (0x00000008)
+    32     %69 = ushr %65, %68 (0x8)
+    32     %70 = load_const (0x00ff00ff = 16711935)
+    32     %71 = iand %69, %70 (0xff00ff)
+    32     %72 = iadd %67, %71
+    32     %73 = iadd %62, %72
+    32     %74 = load_const (0x00000018 = 24)
+    32     %75 = iadd %10, %74 (0x18)
+    32     %76 = @load_global (%75) (access=none, align_mul=4, align_offset=0)
+    32     %77 = load_const (0x00ff00ff = 16711935)
+    32     %78 = iand %76, %77 (0xff00ff)
+    32     %79 = load_const (0x00000008)
+    32     %80 = ushr %76, %79 (0x8)
+    32     %81 = load_const (0x00ff00ff = 16711935)
+    32     %82 = iand %80, %81 (0xff00ff)
+    32     %83 = iadd %78, %82
+    32     %84 = iadd %73, %83
+    32     %85 = load_const (0x0000001c = 28)
+    32     %86 = iadd %10, %85 (0x1c)
+    32     %87 = @load_global (%86) (access=none, align_mul=4, align_offset=0)
+    32     %88 = load_const (0x00ff00ff = 16711935)
+    32     %89 = iand %87, %88 (0xff00ff)
+    32     %90 = load_const (0x00000008)
+    32     %91 = ushr %87, %90 (0x8)
+    32     %92 = load_const (0x00ff00ff = 16711935)
+    32     %93 = iand %91, %92 (0xff00ff)
+    32     %94 = iadd %89, %93
+    32     %95 = iadd %84, %94
+    32     %96 = load_const (0x00000020 = 32)
+    32     %97 = iadd %10, %96 (0x20)
+    32     %98 = @load_global (%97) (access=none, align_mul=4, align_offset=0)
+    32     %99 = load_const (0x00ff00ff = 16711935)
+    32    %100 = iand %98, %99 (0xff00ff)
+    32    %101 = load_const (0x00000008)
+    32    %102 = ushr %98, %101 (0x8)
+    32    %103 = load_const (0x00ff00ff = 16711935)
+    32    %104 = iand %102, %103 (0xff00ff)
+    32    %105 = iadd %100, %104
+    32    %106 = iadd %95, %105
+    32    %107 = load_const (0x00000024 = 36)
+    32    %108 = iadd %10, %107 (0x24)
+    32    %109 = @load_global (%108) (access=none, align_mul=4, align_offset=0)
+    32    %110 = load_const (0x00ff00ff = 16711935)
+    32    %111 = iand %109, %110 (0xff00ff)
+    32    %112 = load_const (0x00000008)
+    32    %113 = ushr %109, %112 (0x8)
+    32    %114 = load_const (0x00ff00ff = 16711935)
+    32    %115 = iand %113, %114 (0xff00ff)
+    32    %116 = iadd %111, %115
+    32    %117 = iadd %106, %116
+    32    %118 = load_const (0x00000028 = 40)
+    32    %119 = iadd %10, %118 (0x28)
+    32    %120 = @load_global (%119) (access=none, align_mul=4, align_offset=0)
+    32    %121 = load_const (0x00ff00ff = 16711935)
+    32    %122 = iand %120, %121 (0xff00ff)
+    32    %123 = load_const (0x00000008)
+    32    %124 = ushr %120, %123 (0x8)
+    32    %125 = load_const (0x00ff00ff = 16711935)
+    32    %126 = iand %124, %125 (0xff00ff)
+    32    %127 = iadd %122, %126
+    32    %128 = iadd %117, %127
+    32    %129 = load_const (0x0000002c = 44)
+    32    %130 = iadd %10, %129 (0x2c)
+    32    %131 = @load_global (%130) (access=none, align_mul=4, align_offset=0)
+    32    %132 = load_const (0x00ff00ff = 16711935)
+    32    %133 = iand %131, %132 (0xff00ff)
+    32    %134 = load_const (0x00000008)
+    32    %135 = ushr %131, %134 (0x8)
+    32    %136 = load_const (0x00ff00ff = 16711935)
+    32    %137 = iand %135, %136 (0xff00ff)
+    32    %138 = iadd %133, %137
+    32    %139 = iadd %128, %138
+    32    %140 = load_const (0x00000030 = 48)
+    32    %141 = iadd %10, %140 (0x30)
+    32    %142 = @load_global (%141) (access=none, align_mul=4, align_offset=0)
+    32    %143 = load_const (0x000000ff = 255)
+    32    %144 = iand %142, %143 (0xff)
+    32    %145 = iadd %139, %144
+    32    %146 = load_const (0x00000008)
+    32    %147 = ushr %142, %146 (0x8)
+    32    %148 = load_const (0x000000ff = 255)
+    32    %149 = iand %147, %148 (0xff)
+    32    %150 = load_const (0x00000010 = 16)
+    32    %151 = ushr %142, %150 (0x10)
+    32    %152 = load_const (0x000000ff = 255)
+    32    %153 = iand %151, %152 (0xff)
+    32    %154 = iadd %149, %153
+    32    %155 = load_const (0x00000018 = 24)
+    32    %156 = ushr %142, %155 (0x18)
+    32    %157 = load_const (0x000000ff = 255)
+    32    %158 = iand %156, %157 (0xff)
+    32    %159 = iadd %154, %158
+    32    %160 = load_const (0x00000034 = 52)
+    32    %161 = iadd %10, %160 (0x34)
+    32    %162 = @load_global (%161) (access=none, align_mul=4, align_offset=0)
+    32    %163 = load_const (0x00ff00ff = 16711935)
+    32    %164 = iand %162, %163 (0xff00ff)
+    32    %165 = load_const (0x00000008)
+    32    %166 = ushr %162, %165 (0x8)
+    32    %167 = load_const (0x00ff00ff = 16711935)
+    32    %168 = iand %166, %167 (0xff00ff)
+    32    %169 = iadd %164, %168
+    32    %170 = iadd %159, %169
+    32    %171 = load_const (0x00000038 = 56)
+    32    %172 = iadd %10, %171 (0x38)
+    32    %173 = @load_global (%172) (access=none, align_mul=4, align_offset=0)
+    32    %174 = load_const (0x00ff00ff = 16711935)
+    32    %175 = iand %173, %174 (0xff00ff)
+    32    %176 = load_const (0x00000008)
+    32    %177 = ushr %173, %176 (0x8)
+    32    %178 = load_const (0x00ff00ff = 16711935)
+    32    %179 = iand %177, %178 (0xff00ff)
+    32    %180 = iadd %175, %179
+    32    %181 = iadd %170, %180
+    32    %182 = load_const (0x0000003c = 60)
+    32    %183 = iadd %10, %182 (0x3c)
+    32    %184 = @load_global (%183) (access=none, align_mul=4, align_offset=0)
+    32    %185 = load_const (0x00ff00ff = 16711935)
+    32    %186 = iand %184, %185 (0xff00ff)
+    32    %187 = load_const (0x00000008)
+    32    %188 = ushr %184, %187 (0x8)
+    32    %189 = load_const (0x00ff00ff = 16711935)
+    32    %190 = iand %188, %189 (0xff00ff)
+    32    %191 = iadd %186, %190
+    32    %192 = iadd %181, %191
+    32    %193 = load_const (0x00000040 = 64)
+    32    %194 = iadd %10, %193 (0x40)
+    32    %195 = @load_global (%194) (access=none, align_mul=4, align_offset=0)
+    32    %196 = load_const (0x00ff00ff = 16711935)
+    32    %197 = iand %195, %196 (0xff00ff)
+    32    %198 = load_const (0x00000008)
+    32    %199 = ushr %195, %198 (0x8)
+    32    %200 = load_const (0x00ff00ff = 16711935)
+    32    %201 = iand %199, %200 (0xff00ff)
+    32    %202 = iadd %197, %201
+    32    %203 = iadd %192, %202
+    32    %204 = load_const (0x00000044 = 68)
+    32    %205 = iadd %10, %204 (0x44)
+    32    %206 = @load_global (%205) (access=none, align_mul=4, align_offset=0)
+    32    %207 = load_const (0x00ff00ff = 16711935)
+    32    %208 = iand %206, %207 (0xff00ff)
+    32    %209 = load_const (0x00000008)
+    32    %210 = ushr %206, %209 (0x8)
+    32    %211 = load_const (0x00ff00ff = 16711935)
+    32    %212 = iand %210, %211 (0xff00ff)
+    32    %213 = iadd %208, %212
+    32    %214 = iadd %203, %213
+    32    %215 = load_const (0x00000048 = 72)
+    32    %216 = iadd %10, %215 (0x48)
+    32    %217 = @load_global (%216) (access=none, align_mul=4, align_offset=0)
+    32    %218 = load_const (0x00ff00ff = 16711935)
+    32    %219 = iand %217, %218 (0xff00ff)
+    32    %220 = load_const (0x00000008)
+    32    %221 = ushr %217, %220 (0x8)
+    32    %222 = load_const (0x00ff00ff = 16711935)
+    32    %223 = iand %221, %222 (0xff00ff)
+    32    %224 = iadd %219, %223
+    32    %225 = iadd %214, %224
+    32    %226 = load_const (0x0000004c = 76)
+    32    %227 = iadd %10, %226 (0x4c)
+    32    %228 = @load_global (%227) (access=none, align_mul=4, align_offset=0)
+    32    %229 = load_const (0x00ff00ff = 16711935)
+    32    %230 = iand %228, %229 (0xff00ff)
+    32    %231 = load_const (0x00000008)
+    32    %232 = ushr %228, %231 (0x8)
+    32    %233 = load_const (0x00ff00ff = 16711935)
+    32    %234 = iand %232, %233 (0xff00ff)
+    32    %235 = iadd %230, %234
+    32    %236 = iadd %225, %235
+    32    %237 = load_const (0x00000050 = 80)
+    32    %238 = iadd %10, %237 (0x50)
+    32    %239 = @load_global (%238) (access=none, align_mul=4, align_offset=0)
+    32    %240 = load_const (0x00ff00ff = 16711935)
+    32    %241 = iand %239, %240 (0xff00ff)
+    32    %242 = load_const (0x00000008)
+    32    %243 = ushr %239, %242 (0x8)
+    32    %244 = load_const (0x00ff00ff = 16711935)
+    32    %245 = iand %243, %244 (0xff00ff)
+    32    %246 = iadd %241, %245
+    32    %247 = iadd %236, %246
+    32    %248 = load_const (0x00000054 = 84)
+    32    %249 = iadd %10, %248 (0x54)
+    32    %250 = @load_global (%249) (access=none, align_mul=4, align_offset=0)
+    32    %251 = load_const (0x00ff00ff = 16711935)
+    32    %252 = iand %250, %251 (0xff00ff)
+    32    %253 = load_const (0x00000008)
+    32    %254 = ushr %250, %253 (0x8)
+    32    %255 = load_const (0x00ff00ff = 16711935)
+    32    %256 = iand %254, %255 (0xff00ff)
+    32    %257 = iadd %252, %256
+    32    %258 = iadd %247, %257
+    32    %259 = load_const (0x00000058 = 88)
+    32    %260 = iadd %10, %259 (0x58)
+    32    %261 = @load_global (%260) (access=none, align_mul=4, align_offset=0)
+    32    %262 = load_const (0x00ff00ff = 16711935)
+    32    %263 = iand %261, %262 (0xff00ff)
+    32    %264 = load_const (0x00000008)
+    32    %265 = ushr %261, %264 (0x8)
+    32    %266 = load_const (0x00ff00ff = 16711935)
+    32    %267 = iand %265, %266 (0xff00ff)
+    32    %268 = iadd %263, %267
+    32    %269 = iadd %258, %268
+    32    %270 = load_const (0x0000005c = 92)
+    32    %271 = iadd %10, %270 (0x5c)
+    32    %272 = @load_global (%271) (access=none, align_mul=4, align_offset=0)
+    32    %273 = load_const (0x00ff00ff = 16711935)
+    32    %274 = iand %272, %273 (0xff00ff)
+    32    %275 = load_const (0x00000008)
+    32    %276 = ushr %272, %275 (0x8)
+    32    %277 = load_const (0x00ff00ff = 16711935)
+    32    %278 = iand %276, %277 (0xff00ff)
+    32    %279 = iadd %274, %278
+    32    %280 = iadd %269, %279
+    32    %281 = load_const (0x00000060 = 96)
+    32    %282 = iadd %10, %281 (0x60)
+    32    %283 = @load_global (%282) (access=none, align_mul=4, align_offset=0)
+    32    %284 = load_const (0x000000ff = 255)
+    32    %285 = iand %283, %284 (0xff)
+    32    %286 = iadd %280, %285
+    32    %287 = load_const (0x00000008)
+    32    %288 = ushr %283, %287 (0x8)
+    32    %289 = load_const (0x000000ff = 255)
+    32    %290 = iand %288, %289 (0xff)
+    32    %291 = iadd %286, %290
+    32    %292 = load_const (0x00000010 = 16)
+    32    %293 = ushr %283, %292 (0x10)
+    32    %294 = load_const (0x000000ff = 255)
+    32    %295 = iand %293, %294 (0xff)
+    32    %296 = load_const (0x00000018 = 24)
+    32    %297 = ushr %283, %296 (0x18)
+    32    %298 = load_const (0x000000ff = 255)
+    32    %299 = iand %297, %298 (0xff)
+    32    %300 = iadd %295, %299
+    32    %301 = load_const (0x00000064 = 100)
+    32    %302 = iadd %10, %301 (0x64)
+    32    %303 = @load_global (%302) (access=none, align_mul=4, align_offset=0)
+    32    %304 = load_const (0x00ff00ff = 16711935)
+    32    %305 = iand %303, %304 (0xff00ff)
+    32    %306 = load_const (0x00000008)
+    32    %307 = ushr %303, %306 (0x8)
+    32    %308 = load_const (0x00ff00ff = 16711935)
+    32    %309 = iand %307, %308 (0xff00ff)
+    32    %310 = iadd %305, %309
+    32    %311 = iadd %300, %310
+    32    %312 = load_const (0x00000068 = 104)
+    32    %313 = iadd %10, %312 (0x68)
+    32    %314 = @load_global (%313) (access=none, align_mul=4, align_offset=0)
+    32    %315 = load_const (0x00ff00ff = 16711935)
+    32    %316 = iand %314, %315 (0xff00ff)
+    32    %317 = load_const (0x00000008)
+    32    %318 = ushr %314, %317 (0x8)
+    32    %319 = load_const (0x00ff00ff = 16711935)
+    32    %320 = iand %318, %319 (0xff00ff)
+    32    %321 = iadd %316, %320
+    32    %322 = iadd %311, %321
+    32    %323 = load_const (0x0000006c = 108)
+    32    %324 = iadd %10, %323 (0x6c)
+    32    %325 = @load_global (%324) (access=none, align_mul=4, align_offset=0)
+    32    %326 = load_const (0x00ff00ff = 16711935)
+    32    %327 = iand %325, %326 (0xff00ff)
+    32    %328 = load_const (0x00000008)
+    32    %329 = ushr %325, %328 (0x8)
+    32    %330 = load_const (0x00ff00ff = 16711935)
+    32    %331 = iand %329, %330 (0xff00ff)
+    32    %332 = iadd %327, %331
+    32    %333 = iadd %322, %332
+    32    %334 = load_const (0x00000070 = 112)
+    32    %335 = iadd %10, %334 (0x70)
+    32    %336 = @load_global (%335) (access=none, align_mul=4, align_offset=0)
+    32    %337 = load_const (0x00ff00ff = 16711935)
+    32    %338 = iand %336, %337 (0xff00ff)
+    32    %339 = load_const (0x00000008)
+    32    %340 = ushr %336, %339 (0x8)
+    32    %341 = load_const (0x00ff00ff = 16711935)
+    32    %342 = iand %340, %341 (0xff00ff)
+    32    %343 = iadd %338, %342
+    32    %344 = iadd %333, %343
+    32    %345 = load_const (0x00000074 = 116)
+    32    %346 = iadd %10, %345 (0x74)
+    32    %347 = @load_global (%346) (access=none, align_mul=4, align_offset=0)
+    32    %348 = load_const (0x00ff00ff = 16711935)
+    32    %349 = iand %347, %348 (0xff00ff)
+    32    %350 = load_const (0x00000008)
+    32    %351 = ushr %347, %350 (0x8)
+    32    %352 = load_const (0x00ff00ff = 16711935)
+    32    %353 = iand %351, %352 (0xff00ff)
+    32    %354 = iadd %349, %353
+    32    %355 = iadd %344, %354
+    32    %356 = load_const (0x00000078 = 120)
+    32    %357 = iadd %10, %356 (0x78)
+    32    %358 = @load_global (%357) (access=none, align_mul=4, align_offset=0)
+    32    %359 = load_const (0x00ff00ff = 16711935)
+    32    %360 = iand %358, %359 (0xff00ff)
+    32    %361 = load_const (0x00000008)
+    32    %362 = ushr %358, %361 (0x8)
+    32    %363 = load_const (0x00ff00ff = 16711935)
+    32    %364 = iand %362, %363 (0xff00ff)
+    32    %365 = iadd %360, %364
+    32    %366 = iadd %355, %365
+    32    %367 = load_const (0x0000007c = 124)
+    32    %368 = iadd %10, %367 (0x7c)
+    32    %369 = @load_global (%368) (access=none, align_mul=4, align_offset=0)
+    32    %370 = load_const (0x00ff00ff = 16711935)
+    32    %371 = iand %369, %370 (0xff00ff)
+    32    %372 = load_const (0x00000008)
+    32    %373 = ushr %369, %372 (0x8)
+    32    %374 = load_const (0x00ff00ff = 16711935)
+    32    %375 = iand %373, %374 (0xff00ff)
+    32    %376 = iadd %371, %375
+    32    %377 = iadd %366, %376
+    32    %378 = load_const (0x00000080 = 128)
+    32    %379 = iadd %10, %378 (0x80)
+    32    %380 = @load_global (%379) (access=none, align_mul=4, align_offset=0)
+    32    %381 = load_const (0x00ff00ff = 16711935)
+    32    %382 = iand %380, %381 (0xff00ff)
+    32    %383 = load_const (0x00000008)
+    32    %384 = ushr %380, %383 (0x8)
+    32    %385 = load_const (0x00ff00ff = 16711935)
+    32    %386 = iand %384, %385 (0xff00ff)
+    32    %387 = iadd %382, %386
+    32    %388 = iadd %377, %387
+    32    %389 = load_const (0x00000084 = 132)
+    32    %390 = iadd %10, %389 (0x84)
+    32    %391 = @load_global (%390) (access=none, align_mul=4, align_offset=0)
+    32    %392 = load_const (0x00ff00ff = 16711935)
+    32    %393 = iand %391, %392 (0xff00ff)
+    32    %394 = load_const (0x00000008)
+    32    %395 = ushr %391, %394 (0x8)
+    32    %396 = load_const (0x00ff00ff = 16711935)
+    32    %397 = iand %395, %396 (0xff00ff)
+    32    %398 = iadd %393, %397
+    32    %399 = iadd %388, %398
+    32    %400 = load_const (0x00000088 = 136)
+    32    %401 = iadd %10, %400 (0x88)
+    32    %402 = @load_global (%401) (access=none, align_mul=4, align_offset=0)
+    32    %403 = load_const (0x00ff00ff = 16711935)
+    32    %404 = iand %402, %403 (0xff00ff)
+    32    %405 = load_const (0x00000008)
+    32    %406 = ushr %402, %405 (0x8)
+    32    %407 = load_const (0x00ff00ff = 16711935)
+    32    %408 = iand %406, %407 (0xff00ff)
+    32    %409 = iadd %404, %408
+    32    %410 = iadd %399, %409
+    32    %411 = load_const (0x0000008c = 140)
+    32    %412 = iadd %10, %411 (0x8c)
+    32    %413 = @load_global (%412) (access=none, align_mul=4, align_offset=0)
+    32    %414 = load_const (0x00ff00ff = 16711935)
+    32    %415 = iand %413, %414 (0xff00ff)
+    32    %416 = load_const (0x00000008)
+    32    %417 = ushr %413, %416 (0x8)
+    32    %418 = load_const (0x00ff00ff = 16711935)
+    32    %419 = iand %417, %418 (0xff00ff)
+    32    %420 = iadd %415, %419
+    32    %421 = iadd %410, %420
+    32    %422 = load_const (0x00000090 = 144)
+    32    %423 = iadd %10, %422 (0x90)
+    32    %424 = @load_global (%423) (access=none, align_mul=4, align_offset=0)
+    32    %425 = load_const (0x000000ff = 255)
+    32    %426 = iand %424, %425 (0xff)
+    32    %427 = iadd %421, %426
+    32    %428 = load_const (0x00000008)
+    32    %429 = ushr %424, %428 (0x8)
+    32    %430 = load_const (0x000000ff = 255)
+    32    %431 = iand %429, %430 (0xff)
+    32    %432 = iadd %427, %431
+    32    %433 = load_const (0x00000010 = 16)
+    32    %434 = ushr %424, %433 (0x10)
+    32    %435 = load_const (0x000000ff = 255)
+    32    %436 = iand %434, %435 (0xff)
+    32    %437 = iadd %432, %436
+    32    %438 = load_const (0x00000018 = 24)
+    32    %439 = ushr %424, %438 (0x18)
+    32    %440 = load_const (0x000000ff = 255)
+    32    %441 = iand %439, %440 (0xff)
+    32    %442 = load_const (0x00000094 = 148)
+    32    %443 = iadd %10, %442 (0x94)
+    32    %444 = @load_global (%443) (access=none, align_mul=4, align_offset=0)
+    32    %445 = load_const (0x00ff00ff = 16711935)
+    32    %446 = iand %444, %445 (0xff00ff)
+    32    %447 = load_const (0x00000008)
+    32    %448 = ushr %444, %447 (0x8)
+    32    %449 = load_const (0x00ff00ff = 16711935)
+    32    %450 = iand %448, %449 (0xff00ff)
+    32    %451 = iadd %446, %450
+    32    %452 = iadd %441, %451
+    32    %453 = load_const (0x00000098 = 152)
+    32    %454 = iadd %10, %453 (0x98)
+    32    %455 = @load_global (%454) (access=none, align_mul=4, align_offset=0)
+    32    %456 = load_const (0x00ff00ff = 16711935)
+    32    %457 = iand %455, %456 (0xff00ff)
+    32    %458 = load_const (0x00000008)
+    32    %459 = ushr %455, %458 (0x8)
+    32    %460 = load_const (0x00ff00ff = 16711935)
+    32    %461 = iand %459, %460 (0xff00ff)
+    32    %462 = iadd %457, %461
+    32    %463 = iadd %452, %462
+    32    %464 = load_const (0x0000009c = 156)
+    32    %465 = iadd %10, %464 (0x9c)
+    32    %466 = @load_global (%465) (access=none, align_mul=4, align_offset=0)
+    32    %467 = load_const (0x00ff00ff = 16711935)
+    32    %468 = iand %466, %467 (0xff00ff)
+    32    %469 = load_const (0x00000008)
+    32    %470 = ushr %466, %469 (0x8)
+    32    %471 = load_const (0x00ff00ff = 16711935)
+    32    %472 = iand %470, %471 (0xff00ff)
+    32    %473 = iadd %468, %472
+    32    %474 = iadd %463, %473
+    32    %475 = load_const (0x000000a0 = 160)
+    32    %476 = iadd %10, %475 (0xa0)
+    32    %477 = @load_global (%476) (access=none, align_mul=4, align_offset=0)
+    32    %478 = load_const (0x00ff00ff = 16711935)
+    32    %479 = iand %477, %478 (0xff00ff)
+    32    %480 = load_const (0x00000008)
+    32    %481 = ushr %477, %480 (0x8)
+    32    %482 = load_const (0x00ff00ff = 16711935)
+    32    %483 = iand %481, %482 (0xff00ff)
+    32    %484 = iadd %479, %483
+    32    %485 = iadd %474, %484
+    32    %486 = load_const (0x000000a4 = 164)
+    32    %487 = iadd %10, %486 (0xa4)
+    32    %488 = @load_global (%487) (access=none, align_mul=4, align_offset=0)
+    32    %489 = load_const (0x00ff00ff = 16711935)
+    32    %490 = iand %488, %489 (0xff00ff)
+    32    %491 = load_const (0x00000008)
+    32    %492 = ushr %488, %491 (0x8)
+    32    %493 = load_const (0x00ff00ff = 16711935)
+    32    %494 = iand %492, %493 (0xff00ff)
+    32    %495 = iadd %490, %494
+    32    %496 = iadd %485, %495
+    32    %497 = load_const (0x000000a8 = 168)
+    32    %498 = iadd %10, %497 (0xa8)
+    32    %499 = @load_global (%498) (access=none, align_mul=4, align_offset=0)
+    32    %500 = load_const (0x00ff00ff = 16711935)
+    32    %501 = iand %499, %500 (0xff00ff)
+    32    %502 = load_const (0x00000008)
+    32    %503 = ushr %499, %502 (0x8)
+    32    %504 = load_const (0x00ff00ff = 16711935)
+    32    %505 = iand %503, %504 (0xff00ff)
+    32    %506 = iadd %501, %505
+    32    %507 = iadd %496, %506
+    32    %508 = load_const (0x000000ac = 172)
+    32    %509 = iadd %10, %508 (0xac)
+    32    %510 = @load_global (%509) (access=none, align_mul=4, align_offset=0)
+    32    %511 = load_const (0x00ff00ff = 16711935)
+    32    %512 = iand %510, %511 (0xff00ff)
+    32    %513 = load_const (0x00000008)
+    32    %514 = ushr %510, %513 (0x8)
+    32    %515 = load_const (0x00ff00ff = 16711935)
+    32    %516 = iand %514, %515 (0xff00ff)
+    32    %517 = iadd %512, %516
+    32    %518 = iadd %507, %517
+    32    %519 = load_const (0x000000b0 = 176)
+    32    %520 = iadd %10, %519 (0xb0)
+    32    %521 = @load_global (%520) (access=none, align_mul=4, align_offset=0)
+    32    %522 = load_const (0x00ff00ff = 16711935)
+    32    %523 = iand %521, %522 (0xff00ff)
+    32    %524 = load_const (0x00000008)
+    32    %525 = ushr %521, %524 (0x8)
+    32    %526 = load_const (0x00ff00ff = 16711935)
+    32    %527 = iand %525, %526 (0xff00ff)
+    32    %528 = iadd %523, %527
+    32    %529 = iadd %518, %528
+    32    %530 = load_const (0x000000b4 = 180)
+    32    %531 = iadd %10, %530 (0xb4)
+    32    %532 = @load_global (%531) (access=none, align_mul=4, align_offset=0)
+    32    %533 = load_const (0x00ff00ff = 16711935)
+    32    %534 = iand %532, %533 (0xff00ff)
+    32    %535 = load_const (0x00000008)
+    32    %536 = ushr %532, %535 (0x8)
+    32    %537 = load_const (0x00ff00ff = 16711935)
+    32    %538 = iand %536, %537 (0xff00ff)
+    32    %539 = iadd %534, %538
+    32    %540 = iadd %529, %539
+    32    %541 = load_const (0x000000b8 = 184)
+    32    %542 = iadd %10, %541 (0xb8)
+    32    %543 = @load_global (%542) (access=none, align_mul=4, align_offset=0)
+    32    %544 = load_const (0x00ff00ff = 16711935)
+    32    %545 = iand %543, %544 (0xff00ff)
+    32    %546 = load_const (0x00000008)
+    32    %547 = ushr %543, %546 (0x8)
+    32    %548 = load_const (0x00ff00ff = 16711935)
+    32    %549 = iand %547, %548 (0xff00ff)
+    32    %550 = iadd %545, %549
+    32    %551 = iadd %540, %550
+    32    %552 = load_const (0x000000bc = 188)
+    32    %553 = iadd %10, %552 (0xbc)
+    32    %554 = @load_global (%553) (access=none, align_mul=4, align_offset=0)
+    32    %555 = load_const (0x00ff00ff = 16711935)
+    32    %556 = iand %554, %555 (0xff00ff)
+    32    %557 = load_const (0x00000008)
+    32    %558 = ushr %554, %557 (0x8)
+    32    %559 = load_const (0x00ff00ff = 16711935)
+    32    %560 = iand %558, %559 (0xff00ff)
+    32    %561 = iadd %556, %560
+    32    %562 = iadd %551, %561
+    32    %563 = load_const (0x000000c0 = 192)
+    32    %564 = iadd %10, %563 (0xc0)
+    32    %565 = @load_global (%564) (access=none, align_mul=4, align_offset=0)
+    32    %566 = load_const (0x00ff00ff = 16711935)
+    32    %567 = iand %565, %566 (0xff00ff)
+    32    %568 = load_const (0x00000008)
+    32    %569 = ushr %565, %568 (0x8)
+    32    %570 = load_const (0x00ff00ff = 16711935)
+    32    %571 = iand %569, %570 (0xff00ff)
+    32    %572 = iadd %567, %571
+    32    %573 = iadd %562, %572
+    32    %574 = load_const (0x0000ffff = 65535)
+    32    %575 = iand %145, %574 (0xffff)
+    32    %576 = load_const (0x00000010 = 16)
+    32    %577 = ushr %145, %576 (0x10)
+    32    %578 = iadd %575, %577
+    32    %579 = load_const (0x00000018 = 24)
+    32    %580 = iadd %578, %579 (0x18)
+    32    %581 = load_const (0x00000a73 = 2675)
+    32    %582 = imul %580, %581 (0xa73)
+    32    %583 = load_const (0x00000011 = 17)
+    32    %584 = ushr %582, %583 (0x11)
+    32    %585 = load_const (0x0000ffff = 65535)
+    32    %586 = iand %291, %585 (0xffff)
+    32    %587 = load_const (0x00000010 = 16)
+    32    %588 = ushr %291, %587 (0x10)
+    32    %589 = iadd %586, %588
+    32    %590 = load_const (0x00000018 = 24)
+    32    %591 = iadd %589, %590 (0x18)
+    32    %592 = load_const (0x00000a73 = 2675)
+    32    %593 = imul %591, %592 (0xa73)
+    32    %594 = load_const (0x00000011 = 17)
+    32    %595 = ushr %593, %594 (0x11)
+    32    %596 = load_const (0x00000008)
+    32    %597 = ishl %595, %596 (0x8)
+    32    %598 = ior %584, %597
+    32    %599 = load_const (0x0000ffff = 65535)
+    32    %600 = iand %437, %599 (0xffff)
+    32    %601 = load_const (0x00000010 = 16)
+    32    %602 = ushr %437, %601 (0x10)
+    32    %603 = iadd %600, %602
+    32    %604 = load_const (0x00000018 = 24)
+    32    %605 = iadd %603, %604 (0x18)
+    32    %606 = load_const (0x00000a73 = 2675)
+    32    %607 = imul %605, %606 (0xa73)
+    32    %608 = load_const (0x00000011 = 17)
+    32    %609 = ushr %607, %608 (0x11)
+    32    %610 = load_const (0x00000010 = 16)
+    32    %611 = ishl %609, %610 (0x10)
+    32    %612 = ior %598, %611
+    32    %613 = load_const (0x0000ffff = 65535)
+    32    %614 = iand %573, %613 (0xffff)
+    32    %615 = load_const (0x00000010 = 16)
+    32    %616 = ushr %573, %615 (0x10)
+    32    %617 = iadd %614, %616
+    32    %618 = load_const (0x00000018 = 24)
+    32    %619 = iadd %617, %618 (0x18)
+    32    %620 = load_const (0x00000a73 = 2675)
+    32    %621 = imul %619, %620 (0xa73)
+    32    %622 = load_const (0x00000011 = 17)
+    32    %623 = ushr %621, %622 (0x11)
+    32    %624 = load_const (0x00000018 = 24)
+    32    %625 = ishl %623, %624 (0x18)
+    32    %626 = ior %612, %625
+    32    %627 = load_const (0x00000002)
+    32    %628 = ishl %7, %627 (0x2)
+    32    %629 = iadd %1, %628
+                 @store_global (%626, %629) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b1
+    block b1:
+}
+
+kernel: avgpool, shared 0 bytes per workgroup
+GPU addresses: out 0xfffed000 in 0xfffdf000 (50176 bytes each)
+grid: 1 dimension(s), 4 x 1 workgroups of 64 x 1 threads
+avgpool: 7x7 x 1024 channels: 1024 exact, 0 wrong, 0 stray bytes past the output; first: 255 0 137 129
+{"result": "PASS", "kernel": "avgpool", "h": 7, "w": 7, "c": 1024, "exact": 1024, "wrong": 0, "stray": 0, "untouched": 0, "first_launch_ms": 0.562, "median_ms": 0.280, "launches": 10}

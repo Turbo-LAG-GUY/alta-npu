@@ -1,0 +1,3 @@
+total 0
+lrwxrwxrwx 1 root root    0 Nov 12 10:05 devcd1 -> ../../devices/virtual/devcoredump/devcd1
+-rw-r--r-- 1 root root 4096 Nov 12 10:05 disabled

@@ -1,0 +1,228 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: tgather
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32     %2 = mov %0.y
+    32     %3 = load_const (0x00000000)
+    32     %4 = @load_kernel_input (%3 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000004)
+    32     %6 = @load_kernel_input (%5 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %7 = load_const (0x00000008)
+    32     %8 = @load_kernel_input (%7 (0x8)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %9 = load_const (0x0000000c = 12)
+    32    %10 = @load_kernel_input (%9 (0xc)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %11 = load_const (0x00000002)
+    32    %12 = ishl %1, %11 (0x2)
+    32    %13 = imul %12, %8
+    32    %14 = iadd %13, %2
+    32    %15 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %16 = iand %14, %15 (0xfffffffc)
+    32    %17 = iadd %6, %16
+    32    %18 = @load_global (%17) (access=none, align_mul=4, align_offset=0)
+    32    %19 = load_const (0x00000003)
+    32    %20 = iand %14, %19 (0x3)
+    32    %21 = load_const (0x00000003)
+    32    %22 = ishl %20, %21 (0x3)
+    32    %23 = ushr %18, %22
+    32    %24 = load_const (0x000000ff = 255)
+    32    %25 = iand %23, %24 (0xff)
+    32    %26 = iadd %14, %8
+    32    %27 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %28 = iand %26, %27 (0xfffffffc)
+    32    %29 = iadd %6, %28
+    32    %30 = @load_global (%29) (access=none, align_mul=4, align_offset=0)
+    32    %31 = load_const (0x00000003)
+    32    %32 = iand %26, %31 (0x3)
+    32    %33 = load_const (0x00000003)
+    32    %34 = ishl %32, %33 (0x3)
+    32    %35 = ushr %30, %34
+    32    %36 = load_const (0x000000ff = 255)
+    32    %37 = iand %35, %36 (0xff)
+    32    %38 = load_const (0x00000008)
+    32    %39 = ishl %37, %38 (0x8)
+    32    %40 = ior %25, %39
+    32    %41 = iadd %26, %8
+    32    %42 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %43 = iand %41, %42 (0xfffffffc)
+    32    %44 = iadd %6, %43
+    32    %45 = @load_global (%44) (access=none, align_mul=4, align_offset=0)
+    32    %46 = load_const (0x00000003)
+    32    %47 = iand %41, %46 (0x3)
+    32    %48 = load_const (0x00000003)
+    32    %49 = ishl %47, %48 (0x3)
+    32    %50 = ushr %45, %49
+    32    %51 = load_const (0x000000ff = 255)
+    32    %52 = iand %50, %51 (0xff)
+    32    %53 = load_const (0x00000010 = 16)
+    32    %54 = ishl %52, %53 (0x10)
+    32    %55 = ior %40, %54
+    32    %56 = iadd %41, %8
+    32    %57 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %58 = iand %56, %57 (0xfffffffc)
+    32    %59 = iadd %6, %58
+    32    %60 = @load_global (%59) (access=none, align_mul=4, align_offset=0)
+    32    %61 = load_const (0x00000003)
+    32    %62 = iand %56, %61 (0x3)
+    32    %63 = load_const (0x00000003)
+    32    %64 = ishl %62, %63 (0x3)
+    32    %65 = ushr %60, %64
+    32    %66 = load_const (0x000000ff = 255)
+    32    %67 = iand %65, %66 (0xff)
+    32    %68 = load_const (0x00000018 = 24)
+    32    %69 = ishl %67, %68 (0x18)
+    32    %70 = ior %55, %69
+    32    %71 = imul %2, %10
+    32    %72 = load_const (0x00000002)
+    32    %73 = ishl %1, %72 (0x2)
+    32    %74 = iadd %71, %73
+    32    %75 = iadd %4, %74
+                @store_global (%70, %75) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: tgather, shared 0 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: tgather
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = load_const (0x00000000)
+    32     %2 = @load_kernel_input (%1 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %3 = load_const (0x00000004)
+    32     %4 = @load_kernel_input (%3 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000008)
+    32     %6 = @load_kernel_input (%5 (0x8)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %7 = load_const (0x0000000c = 12)
+    32     %8 = @load_kernel_input (%7 (0xc)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %9 = imul %0.x, %3 (0x4)
+    32    %10 = imul %9, %6
+    32    %11 = iadd %10, %0.y
+    32    %12 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %13 = iand %0.y, %12 (0xfffffffc)
+    32    %14 = iadd %13, %10
+    32    %15 = iadd %4, %14
+    32    %16 = @load_global (%15) (access=none, align_mul=4, align_offset=0)
+    32    %17 = imul %11, %5 (0x8)
+    32    %18 = ushr %16, %17
+    32    %19 = load_const (0x000000ff = 255)
+    32    %20 = iand %18, %19 (0xff)
+    32    %21 = iadd %11, %6
+    32    %22 = iand %21, %12 (0xfffffffc)
+    32    %23 = iadd %4, %22
+    32    %24 = @load_global (%23) (access=none, align_mul=4, align_offset=0)
+    32    %25 = imul %21, %5 (0x8)
+    32    %26 = ushr %24, %25
+    32    %27 = iand %26, %19 (0xff)
+    32    %28 = load_const (0x00000100 = 256)
+    32    %29 = imul %27, %28 (0x100)
+    32    %30 = ior %20, %29
+    32    %31 = iadd %21, %6
+    32    %32 = iand %31, %12 (0xfffffffc)
+    32    %33 = iadd %4, %32
+    32    %34 = @load_global (%33) (access=none, align_mul=4, align_offset=0)
+    32    %35 = imul %31, %5 (0x8)
+    32    %36 = ushr %34, %35
+    32    %37 = iand %36, %19 (0xff)
+    32    %38 = load_const (0x00010000 = 65536)
+    32    %39 = imul %37, %38 (0x10000)
+    32    %40 = ior %30, %39
+    32    %41 = iadd %31, %6
+    32    %42 = iand %41, %12 (0xfffffffc)
+    32    %43 = iadd %4, %42
+    32    %44 = @load_global (%43) (access=none, align_mul=4, align_offset=0)
+    32    %45 = imul %41, %5 (0x8)
+    32    %46 = ushr %44, %45
+    32    %47 = iand %46, %19 (0xff)
+    32    %48 = load_const (0x01000000 = 16777216)
+    32    %49 = imul %47, %48 (0x1000000)
+    32    %50 = ior %40, %49
+    32    %51 = imul %0.y, %8
+    32    %52 = iadd %51, %9
+    32    %53 = iadd %2, %52
+                @store_global (%50, %53) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 00000800 40000040 00000002] imullo0.s32.pack  t0.___w, t0.xxxx, u0.xxxx, void
+001 [0081103c 3fc00800 40aa0040 00000002] imullo0.s32.pack  t1.x___, t0.wwww, u0.yyyy, void
+002 [01011001 00001800 40000000 00154008] add.s32.pack      t1._y__, t1.xxxx, void, t0.yyyy
+003 [0201101d 15400800 40010000 202a8008] and.s32.pack      t1.__z_, t0.yyyy, void, u0.zzzz
+004 [00811001 2a801800 40000000 00000018] add.s32.pack      t1.x___, t1.zzzz, void, t1.xxxx
+005 [00811001 3fc00800 40000010 00000018] add.s32.pack      t1.x___, u0.wwww, void, t1.xxxx
+006 [02011032 00201c04 800000c0 00000002] load.denorm.u32   t1.__z_, t1.xxxx, u1.xxxx, void
+007 [0081103c 15401800 40aa00c0 00000002] imullo0.s32.pack  t1.x___, t1.yyyy, u1.yyyy, void
+008 [0081101a 2aa01800 80010000 00000018] rshift.u32.pack   t1.x___, t1.zzzz, void, t1.xxxx
+009 [0081101d 00001800 40010000 202a8018] and.s32.pack      t1.x___, t1.xxxx, void, u1.zzzz
+010 [01011001 15401800 40000000 20154008] add.s32.pack      t1._y__, t1.yyyy, void, u0.yyyy
+011 [0201101d 15401800 40010000 202a8008] and.s32.pack      t1.__z_, t1.yyyy, void, u0.zzzz
+012 [02011001 3fc00800 40000010 002a8018] add.s32.pack      t1.__z_, u0.wwww, void, t1.zzzz
+013 [04011032 2aa01c04 800000c0 00000002] load.denorm.u32   t1.___w, t1.zzzz, u1.xxxx, void
+014 [0201103c 15401800 40aa00c0 00000002] imullo0.s32.pack  t1.__z_, t1.yyyy, u1.yyyy, void
+015 [0201101a 3fe01800 80010000 002a8018] rshift.u32.pack   t1.__z_, t1.wwww, void, t1.zzzz
+016 [0201101d 2a801800 40010000 202a8018] and.s32.pack      t1.__z_, t1.zzzz, void, u1.zzzz
+017 [0201103c 2a801800 41fe00c0 00000002] imullo0.s32.pack  t1.__z_, t1.zzzz, u1.wwww, void
+018 [0081101c 00001800 40010000 002a8018] or.s32.pack       t1.x___, t1.xxxx, void, t1.zzzz
+019 [01011001 15401800 40000000 20154008] add.s32.pack      t1._y__, t1.yyyy, void, u0.yyyy
+020 [0201101d 15401800 40010000 202a8008] and.s32.pack      t1.__z_, t1.yyyy, void, u0.zzzz
+021 [02011001 3fc00800 40000010 002a8018] add.s32.pack      t1.__z_, u0.wwww, void, t1.zzzz
+022 [04011032 2aa01c04 800000c0 00000002] load.denorm.u32   t1.___w, t1.zzzz, u1.xxxx, void
+023 [0201103c 15401800 40aa00c0 00000002] imullo0.s32.pack  t1.__z_, t1.yyyy, u1.yyyy, void
+024 [0201101a 3fe01800 80010000 002a8018] rshift.u32.pack   t1.__z_, t1.wwww, void, t1.zzzz
+025 [0201101d 2a801800 40010000 202a8018] and.s32.pack      t1.__z_, t1.zzzz, void, u1.zzzz
+026 [0201103c 2a801800 40000140 00000002] imullo0.s32.pack  t1.__z_, t1.zzzz, u2.xxxx, void
+027 [0081101c 00001800 40010000 002a8018] or.s32.pack       t1.x___, t1.xxxx, void, t1.zzzz
+028 [01011001 15401800 40000000 20154008] add.s32.pack      t1._y__, t1.yyyy, void, u0.yyyy
+029 [0201101d 15401800 40010000 202a8008] and.s32.pack      t1.__z_, t1.yyyy, void, u0.zzzz
+030 [02011001 3fc00800 40000010 002a8018] add.s32.pack      t1.__z_, u0.wwww, void, t1.zzzz
+031 [04011032 2aa01c04 800000c0 00000002] load.denorm.u32   t1.___w, t1.zzzz, u1.xxxx, void
+032 [0101103c 15401800 40aa00c0 00000002] imullo0.s32.pack  t1._y__, t1.yyyy, u1.yyyy, void
+033 [0101101a 3fe01800 80010000 00154018] rshift.u32.pack   t1._y__, t1.wwww, void, t1.yyyy
+034 [0101101d 15401800 40010000 202a8018] and.s32.pack      t1._y__, t1.yyyy, void, u1.zzzz
+035 [0101103c 15401800 40aa0140 00000002] imullo0.s32.pack  t1._y__, t1.yyyy, u2.yyyy, void
+036 [0081101c 00001800 40010000 00154018] or.s32.pack       t1.x___, t1.xxxx, void, t1.yyyy
+037 [0080103c 15400800 41540140 00000002] imullo0.s32.pack  t0.x___, t0.yyyy, u2.zzzz, void
+038 [00801001 00000800 40000000 003fc008] add.s32.pack      t0.x___, t0.xxxx, void, t0.wwww
+039 [00801001 3fc02800 40000010 00000008] add.s32.pack      t0.x___, u2.wwww, void, t0.xxxx
+040 [00820033 00200c04 800000c0 0000001a] store.denorm.u32  mem.x___, t0.xxxx, u1.xxxx, t1.xxxx	; dontcare bits in store: 00000000000000000000000000020000
+num loops: 0
+num temps: 2
+immediates:
+ [0].x = 0.000000 (0x00000004) (1)
+ [0].y = 0.000000 (0x04000008) (12)
+ [0].z = -nan (0xfffffffc) (1)
+ [0].w = 0.000000 (0x04000004) (12)
+ [1].x = 0.000000 (0x00000000) (1)
+ [1].y = 0.000000 (0x00000008) (1)
+ [1].z = 0.000000 (0x000000ff) (1)
+ [1].w = 0.000000 (0x00000100) (1)
+ [2].x = 0.000000 (0x00010000) (1)
+ [2].y = 0.000000 (0x01000000) (1)
+ [2].z = 0.000000 (0x0400000c) (12)
+ [2].w = 0.000000 (0x04000000) (12)
+workitem inputs: load_global_invocation_id - -
+barriers: no
+GPU addresses: out 0xffd7b000 in 0xffafb000 (2592000 bytes each)
+grid: 2 dimension(s), 2025 x 5 workgroups of 64 x 1 threads
+out[0..3]: 0xdeadbeef 0xdeadbeef 0xdeadbeef 0xdeadbeef
+{"result": "OFFLINE", "kernel": "tgather in", "threads": "129600 x 5", "workgroup": "64 x 1", "hwc": "540x960x5", "mismatched_words": 648000, "untouched": 648000, "first_mismatch": 0, "got": 3735928559, "want": 2921304065, "launch_to_done_ms": 1.365, "median_ms": 1.365, "launches": 1, "mb_per_s": 1898.4}

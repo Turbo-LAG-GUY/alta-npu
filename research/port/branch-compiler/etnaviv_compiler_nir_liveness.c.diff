@@ -1,0 +1,74 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_liveness.c b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_liveness.c
+index 5ce12dce665..b2e458d82e7 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_liveness.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_liveness.c
+@@ -146,8 +146,37 @@ etna_live_defs(nir_function_impl *impl, struct live_def *defs, unsigned *live_ma
+          if (instr->type == nir_instr_type_intrinsic) {
+             nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
+             if (intr->intrinsic == nir_intrinsic_load_input ||
+-                intr->intrinsic == nir_intrinsic_load_instance_id)
++                intr->intrinsic == nir_intrinsic_load_global_ir3 ||
++                intr->intrinsic == nir_intrinsic_load_shared ||
++                intr->intrinsic == nir_intrinsic_load_instance_id ||
++                intr->intrinsic == nir_intrinsic_load_global_invocation_id_zero_base ||
++                intr->intrinsic == nir_intrinsic_load_local_invocation_id ||
++                intr->intrinsic == nir_intrinsic_load_workgroup_id ||
++                intr->intrinsic == nir_intrinsic_image_size)
+                defs[state.num_defs].live_start = 0;
++
++            /* its dest might not be used later, which would confuse the RA */
++            if (intr->intrinsic == nir_intrinsic_global_atomic_add ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_add ||
++                intr->intrinsic == nir_intrinsic_global_atomic_and ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_and ||
++                intr->intrinsic == nir_intrinsic_global_atomic_or ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_or ||
++                intr->intrinsic == nir_intrinsic_global_atomic_xor ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_xor ||
++                intr->intrinsic == nir_intrinsic_global_atomic_exchange ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_exchange ||
++                intr->intrinsic == nir_intrinsic_global_atomic_comp_swap ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_comp_swap ||
++                intr->intrinsic == nir_intrinsic_global_atomic_imax ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_imax ||
++                intr->intrinsic == nir_intrinsic_global_atomic_imin ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_imin ||
++                intr->intrinsic == nir_intrinsic_global_atomic_umax ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_umax ||
++                intr->intrinsic == nir_intrinsic_global_atomic_umin ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_umin)
++               defs[state.num_defs].live_end = state.num_defs + 1;
+          }
+ 
+          live_map[idx] = state.num_defs;
+@@ -210,7 +239,29 @@ etna_live_defs(nir_function_impl *impl, struct live_def *defs, unsigned *live_ma
+          /* output live till the end */
+          if (instr->type == nir_instr_type_intrinsic) {
+             nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
+-            if (intr->intrinsic == nir_intrinsic_store_deref)
++            if (intr->intrinsic == nir_intrinsic_store_deref ||
++                intr->intrinsic == nir_intrinsic_store_global_ir3 ||
++                intr->intrinsic == nir_intrinsic_store_shared ||
++                intr->intrinsic == nir_intrinsic_global_atomic_add ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_add ||
++                intr->intrinsic == nir_intrinsic_global_atomic_and ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_and ||
++                intr->intrinsic == nir_intrinsic_global_atomic_or ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_or ||
++                intr->intrinsic == nir_intrinsic_global_atomic_xor ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_xor ||
++                intr->intrinsic == nir_intrinsic_global_atomic_exchange ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_exchange ||
++                intr->intrinsic == nir_intrinsic_global_atomic_comp_swap ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_comp_swap ||
++                intr->intrinsic == nir_intrinsic_global_atomic_imax ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_imax ||
++                intr->intrinsic == nir_intrinsic_global_atomic_imin ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_imin ||
++                intr->intrinsic == nir_intrinsic_global_atomic_umax ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_umax ||
++                intr->intrinsic == nir_intrinsic_global_atomic_umin ||
++                intr->intrinsic == nir_intrinsic_shared_atomic_umin)
+                state.index = ~0u;
+          }
+ 

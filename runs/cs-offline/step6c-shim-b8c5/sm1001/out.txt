@@ -1,0 +1,786 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: etna_ml_softmax
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 512
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:    // preds:
+    32      %0 = load_const (0x00000000)
+    32      %1 = @load_kernel_input (%0 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32      %2 = load_const (0x00000004)
+    32      %3 = @load_kernel_input (%2 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3    %4 = @load_workgroup_id
+    32      %5 = mov %4.x
+    32      %6 = load_const (0x00000000)
+    32      %7 = umin %5, %6 (0x0)
+    32x3    %8 = @load_local_invocation_id
+    32      %9 = mov %8.x
+    32     %10 = load_const (0x0000003f = 63)
+    32     %11 = umin %9, %10 (0x3f)
+    32     %12 = load_const (0x000003e9 = 1001)
+    32     %13 = imul %7, %12 (0x3e9)
+    32     %14 = iadd %3, %13
+    32     %15 = iadd %1, %13
+    32     %16 = load_const (0x00000000)
+    32     %17 = load_const (0x00000000 = 0.000000)
+    32     %18 = load_const (0x00000002)
+    32     %19 = ishl %11, %18 (0x2)
+    32     %20 = iadd %14, %19
+    32     %21 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32     %22 = load_const (0x000000ff = 255)
+    32     %23 = iand %21, %22 (0xff)
+    32     %24 = umax %16 (0x0), %23
+    32     %25 = load_const (0x00000008)
+    32     %26 = ushr %21, %25 (0x8)
+    32     %27 = load_const (0x000000ff = 255)
+    32     %28 = iand %26, %27 (0xff)
+    32     %29 = umax %24, %28
+    32     %30 = load_const (0x00000010 = 16)
+    32     %31 = ushr %21, %30 (0x10)
+    32     %32 = load_const (0x000000ff = 255)
+    32     %33 = iand %31, %32 (0xff)
+    32     %34 = umax %29, %33
+    32     %35 = load_const (0x00000018 = 24)
+    32     %36 = ushr %21, %35 (0x18)
+    32     %37 = load_const (0x000000ff = 255)
+    32     %38 = iand %36, %37 (0xff)
+    32     %39 = umax %34, %38
+    32     %40 = load_const (0x00000040 = 64)
+    32     %41 = iadd %11, %40 (0x40)
+    32     %42 = load_const (0x00000002)
+    32     %43 = ishl %41, %42 (0x2)
+    32     %44 = iadd %14, %43
+    32     %45 = @load_global (%44) (access=none, align_mul=4, align_offset=0)
+    32     %46 = load_const (0x000000ff = 255)
+    32     %47 = iand %45, %46 (0xff)
+    32     %48 = umax %39, %47
+    32     %49 = load_const (0x00000008)
+    32     %50 = ushr %45, %49 (0x8)
+    32     %51 = load_const (0x000000ff = 255)
+    32     %52 = iand %50, %51 (0xff)
+    32     %53 = umax %48, %52
+    32     %54 = load_const (0x00000010 = 16)
+    32     %55 = ushr %45, %54 (0x10)
+    32     %56 = load_const (0x000000ff = 255)
+    32     %57 = iand %55, %56 (0xff)
+    32     %58 = umax %53, %57
+    32     %59 = load_const (0x00000018 = 24)
+    32     %60 = ushr %45, %59 (0x18)
+    32     %61 = load_const (0x000000ff = 255)
+    32     %62 = iand %60, %61 (0xff)
+    32     %63 = umax %58, %62
+    32     %64 = load_const (0x00000080 = 128)
+    32     %65 = iadd %11, %64 (0x80)
+    32     %66 = load_const (0x00000002)
+    32     %67 = ishl %65, %66 (0x2)
+    32     %68 = iadd %14, %67
+    32     %69 = @load_global (%68) (access=none, align_mul=4, align_offset=0)
+    32     %70 = load_const (0x000000ff = 255)
+    32     %71 = iand %69, %70 (0xff)
+    32     %72 = umax %63, %71
+    32     %73 = load_const (0x00000008)
+    32     %74 = ushr %69, %73 (0x8)
+    32     %75 = load_const (0x000000ff = 255)
+    32     %76 = iand %74, %75 (0xff)
+    32     %77 = umax %72, %76
+    32     %78 = load_const (0x00000010 = 16)
+    32     %79 = ushr %69, %78 (0x10)
+    32     %80 = load_const (0x000000ff = 255)
+    32     %81 = iand %79, %80 (0xff)
+    32     %82 = umax %77, %81
+    32     %83 = load_const (0x00000018 = 24)
+    32     %84 = ushr %69, %83 (0x18)
+    32     %85 = load_const (0x000000ff = 255)
+    32     %86 = iand %84, %85 (0xff)
+    32     %87 = umax %82, %86
+    32     %88 = load_const (0x000000c0 = 192)
+    32     %89 = iadd %11, %88 (0xc0)
+    32     %90 = load_const (0x000000fa = 250)
+    32     %91 = umin %89, %90 (0xfa)
+    32     %92 = load_const (0x00000002)
+    32     %93 = ishl %91, %92 (0x2)
+    32     %94 = iadd %14, %93
+    32     %95 = @load_global (%94) (access=none, align_mul=4, align_offset=0)
+    32     %96 = load_const (0x000000fa = 250)
+    1      %97 = ieq %91, %96 (0xfa)
+    32     %98 = load_const (0x000000fb = 251)
+    1      %99 = uge %89, %98 (0xfb)
+    32    %100 = load_const (0x000000ff = 255)
+    32    %101 = iand %95, %100 (0xff)
+    32    %102 = umax %87, %101
+    32    %103 = load_const (0x00000008)
+    32    %104 = ushr %95, %103 (0x8)
+    32    %105 = load_const (0x000000ff = 255)
+    32    %106 = iand %104, %105 (0xff)
+    32    %107 = load_const (0x00000000)
+    32    %108 = bcsel %97, %107 (0x0), %106
+    32    %109 = umax %102, %108
+    32    %110 = load_const (0x00000010 = 16)
+    32    %111 = ushr %95, %110 (0x10)
+    32    %112 = load_const (0x000000ff = 255)
+    32    %113 = iand %111, %112 (0xff)
+    32    %114 = load_const (0x00000000)
+    32    %115 = bcsel %97, %114 (0x0), %113
+    32    %116 = umax %109, %115
+    32    %117 = load_const (0x00000018 = 24)
+    32    %118 = ushr %95, %117 (0x18)
+    32    %119 = load_const (0x000000ff = 255)
+    32    %120 = iand %118, %119 (0xff)
+    32    %121 = load_const (0x00000000)
+    32    %122 = bcsel %97, %121 (0x0), %120
+    32    %123 = umax %116, %122
+    32    %124 = load_const (0x00000002)
+    32    %125 = ishl %11, %124 (0x2)
+                 @store_shared (%123, %125) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %126 = load_const (0x00000000)
+    32x4  %127 = @load_shared (%126 (0x0)) (base=0, access=none, align_mul=16, align_offset=0)
+    32    %128 = load_const (0x00000000)
+    32x4  %129 = @load_shared (%128 (0x0)) (base=16, access=none, align_mul=16, align_offset=0)
+    32x4  %130 = umax %127, %129
+    32    %131 = load_const (0x00000000)
+    32x4  %132 = @load_shared (%131 (0x0)) (base=32, access=none, align_mul=16, align_offset=0)
+    32x4  %133 = umax %130, %132
+    32    %134 = load_const (0x00000000)
+    32x4  %135 = @load_shared (%134 (0x0)) (base=48, access=none, align_mul=16, align_offset=0)
+    32x4  %136 = umax %133, %135
+    32    %137 = load_const (0x00000000)
+    32x4  %138 = @load_shared (%137 (0x0)) (base=64, access=none, align_mul=16, align_offset=0)
+    32x4  %139 = umax %136, %138
+    32    %140 = load_const (0x00000000)
+    32x4  %141 = @load_shared (%140 (0x0)) (base=80, access=none, align_mul=16, align_offset=0)
+    32x4  %142 = umax %139, %141
+    32    %143 = load_const (0x00000000)
+    32x4  %144 = @load_shared (%143 (0x0)) (base=96, access=none, align_mul=16, align_offset=0)
+    32x4  %145 = umax %142, %144
+    32    %146 = load_const (0x00000000)
+    32x4  %147 = @load_shared (%146 (0x0)) (base=112, access=none, align_mul=16, align_offset=0)
+    32x4  %148 = umax %145, %147
+    32    %149 = load_const (0x00000000)
+    32x4  %150 = @load_shared (%149 (0x0)) (base=128, access=none, align_mul=16, align_offset=0)
+    32x4  %151 = umax %148, %150
+    32    %152 = load_const (0x00000000)
+    32x4  %153 = @load_shared (%152 (0x0)) (base=144, access=none, align_mul=16, align_offset=0)
+    32x4  %154 = umax %151, %153
+    32    %155 = load_const (0x00000000)
+    32x4  %156 = @load_shared (%155 (0x0)) (base=160, access=none, align_mul=16, align_offset=0)
+    32x4  %157 = umax %154, %156
+    32    %158 = load_const (0x00000000)
+    32x4  %159 = @load_shared (%158 (0x0)) (base=176, access=none, align_mul=16, align_offset=0)
+    32x4  %160 = umax %157, %159
+    32    %161 = load_const (0x00000000)
+    32x4  %162 = @load_shared (%161 (0x0)) (base=192, access=none, align_mul=16, align_offset=0)
+    32x4  %163 = umax %160, %162
+    32    %164 = load_const (0x00000000)
+    32x4  %165 = @load_shared (%164 (0x0)) (base=208, access=none, align_mul=16, align_offset=0)
+    32x4  %166 = umax %163, %165
+    32    %167 = load_const (0x00000000)
+    32x4  %168 = @load_shared (%167 (0x0)) (base=224, access=none, align_mul=16, align_offset=0)
+    32x4  %169 = umax %166, %168
+    32    %170 = load_const (0x00000000)
+    32x4  %171 = @load_shared (%170 (0x0)) (base=240, access=none, align_mul=16, align_offset=0)
+    32x4  %172 = umax %169, %171
+    32    %173 = mov %172.x
+    32    %174 = mov %172.y
+    32    %175 = mov %172.z
+    32    %176 = mov %172.w
+    32    %177 = umax %173, %174
+    32    %178 = umax %175, %176
+    32    %179 = umax %177, %178
+    32    %180 = load_const (0x00000000 = 0.000000)
+    32    %181 = u2f32 %179
+    32    %182 = load_const (0x00000002)
+    32    %183 = ishl %11, %182 (0x2)
+    32    %184 = iadd %14, %183
+    32    %185 = @load_global (%184) (access=none, align_mul=4, align_offset=0)
+    32    %186 = load_const (0x000000ff = 255)
+    32    %187 = iand %185, %186 (0xff)
+    32    %188 = u2f32 %187
+    32    %189 = fsub %188, %181
+    32    %190 = load_const (0x3e7561b4 = 0.239631)
+    32    %191 = fmul %189, %190 (0.239631)
+    32    %192 = fexp2 %191
+    32    %193 = fadd %180 (0.000000), %192
+    32    %194 = load_const (0x00000008)
+    32    %195 = ushr %185, %194 (0x8)
+    32    %196 = load_const (0x000000ff = 255)
+    32    %197 = iand %195, %196 (0xff)
+    32    %198 = u2f32 %197
+    32    %199 = fsub %198, %181
+    32    %200 = load_const (0x3e7561b4 = 0.239631)
+    32    %201 = fmul %199, %200 (0.239631)
+    32    %202 = fexp2 %201
+    32    %203 = fadd %193, %202
+    32    %204 = load_const (0x00000010 = 16)
+    32    %205 = ushr %185, %204 (0x10)
+    32    %206 = load_const (0x000000ff = 255)
+    32    %207 = iand %205, %206 (0xff)
+    32    %208 = u2f32 %207
+    32    %209 = fsub %208, %181
+    32    %210 = load_const (0x3e7561b4 = 0.239631)
+    32    %211 = fmul %209, %210 (0.239631)
+    32    %212 = fexp2 %211
+    32    %213 = fadd %203, %212
+    32    %214 = load_const (0x00000018 = 24)
+    32    %215 = ushr %185, %214 (0x18)
+    32    %216 = load_const (0x000000ff = 255)
+    32    %217 = iand %215, %216 (0xff)
+    32    %218 = u2f32 %217
+    32    %219 = fsub %218, %181
+    32    %220 = load_const (0x3e7561b4 = 0.239631)
+    32    %221 = fmul %219, %220 (0.239631)
+    32    %222 = fexp2 %221
+    32    %223 = fadd %213, %222
+    32    %224 = load_const (0x00000040 = 64)
+    32    %225 = iadd %11, %224 (0x40)
+    32    %226 = load_const (0x00000002)
+    32    %227 = ishl %225, %226 (0x2)
+    32    %228 = iadd %14, %227
+    32    %229 = @load_global (%228) (access=none, align_mul=4, align_offset=0)
+    32    %230 = load_const (0x000000ff = 255)
+    32    %231 = iand %229, %230 (0xff)
+    32    %232 = u2f32 %231
+    32    %233 = fsub %232, %181
+    32    %234 = load_const (0x3e7561b4 = 0.239631)
+    32    %235 = fmul %233, %234 (0.239631)
+    32    %236 = fexp2 %235
+    32    %237 = fadd %223, %236
+    32    %238 = load_const (0x00000008)
+    32    %239 = ushr %229, %238 (0x8)
+    32    %240 = load_const (0x000000ff = 255)
+    32    %241 = iand %239, %240 (0xff)
+    32    %242 = u2f32 %241
+    32    %243 = fsub %242, %181
+    32    %244 = load_const (0x3e7561b4 = 0.239631)
+    32    %245 = fmul %243, %244 (0.239631)
+    32    %246 = fexp2 %245
+    32    %247 = fadd %237, %246
+    32    %248 = load_const (0x00000010 = 16)
+    32    %249 = ushr %229, %248 (0x10)
+    32    %250 = load_const (0x000000ff = 255)
+    32    %251 = iand %249, %250 (0xff)
+    32    %252 = u2f32 %251
+    32    %253 = fsub %252, %181
+    32    %254 = load_const (0x3e7561b4 = 0.239631)
+    32    %255 = fmul %253, %254 (0.239631)
+    32    %256 = fexp2 %255
+    32    %257 = fadd %247, %256
+    32    %258 = load_const (0x00000018 = 24)
+    32    %259 = ushr %229, %258 (0x18)
+    32    %260 = load_const (0x000000ff = 255)
+    32    %261 = iand %259, %260 (0xff)
+    32    %262 = u2f32 %261
+    32    %263 = fsub %262, %181
+    32    %264 = load_const (0x3e7561b4 = 0.239631)
+    32    %265 = fmul %263, %264 (0.239631)
+    32    %266 = fexp2 %265
+    32    %267 = fadd %257, %266
+    32    %268 = load_const (0x00000080 = 128)
+    32    %269 = iadd %11, %268 (0x80)
+    32    %270 = load_const (0x00000002)
+    32    %271 = ishl %269, %270 (0x2)
+    32    %272 = iadd %14, %271
+    32    %273 = @load_global (%272) (access=none, align_mul=4, align_offset=0)
+    32    %274 = load_const (0x000000ff = 255)
+    32    %275 = iand %273, %274 (0xff)
+    32    %276 = u2f32 %275
+    32    %277 = fsub %276, %181
+    32    %278 = load_const (0x3e7561b4 = 0.239631)
+    32    %279 = fmul %277, %278 (0.239631)
+    32    %280 = fexp2 %279
+    32    %281 = fadd %267, %280
+    32    %282 = load_const (0x00000008)
+    32    %283 = ushr %273, %282 (0x8)
+    32    %284 = load_const (0x000000ff = 255)
+    32    %285 = iand %283, %284 (0xff)
+    32    %286 = u2f32 %285
+    32    %287 = fsub %286, %181
+    32    %288 = load_const (0x3e7561b4 = 0.239631)
+    32    %289 = fmul %287, %288 (0.239631)
+    32    %290 = fexp2 %289
+    32    %291 = fadd %281, %290
+    32    %292 = load_const (0x00000010 = 16)
+    32    %293 = ushr %273, %292 (0x10)
+    32    %294 = load_const (0x000000ff = 255)
+    32    %295 = iand %293, %294 (0xff)
+    32    %296 = u2f32 %295
+    32    %297 = fsub %296, %181
+    32    %298 = load_const (0x3e7561b4 = 0.239631)
+    32    %299 = fmul %297, %298 (0.239631)
+    32    %300 = fexp2 %299
+    32    %301 = fadd %291, %300
+    32    %302 = load_const (0x00000018 = 24)
+    32    %303 = ushr %273, %302 (0x18)
+    32    %304 = load_const (0x000000ff = 255)
+    32    %305 = iand %303, %304 (0xff)
+    32    %306 = u2f32 %305
+    32    %307 = fsub %306, %181
+    32    %308 = load_const (0x3e7561b4 = 0.239631)
+    32    %309 = fmul %307, %308 (0.239631)
+    32    %310 = fexp2 %309
+    32    %311 = fadd %301, %310
+    32    %312 = load_const (0x000000c0 = 192)
+    32    %313 = iadd %11, %312 (0xc0)
+    32    %314 = load_const (0x000000fa = 250)
+    32    %315 = umin %313, %314 (0xfa)
+    32    %316 = load_const (0x00000002)
+    32    %317 = ishl %315, %316 (0x2)
+    32    %318 = iadd %14, %317
+    32    %319 = @load_global (%318) (access=none, align_mul=4, align_offset=0)
+    32    %320 = load_const (0x000000fa = 250)
+    1     %321 = ieq %315, %320 (0xfa)
+    32    %322 = load_const (0x000000fb = 251)
+    1     %323 = uge %313, %322 (0xfb)
+    32    %324 = load_const (0x000000ff = 255)
+    32    %325 = iand %319, %324 (0xff)
+    32    %326 = u2f32 %325
+    32    %327 = fsub %326, %181
+    32    %328 = load_const (0x3e7561b4 = 0.239631)
+    32    %329 = fmul %327, %328 (0.239631)
+    32    %330 = fexp2 %329
+    32    %331 = load_const (0x00000000 = 0.000000)
+    32    %332 = bcsel %323, %331 (0x0), %330
+    32    %333 = fadd %311, %332
+    32    %334 = load_const (0x00000008)
+    32    %335 = ushr %319, %334 (0x8)
+    32    %336 = load_const (0x000000ff = 255)
+    32    %337 = iand %335, %336 (0xff)
+    32    %338 = load_const (0x00000000)
+    32    %339 = bcsel %321, %338 (0x0), %337
+    32    %340 = u2f32 %339
+    32    %341 = fsub %340, %181
+    32    %342 = load_const (0x3e7561b4 = 0.239631)
+    32    %343 = fmul %341, %342 (0.239631)
+    32    %344 = fexp2 %343
+    1     %345 = ior %321, %323
+    32    %346 = load_const (0x00000000 = 0.000000)
+    32    %347 = bcsel %345, %346 (0x0), %344
+    32    %348 = fadd %333, %347
+    32    %349 = load_const (0x00000010 = 16)
+    32    %350 = ushr %319, %349 (0x10)
+    32    %351 = load_const (0x000000ff = 255)
+    32    %352 = iand %350, %351 (0xff)
+    32    %353 = load_const (0x00000000)
+    32    %354 = bcsel %321, %353 (0x0), %352
+    32    %355 = u2f32 %354
+    32    %356 = fsub %355, %181
+    32    %357 = load_const (0x3e7561b4 = 0.239631)
+    32    %358 = fmul %356, %357 (0.239631)
+    32    %359 = fexp2 %358
+    1     %360 = ior %321, %323
+    32    %361 = load_const (0x00000000 = 0.000000)
+    32    %362 = bcsel %360, %361 (0x0), %359
+    32    %363 = fadd %348, %362
+    32    %364 = load_const (0x00000018 = 24)
+    32    %365 = ushr %319, %364 (0x18)
+    32    %366 = load_const (0x000000ff = 255)
+    32    %367 = iand %365, %366 (0xff)
+    32    %368 = load_const (0x00000000)
+    32    %369 = bcsel %321, %368 (0x0), %367
+    32    %370 = u2f32 %369
+    32    %371 = fsub %370, %181
+    32    %372 = load_const (0x3e7561b4 = 0.239631)
+    32    %373 = fmul %371, %372 (0.239631)
+    32    %374 = fexp2 %373
+    1     %375 = ior %321, %323
+    32    %376 = load_const (0x00000000 = 0.000000)
+    32    %377 = bcsel %375, %376 (0x0), %374
+    32    %378 = fadd %363, %377
+    32    %379 = load_const (0x00000002)
+    32    %380 = ishl %11, %379 (0x2)
+                 @store_shared (%378, %380) (base=256, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %381 = load_const (0x00000000)
+    32x4  %382 = @load_shared (%381 (0x0)) (base=256, access=none, align_mul=16, align_offset=0)
+    32    %383 = load_const (0x00000000)
+    32x4  %384 = @load_shared (%383 (0x0)) (base=272, access=none, align_mul=16, align_offset=0)
+    32x4  %385 = fadd %382, %384
+    32    %386 = load_const (0x00000000)
+    32x4  %387 = @load_shared (%386 (0x0)) (base=288, access=none, align_mul=16, align_offset=0)
+    32x4  %388 = fadd %385, %387
+    32    %389 = load_const (0x00000000)
+    32x4  %390 = @load_shared (%389 (0x0)) (base=304, access=none, align_mul=16, align_offset=0)
+    32x4  %391 = fadd %388, %390
+    32    %392 = load_const (0x00000000)
+    32x4  %393 = @load_shared (%392 (0x0)) (base=320, access=none, align_mul=16, align_offset=0)
+    32x4  %394 = fadd %391, %393
+    32    %395 = load_const (0x00000000)
+    32x4  %396 = @load_shared (%395 (0x0)) (base=336, access=none, align_mul=16, align_offset=0)
+    32x4  %397 = fadd %394, %396
+    32    %398 = load_const (0x00000000)
+    32x4  %399 = @load_shared (%398 (0x0)) (base=352, access=none, align_mul=16, align_offset=0)
+    32x4  %400 = fadd %397, %399
+    32    %401 = load_const (0x00000000)
+    32x4  %402 = @load_shared (%401 (0x0)) (base=368, access=none, align_mul=16, align_offset=0)
+    32x4  %403 = fadd %400, %402
+    32    %404 = load_const (0x00000000)
+    32x4  %405 = @load_shared (%404 (0x0)) (base=384, access=none, align_mul=16, align_offset=0)
+    32x4  %406 = fadd %403, %405
+    32    %407 = load_const (0x00000000)
+    32x4  %408 = @load_shared (%407 (0x0)) (base=400, access=none, align_mul=16, align_offset=0)
+    32x4  %409 = fadd %406, %408
+    32    %410 = load_const (0x00000000)
+    32x4  %411 = @load_shared (%410 (0x0)) (base=416, access=none, align_mul=16, align_offset=0)
+    32x4  %412 = fadd %409, %411
+    32    %413 = load_const (0x00000000)
+    32x4  %414 = @load_shared (%413 (0x0)) (base=432, access=none, align_mul=16, align_offset=0)
+    32x4  %415 = fadd %412, %414
+    32    %416 = load_const (0x00000000)
+    32x4  %417 = @load_shared (%416 (0x0)) (base=448, access=none, align_mul=16, align_offset=0)
+    32x4  %418 = fadd %415, %417
+    32    %419 = load_const (0x00000000)
+    32x4  %420 = @load_shared (%419 (0x0)) (base=464, access=none, align_mul=16, align_offset=0)
+    32x4  %421 = fadd %418, %420
+    32    %422 = load_const (0x00000000)
+    32x4  %423 = @load_shared (%422 (0x0)) (base=480, access=none, align_mul=16, align_offset=0)
+    32x4  %424 = fadd %421, %423
+    32    %425 = load_const (0x00000000)
+    32x4  %426 = @load_shared (%425 (0x0)) (base=496, access=none, align_mul=16, align_offset=0)
+    32x4  %427 = fadd %424, %426
+    32    %428 = mov %427.x
+    32    %429 = mov %427.y
+    32    %430 = mov %427.z
+    32    %431 = mov %427.w
+    32    %432 = fadd %428, %429
+    32    %433 = fadd %430, %431
+    32    %434 = fadd %432, %433
+    32    %435 = frcp %434
+    32    %436 = load_const (0x43800000 = 256.000000)
+    32    %437 = fmul %435, %436 (256.000000)
+    32    %438 = load_const (0x00000000 = 0.000000)
+    32    %439 = u2f32 %179
+    32    %440 = load_const (0x00000002)
+    32    %441 = ishl %11, %440 (0x2)
+    32    %442 = iadd %14, %441
+    32    %443 = @load_global (%442) (access=none, align_mul=4, align_offset=0)
+    32    %444 = load_const (0x000000ff = 255)
+    32    %445 = iand %443, %444 (0xff)
+    32    %446 = u2f32 %445
+    32    %447 = fsub %446, %439
+    32    %448 = load_const (0x3e7561b4 = 0.239631)
+    32    %449 = fmul %447, %448 (0.239631)
+    32    %450 = fexp2 %449
+    32    %451 = fmul %450, %437
+    32    %452 = load_const (0x3f000000 = 0.500000)
+    32    %453 = fadd %451, %452 (0.500000)
+    32    %454 = load_const (0x437f0000 = 255.000000)
+    32    %455 = fmin %453, %454 (255.000000)
+    32    %456 = f2u32 %455
+    32    %457 = load_const (0x00000008)
+    32    %458 = ushr %443, %457 (0x8)
+    32    %459 = load_const (0x000000ff = 255)
+    32    %460 = iand %458, %459 (0xff)
+    32    %461 = u2f32 %460
+    32    %462 = fsub %461, %439
+    32    %463 = load_const (0x3e7561b4 = 0.239631)
+    32    %464 = fmul %462, %463 (0.239631)
+    32    %465 = fexp2 %464
+    32    %466 = fmul %465, %437
+    32    %467 = load_const (0x3f000000 = 0.500000)
+    32    %468 = fadd %466, %467 (0.500000)
+    32    %469 = load_const (0x437f0000 = 255.000000)
+    32    %470 = fmin %468, %469 (255.000000)
+    32    %471 = f2u32 %470
+    32    %472 = load_const (0x00000008)
+    32    %473 = ishl %471, %472 (0x8)
+    32    %474 = ior %456, %473
+    32    %475 = load_const (0x00000010 = 16)
+    32    %476 = ushr %443, %475 (0x10)
+    32    %477 = load_const (0x000000ff = 255)
+    32    %478 = iand %476, %477 (0xff)
+    32    %479 = u2f32 %478
+    32    %480 = fsub %479, %439
+    32    %481 = load_const (0x3e7561b4 = 0.239631)
+    32    %482 = fmul %480, %481 (0.239631)
+    32    %483 = fexp2 %482
+    32    %484 = fmul %483, %437
+    32    %485 = load_const (0x3f000000 = 0.500000)
+    32    %486 = fadd %484, %485 (0.500000)
+    32    %487 = load_const (0x437f0000 = 255.000000)
+    32    %488 = fmin %486, %487 (255.000000)
+    32    %489 = f2u32 %488
+    32    %490 = load_const (0x00000010 = 16)
+    32    %491 = ishl %489, %490 (0x10)
+    32    %492 = ior %474, %491
+    32    %493 = load_const (0x00000018 = 24)
+    32    %494 = ushr %443, %493 (0x18)
+    32    %495 = load_const (0x000000ff = 255)
+    32    %496 = iand %494, %495 (0xff)
+    32    %497 = u2f32 %496
+    32    %498 = fsub %497, %439
+    32    %499 = load_const (0x3e7561b4 = 0.239631)
+    32    %500 = fmul %498, %499 (0.239631)
+    32    %501 = fexp2 %500
+    32    %502 = fmul %501, %437
+    32    %503 = load_const (0x3f000000 = 0.500000)
+    32    %504 = fadd %502, %503 (0.500000)
+    32    %505 = load_const (0x437f0000 = 255.000000)
+    32    %506 = fmin %504, %505 (255.000000)
+    32    %507 = f2u32 %506
+    32    %508 = load_const (0x00000018 = 24)
+    32    %509 = ishl %507, %508 (0x18)
+    32    %510 = ior %492, %509
+    32    %511 = load_const (0x00000002)
+    32    %512 = ishl %11, %511 (0x2)
+    32    %513 = iadd %15, %512
+                 @store_global (%510, %513) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %514 = load_const (0x00000040 = 64)
+    32    %515 = iadd %11, %514 (0x40)
+    32    %516 = load_const (0x00000002)
+    32    %517 = ishl %515, %516 (0x2)
+    32    %518 = iadd %14, %517
+    32    %519 = @load_global (%518) (access=none, align_mul=4, align_offset=0)
+    32    %520 = load_const (0x000000ff = 255)
+    32    %521 = iand %519, %520 (0xff)
+    32    %522 = u2f32 %521
+    32    %523 = fsub %522, %439
+    32    %524 = load_const (0x3e7561b4 = 0.239631)
+    32    %525 = fmul %523, %524 (0.239631)
+    32    %526 = fexp2 %525
+    32    %527 = fmul %526, %437
+    32    %528 = load_const (0x3f000000 = 0.500000)
+    32    %529 = fadd %527, %528 (0.500000)
+    32    %530 = load_const (0x437f0000 = 255.000000)
+    32    %531 = fmin %529, %530 (255.000000)
+    32    %532 = f2u32 %531
+    32    %533 = load_const (0x00000008)
+    32    %534 = ushr %519, %533 (0x8)
+    32    %535 = load_const (0x000000ff = 255)
+    32    %536 = iand %534, %535 (0xff)
+    32    %537 = u2f32 %536
+    32    %538 = fsub %537, %439
+    32    %539 = load_const (0x3e7561b4 = 0.239631)
+    32    %540 = fmul %538, %539 (0.239631)
+    32    %541 = fexp2 %540
+    32    %542 = fmul %541, %437
+    32    %543 = load_const (0x3f000000 = 0.500000)
+    32    %544 = fadd %542, %543 (0.500000)
+    32    %545 = load_const (0x437f0000 = 255.000000)
+    32    %546 = fmin %544, %545 (255.000000)
+    32    %547 = f2u32 %546
+    32    %548 = load_const (0x00000008)
+    32    %549 = ishl %547, %548 (0x8)
+    32    %550 = ior %532, %549
+    32    %551 = load_const (0x00000010 = 16)
+    32    %552 = ushr %519, %551 (0x10)
+    32    %553 = load_const (0x000000ff = 255)
+    32    %554 = iand %552, %553 (0xff)
+    32    %555 = u2f32 %554
+    32    %556 = fsub %555, %439
+    32    %557 = load_const (0x3e7561b4 = 0.239631)
+    32    %558 = fmul %556, %557 (0.239631)
+    32    %559 = fexp2 %558
+    32    %560 = fmul %559, %437
+    32    %561 = load_const (0x3f000000 = 0.500000)
+    32    %562 = fadd %560, %561 (0.500000)
+    32    %563 = load_const (0x437f0000 = 255.000000)
+    32    %564 = fmin %562, %563 (255.000000)
+    32    %565 = f2u32 %564
+    32    %566 = load_const (0x00000010 = 16)
+    32    %567 = ishl %565, %566 (0x10)
+    32    %568 = ior %550, %567
+    32    %569 = load_const (0x00000018 = 24)
+    32    %570 = ushr %519, %569 (0x18)
+    32    %571 = load_const (0x000000ff = 255)
+    32    %572 = iand %570, %571 (0xff)
+    32    %573 = u2f32 %572
+    32    %574 = fsub %573, %439
+    32    %575 = load_const (0x3e7561b4 = 0.239631)
+    32    %576 = fmul %574, %575 (0.239631)
+    32    %577 = fexp2 %576
+    32    %578 = fmul %577, %437
+    32    %579 = load_const (0x3f000000 = 0.500000)
+    32    %580 = fadd %578, %579 (0.500000)
+    32    %581 = load_const (0x437f0000 = 255.000000)
+    32    %582 = fmin %580, %581 (255.000000)
+    32    %583 = f2u32 %582
+    32    %584 = load_const (0x00000018 = 24)
+    32    %585 = ishl %583, %584 (0x18)
+    32    %586 = ior %568, %585
+    32    %587 = load_const (0x00000002)
+    32    %588 = ishl %515, %587 (0x2)
+    32    %589 = iadd %15, %588
+                 @store_global (%586, %589) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %590 = load_const (0x00000080 = 128)
+    32    %591 = iadd %11, %590 (0x80)
+    32    %592 = load_const (0x00000002)
+    32    %593 = ishl %591, %592 (0x2)
+    32    %594 = iadd %14, %593
+    32    %595 = @load_global (%594) (access=none, align_mul=4, align_offset=0)
+    32    %596 = load_const (0x000000ff = 255)
+    32    %597 = iand %595, %596 (0xff)
+    32    %598 = u2f32 %597
+    32    %599 = fsub %598, %439
+    32    %600 = load_const (0x3e7561b4 = 0.239631)
+    32    %601 = fmul %599, %600 (0.239631)
+    32    %602 = fexp2 %601
+    32    %603 = fmul %602, %437
+    32    %604 = load_const (0x3f000000 = 0.500000)
+    32    %605 = fadd %603, %604 (0.500000)
+    32    %606 = load_const (0x437f0000 = 255.000000)
+    32    %607 = fmin %605, %606 (255.000000)
+    32    %608 = f2u32 %607
+    32    %609 = load_const (0x00000008)
+    32    %610 = ushr %595, %609 (0x8)
+    32    %611 = load_const (0x000000ff = 255)
+    32    %612 = iand %610, %611 (0xff)
+    32    %613 = u2f32 %612
+    32    %614 = fsub %613, %439
+    32    %615 = load_const (0x3e7561b4 = 0.239631)
+    32    %616 = fmul %614, %615 (0.239631)
+    32    %617 = fexp2 %616
+    32    %618 = fmul %617, %437
+    32    %619 = load_const (0x3f000000 = 0.500000)
+    32    %620 = fadd %618, %619 (0.500000)
+    32    %621 = load_const (0x437f0000 = 255.000000)
+    32    %622 = fmin %620, %621 (255.000000)
+    32    %623 = f2u32 %622
+    32    %624 = load_const (0x00000008)
+    32    %625 = ishl %623, %624 (0x8)
+    32    %626 = ior %608, %625
+    32    %627 = load_const (0x00000010 = 16)
+    32    %628 = ushr %595, %627 (0x10)
+    32    %629 = load_const (0x000000ff = 255)
+    32    %630 = iand %628, %629 (0xff)
+    32    %631 = u2f32 %630
+    32    %632 = fsub %631, %439
+    32    %633 = load_const (0x3e7561b4 = 0.239631)
+    32    %634 = fmul %632, %633 (0.239631)
+    32    %635 = fexp2 %634
+    32    %636 = fmul %635, %437
+    32    %637 = load_const (0x3f000000 = 0.500000)
+    32    %638 = fadd %636, %637 (0.500000)
+    32    %639 = load_const (0x437f0000 = 255.000000)
+    32    %640 = fmin %638, %639 (255.000000)
+    32    %641 = f2u32 %640
+    32    %642 = load_const (0x00000010 = 16)
+    32    %643 = ishl %641, %642 (0x10)
+    32    %644 = ior %626, %643
+    32    %645 = load_const (0x00000018 = 24)
+    32    %646 = ushr %595, %645 (0x18)
+    32    %647 = load_const (0x000000ff = 255)
+    32    %648 = iand %646, %647 (0xff)
+    32    %649 = u2f32 %648
+    32    %650 = fsub %649, %439
+    32    %651 = load_const (0x3e7561b4 = 0.239631)
+    32    %652 = fmul %650, %651 (0.239631)
+    32    %653 = fexp2 %652
+    32    %654 = fmul %653, %437
+    32    %655 = load_const (0x3f000000 = 0.500000)
+    32    %656 = fadd %654, %655 (0.500000)
+    32    %657 = load_const (0x437f0000 = 255.000000)
+    32    %658 = fmin %656, %657 (255.000000)
+    32    %659 = f2u32 %658
+    32    %660 = load_const (0x00000018 = 24)
+    32    %661 = ishl %659, %660 (0x18)
+    32    %662 = ior %644, %661
+    32    %663 = load_const (0x00000002)
+    32    %664 = ishl %591, %663 (0x2)
+    32    %665 = iadd %15, %664
+                 @store_global (%662, %665) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %666 = load_const (0x000000c0 = 192)
+    32    %667 = iadd %11, %666 (0xc0)
+    32    %668 = load_const (0x000000fa = 250)
+    32    %669 = umin %667, %668 (0xfa)
+    32    %670 = load_const (0x00000002)
+    32    %671 = ishl %669, %670 (0x2)
+    32    %672 = iadd %14, %671
+    32    %673 = @load_global (%672) (access=none, align_mul=4, align_offset=0)
+    32    %674 = load_const (0x000000fa = 250)
+    1     %675 = ieq %669, %674 (0xfa)
+    32    %676 = load_const (0x000000fb = 251)
+    1     %677 = uge %667, %676 (0xfb)
+    32    %678 = load_const (0x000000ff = 255)
+    32    %679 = iand %673, %678 (0xff)
+    32    %680 = u2f32 %679
+    32    %681 = fsub %680, %439
+    32    %682 = load_const (0x3e7561b4 = 0.239631)
+    32    %683 = fmul %681, %682 (0.239631)
+    32    %684 = fexp2 %683
+    32    %685 = fmul %684, %437
+    32    %686 = load_const (0x3f000000 = 0.500000)
+    32    %687 = fadd %685, %686 (0.500000)
+    32    %688 = load_const (0x437f0000 = 255.000000)
+    32    %689 = fmin %687, %688 (255.000000)
+    32    %690 = f2u32 %689
+    32    %691 = load_const (0x00000008)
+    32    %692 = ushr %673, %691 (0x8)
+    32    %693 = load_const (0x000000ff = 255)
+    32    %694 = iand %692, %693 (0xff)
+    32    %695 = load_const (0x00000000)
+    32    %696 = bcsel %675, %695 (0x0), %694
+    32    %697 = u2f32 %696
+    32    %698 = fsub %697, %439
+    32    %699 = load_const (0x3e7561b4 = 0.239631)
+    32    %700 = fmul %698, %699 (0.239631)
+    32    %701 = fexp2 %700
+    32    %702 = fmul %701, %437
+    32    %703 = load_const (0x3f000000 = 0.500000)
+    32    %704 = fadd %702, %703 (0.500000)
+    32    %705 = load_const (0x437f0000 = 255.000000)
+    32    %706 = fmin %704, %705 (255.000000)
+    32    %707 = f2u32 %706
+    32    %708 = load_const (0x00000008)
+    32    %709 = ishl %707, %708 (0x8)
+    32    %710 = ior %690, %709
+    32    %711 = load_const (0x00000010 = 16)
+    32    %712 = ushr %673, %711 (0x10)
+    32    %713 = load_const (0x000000ff = 255)
+    32    %714 = iand %712, %713 (0xff)
+    32    %715 = load_const (0x00000000)
+    32    %716 = bcsel %675, %715 (0x0), %714
+    32    %717 = u2f32 %716
+    32    %718 = fsub %717, %439
+    32    %719 = load_const (0x3e7561b4 = 0.239631)
+    32    %720 = fmul %718, %719 (0.239631)
+    32    %721 = fexp2 %720
+    32    %722 = fmul %721, %437
+    32    %723 = load_const (0x3f000000 = 0.500000)
+    32    %724 = fadd %722, %723 (0.500000)
+    32    %725 = load_const (0x437f0000 = 255.000000)
+    32    %726 = fmin %724, %725 (255.000000)
+    32    %727 = f2u32 %726
+    32    %728 = load_const (0x00000010 = 16)
+    32    %729 = ishl %727, %728 (0x10)
+    32    %730 = ior %710, %729
+    32    %731 = load_const (0x00000018 = 24)
+    32    %732 = ushr %673, %731 (0x18)
+    32    %733 = load_const (0x000000ff = 255)
+    32    %734 = iand %732, %733 (0xff)
+    32    %735 = load_const (0x00000000)
+    32    %736 = bcsel %675, %735 (0x0), %734
+    32    %737 = u2f32 %736
+    32    %738 = fsub %737, %439
+    32    %739 = load_const (0x3e7561b4 = 0.239631)
+    32    %740 = fmul %738, %739 (0.239631)
+    32    %741 = fexp2 %740
+    32    %742 = fmul %741, %437
+    32    %743 = load_const (0x3f000000 = 0.500000)
+    32    %744 = fadd %742, %743 (0.500000)
+    32    %745 = load_const (0x437f0000 = 255.000000)
+    32    %746 = fmin %744, %745 (255.000000)
+    32    %747 = f2u32 %746
+    32    %748 = load_const (0x00000018 = 24)
+    32    %749 = ishl %747, %748 (0x18)
+    32    %750 = ior %730, %749
+    32    %751 = load_const (0x00000002)
+    32    %752 = ishl %669, %751 (0x2)
+    32    %753 = iadd %15, %752
+                 @store_global (%750, %753) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b1
+    block b1:
+}
+
+kernel: softmax, shared 512 bytes per workgroup
+GPU addresses: out 0xffffa000 in 0xffff9000 (1004 bytes each)
+grid: 1 dimension(s), 1 x 1 workgroups of 64 x 1 threads
+softmax: 1 rows of 1001, factor 0.2396305: 0 exact, 0 off by 1, 1001 worse (worst 239); row 0 peaks: 190 239 239
+{"result": "OFFLINE", "kernel": "softmax", "rows": 1, "len": 1001, "exact": 0, "off_by_1": 0, "worse": 1001, "worst": 239, "bytes_0xef": 251, "first_launch_ms": 0.798, "median_ms": 0.798, "launches": 1}

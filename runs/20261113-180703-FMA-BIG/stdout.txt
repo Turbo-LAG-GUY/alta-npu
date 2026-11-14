@@ -1,0 +1,5 @@
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120
+GPU addresses: out 0xffefb000 in 0xffdfb000
+out[0..3]: 0.225958 0.815003 0.400889 0.989937
+{"result": "PASS", "kernel": "fma", "threads": 65536, "workgroup": 64, "fma_per_thread": 256, "mismatches": 0, "untouched": 0, "worst_abs_error": 3.93e-06, "first_launch_ms": 86.840, "median_ms": 21.866, "launches": 10, "gflops": 6.138}

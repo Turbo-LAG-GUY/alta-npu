@@ -1,0 +1,157 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: t4x4copy
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32     %2 = mov %0.y
+    32     %3 = load_const (0x00000000)
+    32     %4 = @load_kernel_input (%3 (0x0)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000004)
+    32     %6 = @load_kernel_input (%5 (0x4)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %7 = load_const (0x00000008)
+    32     %8 = @load_kernel_input (%7 (0x8)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %9 = load_const (0x0000000c = 12)
+    32    %10 = @load_kernel_input (%9 (0xc)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %11 = load_const (0x00000010 = 16)
+    32    %12 = @load_kernel_input (%11 (0x10)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %13 = load_const (0x00000014 = 20)
+    32    %14 = @load_kernel_input (%13 (0x14)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %15 = load_const (0x00000018 = 24)
+    32    %16 = @load_kernel_input (%15 (0x18)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %17 = load_const (0x0000001c = 28)
+    32    %18 = @load_kernel_input (%17 (0x1c)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %19 = imul %1, %8
+    32    %20 = imul %2, %10
+    32    %21 = iadd %19, %20
+    32    %22 = iadd %6, %21
+    32    %23 = imul %1, %14
+    32    %24 = imul %2, %16
+    32    %25 = iadd %23, %24
+    32    %26 = iadd %4, %25
+    32    %27 = @load_global (%22) (access=none, align_mul=4, align_offset=0)
+    32    %28 = iadd %22, %12
+    32    %29 = @load_global (%28) (access=none, align_mul=4, align_offset=0)
+    32    %30 = iadd %28, %12
+    32    %31 = @load_global (%30) (access=none, align_mul=4, align_offset=0)
+    32    %32 = iadd %30, %12
+    32    %33 = @load_global (%32) (access=none, align_mul=4, align_offset=0)
+                @store_global (%27, %26) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %34 = iadd %26, %18
+                @store_global (%29, %34) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %35 = iadd %34, %18
+                @store_global (%31, %35) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %36 = iadd %35, %18
+                @store_global (%33, %36) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: t4x4copy, shared 0 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: t4x4copy
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = load_const (0x00000000)
+    32     %2 = @load_kernel_input (%1 (0x0)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %3 = load_const (0x00000004)
+    32     %4 = @load_kernel_input (%3 (0x4)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000008)
+    32     %6 = @load_kernel_input (%5 (0x8)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %7 = load_const (0x0000000c = 12)
+    32     %8 = @load_kernel_input (%7 (0xc)) (base=0, range=32, align_mul=4, align_offset=0)
+    32     %9 = load_const (0x00000010 = 16)
+    32    %10 = @load_kernel_input (%9 (0x10)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %11 = load_const (0x00000014 = 20)
+    32    %12 = @load_kernel_input (%11 (0x14)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %13 = load_const (0x00000018 = 24)
+    32    %14 = @load_kernel_input (%13 (0x18)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %15 = load_const (0x0000001c = 28)
+    32    %16 = @load_kernel_input (%15 (0x1c)) (base=0, range=32, align_mul=4, align_offset=0)
+    32    %17 = imul %0.x, %6
+    32    %18 = imul %0.y, %8
+    32    %19 = iadd %17, %18
+    32    %20 = iadd %4, %19
+    32    %21 = imul %0.x, %12
+    32    %22 = imul %0.y, %14
+    32    %23 = iadd %21, %22
+    32    %24 = iadd %2, %23
+    32    %25 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32    %26 = iadd %20, %10
+    32    %27 = @load_global (%26) (access=none, align_mul=4, align_offset=0)
+    32    %28 = iadd %26, %10
+    32    %29 = @load_global (%28) (access=none, align_mul=4, align_offset=0)
+    32    %30 = iadd %28, %10
+    32    %31 = @load_global (%30) (access=none, align_mul=4, align_offset=0)
+                @store_global (%25, %24) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %32 = iadd %24, %16
+                @store_global (%27, %32) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %33 = iadd %32, %16
+                @store_global (%29, %33) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %34 = iadd %33, %16
+                @store_global (%31, %34) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 00000800 40000040 00000002] imullo0.s32.pack  t0.___w, t0.xxxx, u0.xxxx, void
+001 [0081103c 15400800 40aa0040 00000002] imullo0.s32.pack  t1.x___, t0.yyyy, u0.yyyy, void
+002 [04001001 3fc00800 40000000 00000018] add.s32.pack      t0.___w, t0.wwww, void, t1.xxxx
+003 [04001001 2a800800 40000010 003fc008] add.s32.pack      t0.___w, u0.zzzz, void, t0.wwww
+004 [0081103c 00000800 41fe0040 00000002] imullo0.s32.pack  t1.x___, t0.xxxx, u0.wwww, void
+005 [0080103c 15400800 400000c0 00000002] imullo0.s32.pack  t0.x___, t0.yyyy, u1.xxxx, void
+006 [00801001 00001800 40000000 00000008] add.s32.pack      t0.x___, t1.xxxx, void, t0.xxxx
+007 [00801001 15401800 40000010 00000008] add.s32.pack      t0.x___, u1.yyyy, void, t0.xxxx
+008 [01001032 3fe00c04 815400c0 00000002] load.denorm.u32   t0._y__, t0.wwww, u1.zzzz, void
+009 [02001001 3fc00800 40000000 203fc018] add.s32.pack      t0.__z_, t0.wwww, void, u1.wwww
+010 [04001032 2aa00c04 815400c0 00000002] load.denorm.u32   t0.___w, t0.zzzz, u1.zzzz, void
+011 [02001001 2a800800 40000000 203fc018] add.s32.pack      t0.__z_, t0.zzzz, void, u1.wwww
+012 [00811032 2aa00c04 815400c0 00000002] load.denorm.u32   t1.x___, t0.zzzz, u1.zzzz, void
+013 [02001001 2a800800 40000000 203fc018] add.s32.pack      t0.__z_, t0.zzzz, void, u1.wwww
+014 [01011032 2aa00c04 815400c0 00000002] load.denorm.u32   t1._y__, t0.zzzz, u1.zzzz, void
+015 [00820033 00200c04 815400c0 0000400a] store.denorm.u32  mem.x___, t0.xxxx, u1.zzzz, t0.yxxx	; dontcare bits in store: 00000000000000000000000000020000
+016 [02001001 00000800 40000000 20000028] add.s32.pack      t0.__z_, t0.xxxx, void, u2.xxxx
+017 [00820033 2aa00c04 815400c0 0000c00a] store.denorm.u32  mem.x___, t0.zzzz, u1.zzzz, t0.wxxx	; dontcare bits in store: 00000000000000000000000000020000
+018 [02011001 2a800800 40000000 20000028] add.s32.pack      t1.__z_, t0.zzzz, void, u2.xxxx
+019 [00820033 2aa01c04 815400c0 0000001a] store.denorm.u32  mem.x___, t1.zzzz, u1.zzzz, t1.xxxx	; dontcare bits in store: 00000000000000000000000000020000
+020 [04011001 2a801800 40000000 20000028] add.s32.pack      t1.___w, t1.zzzz, void, u2.xxxx
+021 [00820033 3fe01c04 815400c0 0000401a] store.denorm.u32  mem.x___, t1.wwww, u1.zzzz, t1.yxxx	; dontcare bits in store: 00000000000000000000000000020000
+num loops: 0
+num temps: 2
+immediates:
+ [0].x = 0.000000 (0x04000008) (12)
+ [0].y = 0.000000 (0x0400000c) (12)
+ [0].z = 0.000000 (0x04000004) (12)
+ [0].w = 0.000000 (0x04000014) (12)
+ [1].x = 0.000000 (0x04000018) (12)
+ [1].y = 0.000000 (0x04000000) (12)
+ [1].z = 0.000000 (0x00000000) (1)
+ [1].w = 0.000000 (0x04000010) (12)
+ [2].x = 0.000000 (0x0400001c) (12)
+ [2].y = 0.000000 (0x00000000) (0)
+ [2].z = 0.000000 (0x00000000) (0)
+ [2].w = 0.000000 (0x00000000) (0)
+workitem inputs: load_global_invocation_id - -
+barriers: no
+GPU addresses: out 0xffc7b000 in 0xff8fb000 (3211264 bytes each)
+grid: 2 dimension(s), 49 x 64 workgroups of 64 x 1 threads
+out[0..3]: 0xdeadbeef 0xdeadbeef 0xdeadbeef 0xdeadbeef
+{"result": "OFFLINE", "kernel": "t4x4copy in", "threads": "3136 x 64", "workgroup": "64 x 1", "hwc": "112x112x256", "mismatched_words": 802816, "untouched": 802816, "first_mismatch": 0, "got": 3735928559, "want": 2315748353, "launch_to_done_ms": 4.498, "median_ms": 4.498, "launches": 1, "mb_per_s": 713.9}

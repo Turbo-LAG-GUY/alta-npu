@@ -1,0 +1,10 @@
+label: HIST8-64
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/npu_detail_test.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_64x64.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_reference_64x64.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap -n 5
+cwd: /home/jordan/alta-npu
+start: 2026-11-12T09:04:41-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1505
+deadline_s: 120
+journal_cursor: s=34e9d89724f14199ba3108e469c360c3;i=ef76b;b=46d8402b9c78431a93b36209e5da1d3c;m=d5e7c7b60;t=66014cae502e5;x=b80df76618b3f199
+end: 2026-11-12T09:04:44-05:00  rc: 0  wall_s: 3

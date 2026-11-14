@@ -1,0 +1,19 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_uniforms.h b/src/gallium/drivers/etnaviv/etnaviv_uniforms.h
+index 119d96bc1d6..36b7df685ea 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_uniforms.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_uniforms.h
+@@ -32,11 +32,13 @@
+ struct etna_context;
+ struct etna_shader_variant;
+ struct pipe_constant_buffer;
++struct pipe_grid_info;
+ 
+ void
+ etna_uniforms_write(const struct etna_context *ctx,
+                     const struct etna_shader_variant *sobj,
+-                    struct pipe_constant_buffer *cb);
++                    struct pipe_constant_buffer *cb,
++                    const struct pipe_grid_info *grid);
+ 
+ void
+ etna_set_shader_uniforms_dirty_flags(struct etna_shader_variant *sobj);

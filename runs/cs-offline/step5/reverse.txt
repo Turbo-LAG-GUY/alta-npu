@@ -1,0 +1,18 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+kernel: reverse, 20 instructions, num_temps 3 (driver programs 4), uniforms 12, shared 2048 bytes per workgroup, barriers yes
+  input t0: load_workgroup_id
+  input t1: load_global_invocation_id
+  input t2: load_local_invocation_id
+  u0.x: group_count 0x00000000
+  u0.y: group_count 0x00000001
+  u0.z: group_count 0x00000002
+  u0.w: constant    0x00000800
+  u1.x: shared_addr 0x00000000
+  u1.y: constant    0x00000004
+  u1.z: kernel_arg  offset 4 size 4
+  u1.w: constant    0x00000000
+  u2.x: kernel_arg  offset 12 size 4
+  u2.y: kernel_arg  offset 8 size 4
+  u2.z: kernel_arg  offset 0 size 4
+  u2.w: unused      0x00000000
+wrote /home/jordan/alta-npu/runs/cs-offline/step5/reverse.bin

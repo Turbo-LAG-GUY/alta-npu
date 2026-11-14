@@ -1,0 +1,220 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: reduce
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 2048
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32x3   %2 = @load_local_invocation_id
+    32     %3 = mov %2.x
+    32     %4 = load_const (0x00000000)
+    32     %5 = @load_kernel_input (%4 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000004)
+    32     %7 = @load_kernel_input (%6 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %8 = load_const (0x00000002)
+    32     %9 = ishl %1, %8 (0x2)
+    32    %10 = load_const (0x00000002)
+    32    %11 = ishl %3, %10 (0x2)
+    32    %12 = iadd %7, %9
+    32    %13 = @load_global (%12) (access=none, align_mul=4, align_offset=0)
+                @store_shared (%13, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %14 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %15 = @load_shared (%11) (base=32, access=none, align_mul=4, align_offset=0)
+    32    %16 = load_const (0x00000008)
+    1     %17 = ult %3, %16 (0x8)
+    32    %18 = iadd %14, %15
+    32    %19 = bcsel %17, %18, %14
+                @store_shared (%19, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %20 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %21 = @load_shared (%11) (base=16, access=none, align_mul=4, align_offset=0)
+    32    %22 = load_const (0x00000004)
+    1     %23 = ult %3, %22 (0x4)
+    32    %24 = iadd %20, %21
+    32    %25 = bcsel %23, %24, %20
+                @store_shared (%25, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %26 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %27 = @load_shared (%11) (base=8, access=none, align_mul=4, align_offset=0)
+    32    %28 = load_const (0x00000002)
+    1     %29 = ult %3, %28 (0x2)
+    32    %30 = iadd %26, %27
+    32    %31 = bcsel %29, %30, %26
+                @store_shared (%31, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %32 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %33 = @load_shared (%11) (base=4, access=none, align_mul=4, align_offset=0)
+    32    %34 = load_const (0x00000001)
+    1     %35 = ult %3, %34 (0x1)
+    32    %36 = iadd %32, %33
+    32    %37 = bcsel %35, %36, %32
+                @store_shared (%37, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %38 = load_const (0x00000000)
+    32    %39 = @load_shared (%38 (0x0)) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %40 = iadd %5, %9
+                @store_global (%39, %40) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: reduce, shared 2048 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: reduce
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 2048
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_workgroup_id
+    32x3   %1 = @load_num_workgroups
+    32     %2 = imul %1.y, %0.z
+    32     %3 = iadd %0.y, %2
+    32     %4 = imul %1.x, %3
+    32     %5 = iadd %0.x, %4
+    32     %6 = @load_shared_base_ptr
+    32     %7 = load_const (0x00000800 = 2048)
+    32     %8 = imul %5, %7 (0x800)
+    32     %9 = iadd %6, %8
+    32x3  %10 = @load_global_invocation_id
+    32x3  %11 = @load_local_invocation_id
+    32    %12 = load_const (0x00000000)
+    32    %13 = @load_kernel_input (%12 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %14 = load_const (0x00000004)
+    32    %15 = @load_kernel_input (%14 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %16 = imul %10.x, %14 (0x4)
+    32    %17 = imul %11.x, %14 (0x4)
+    32    %18 = iadd %15, %16
+    32    %19 = @load_global (%18) (access=none, align_mul=4, align_offset=0)
+    32    %20 = iadd %9, %17
+                @store_global (%19, %20) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %21 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32x4  %22 = load_const (0x00000020, 0x00000010, 0x00000008, 0x00000004) = (32, 16, 8, 4)
+    32x4  %23 = iadd %17.xxxx, %22 (0x20, 0x10, 0x8, 0x4)
+    32x4  %24 = iadd %9.xxxx, %23
+    32    %25 = mov %24.w
+    32    %26 = mov %24.z
+    32    %27 = mov %24.x
+    32    %28 = mov %24.y
+    32    %29 = @load_global (%27) (access=none, align_mul=4, align_offset=0)
+    32x3  %30 = load_const (0x00000008, 0x00000004, 0x00000002)
+    32x3  %31 = ult32 %11.xxx, %30 (0x8, 0x4, 0x2)
+    32    %32 = iadd %21, %29
+    32    %33 = b32csel %31.x, %32, %21
+                @store_global (%33, %20) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %34 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32    %35 = @load_global (%28) (access=none, align_mul=4, align_offset=0)
+    32    %36 = iadd %34, %35
+    32    %37 = b32csel %31.y, %36, %34
+                @store_global (%37, %20) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %38 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32    %39 = @load_global (%26) (access=none, align_mul=4, align_offset=0)
+    32    %40 = iadd %38, %39
+    32    %41 = b32csel %31.z, %40, %38
+                @store_global (%41, %20) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %42 = @load_global (%20) (access=none, align_mul=4, align_offset=0)
+    32    %43 = @load_global (%25) (access=none, align_mul=4, align_offset=0)
+    32    %44 = ieq32 %11.x, %12 (0x0)
+    32    %45 = iadd %42, %43
+    32    %46 = b32csel %44, %45, %42
+                @store_global (%46, %20) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %47 = @load_global (%9) (access=none, align_mul=4, align_offset=0)
+    32    %48 = iadd %13, %16
+                @store_global (%47, %48) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 15400800 41540050 00000000] imullo0.s32.pack  t0.___w, u0.yyyy, t0.zzzz, void
+001 [04001001 15400800 40000000 003fc008] add.s32.pack      t0.___w, t0.yyyy, void, t0.wwww
+002 [0400103c 00000800 41fe0050 00000000] imullo0.s32.pack  t0.___w, u0.xxxx, t0.wwww, void
+003 [00801001 00000800 40000000 003fc008] add.s32.pack      t0.x___, t0.xxxx, void, t0.wwww
+004 [0080103c 00000800 41fe0040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.wwww, void
+005 [00801001 00001800 40000010 00000008] add.s32.pack      t0.x___, u1.xxxx, void, t0.xxxx
+006 [0100103c 00001800 40aa00c0 00000002] imullo0.s32.pack  t0._y__, t1.xxxx, u1.yyyy, void
+007 [0200103c 00002800 40aa00c0 00000002] imullo0.s32.pack  t0.__z_, t2.xxxx, u1.yyyy, void
+008 [04001001 2a801800 40000010 00154008] add.s32.pack      t0.___w, u1.zzzz, void, t0.yyyy
+009 [00811032 3fe00c04 81fe00c0 00000002] load.denorm.u32   t1.x___, t0.wwww, u1.wwww, void
+010 [04001001 00000800 40000000 002a8008] add.s32.pack      t0.___w, t0.xxxx, void, t0.zzzz
+011 [00840033 3fe00c04 81fe00c0 0000001a] store.denorm.u32  mem.x___, t0.wwww, u1.wwww, t1.xxxx	; dontcare bits in store: 00000000000000000000000000040000
+012 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+013 [01011032 3fe00c04 81fe00c0 00000002] load.denorm.u32   t1._y__, t0.wwww, u1.wwww, void
+014 [07831001 2a800800 40000000 20390028] add.s32.pack      t3, t0.zzzz, void, u2.xyzw
+015 [07831001 00000800 40000000 00390038] add.s32.pack      t3, t0.xxxx, void, t3.xyzw
+016 [02001009 00000000 00000000 003fc038] mov.pack          t0.__z_, void, void, t3.wwww
+017 [02011009 00000000 00000000 002a8038] mov.pack          t1.__z_, void, void, t3.zzzz
+018 [04011009 00000000 00000000 00000038] mov.pack          t1.___w, void, void, t3.xxxx
+019 [04021009 00000000 00000000 00154038] mov.pack          t2.___w, void, void, t3.yyyy
+020 [00831032 3fe01c04 81fe00c0 00000002] load.denorm.u32   t3.x___, t1.wwww, u1.wwww, void
+021 [070310b1 00202800 812001c0 76ffdffa] cmp.lt.u32.pack   t3._yzw, t2.xxxx, u3.xxyz, -1:s20
+022 [04011001 15401800 40000000 00000038] add.s32.pack      t1.___w, t1.yyyy, void, t3.xxxx
+023 [010112cf 15603800 81fe00c0 00154018] select.nz.u32.pack t1._y__, t3.yyyy, t1.wwww, t1.yyyy
+024 [00840033 3fe00c04 81fe00c0 0000401a] store.denorm.u32  mem.x___, t0.wwww, u1.wwww, t1.yxxx	; dontcare bits in store: 00000000000000000000000000040000
+025 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+026 [04011032 3fe00c04 81fe00c0 00000002] load.denorm.u32   t1.___w, t0.wwww, u1.wwww, void
+027 [00831032 3fe02c04 81fe00c0 00000002] load.denorm.u32   t3.x___, t2.wwww, u1.wwww, void
+028 [04021001 3fc01800 40000000 00000038] add.s32.pack      t2.___w, t1.wwww, void, t3.xxxx
+029 [040112cf 2aa03800 81fe0140 003fc018] select.nz.u32.pack t1.___w, t3.zzzz, t2.wwww, t1.wwww
+030 [00840033 3fe00c04 81fe00c0 0000c01a] store.denorm.u32  mem.x___, t0.wwww, u1.wwww, t1.wxxx	; dontcare bits in store: 00000000000000000000000000040000
+031 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+032 [04021032 3fe00c04 81fe00c0 00000002] load.denorm.u32   t2.___w, t0.wwww, u1.wwww, void
+033 [00831032 2aa01c04 81fe00c0 00000002] load.denorm.u32   t3.x___, t1.zzzz, u1.wwww, void
+034 [02011001 3fc02800 40000000 00000038] add.s32.pack      t1.__z_, t2.wwww, void, t3.xxxx
+035 [020112cf 3fe03800 815400c0 003fc028] select.nz.u32.pack t1.__z_, t3.wwww, t1.zzzz, t2.wwww
+036 [00840033 3fe00c04 81fe00c0 0000801a] store.denorm.u32  mem.x___, t0.wwww, u1.wwww, t1.zxxx	; dontcare bits in store: 00000000000000000000000000040000
+037 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+038 [04021032 3fe00c04 81fe00c0 00000002] load.denorm.u32   t2.___w, t0.wwww, u1.wwww, void
+039 [00831032 2aa00c04 81fe00c0 00000002] load.denorm.u32   t3.x___, t0.zzzz, u1.wwww, void
+040 [02001171 00002800 41fe00c0 76ffdffa] cmp.eq.s32.pack   t0.__z_, t2.xxxx, u1.wwww, -1:s20
+041 [00821001 3fc02800 40000000 00000038] add.s32.pack      t2.x___, t2.wwww, void, t3.xxxx
+042 [020012cf 2aa00800 80000140 003fc028] select.nz.u32.pack t0.__z_, t0.zzzz, t2.xxxx, t2.wwww
+043 [00840033 3fe00c04 81fe00c0 0000800a] store.denorm.u32  mem.x___, t0.wwww, u1.wwww, t0.zxxx	; dontcare bits in store: 00000000000000000000000000040000
+044 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+045 [00821032 00200c04 81fe00c0 00000002] load.denorm.u32   t2.x___, t0.xxxx, u1.wwww, void
+046 [00801001 3fc03800 40000010 00154008] add.s32.pack      t0.x___, u3.wwww, void, t0.yyyy
+047 [00840033 00200c04 81fe00c0 0000002a] store.denorm.u32  mem.x___, t0.xxxx, u1.wwww, t2.xxxx	; dontcare bits in store: 00000000000000000000000000040000
+num loops: 0
+num temps: 4
+immediates:
+ [0].x = 0.000000 (0x00000000) (13)
+ [0].y = 0.000000 (0x00000001) (13)
+ [0].z = 0.000000 (0x00000002) (13)
+ [0].w = 0.000000 (0x00000800) (1)
+ [1].x = 0.000000 (0x00000000) (14)
+ [1].y = 0.000000 (0x00000004) (1)
+ [1].z = 0.000000 (0x04000004) (12)
+ [1].w = 0.000000 (0x00000000) (1)
+ [2].x = 0.000000 (0x00000020) (1)
+ [2].y = 0.000000 (0x00000010) (1)
+ [2].z = 0.000000 (0x00000008) (1)
+ [2].w = 0.000000 (0x00000004) (1)
+ [3].x = 0.000000 (0x00000008) (1)
+ [3].y = 0.000000 (0x00000004) (1)
+ [3].z = 0.000000 (0x00000002) (1)
+ [3].w = 0.000000 (0x04000000) (12)
+workitem inputs: load_workgroup_id load_global_invocation_id load_local_invocation_id
+barriers: yes
+GPU addresses: out 0xffffa000 in 0xffff9000 (1024 bytes each)
+out[0..3]: 0xdeadbeef 0xdeadbeef 0xdeadbeef 0xdeadbeef
+{"result": "OFFLINE", "kernel": "reduce", "threads": 256, "workgroup": 16, "mismatches": 256, "untouched": 256, "first_mismatch": 0, "got": 3735928559, "want": 856, "launch_to_done_ms": 1.216, "median_ms": 1.216, "launches": 1}

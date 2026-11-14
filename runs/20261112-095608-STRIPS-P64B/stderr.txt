@@ -1,0 +1,2 @@
+etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 rows, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 40 of 1024 KiB

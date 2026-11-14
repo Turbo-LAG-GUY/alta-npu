@@ -1,0 +1,12 @@
+etnaviv/ml: strips: strip 0 op 0 (transpose): input rows 0..35 -> output rows 0..35, y offset 0, plane rows in 0 out 0, tensors 12 (+0) -> 13 (+0)
+etnaviv/ml: strips: strip 0 op 1 (conv): input rows 0..35 -> output rows 0..34, y offset -1, plane rows in 0 out 0, tensors 13 (+0) -> 14 (+0)
+etnaviv/ml: strips: strip 0 op 2 (conv): input rows 0..34 -> output rows 0..33, y offset -1, plane rows in 0 out 0, tensors 14 (+0) -> 15 (+0)
+etnaviv/ml: strips: strip 0 op 3 (conv): input rows 0..33 -> output rows 0..32, y offset -1, plane rows in 0 out 0, tensors 15 (+0) -> 16 (+0)
+etnaviv/ml: strips: strip 0 op 4 (detranspose): input rows 0..32 -> output rows 0..32, y offset 0, plane rows in 0 out 0, tensors 16 (+0) -> 17 (+0)
+etnaviv/ml: strips: strip 1 op 0 (transpose): input rows 29..64 -> output rows 29..64, y offset 0, plane rows in 0 out 0, tensors 18 (+9280) -> 19 (+0)
+etnaviv/ml: strips: strip 1 op 1 (conv): input rows 29..64 -> output rows 30..64, y offset 0, plane rows in 0 out 0, tensors 19 (+0) -> 20 (+0)
+etnaviv/ml: strips: strip 1 op 2 (conv): input rows 30..64 -> output rows 31..64, y offset 0, plane rows in 0 out 0, tensors 20 (+0) -> 21 (+0)
+etnaviv/ml: strips: strip 1 op 3 (conv): input rows 31..64 -> output rows 32..64, y offset 0, plane rows in 0 out 0, tensors 21 (+0) -> 22 (+0)
+etnaviv/ml: strips: strip 1 op 4 (detranspose): input rows 32..64 -> output rows 32..64, y offset 0, plane rows in 0 out 0, tensors 22 (+0) -> 23 (+8192)
+etnaviv/ml: strips: 5 operations at 64x64 (WxH) in 2 strips of 32 rows, 60 KiB of in-between tensors per strip, input transposed per strip, output detransposed per strip
+etnaviv/ml: AXI SRAM: placed 8 of 8 intermediate tensors, using 52 of 1024 KiB

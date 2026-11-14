@@ -1,0 +1,573 @@
+--- step6c/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -344,9 +344,11 @@
+          struct etna_ml_tensor *tensor = etna_ml_get_tensor(subgraph, poperation->input_tensors[i]->index);
+          enum etna_ml_tensor_layout operation_layout = ETNA_ML_LAYOUT_ANY;
+ 
++         /* the shader-core average pool reads channel planes too */
+          if (poperation->type == PIPE_ML_OPERATION_TYPE_CONVOLUTION ||
+              poperation->type == PIPE_ML_OPERATION_TYPE_FULLY_CONNECTED ||
+-             poperation->type == PIPE_ML_OPERATION_TYPE_CONCATENATION)
++             poperation->type == PIPE_ML_OPERATION_TYPE_CONCATENATION ||
++             poperation->type == PIPE_ML_OPERATION_TYPE_POOLING)
+             operation_layout = ETNA_ML_LAYOUT_NCHW;
+ 
+          if (!etna_ml_find_producer(poperations, count, poperation->input_tensors[i]->index)) {
+@@ -483,6 +485,14 @@
+             list_addtail(&operation->link, etna_operations);
+             break;
+          }
++         case PIPE_ML_OPERATION_TYPE_POOLING: {
++            /* only global average pools are supported (etna_ml_shader_avgpool_supported) */
++            etna_ml_lower_avgpool(subgraph, poperation, operation);
++            operation->input_tensors[0] = input_tensors[0];
++            operation->output_tensors[0] = poperation->output_tensors[0]->index;
++            list_addtail(&operation->link, etna_operations);
++            break;
++         }
+          case PIPE_ML_OPERATION_TYPE_RELU: {
+             etna_ml_lower_relu(subgraph, poperation, poperation->input_tensors[0], operation);
+             operation->input_tensors[0] = input_tensors[0];
+@@ -647,6 +657,7 @@
+       case PIPE_ML_OPERATION_TYPE_LOGISTIC:
+       case PIPE_ML_OPERATION_TYPE_TRANSPOSE:
+       case PIPE_ML_OPERATION_TYPE_SOFTMAX:
++      case PIPE_ML_OPERATION_TYPE_POOLING:
+          break;
+       default:
+          UNREACHABLE("Unsupported ML operation type");
+@@ -758,6 +769,9 @@
+       case PIPE_ML_OPERATION_TYPE_SOFTMAX:
+          supported = etna_ml_shader_softmax_supported(etna_ml_device_screen(pdevice), operation);
+          break;
++      case PIPE_ML_OPERATION_TYPE_POOLING:
++         supported = etna_ml_shader_avgpool_supported(etna_ml_device_screen(pdevice), operation);
++         break;
+       default:
+          return false;
+    }
+--- step6c/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -42,6 +42,7 @@
+ enum etna_ml_shader_op {
+    ETNA_ML_SHADER_TRANSPOSE, /* direction in tp_type (ETNA_ML_TP_TRANSPOSE / DETRANSPOSE) */
+    ETNA_ML_SHADER_SOFTMAX,
++   ETNA_ML_SHADER_AVGPOOL, /* global average pool: input_width x input_height x input_channels -> 1x1 */
+ };
+ 
+ enum etna_ml_tp_type {
+@@ -96,7 +97,8 @@
+    struct etna_bo *kernel;
+ 
+    /* ETNA_JOB_TYPE_SHADER: the kernel, its kernel input and grid. The transpose kernel is the screen's; a kernel
+-    * built for this operation (softmax: row length baked in) is owned_shader, freed with the subgraph. */
++    * built for this operation (softmax: row length baked in; average pool: plane size and channels) is
++    * owned_shader, freed with the subgraph. */
+    struct etna_shader_variant *shader;
+    struct etna_shader *owned_shader;
+    uint32_t shader_args[8];
+--- step6c/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
+@@ -17,6 +17,10 @@
+  * 8-bit values, one 64-thread workgroup per row (etna_ml_shader_build_softmax); a SQUEEZE in front of it is taken as a
+  * reshape so both can join the NPU graph (MobileNet ends CONV -> SQUEEZE -> SOFTMAX). Only kernels that fit the
+  * register budget of barrier kernels (etna_compute_barrier_reg_budget) are used; others stay on the CPU.
++ *
++ * Global average pool (ETNA_ML_SHADER=avgpool): TFLite AVERAGE_POOL_2D over the whole input (MobileNet's 7x7x1024 ->
++ * 1x1x1024), one thread per 4 channel planes (etna_ml_shader_build_avgpool), no barriers. Without it Teflon splits
++ * such a graph into two NPU submits with the pool on the CPU between them.
+  */
+ 
+ #include <math.h>
+@@ -271,6 +275,93 @@
+    return b.shader;
+ }
+ 
++/* (n * m) >> s == n / d for every n in 0..n_max, with n_max * m < 2^32: the average pool's division as an integer
++ * multiply and shift. Checked here for every n the kernel can see; false if no such m, s exist. */
++static bool
++udiv_magic(unsigned d, unsigned n_max, uint32_t *m, unsigned *s)
++{
++   for (unsigned sh = 0; sh < 32; sh++) {
++      const uint64_t mm = DIV_ROUND_UP((uint64_t)1 << sh, d);
++      if ((uint64_t)n_max * mm >= (1ull << 32))
++         return false;
++
++      bool exact = true;
++      for (uint64_t n = 0; n <= n_max && exact; n++)
++         exact = ((n * mm) >> sh) == n / d;
++      if (exact) {
++         *m = (uint32_t)mm;
++         *s = sh;
++         return true;
++      }
++   }
++   return false;
++}
++
++/*
++ * Global average pool over channel planes (NCHW, the NN cores' output layout) of hw uint8 values each, with TFLite's
++ * uint8 rounding: out[c] = (sum of plane c + hw / 2) / hw (input and output share their quantization, so nothing is
++ * requantized). One thread per 4 channels: 4 consecutive planes are 4 * hw contiguous bytes, i.e. hw whole words
++ * starting on a word, and which channel each byte belongs to is known at compile time, so the loop is unrolled and
++ * branch-free with no shared memory or barriers. A word whose 4 bytes are all in one channel is added two bytes at a
++ * time into 16-bit lanes ((w & 0x00ff00ff) + ((w >> 8) & 0x00ff00ff)); bytes of words that straddle two channels go
++ * into the low lane one by one. A lane sums at most hw bytes of its channel, so hw <= 256 can't overflow it. The
++ * division is a multiply and shift (udiv_magic). Thread g writes channels 4g..4g+3 as one word, so the output is
++ * exactly channels bytes. Kernel input: out, in.
++ */
++nir_shader *
++etna_ml_shader_build_avgpool(const nir_shader_compiler_options *opts, unsigned hw, unsigned channels)
++{
++   const unsigned groups = channels / 4;
++   uint32_t m;
++   unsigned s;
++
++   if (!hw || hw > ETNA_ML_AVGPOOL_MAX_HW || !channels || channels % 4 ||
++       !udiv_magic(hw, 255 * hw + hw / 2, &m, &s))
++      return NULL;
++
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "etna_ml_avgpool");
++   b.shader->info.workgroup_size_variable = true;
++
++   nir_def *out_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 0), .base = 0, .range = 8);
++   nir_def *in_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 4), .base = 0, .range = 8);
++   /* the ID clamped to the grid, so a wrong ID can only give wrong values, never a stray address */
++   nir_def *g = nir_umin(&b, nir_channel(&b, nir_load_global_invocation_id(&b, 32), 0), nir_imm_int(&b, groups - 1));
++   nir_def *src = nir_iadd(&b, in_addr, nir_imul_imm(&b, g, 4 * hw));
++
++   nir_def *acc[4] = { NULL };
++   for (unsigned k = 0; k < hw; k++) {
++      nir_def *word = nir_load_global(&b, 1, 32, k ? nir_iadd_imm(&b, src, 4 * k) : src, .align_mul = 4);
++      const unsigned first = 4 * k / hw, last = (4 * k + 3) / hw;
++
++      if (first == last) {
++         nir_def *pairs = nir_iadd(&b, nir_iand_imm(&b, word, 0x00ff00ff),
++                                   nir_iand_imm(&b, nir_ushr_imm(&b, word, 8), 0x00ff00ff));
++         acc[first] = acc[first] ? nir_iadd(&b, acc[first], pairs) : pairs;
++         continue;
++      }
++
++      for (unsigned i = 0; i < 4; i++) {
++         const unsigned c = (4 * k + i) / hw;
++         nir_def *v = nir_iand_imm(&b, i ? nir_ushr_imm(&b, word, 8 * i) : word, 0xff);
++         acc[c] = acc[c] ? nir_iadd(&b, acc[c], v) : v;
++      }
++   }
++
++   /* every channel has hw >= 1 bytes, so every acc[c] is set */
++   nir_def *out_word = NULL;
++   for (unsigned c = 0; c < 4; c++) {
++      nir_def *sum = nir_iadd(&b, nir_iand_imm(&b, acc[c], 0xffff), nir_ushr_imm(&b, acc[c], 16));
++      nir_def *q = nir_ushr_imm(&b, nir_imul_imm(&b, nir_iadd_imm(&b, sum, hw / 2), m), s);
++      if (c)
++         q = nir_ishl_imm(&b, q, 8 * c);
++      out_word = out_word ? nir_ior(&b, out_word, q) : q;
++   }
++   nir_store_global(&b, out_word, nir_iadd(&b, out_addr, nir_ishl_imm(&b, g, 2)), .write_mask = 0x1,
++                    .align_mul = 4);
++
++   return b.shader;
++}
++
+ /* The transpose kernel, compiled once per screen (subgraphs are created from one thread at a time). */
+ static struct etna_shader_variant *
+ transpose_kernel(struct etna_screen *screen)
+@@ -493,6 +584,154 @@
+    return true;
+ }
+ 
++static bool
++avgpool_enabled(const struct etna_screen *screen)
++{
++   return shader_option("avgpool") && screen->base.caps.compute && !DBG_ENABLED(ETNA_DBG_NPU_PARALLEL);
++}
++
++/* The average pools the kernel handles: global ones (the filter covers the whole input, no padding, so the output
++ * is 1x1), batch 1, 8-bit unsigned tensors with the same per-tensor quantization in and out (the result is then the
++ * integer mean, TFLite's (sum + hw/2) / hw), no fused activation, channels % 4 == 0, at most ETNA_ML_AVGPOOL_MAX_HW
++ * values per channel. MobileNet's 7x7x1024 pool is one; it used to split the graph into two NPU submits. */
++static bool
++avgpool_params(const struct pipe_ml_operation *poperation, unsigned *hw, unsigned *channels)
++{
++   const struct pipe_tensor *in = poperation->input_tensors[0], *out = poperation->output_tensors[0];
++
++   if (poperation->type != PIPE_ML_OPERATION_TYPE_POOLING || poperation->pooling.type != PIPE_ML_POOLING_TYPE_AVG ||
++       poperation->pooling.fused_activation)
++      return false;
++   if (poperation->input_count != 1 || poperation->output_count != 1 || in->data)
++      return false;
++   if (in->type_size != 1 || out->type_size != 1 || in->is_signed || out->is_signed || in->scales ||
++       out->scales || in->zero_points || out->zero_points)
++      return false;
++   if (in->scale != out->scale || in->zero_point != out->zero_point)
++      return false;
++   if (in->dims[0] != 1 || out->dims[0] != 1 || out->dims[1] != 1 || out->dims[2] != 1 ||
++       out->dims[3] != in->dims[3])
++      return false;
++   if (poperation->pooling.filter_height != in->dims[1] || poperation->pooling.filter_width != in->dims[2] ||
++       poperation->pooling.padding_top || poperation->pooling.padding_bottom || poperation->pooling.padding_left ||
++       poperation->pooling.padding_right)
++      return false;
++
++   *hw = in->dims[1] * in->dims[2];
++   *channels = in->dims[3];
++   const unsigned groups = *channels / 4;
++
++   return *hw >= 1 && *hw <= ETNA_ML_AVGPOOL_MAX_HW && *channels >= 4 && *channels % 4 == 0 &&
++          groups / block_width(groups) <= 65535;
++}
++
++/* The kernel for this pool (caller owns the shader), or NULL */
++static struct etna_shader *
++avgpool_kernel(struct etna_screen *screen, unsigned hw, unsigned channels, struct etna_shader_variant **variant)
++{
++   const nir_shader_compiler_options *opts = etna_compiler_get_options(screen->compiler);
++   nir_shader *nir = etna_ml_shader_build_avgpool(opts, hw, channels);
++   if (!nir)
++      return NULL;
++
++   struct etna_shader *shader = etna_compute_shader_create(screen, nir, NULL);
++   struct etna_shader_variant *v = shader ? etna_compute_shader_get_variant(shader, NULL) : NULL;
++   if (!v) {
++      ML_DBG("average pool kernel %u x %u channels did not compile: left to the CPU\n", hw, channels);
++      if (shader)
++         etna_compute_shader_destroy(shader);
++      return NULL;
++   }
++
++   *variant = v;
++   return shader;
++}
++
++bool
++etna_ml_shader_avgpool_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation)
++{
++   unsigned hw, channels;
++
++   if (!avgpool_enabled(screen) || !avgpool_params(poperation, &hw, &channels))
++      return false;
++
++   /* compile it now: if it can't, the operation stays on the CPU instead of failing later */
++   struct etna_shader_variant *v;
++   struct etna_shader *shader = avgpool_kernel(screen, hw, channels, &v);
++   if (!shader)
++      return false;
++
++   etna_compute_shader_destroy(shader);
++   return true;
++}
++
++void
++etna_ml_lower_avgpool(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                      struct etna_operation *operation)
++{
++   const struct pipe_tensor *in = poperation->input_tensors[0];
++   unsigned hw, channels;
++   ASSERTED bool ok = avgpool_params(poperation, &hw, &channels);
++   assert(ok);
++
++   operation->type = ETNA_JOB_TYPE_SHADER;
++   operation->shader_op = ETNA_ML_SHADER_AVGPOOL;
++   operation->input_count = 1;
++   operation->output_count = 1;
++   operation->input_width = in->dims[1];
++   operation->input_height = in->dims[2];
++   operation->input_channels = operation->output_channels = channels;
++   operation->output_width = operation->output_height = 1;
++   operation->input_tensor_sizes[0] = hw * channels;
++   operation->output_tensor_sizes[0] = channels;
++}
++
++static bool
++compile_avgpool(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                struct etna_vip_instruction *instruction)
++{
++   struct pipe_resource *input = etna_ml_get_resource(subgraph, operation->input_tensors[0]);
++   struct pipe_resource *output = etna_ml_get_resource(subgraph, operation->output_tensors[0]);
++   const unsigned in_offset = etna_ml_get_offset(subgraph, operation->input_tensors[0]);
++   const unsigned out_offset = etna_ml_get_offset(subgraph, operation->output_tensors[0]);
++   const unsigned hw = operation->input_width * operation->input_height, channels = operation->input_channels;
++
++   if (!input || !output || in_offset % 4 || out_offset % 4 ||
++       input == subgraph->axi_sram || output == subgraph->axi_sram)
++      return false;
++
++   struct etna_bo *in_bo = etna_buffer_resource(input)->bo, *out_bo = etna_buffer_resource(output)->bo;
++   if (etna_bo_size(in_bo) < in_offset + hw * channels || etna_bo_size(out_bo) < out_offset + channels)
++      return false;
++
++   struct etna_shader_variant *v;
++   struct etna_shader *shader = avgpool_kernel(subgraph->screen, hw, channels, &v);
++   if (!shader)
++      return false;
++
++   const unsigned groups = channels / 4;
++   memset(instruction, 0, sizeof(*instruction));
++   instruction->type = ETNA_JOB_TYPE_SHADER;
++   instruction->owned_shader = shader;
++   instruction->shader = v;
++   pipe_resource_reference(&instruction->input, input);
++   pipe_resource_reference(&instruction->output, output);
++   instruction->input_offset = in_offset;
++   instruction->output_offset = out_offset;
++   instruction->shader_args[0] = etna_bo_gpu_va(out_bo) + out_offset;
++   instruction->shader_args[1] = etna_bo_gpu_va(in_bo) + in_offset;
++   instruction->work_dim = 1;
++   instruction->block[0] = block_width(groups);
++   instruction->block[1] = instruction->block[2] = 1;
++   instruction->grid[0] = groups / instruction->block[0];
++   instruction->grid[1] = instruction->grid[2] = 1;
++
++   ML_DBG("shader avgpool: %ux%u channels %u, grid %u of %u, %u instructions, %u temps\n", operation->input_width,
++          operation->input_height, channels, instruction->grid[0], instruction->block[0], v->code_size / 4,
++          v->num_temps + 1);
++   return true;
++}
++
+ bool
+ etna_ml_compile_operation_shader(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
+                                  struct etna_vip_instruction *instruction)
+@@ -502,6 +741,8 @@
+       return compile_transpose(subgraph, operation, instruction);
+    case ETNA_ML_SHADER_SOFTMAX:
+       return compile_softmax(subgraph, operation, instruction);
++   case ETNA_ML_SHADER_AVGPOOL:
++      return compile_avgpool(subgraph, operation, instruction);
+    }
+    return false;
+ }
+--- step6c/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
+@@ -36,6 +36,14 @@
+ etna_ml_lower_softmax(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
+                       struct etna_operation *operation);
+ 
++/* global average pool on the shader core (ETNA_ML_SHADER=avgpool) */
++bool
++etna_ml_shader_avgpool_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation);
++
++void
++etna_ml_lower_avgpool(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                      struct etna_operation *operation);
++
+ void
+ etna_ml_shader_instruction_fini(struct etna_vip_instruction *instruction);
+ 
+@@ -49,4 +57,11 @@
+ etna_ml_shader_build_softmax(const struct nir_shader_compiler_options *opts, unsigned n, unsigned rows,
+                              float factor, unsigned threads);
+ 
++/* global average pool kernel: channel planes of hw uint8 (NCHW), channels % 4 == 0, one thread per 4 channels
++ * (grid size channels / 4), out[c] = (sum of plane c + hw / 2) / hw. NULL if hw is outside 1..ETNA_ML_AVGPOOL_MAX_HW. */
++#define ETNA_ML_AVGPOOL_MAX_HW 256
++
++struct nir_shader *
++etna_ml_shader_build_avgpool(const struct nir_shader_compiler_options *opts, unsigned hw, unsigned channels);
++
+ #endif
+--- step6c/mesa-compute/src/gallium/frontends/teflon/tfl_device.c
++++ mesa-compute/src/gallium/frontends/teflon/tfl_device.c
+@@ -173,6 +173,7 @@
+       operation->pooling.filter_width = params->filter_width;
+       operation->pooling.stride_x = params->stride_width;
+       operation->pooling.stride_y = params->stride_height;
++      operation->pooling.fused_activation = params->activation != kTfLiteActNone;
+       if (params->padding == kTfLitePaddingSame) {
+          struct pipe_tensor *in = operation->input_tensors[0];
+          calc_same_padding(in->dims[1], params->filter_height, params->stride_height,
+--- step6c/mesa-compute/src/gallium/include/pipe/p_state.h
++++ mesa-compute/src/gallium/include/pipe/p_state.h
+@@ -1180,6 +1180,12 @@
+          unsigned padding_bottom;
+          unsigned padding_left;
+          unsigned padding_right;
++
++         /**
++          * Whether the frontend's operation has a fused activation (ReLU and
++          * the like); a driver that doesn't apply it must refuse the operation.
++          */
++         bool fused_activation;
+       } pooling;
+       struct {
+          /**
+--- step6c/npu-shader/cs_compile.c
++++ npu-shader/cs_compile.c
+@@ -62,7 +62,7 @@
+ int
+ main(int argc, char **argv)
+ {
+-   unsigned fma_iters = 0, wg = 64, len = 1001;
++   unsigned fma_iters = 0, wg = 64, len = 1001, pool_hw = 49, pool_ch = 1024;
+    float factor = 0.16609922f * 1.4426950409f;
+    const char *out = NULL, *kernel = NULL;
+    bool dump = false;
+@@ -78,13 +78,18 @@
+          len = atoi(argv[++i]);
+       else if (!strcmp(argv[i], "--factor") && i + 1 < argc)
+          factor = atof(argv[++i]);
++      else if (!strcmp(argv[i], "--hw") && i + 1 < argc)
++         pool_hw = atoi(argv[++i]);
++      else if (!strcmp(argv[i], "--ch") && i + 1 < argc)
++         pool_ch = atoi(argv[++i]);
+       else if (!strcmp(argv[i], "--out") && i + 1 < argc)
+          out = argv[++i];
+       else if (!strcmp(argv[i], "--dump"))
+          dump = true;
+       else {
+-         fprintf(stderr, "usage: %s [--kernel copy|fma|ids|reverse|reverse-nobarrier|reduce|ids2d|t4x4|tgather] [--fma N] [-w WG] "
+-                         "[--out FILE.bin] [--dump]\n", argv[0]);
++         fprintf(stderr, "usage: %s [--kernel copy|fma|ids|reverse|reverse-nobarrier|reduce|ids2d|t4x4|tgather|"
++                         "softmax|avgpool] [--fma N] [-w WG] [--len N] [--hw HW --ch C] [--out FILE.bin] [--dump]\n",
++                 argv[0]);
+          return 2;
+       }
+    }
+@@ -159,7 +164,13 @@
+       nir = cs_build_t4x4(opts, 2);
+    else if (!strcmp(kernel, "tgather"))
+       nir = cs_build_tgather(opts);
+-   else {
++   else if (!strcmp(kernel, "avgpool")) {
++      nir = etna_ml_shader_build_avgpool(opts, pool_hw, pool_ch);
++      if (!nir) {
++         fprintf(stderr, "avgpool: --hw 1..256, --ch a multiple of 4\n");
++         return 2;
++      }
++   } else {
+       fprintf(stderr, "unknown kernel %s\n", kernel);
+       return 2;
+    }
+--- step6c/npu-shader/cs_kernels.h
++++ npu-shader/cs_kernels.h
+@@ -76,6 +76,12 @@
+ etna_ml_shader_build_softmax(const struct nir_shader_compiler_options *opts, unsigned n, unsigned rows,
+                              float factor, unsigned threads);
+ 
++/* avgpool (step 6d): the driver's global average pool kernel (etnaviv_ml_shader.c). Channel planes (NCHW) of hw
++ * uint8, channels % 4 == 0, one thread per 4 channels, out[c] = (sum of plane c + hw / 2) / hw; NULL if hw > 256.
++ * Kernel input: out, in. */
++struct nir_shader *
++etna_ml_shader_build_avgpool(const struct nir_shader_compiler_options *opts, unsigned hw, unsigned channels);
++
+ /* ids_gl: the ID order of the softmax kernel (workgroup first, then local; value order 0x1). Thread writes
+  * group.x, local.x at out + min(group.x * A + local.x, B) * 8 (A = workgroup size, B = threads - 1). Input: out, -, A, B. */
+ static nir_shader *
+--- step6c/npu-shader/cs_run.c
++++ npu-shader/cs_run.c
+@@ -159,7 +159,7 @@
+    }
+    if (!kernel)
+       kernel = fma_iters ? "fma" : "copy";
+-   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP } kid;
++   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL } kid;
+    unsigned k4 = 0;
+    if (!strcmp(kernel, "copy"))
+       kid = K_COPY;
+@@ -189,6 +189,8 @@
+       kid = K_SOFTMAX;
+    else if (!strcmp(kernel, "ids_gl"))
+       kid = K_IDS_GL;
++   else if (!strcmp(kernel, "avgpool"))
++      kid = K_AVGPOOL;
+    else if (!strncmp(kernel, "regp", 4)) {
+       kid = K_REGP; /* regpK: K vec4 values live across the barrier */
+       k4 = atoi(kernel + 4);
+@@ -230,6 +232,14 @@
+       }
+       n = rows * wg;
+    }
++   if (kid == K_AVGPOOL) {
++      /* one thread per 4 channel planes of H*W bytes */
++      if (!HW || HW > 256 || !C || C % 4) {
++         fprintf(stderr, "avgpool: --hwc H W C with H*W 1..256 and C %% 4 == 0\n");
++         return 2;
++      }
++      n = C / 4;
++   }
+    if (!wg || !wy || wg * wy > 256 || !n || n % wg || !ny || ny % wy || !repeat) {
+       fprintf(stderr, "threads (%u x %u) must be nonzero multiples of the workgroup (%u x %u, at most 256 threads), "
+                       "repeat >= 1\n", n, ny, wg, wy);
+@@ -275,8 +285,13 @@
+                      kid == K_TGATHER ? cs_build_tgather(opts) :
+                      kid == K_FOPS ? cs_build_fops(opts) :
+                      kid == K_SOFTMAX ? etna_ml_shader_build_softmax(opts, len, rows, factor, wg) :
++                     kid == K_AVGPOOL ? etna_ml_shader_build_avgpool(opts, HW, C) :
+                      kid == K_IDS_GL ? cs_build_ids_gl(opts) :
+                      kid == K_REGP ? cs_build_regp(opts, k4) : cs_build_copy(opts);
++   if (!nir) {
++      fprintf(stderr, "kernel builder refused these parameters\n");
++      return 2;
++   }
+    if (!fma_iters)
+       nir_print_shader(nir, stdout);
+    printf("kernel: %s, shared %u bytes per workgroup\n", kernel, nir->info.shared_size);
+@@ -306,6 +321,8 @@
+       bytes = ((size_t)rows * len + 3) / 4 * 4; /* whole words: the kernel writes up to 3 bytes past the end */
+    if (kid == K_REGP)
+       bytes = (size_t)n * 4 + (size_t)n * k4 * 16; /* out uses the first n words; in holds the extras after them */
++   if (kid == K_AVGPOOL)
++      bytes = (size_t)HW * C; /* in: C planes of HW bytes; out: the first C bytes, the rest must stay 0xdeadbeef */
+    uint32_t *in = malloc(bytes), *out = malloc(bytes), *want = malloc(bytes);
+    float *fin = (float *)in, *fout = (float *)out;
+    uint8_t *in8 = (uint8_t *)in, *want8 = (uint8_t *)want;
+@@ -326,6 +343,17 @@
+          in8[(size_t)r * len + (len - 1)] = 200;
+       }
+    }
++   if (kid == K_AVGPOOL) {
++      /* channels 0-3 all 255 (the largest lane sums), 4-7 all 0, the rest pseudo-random bytes */
++      uint32_t x = 0x9e3779b9u;
++      for (size_t i = 0; i < bytes; i++) {
++         const size_t c = i / HW;
++         x ^= x << 13;
++         x ^= x >> 17;
++         x ^= x << 5;
++         in8[i] = c < 4 ? 255 : c < 8 ? 0 : (uint8_t)(x >> 24);
++      }
++   }
+    if (transpose) {
+       /* a byte pattern that changes with every position (period far above any stride used) */
+       for (size_t i = 0; i < bytes; i++)
+@@ -473,6 +501,41 @@
+    }
+ 
+    pipe_buffer_read(pc, res[0], 0, bytes, out);
++   if (kid == K_AVGPOOL) {
++      const uint8_t *out8 = (const uint8_t *)out;
++      const uint32_t fill = 0xdeadbeef;
++      unsigned exact = 0, wrong = 0, stray = 0, untouched = 0;
++      for (unsigned c = 0; c < C; c++) {
++         unsigned sum = 0;
++         for (unsigned p = 0; p < HW; p++)
++            sum += in8[(size_t)c * HW + p];
++         const unsigned want_q = (sum + HW / 2) / HW;
++         untouched += out8[c] == ((const uint8_t *)&fill)[c % 4];
++         if (out8[c] == want_q) {
++            exact++;
++         } else {
++            if (wrong < 8)
++               printf("channel %u: got %u want %u (sum %u)\n", c, out8[c], want_q, sum);
++            wrong++;
++         }
++      }
++      for (size_t i = C; i < bytes; i++)
++         stray += out8[i] != ((const uint8_t *)&fill)[i % 4];
++      printf("avgpool: %ux%u x %u channels: %u exact, %u wrong, %u stray bytes past the output; first: %u %u %u %u\n",
++             H, W, C, exact, wrong, stray, out8[0], out8[4], out8[8], out8[9]);
++      const char *ares = offline ? "OFFLINE" : (wrong || stray ? "MISMATCH" : "PASS");
++      printf("{\"result\": \"%s\", \"kernel\": \"avgpool\", \"h\": %u, \"w\": %u, \"c\": %u, \"exact\": %u, "
++             "\"wrong\": %u, \"stray\": %u, \"untouched\": %u, \"first_launch_ms\": %.3f, \"median_ms\": %.3f, "
++             "\"launches\": %u}\n", ares, H, W, C, exact, wrong, stray, untouched, first_ms, ms, repeat);
++      step("finished");
++      pc->set_global_binding(pc, 0, 2, NULL, NULL);
++      pipe_resource_reference(&res[0], NULL);
++      pipe_resource_reference(&res[1], NULL);
++      pc->delete_compute_state(pc, cso);
++      pc->destroy(pc);
++      ps->destroy(ps);
++      return offline ? 0 : (wrong || stray ? 3 : 0);
++   }
+    if (kid == K_SOFTMAX) {
+       const uint8_t *out8 = (const uint8_t *)out;
+       unsigned exact = 0, off1 = 0, worse = 0, worst = 0, untouched8 = 0;

@@ -1,0 +1,171 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: etna_ml_avgpool
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32     %0 = load_const (0x00000000)
+    32     %1 = @load_kernel_input (%0 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %2 = load_const (0x00000004)
+    32     %3 = @load_kernel_input (%2 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3   %4 = @load_global_invocation_id
+    32     %5 = mov %4.x
+    32     %6 = load_const (0x0000003f = 63)
+    32     %7 = umin %5, %6 (0x3f)
+    32     %8 = load_const (0x00000004)
+    32     %9 = imul %7, %8 (0x4)
+    32    %10 = iadd %3, %9
+    32    %11 = @load_global (%10) (access=none, align_mul=4, align_offset=0)
+    32    %12 = load_const (0x000000ff = 255)
+    32    %13 = iand %11, %12 (0xff)
+    32    %14 = load_const (0x00000008)
+    32    %15 = ushr %11, %14 (0x8)
+    32    %16 = load_const (0x000000ff = 255)
+    32    %17 = iand %15, %16 (0xff)
+    32    %18 = load_const (0x00000010 = 16)
+    32    %19 = ushr %11, %18 (0x10)
+    32    %20 = load_const (0x000000ff = 255)
+    32    %21 = iand %19, %20 (0xff)
+    32    %22 = load_const (0x00000018 = 24)
+    32    %23 = ushr %11, %22 (0x18)
+    32    %24 = load_const (0x000000ff = 255)
+    32    %25 = iand %23, %24 (0xff)
+    32    %26 = load_const (0x0000ffff = 65535)
+    32    %27 = iand %13, %26 (0xffff)
+    32    %28 = load_const (0x00000010 = 16)
+    32    %29 = ushr %13, %28 (0x10)
+    32    %30 = iadd %27, %29
+    32    %31 = load_const (0x0000ffff = 65535)
+    32    %32 = iand %17, %31 (0xffff)
+    32    %33 = load_const (0x00000010 = 16)
+    32    %34 = ushr %17, %33 (0x10)
+    32    %35 = iadd %32, %34
+    32    %36 = load_const (0x00000008)
+    32    %37 = ishl %35, %36 (0x8)
+    32    %38 = ior %30, %37
+    32    %39 = load_const (0x0000ffff = 65535)
+    32    %40 = iand %21, %39 (0xffff)
+    32    %41 = load_const (0x00000010 = 16)
+    32    %42 = ushr %21, %41 (0x10)
+    32    %43 = iadd %40, %42
+    32    %44 = load_const (0x00000010 = 16)
+    32    %45 = ishl %43, %44 (0x10)
+    32    %46 = ior %38, %45
+    32    %47 = load_const (0x0000ffff = 65535)
+    32    %48 = iand %25, %47 (0xffff)
+    32    %49 = load_const (0x00000010 = 16)
+    32    %50 = ushr %25, %49 (0x10)
+    32    %51 = iadd %48, %50
+    32    %52 = load_const (0x00000018 = 24)
+    32    %53 = ishl %51, %52 (0x18)
+    32    %54 = ior %46, %53
+    32    %55 = load_const (0x00000002)
+    32    %56 = ishl %7, %55 (0x2)
+    32    %57 = iadd %1, %56
+                @store_global (%54, %57) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: avgpool, shared 0 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: etna_ml_avgpool
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32     %0 = load_const (0x00000000)
+    32     %1 = @load_kernel_input (%0 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %2 = load_const (0x00000004)
+    32     %3 = @load_kernel_input (%2 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3   %4 = @load_global_invocation_id
+    32     %5 = load_const (0x0000003f = 63)
+    32     %6 = umin %4.x, %5 (0x3f)
+    32     %7 = imul %6, %2 (0x4)
+    32     %8 = iadd %3, %7
+    32     %9 = @load_global (%8) (access=none, align_mul=4, align_offset=0)
+    32    %10 = load_const (0x000000ff = 255)
+    32    %11 = iand %9, %10 (0xff)
+    32x3  %12 = load_const (0x00000008, 0x00000010, 0x00000018) = (8, 16, 24)
+    32x3  %13 = ushr %9.xxx, %12 (0x8, 0x10, 0x18)
+    32x2  %14 = iand %13.xy, %10 (0xff).xx
+    32    %15 = load_const (0x00000010 = 16)
+    32    %16 = ushr %11, %15 (0x10)
+    32    %17 = iadd %11, %16
+    32x2  %18 = ushr %14, %15 (0x10).xx
+    32x2  %19 = iadd %14, %18
+    32x2  %20 = load_const (0x00000100, 0x00010000) = (256, 65536)
+    32    %21 = imul %19.x, %20 (0x100, 0x10000).x
+    32    %22 = imul %19.y, %20 (0x100, 0x10000).y
+    32    %23 = ior %17, %21
+    32    %24 = ior %23, %22
+    32    %25 = load_const (0x01000000 = 16777216)
+    32    %26 = imul %13.z, %25 (0x1000000)
+    32    %27 = ior %24, %26
+    32    %28 = iadd %1, %7
+                @store_global (%27, %28) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0080104f 00200800 80000040 0000000a] select.gt.u32.pack t0.x___, t0.xxxx, u0.xxxx, t0.xxxx
+001 [0080103c 00000800 40aa0040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.yyyy, void
+002 [01001001 2a800800 40000010 00000008] add.s32.pack      t0._y__, u0.zzzz, void, t0.xxxx
+003 [02001032 15600c04 81fe0040 00000002] load.denorm.u32   t0.__z_, t0.yyyy, u0.wwww, void
+004 [0100101d 2a800800 40010000 20000018] and.s32.pack      t0._y__, t0.zzzz, void, u1.xxxx
+005 [0381101a 2aa00800 80010000 200e4018] rshift.u32.pack   t1.xyz_, t0.zzzz, void, u1.yzwx
+006 [0600101d 10001800 40010000 20000018] and.s32.pack      t0.__zw, t1.xxxy, void, u1.xxxx
+007 [0401101a 15600800 80010000 202a8018] rshift.u32.pack   t1.___w, t0.yyyy, void, u1.zzzz
+008 [01001001 15400800 40000000 003fc018] add.s32.pack      t0._y__, t0.yyyy, void, t1.wwww
+009 [0182101a 3ba00800 80010000 20028018] rshift.u32.pack   t2.xy__, t0.zwzw, void, u1.zzxx
+010 [06001001 3a800800 40000000 00100028] add.s32.pack      t0.__zw, t0.zzzw, void, t2.xxxy
+011 [0401103c 2a800800 40000140 00000002] imullo0.s32.pack  t1.___w, t0.zzzz, u2.xxxx, void
+012 [0200103c 3fc00800 40aa0140 00000002] imullo0.s32.pack  t0.__z_, t0.wwww, u2.yyyy, void
+013 [0100101c 15400800 40010000 003fc018] or.s32.pack       t0._y__, t0.yyyy, void, t1.wwww
+014 [0100101c 15400800 40010000 002a8008] or.s32.pack       t0._y__, t0.yyyy, void, t0.zzzz
+015 [0200103c 2a801800 41540140 00000002] imullo0.s32.pack  t0.__z_, t1.zzzz, u2.zzzz, void
+016 [0100101c 15400800 40010000 002a8008] or.s32.pack       t0._y__, t0.yyyy, void, t0.zzzz
+017 [00801001 3fc02800 40000010 00000008] add.s32.pack      t0.x___, u2.wwww, void, t0.xxxx
+018 [00830033 00200c04 81fe0040 0000400a] store.denorm.u32  mem.x___, t0.xxxx, u0.wwww, t0.yxxx	; dontcare bits in store: 00000000000000000000000000030000
+num loops: 0
+num temps: 3
+immediates:
+ [0].x = 0.000000 (0x0000003f) (1)
+ [0].y = 0.000000 (0x00000004) (1)
+ [0].z = 0.000000 (0x04000004) (12)
+ [0].w = 0.000000 (0x00000000) (1)
+ [1].x = 0.000000 (0x000000ff) (1)
+ [1].y = 0.000000 (0x00000008) (1)
+ [1].z = 0.000000 (0x00000010) (1)
+ [1].w = 0.000000 (0x00000018) (1)
+ [2].x = 0.000000 (0x00000100) (1)
+ [2].y = 0.000000 (0x00010000) (1)
+ [2].z = 0.000000 (0x01000000) (1)
+ [2].w = 0.000000 (0x04000000) (12)
+workitem inputs: load_global_invocation_id - -
+barriers: no
+GPU addresses: out 0xffffa000 in 0xffff9000 (256 bytes each)
+grid: 1 dimension(s), 1 x 1 workgroups of 64 x 1 threads
+channel 0: got 239 want 255 (sum 255)
+channel 1: got 190 want 255 (sum 255)
+channel 2: got 173 want 255 (sum 255)
+channel 3: got 222 want 255 (sum 255)
+channel 4: got 239 want 0 (sum 0)
+channel 5: got 190 want 0 (sum 0)
+channel 6: got 173 want 0 (sum 0)
+channel 7: got 222 want 0 (sum 0)
+avgpool: 1x1 x 256 channels: 0 exact, 256 wrong, 0 stray bytes past the output; first: 239 239 239 190
+{"result": "OFFLINE", "kernel": "avgpool", "h": 1, "w": 1, "c": 256, "exact": 0, "wrong": 256, "stray": 0, "untouched": 256, "first_launch_ms": 2.725, "median_ms": 2.725, "launches": 1}

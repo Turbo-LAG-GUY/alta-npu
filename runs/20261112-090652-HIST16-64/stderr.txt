@@ -1,0 +1,1 @@
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 148 of 1024 KiB

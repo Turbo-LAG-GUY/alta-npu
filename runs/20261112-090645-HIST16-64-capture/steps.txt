@@ -1,0 +1,19 @@
+[57552.665852] pid=463117 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap model=/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_64x64.tflite | npu=active irqs=12
+[57552.681773] pid=463117 load_delegate: begin | npu=active irqs=12
+[57552.713415] pid=463117 load_delegate: done | npu=active irqs=12
+[57552.716133] pid=463117 Interpreter(): begin | npu=active irqs=12
+[57552.728087] pid=463117 Interpreter(): done | npu=active irqs=12
+[57552.732662] pid=463117 allocate_tensors: begin | npu=active irqs=12
+[57552.737900] pid=463117 allocate_tensors: done (21.8 ms) | npu=active irqs=12
+[57552.745337] pid=463117 input set | npu=active irqs=12
+[57552.751057] pid=463117 invoke 1/5: begin | npu=active irqs=12
+[57552.754401] pid=463117 invoke 1/5: done (0.46 ms) | npu=active irqs=14
+[57552.762128] pid=463117 invoke 2/5: begin | npu=active irqs=14
+[57552.766419] pid=463117 invoke 2/5: done (0.42 ms) | npu=active irqs=15
+[57552.774020] pid=463117 invoke 3/5: begin | npu=active irqs=15
+[57552.783547] pid=463117 invoke 3/5: done (0.35 ms) | npu=active irqs=16
+[57552.791079] pid=463117 invoke 4/5: begin | npu=active irqs=16
+[57552.796426] pid=463117 invoke 4/5: done (0.37 ms) | npu=active irqs=17
+[57552.799039] pid=463117 invoke 5/5: begin | npu=active irqs=17
+[57552.802458] pid=463117 invoke 5/5: done (0.36 ms) | npu=active irqs=18
+[57552.806293] pid=463117 finished | npu=active irqs=18

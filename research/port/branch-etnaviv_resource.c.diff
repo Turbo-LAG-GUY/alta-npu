@@ -1,0 +1,18 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_resource.c b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+index ecb62e7d3aa..2e0148708a3 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_resource.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+@@ -456,6 +456,13 @@ etna_resource_create(struct pipe_screen *pscreen,
+       layout = ETNA_LAYOUT_LINEAR;
+    }
+ 
++   /* HACK: The VIPNano-qi HW claims to support tiled texture reads, but in the
++    * testing so far the blob has been observed to use only linear.
++    *
++    * Also, we cannot use fragment jobs to convert to tiled.
++    */
++   layout = ETNA_LAYOUT_LINEAR;
++
+    /* modifier is only used for scanout surfaces, so safe to use LINEAR here */
+    return etna_resource_alloc(pscreen, layout, DRM_FORMAT_MOD_LINEAR, templat);
+ }

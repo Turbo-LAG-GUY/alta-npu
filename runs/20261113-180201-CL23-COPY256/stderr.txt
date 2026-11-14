@@ -1,0 +1,2 @@
+*** etna_emit_compute_state
+Dumping shader to mesa-shader-00000000.bin

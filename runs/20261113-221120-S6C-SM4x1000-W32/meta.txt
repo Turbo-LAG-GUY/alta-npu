@@ -1,0 +1,10 @@
+label: S6C-SM4x1000-W32
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1000 --rows 4 -w 32 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-ladder-20261113-221056/SM4x1000-W32
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T22:11:20-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2148
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=faea7;b=8f7f01abe08248ae908ecbfc43c3e05b;m=3b8b7a94;t=66033e51fc15a;x=1df7e80b4fa301b4
+end: 2026-11-13T22:11:22-05:00  rc: 0  wall_s: 2

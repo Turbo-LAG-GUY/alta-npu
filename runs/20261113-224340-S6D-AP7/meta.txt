@@ -1,0 +1,10 @@
+label: S6D-AP7
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel avgpool --hwc 7 7 1024 -w 64 --repeat 10 --out /home/jordan/alta-npu/runs/cs6d-ladder-20261113-224334/AP7
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T22:43:40-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2167
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=fb0d0;b=8f7f01abe08248ae908ecbfc43c3e05b;m=b01cd5fe;t=6603459b11cc4;x=87bbb878d6700e01
+end: 2026-11-13T22:43:42-05:00  rc: 0  wall_s: 2

@@ -1,0 +1,13 @@
+000 [0400104f 00200800 80000040 0000000a] select.gt.u32.pack t0.___w, t0.xxxx, u0.xxxx, t0.xxxx
+001 [0401104f 15600800 80aa0040 0015400a] select.gt.u32.pack t1.___w, t0.yyyy, u0.yyyy, t0.yyyy
+002 [0401103c 3fc01800 41540040 00000002] imullo0.s32.pack  t1.___w, t1.wwww, u0.zzzz, void
+003 [04001001 3fc01800 40000000 003fc008] add.s32.pack      t0.___w, t1.wwww, void, t0.wwww
+004 [0400103c 3fc00800 41fe0040 00000002] imullo0.s32.pack  t0.___w, t0.wwww, u0.wwww, void
+005 [04001001 00001800 40000010 003fc008] add.s32.pack      t0.___w, u1.xxxx, void, t0.wwww
+006 [01831009 00000000 00000000 00010008] mov.pack          t3.xy__, void, void, t0.xyxx
+007 [06031009 00000000 00000000 00100018] mov.pack          t3.__zw, void, void, t1.xxxy
+008 [01811009 00000000 00000000 00010028] mov.pack          t1.xy__, void, void, t2.xyxx
+009 [06011009 00000000 00000000 20254018] mov.pack          t1.__zw, void, void, u1.yyyz
+010 [07840033 3fe00c04 81fe00c0 0039003a] store.denorm.u32  mem, t0.wwww, u1.wwww, t3.xyzw	; dontcare bits in 
+011 [00801001 3fc00800 40000000 20000028] add.s32.pack      t0.x___, t0.wwww, void, u2.xxxx
+012 [07840033 00200c04 81fe00c0 0039001a] store.denorm.u32  mem, t0.xxxx, u1.wwww, t1.xyzw	; dontcare bits in 

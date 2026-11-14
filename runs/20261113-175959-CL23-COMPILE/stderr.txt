@@ -1,0 +1,1 @@
+cl2023_copy: ../src/gallium/drivers/etnaviv/etnaviv_compiler_nir.c:738: etna_get_inst_type_from_nir2: Assertion `!"Unhandled base type."' failed.

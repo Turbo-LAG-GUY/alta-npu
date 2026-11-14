@@ -1,0 +1,51 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
+ "etna_ml_shader": "avgpool,softmax",
+ "setup_ms": 410.1,
+ "invoke_ms": [
+  7.39,
+  9.39,
+  6.68,
+  6.67,
+  7.19,
+  6.72,
+  6.67,
+  6.56,
+  6.82,
+  6.94
+ ],
+ "invoke_ms_median": 6.77,
+ "invoke_ms_median_after_first": 6.72,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 4,
+ "diff_vs_cpu_mean_worst": 0.012,
+ "bytes_differing_from_saved": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "tolerance": 0,
+ "bytes_beyond_tolerance": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "match": true
+}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-224456-S6D-MN-APSM

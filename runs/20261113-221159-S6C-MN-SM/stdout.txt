@@ -1,0 +1,50 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
+ "etna_ml_shader": "softmax",
+ "setup_ms": 523.3,
+ "invoke_ms": [
+  8.38,
+  7.28,
+  8.49,
+  8.01,
+  7.38,
+  7.23,
+  7.44,
+  7.72,
+  8.43,
+  7.19
+ ],
+ "invoke_ms_median": 7.58,
+ "invoke_ms_median_after_first": 7.44,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 4,
+ "diff_vs_cpu_mean_worst": 0.012,
+ "bytes_differing_from_saved": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "tolerance": 1,
+ "bytes_beyond_tolerance": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "match": true
+}

@@ -1,0 +1,21 @@
+000 [0080103c 00000800 40000040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.xxxx, void
+001 [01001001 15400800 40000010 00000008] add.s32.pack      t0._y__, u0.yyyy, void, t0.xxxx
+002 [07811032 15600c04 81540040 00000002] load.denorm.u32   t1, t0.yyyy, u0.zzzz, void
+003 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+004 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+005 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+006 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+007 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+008 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+009 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+010 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+011 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+012 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+013 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+014 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+015 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+016 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+017 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+018 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+019 [00801001 15401800 40000010 00000008] add.s32.pack      t0.x___, u1.yyyy, void, t0.xxxx
+020 [07820033 00200c04 81540040 0039001a] store.denorm.u32  mem, t0.xxxx, u0.zzzz, t1.xyzw	; dontcare bits in store: 00000000000000000000000000020000

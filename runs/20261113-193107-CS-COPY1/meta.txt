@@ -1,0 +1,11 @@
+label: CS-COPY1
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run -n 1 -w 1 --out /home/jordan/alta-npu/runs/cs-193005/COPY1
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T19:31:07-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1483
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8808;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=b930cd9af;t=66031a461803c;x=30ab3af7b3c6a09e
+ETNA_MESA_DEBUG=shaderdb,dump_shaders
+end: 2026-11-13T19:31:09-05:00  rc: 0  wall_s: 2

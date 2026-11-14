@@ -1,0 +1,1475 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: etna_ml_softmax
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 512
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:    // preds:
+    32      %0 = load_const (0x00000000)
+    32      %1 = @load_kernel_input (%0 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32      %2 = load_const (0x00000004)
+    32      %3 = @load_kernel_input (%2 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3    %4 = @load_workgroup_id
+    32      %5 = mov %4.x
+    32      %6 = load_const (0x00000000)
+    32      %7 = umin %5, %6 (0x0)
+    32x3    %8 = @load_local_invocation_id
+    32      %9 = mov %8.x
+    32     %10 = load_const (0x0000003f = 63)
+    32     %11 = umin %9, %10 (0x3f)
+    32     %12 = load_const (0x000003e9 = 1001)
+    32     %13 = imul %7, %12 (0x3e9)
+    32     %14 = iadd %3, %13
+    32     %15 = iadd %1, %13
+    32     %16 = load_const (0x00000000)
+    32     %17 = load_const (0x000000fa = 250)
+    32     %18 = umin %11, %17 (0xfa)
+    32     %19 = load_const (0x00000002)
+    32     %20 = ishl %18, %19 (0x2)
+    32     %21 = iadd %14, %20
+    32     %22 = @load_global (%21) (access=none, align_mul=4, align_offset=0)
+    32     %23 = load_const (0x00000002)
+    32     %24 = ishl %18, %23 (0x2)
+    32     %25 = iadd %15, %24
+    32     %26 = load_const (0x000000ff = 255)
+    32     %27 = iand %22, %26 (0xff)
+    32     %28 = load_const (0x00000002)
+    32     %29 = ishl %18, %28 (0x2)
+    32     %30 = load_const (0x000003e9 = 1001)
+    1      %31 = ult %29, %30 (0x3e9)
+    32     %32 = load_const (0x00000000)
+    32     %33 = bcsel %31, %27, %32 (0x0)
+    32     %34 = load_const (0x000000fb = 251)
+    1      %35 = ult %11, %34 (0xfb)
+    1      %36 = iand %35, %31
+    32     %37 = umax %16 (0x0), %33
+    32     %38 = load_const (0x00000008)
+    32     %39 = ushr %22, %38 (0x8)
+    32     %40 = load_const (0x000000ff = 255)
+    32     %41 = iand %39, %40 (0xff)
+    32     %42 = load_const (0x00000002)
+    32     %43 = ishl %18, %42 (0x2)
+    32     %44 = load_const (0x00000001)
+    32     %45 = iadd %43, %44 (0x1)
+    32     %46 = load_const (0x000003e9 = 1001)
+    1      %47 = ult %45, %46 (0x3e9)
+    32     %48 = load_const (0x00000000)
+    32     %49 = bcsel %47, %41, %48 (0x0)
+    32     %50 = load_const (0x000000fb = 251)
+    1      %51 = ult %11, %50 (0xfb)
+    1      %52 = iand %51, %47
+    32     %53 = umax %37, %49
+    32     %54 = load_const (0x00000010 = 16)
+    32     %55 = ushr %22, %54 (0x10)
+    32     %56 = load_const (0x000000ff = 255)
+    32     %57 = iand %55, %56 (0xff)
+    32     %58 = load_const (0x00000002)
+    32     %59 = ishl %18, %58 (0x2)
+    32     %60 = load_const (0x00000002)
+    32     %61 = iadd %59, %60 (0x2)
+    32     %62 = load_const (0x000003e9 = 1001)
+    1      %63 = ult %61, %62 (0x3e9)
+    32     %64 = load_const (0x00000000)
+    32     %65 = bcsel %63, %57, %64 (0x0)
+    32     %66 = load_const (0x000000fb = 251)
+    1      %67 = ult %11, %66 (0xfb)
+    1      %68 = iand %67, %63
+    32     %69 = umax %53, %65
+    32     %70 = load_const (0x00000018 = 24)
+    32     %71 = ushr %22, %70 (0x18)
+    32     %72 = load_const (0x000000ff = 255)
+    32     %73 = iand %71, %72 (0xff)
+    32     %74 = load_const (0x00000002)
+    32     %75 = ishl %18, %74 (0x2)
+    32     %76 = load_const (0x00000003)
+    32     %77 = iadd %75, %76 (0x3)
+    32     %78 = load_const (0x000003e9 = 1001)
+    1      %79 = ult %77, %78 (0x3e9)
+    32     %80 = load_const (0x00000000)
+    32     %81 = bcsel %79, %73, %80 (0x0)
+    32     %82 = load_const (0x000000fb = 251)
+    1      %83 = ult %11, %82 (0xfb)
+    1      %84 = iand %83, %79
+    32     %85 = umax %69, %81
+    32     %86 = load_const (0x00000040 = 64)
+    32     %87 = iadd %11, %86 (0x40)
+    32     %88 = load_const (0x000000fa = 250)
+    32     %89 = umin %87, %88 (0xfa)
+    32     %90 = load_const (0x00000002)
+    32     %91 = ishl %89, %90 (0x2)
+    32     %92 = iadd %14, %91
+    32     %93 = @load_global (%92) (access=none, align_mul=4, align_offset=0)
+    32     %94 = load_const (0x00000002)
+    32     %95 = ishl %89, %94 (0x2)
+    32     %96 = iadd %15, %95
+    32     %97 = load_const (0x000000ff = 255)
+    32     %98 = iand %93, %97 (0xff)
+    32     %99 = load_const (0x00000002)
+    32    %100 = ishl %89, %99 (0x2)
+    32    %101 = load_const (0x000003e9 = 1001)
+    1     %102 = ult %100, %101 (0x3e9)
+    32    %103 = load_const (0x00000000)
+    32    %104 = bcsel %102, %98, %103 (0x0)
+    32    %105 = load_const (0x000000fb = 251)
+    1     %106 = ult %87, %105 (0xfb)
+    1     %107 = iand %106, %102
+    32    %108 = umax %85, %104
+    32    %109 = load_const (0x00000008)
+    32    %110 = ushr %93, %109 (0x8)
+    32    %111 = load_const (0x000000ff = 255)
+    32    %112 = iand %110, %111 (0xff)
+    32    %113 = load_const (0x00000002)
+    32    %114 = ishl %89, %113 (0x2)
+    32    %115 = load_const (0x00000001)
+    32    %116 = iadd %114, %115 (0x1)
+    32    %117 = load_const (0x000003e9 = 1001)
+    1     %118 = ult %116, %117 (0x3e9)
+    32    %119 = load_const (0x00000000)
+    32    %120 = bcsel %118, %112, %119 (0x0)
+    32    %121 = load_const (0x000000fb = 251)
+    1     %122 = ult %87, %121 (0xfb)
+    1     %123 = iand %122, %118
+    32    %124 = umax %108, %120
+    32    %125 = load_const (0x00000010 = 16)
+    32    %126 = ushr %93, %125 (0x10)
+    32    %127 = load_const (0x000000ff = 255)
+    32    %128 = iand %126, %127 (0xff)
+    32    %129 = load_const (0x00000002)
+    32    %130 = ishl %89, %129 (0x2)
+    32    %131 = load_const (0x00000002)
+    32    %132 = iadd %130, %131 (0x2)
+    32    %133 = load_const (0x000003e9 = 1001)
+    1     %134 = ult %132, %133 (0x3e9)
+    32    %135 = load_const (0x00000000)
+    32    %136 = bcsel %134, %128, %135 (0x0)
+    32    %137 = load_const (0x000000fb = 251)
+    1     %138 = ult %87, %137 (0xfb)
+    1     %139 = iand %138, %134
+    32    %140 = umax %124, %136
+    32    %141 = load_const (0x00000018 = 24)
+    32    %142 = ushr %93, %141 (0x18)
+    32    %143 = load_const (0x000000ff = 255)
+    32    %144 = iand %142, %143 (0xff)
+    32    %145 = load_const (0x00000002)
+    32    %146 = ishl %89, %145 (0x2)
+    32    %147 = load_const (0x00000003)
+    32    %148 = iadd %146, %147 (0x3)
+    32    %149 = load_const (0x000003e9 = 1001)
+    1     %150 = ult %148, %149 (0x3e9)
+    32    %151 = load_const (0x00000000)
+    32    %152 = bcsel %150, %144, %151 (0x0)
+    32    %153 = load_const (0x000000fb = 251)
+    1     %154 = ult %87, %153 (0xfb)
+    1     %155 = iand %154, %150
+    32    %156 = umax %140, %152
+    32    %157 = load_const (0x00000080 = 128)
+    32    %158 = iadd %11, %157 (0x80)
+    32    %159 = load_const (0x000000fa = 250)
+    32    %160 = umin %158, %159 (0xfa)
+    32    %161 = load_const (0x00000002)
+    32    %162 = ishl %160, %161 (0x2)
+    32    %163 = iadd %14, %162
+    32    %164 = @load_global (%163) (access=none, align_mul=4, align_offset=0)
+    32    %165 = load_const (0x00000002)
+    32    %166 = ishl %160, %165 (0x2)
+    32    %167 = iadd %15, %166
+    32    %168 = load_const (0x000000ff = 255)
+    32    %169 = iand %164, %168 (0xff)
+    32    %170 = load_const (0x00000002)
+    32    %171 = ishl %160, %170 (0x2)
+    32    %172 = load_const (0x000003e9 = 1001)
+    1     %173 = ult %171, %172 (0x3e9)
+    32    %174 = load_const (0x00000000)
+    32    %175 = bcsel %173, %169, %174 (0x0)
+    32    %176 = load_const (0x000000fb = 251)
+    1     %177 = ult %158, %176 (0xfb)
+    1     %178 = iand %177, %173
+    32    %179 = umax %156, %175
+    32    %180 = load_const (0x00000008)
+    32    %181 = ushr %164, %180 (0x8)
+    32    %182 = load_const (0x000000ff = 255)
+    32    %183 = iand %181, %182 (0xff)
+    32    %184 = load_const (0x00000002)
+    32    %185 = ishl %160, %184 (0x2)
+    32    %186 = load_const (0x00000001)
+    32    %187 = iadd %185, %186 (0x1)
+    32    %188 = load_const (0x000003e9 = 1001)
+    1     %189 = ult %187, %188 (0x3e9)
+    32    %190 = load_const (0x00000000)
+    32    %191 = bcsel %189, %183, %190 (0x0)
+    32    %192 = load_const (0x000000fb = 251)
+    1     %193 = ult %158, %192 (0xfb)
+    1     %194 = iand %193, %189
+    32    %195 = umax %179, %191
+    32    %196 = load_const (0x00000010 = 16)
+    32    %197 = ushr %164, %196 (0x10)
+    32    %198 = load_const (0x000000ff = 255)
+    32    %199 = iand %197, %198 (0xff)
+    32    %200 = load_const (0x00000002)
+    32    %201 = ishl %160, %200 (0x2)
+    32    %202 = load_const (0x00000002)
+    32    %203 = iadd %201, %202 (0x2)
+    32    %204 = load_const (0x000003e9 = 1001)
+    1     %205 = ult %203, %204 (0x3e9)
+    32    %206 = load_const (0x00000000)
+    32    %207 = bcsel %205, %199, %206 (0x0)
+    32    %208 = load_const (0x000000fb = 251)
+    1     %209 = ult %158, %208 (0xfb)
+    1     %210 = iand %209, %205
+    32    %211 = umax %195, %207
+    32    %212 = load_const (0x00000018 = 24)
+    32    %213 = ushr %164, %212 (0x18)
+    32    %214 = load_const (0x000000ff = 255)
+    32    %215 = iand %213, %214 (0xff)
+    32    %216 = load_const (0x00000002)
+    32    %217 = ishl %160, %216 (0x2)
+    32    %218 = load_const (0x00000003)
+    32    %219 = iadd %217, %218 (0x3)
+    32    %220 = load_const (0x000003e9 = 1001)
+    1     %221 = ult %219, %220 (0x3e9)
+    32    %222 = load_const (0x00000000)
+    32    %223 = bcsel %221, %215, %222 (0x0)
+    32    %224 = load_const (0x000000fb = 251)
+    1     %225 = ult %158, %224 (0xfb)
+    1     %226 = iand %225, %221
+    32    %227 = umax %211, %223
+    32    %228 = load_const (0x000000c0 = 192)
+    32    %229 = iadd %11, %228 (0xc0)
+    32    %230 = load_const (0x000000fa = 250)
+    32    %231 = umin %229, %230 (0xfa)
+    32    %232 = load_const (0x00000002)
+    32    %233 = ishl %231, %232 (0x2)
+    32    %234 = iadd %14, %233
+    32    %235 = @load_global (%234) (access=none, align_mul=4, align_offset=0)
+    32    %236 = load_const (0x00000002)
+    32    %237 = ishl %231, %236 (0x2)
+    32    %238 = iadd %15, %237
+    32    %239 = load_const (0x000000ff = 255)
+    32    %240 = iand %235, %239 (0xff)
+    32    %241 = load_const (0x00000002)
+    32    %242 = ishl %231, %241 (0x2)
+    32    %243 = load_const (0x000003e9 = 1001)
+    1     %244 = ult %242, %243 (0x3e9)
+    32    %245 = load_const (0x00000000)
+    32    %246 = bcsel %244, %240, %245 (0x0)
+    32    %247 = load_const (0x000000fb = 251)
+    1     %248 = ult %229, %247 (0xfb)
+    1     %249 = iand %248, %244
+    32    %250 = umax %227, %246
+    32    %251 = load_const (0x00000008)
+    32    %252 = ushr %235, %251 (0x8)
+    32    %253 = load_const (0x000000ff = 255)
+    32    %254 = iand %252, %253 (0xff)
+    32    %255 = load_const (0x00000002)
+    32    %256 = ishl %231, %255 (0x2)
+    32    %257 = load_const (0x00000001)
+    32    %258 = iadd %256, %257 (0x1)
+    32    %259 = load_const (0x000003e9 = 1001)
+    1     %260 = ult %258, %259 (0x3e9)
+    32    %261 = load_const (0x00000000)
+    32    %262 = bcsel %260, %254, %261 (0x0)
+    32    %263 = load_const (0x000000fb = 251)
+    1     %264 = ult %229, %263 (0xfb)
+    1     %265 = iand %264, %260
+    32    %266 = umax %250, %262
+    32    %267 = load_const (0x00000010 = 16)
+    32    %268 = ushr %235, %267 (0x10)
+    32    %269 = load_const (0x000000ff = 255)
+    32    %270 = iand %268, %269 (0xff)
+    32    %271 = load_const (0x00000002)
+    32    %272 = ishl %231, %271 (0x2)
+    32    %273 = load_const (0x00000002)
+    32    %274 = iadd %272, %273 (0x2)
+    32    %275 = load_const (0x000003e9 = 1001)
+    1     %276 = ult %274, %275 (0x3e9)
+    32    %277 = load_const (0x00000000)
+    32    %278 = bcsel %276, %270, %277 (0x0)
+    32    %279 = load_const (0x000000fb = 251)
+    1     %280 = ult %229, %279 (0xfb)
+    1     %281 = iand %280, %276
+    32    %282 = umax %266, %278
+    32    %283 = load_const (0x00000018 = 24)
+    32    %284 = ushr %235, %283 (0x18)
+    32    %285 = load_const (0x000000ff = 255)
+    32    %286 = iand %284, %285 (0xff)
+    32    %287 = load_const (0x00000002)
+    32    %288 = ishl %231, %287 (0x2)
+    32    %289 = load_const (0x00000003)
+    32    %290 = iadd %288, %289 (0x3)
+    32    %291 = load_const (0x000003e9 = 1001)
+    1     %292 = ult %290, %291 (0x3e9)
+    32    %293 = load_const (0x00000000)
+    32    %294 = bcsel %292, %286, %293 (0x0)
+    32    %295 = load_const (0x000000fb = 251)
+    1     %296 = ult %229, %295 (0xfb)
+    1     %297 = iand %296, %292
+    32    %298 = umax %282, %294
+    32    %299 = load_const (0x00000002)
+    32    %300 = ishl %11, %299 (0x2)
+                 @store_shared (%298, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %301 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %302 = @load_shared (%300) (base=128, access=none, align_mul=4, align_offset=0)
+    32    %303 = load_const (0x00000020 = 32)
+    1     %304 = ult %11, %303 (0x20)
+    32    %305 = umax %301, %302
+    32    %306 = bcsel %304, %305, %301
+                 @store_shared (%306, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %307 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %308 = @load_shared (%300) (base=64, access=none, align_mul=4, align_offset=0)
+    32    %309 = load_const (0x00000010 = 16)
+    1     %310 = ult %11, %309 (0x10)
+    32    %311 = umax %307, %308
+    32    %312 = bcsel %310, %311, %307
+                 @store_shared (%312, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %313 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %314 = @load_shared (%300) (base=32, access=none, align_mul=4, align_offset=0)
+    32    %315 = load_const (0x00000008)
+    1     %316 = ult %11, %315 (0x8)
+    32    %317 = umax %313, %314
+    32    %318 = bcsel %316, %317, %313
+                 @store_shared (%318, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %319 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %320 = @load_shared (%300) (base=16, access=none, align_mul=4, align_offset=0)
+    32    %321 = load_const (0x00000004)
+    1     %322 = ult %11, %321 (0x4)
+    32    %323 = umax %319, %320
+    32    %324 = bcsel %322, %323, %319
+                 @store_shared (%324, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %325 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %326 = @load_shared (%300) (base=8, access=none, align_mul=4, align_offset=0)
+    32    %327 = load_const (0x00000002)
+    1     %328 = ult %11, %327 (0x2)
+    32    %329 = umax %325, %326
+    32    %330 = bcsel %328, %329, %325
+                 @store_shared (%330, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %331 = @load_shared (%300) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %332 = @load_shared (%300) (base=4, access=none, align_mul=4, align_offset=0)
+    32    %333 = load_const (0x00000001)
+    1     %334 = ult %11, %333 (0x1)
+    32    %335 = umax %331, %332
+    32    %336 = bcsel %334, %335, %331
+                 @store_shared (%336, %300) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %337 = load_const (0x00000000)
+    32    %338 = @load_shared (%337 (0x0)) (base=0, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %339 = u2f32 %338
+    32    %340 = load_const (0x00000000 = 0.000000)
+    32    %341 = u2f32 %33
+    32    %342 = fsub %341, %339
+    32    %343 = load_const (0x3e7561b4 = 0.239631)
+    32    %344 = fmul %342, %343 (0.239631)
+    32    %345 = fexp2 %344
+    32    %346 = load_const (0x00000000 = 0.000000)
+    32    %347 = bcsel %36, %345, %346 (0x0)
+    32    %348 = fadd %340 (0.000000), %347
+    32    %349 = u2f32 %49
+    32    %350 = fsub %349, %339
+    32    %351 = load_const (0x3e7561b4 = 0.239631)
+    32    %352 = fmul %350, %351 (0.239631)
+    32    %353 = fexp2 %352
+    32    %354 = load_const (0x00000000 = 0.000000)
+    32    %355 = bcsel %52, %353, %354 (0x0)
+    32    %356 = fadd %348, %355
+    32    %357 = u2f32 %65
+    32    %358 = fsub %357, %339
+    32    %359 = load_const (0x3e7561b4 = 0.239631)
+    32    %360 = fmul %358, %359 (0.239631)
+    32    %361 = fexp2 %360
+    32    %362 = load_const (0x00000000 = 0.000000)
+    32    %363 = bcsel %68, %361, %362 (0x0)
+    32    %364 = fadd %356, %363
+    32    %365 = u2f32 %81
+    32    %366 = fsub %365, %339
+    32    %367 = load_const (0x3e7561b4 = 0.239631)
+    32    %368 = fmul %366, %367 (0.239631)
+    32    %369 = fexp2 %368
+    32    %370 = load_const (0x00000000 = 0.000000)
+    32    %371 = bcsel %84, %369, %370 (0x0)
+    32    %372 = fadd %364, %371
+    32    %373 = u2f32 %104
+    32    %374 = fsub %373, %339
+    32    %375 = load_const (0x3e7561b4 = 0.239631)
+    32    %376 = fmul %374, %375 (0.239631)
+    32    %377 = fexp2 %376
+    32    %378 = load_const (0x00000000 = 0.000000)
+    32    %379 = bcsel %107, %377, %378 (0x0)
+    32    %380 = fadd %372, %379
+    32    %381 = u2f32 %120
+    32    %382 = fsub %381, %339
+    32    %383 = load_const (0x3e7561b4 = 0.239631)
+    32    %384 = fmul %382, %383 (0.239631)
+    32    %385 = fexp2 %384
+    32    %386 = load_const (0x00000000 = 0.000000)
+    32    %387 = bcsel %123, %385, %386 (0x0)
+    32    %388 = fadd %380, %387
+    32    %389 = u2f32 %136
+    32    %390 = fsub %389, %339
+    32    %391 = load_const (0x3e7561b4 = 0.239631)
+    32    %392 = fmul %390, %391 (0.239631)
+    32    %393 = fexp2 %392
+    32    %394 = load_const (0x00000000 = 0.000000)
+    32    %395 = bcsel %139, %393, %394 (0x0)
+    32    %396 = fadd %388, %395
+    32    %397 = u2f32 %152
+    32    %398 = fsub %397, %339
+    32    %399 = load_const (0x3e7561b4 = 0.239631)
+    32    %400 = fmul %398, %399 (0.239631)
+    32    %401 = fexp2 %400
+    32    %402 = load_const (0x00000000 = 0.000000)
+    32    %403 = bcsel %155, %401, %402 (0x0)
+    32    %404 = fadd %396, %403
+    32    %405 = u2f32 %175
+    32    %406 = fsub %405, %339
+    32    %407 = load_const (0x3e7561b4 = 0.239631)
+    32    %408 = fmul %406, %407 (0.239631)
+    32    %409 = fexp2 %408
+    32    %410 = load_const (0x00000000 = 0.000000)
+    32    %411 = bcsel %178, %409, %410 (0x0)
+    32    %412 = fadd %404, %411
+    32    %413 = u2f32 %191
+    32    %414 = fsub %413, %339
+    32    %415 = load_const (0x3e7561b4 = 0.239631)
+    32    %416 = fmul %414, %415 (0.239631)
+    32    %417 = fexp2 %416
+    32    %418 = load_const (0x00000000 = 0.000000)
+    32    %419 = bcsel %194, %417, %418 (0x0)
+    32    %420 = fadd %412, %419
+    32    %421 = u2f32 %207
+    32    %422 = fsub %421, %339
+    32    %423 = load_const (0x3e7561b4 = 0.239631)
+    32    %424 = fmul %422, %423 (0.239631)
+    32    %425 = fexp2 %424
+    32    %426 = load_const (0x00000000 = 0.000000)
+    32    %427 = bcsel %210, %425, %426 (0x0)
+    32    %428 = fadd %420, %427
+    32    %429 = u2f32 %223
+    32    %430 = fsub %429, %339
+    32    %431 = load_const (0x3e7561b4 = 0.239631)
+    32    %432 = fmul %430, %431 (0.239631)
+    32    %433 = fexp2 %432
+    32    %434 = load_const (0x00000000 = 0.000000)
+    32    %435 = bcsel %226, %433, %434 (0x0)
+    32    %436 = fadd %428, %435
+    32    %437 = u2f32 %246
+    32    %438 = fsub %437, %339
+    32    %439 = load_const (0x3e7561b4 = 0.239631)
+    32    %440 = fmul %438, %439 (0.239631)
+    32    %441 = fexp2 %440
+    32    %442 = load_const (0x00000000 = 0.000000)
+    32    %443 = bcsel %249, %441, %442 (0x0)
+    32    %444 = fadd %436, %443
+    32    %445 = u2f32 %262
+    32    %446 = fsub %445, %339
+    32    %447 = load_const (0x3e7561b4 = 0.239631)
+    32    %448 = fmul %446, %447 (0.239631)
+    32    %449 = fexp2 %448
+    32    %450 = load_const (0x00000000 = 0.000000)
+    32    %451 = bcsel %265, %449, %450 (0x0)
+    32    %452 = fadd %444, %451
+    32    %453 = u2f32 %278
+    32    %454 = fsub %453, %339
+    32    %455 = load_const (0x3e7561b4 = 0.239631)
+    32    %456 = fmul %454, %455 (0.239631)
+    32    %457 = fexp2 %456
+    32    %458 = load_const (0x00000000 = 0.000000)
+    32    %459 = bcsel %281, %457, %458 (0x0)
+    32    %460 = fadd %452, %459
+    32    %461 = u2f32 %294
+    32    %462 = fsub %461, %339
+    32    %463 = load_const (0x3e7561b4 = 0.239631)
+    32    %464 = fmul %462, %463 (0.239631)
+    32    %465 = fexp2 %464
+    32    %466 = load_const (0x00000000 = 0.000000)
+    32    %467 = bcsel %297, %465, %466 (0x0)
+    32    %468 = fadd %460, %467
+    32    %469 = load_const (0x00000002)
+    32    %470 = ishl %11, %469 (0x2)
+                 @store_shared (%468, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %471 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %472 = @load_shared (%470) (base=128, access=none, align_mul=4, align_offset=0)
+    32    %473 = load_const (0x00000020 = 32)
+    1     %474 = ult %11, %473 (0x20)
+    32    %475 = fadd %471, %472
+    32    %476 = bcsel %474, %475, %471
+                 @store_shared (%476, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %477 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %478 = @load_shared (%470) (base=64, access=none, align_mul=4, align_offset=0)
+    32    %479 = load_const (0x00000010 = 16)
+    1     %480 = ult %11, %479 (0x10)
+    32    %481 = fadd %477, %478
+    32    %482 = bcsel %480, %481, %477
+                 @store_shared (%482, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %483 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %484 = @load_shared (%470) (base=32, access=none, align_mul=4, align_offset=0)
+    32    %485 = load_const (0x00000008)
+    1     %486 = ult %11, %485 (0x8)
+    32    %487 = fadd %483, %484
+    32    %488 = bcsel %486, %487, %483
+                 @store_shared (%488, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %489 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %490 = @load_shared (%470) (base=16, access=none, align_mul=4, align_offset=0)
+    32    %491 = load_const (0x00000004)
+    1     %492 = ult %11, %491 (0x4)
+    32    %493 = fadd %489, %490
+    32    %494 = bcsel %492, %493, %489
+                 @store_shared (%494, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %495 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %496 = @load_shared (%470) (base=8, access=none, align_mul=4, align_offset=0)
+    32    %497 = load_const (0x00000002)
+    1     %498 = ult %11, %497 (0x2)
+    32    %499 = fadd %495, %496
+    32    %500 = bcsel %498, %499, %495
+                 @store_shared (%500, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %501 = @load_shared (%470) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %502 = @load_shared (%470) (base=4, access=none, align_mul=4, align_offset=0)
+    32    %503 = load_const (0x00000001)
+    1     %504 = ult %11, %503 (0x1)
+    32    %505 = fadd %501, %502
+    32    %506 = bcsel %504, %505, %501
+                 @store_shared (%506, %470) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %507 = load_const (0x00000000)
+    32    %508 = @load_shared (%507 (0x0)) (base=0, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %509 = frcp %508
+    32    %510 = load_const (0x43800000 = 256.000000)
+    32    %511 = fmul %509, %510 (256.000000)
+    32    %512 = fmul %345, %511
+    32    %513 = load_const (0x3f000000 = 0.500000)
+    32    %514 = fadd %512, %513 (0.500000)
+    32    %515 = load_const (0x437f0000 = 255.000000)
+    32    %516 = fmin %514, %515 (255.000000)
+    32    %517 = f2u32 %516
+    32    %518 = fmul %353, %511
+    32    %519 = load_const (0x3f000000 = 0.500000)
+    32    %520 = fadd %518, %519 (0.500000)
+    32    %521 = load_const (0x437f0000 = 255.000000)
+    32    %522 = fmin %520, %521 (255.000000)
+    32    %523 = f2u32 %522
+    32    %524 = load_const (0x00000008)
+    32    %525 = ishl %523, %524 (0x8)
+    32    %526 = ior %517, %525
+    32    %527 = fmul %361, %511
+    32    %528 = load_const (0x3f000000 = 0.500000)
+    32    %529 = fadd %527, %528 (0.500000)
+    32    %530 = load_const (0x437f0000 = 255.000000)
+    32    %531 = fmin %529, %530 (255.000000)
+    32    %532 = f2u32 %531
+    32    %533 = load_const (0x00000010 = 16)
+    32    %534 = ishl %532, %533 (0x10)
+    32    %535 = ior %526, %534
+    32    %536 = fmul %369, %511
+    32    %537 = load_const (0x3f000000 = 0.500000)
+    32    %538 = fadd %536, %537 (0.500000)
+    32    %539 = load_const (0x437f0000 = 255.000000)
+    32    %540 = fmin %538, %539 (255.000000)
+    32    %541 = f2u32 %540
+    32    %542 = load_const (0x00000018 = 24)
+    32    %543 = ishl %541, %542 (0x18)
+    32    %544 = ior %535, %543
+                 @store_global (%544, %25) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %545 = fmul %377, %511
+    32    %546 = load_const (0x3f000000 = 0.500000)
+    32    %547 = fadd %545, %546 (0.500000)
+    32    %548 = load_const (0x437f0000 = 255.000000)
+    32    %549 = fmin %547, %548 (255.000000)
+    32    %550 = f2u32 %549
+    32    %551 = fmul %385, %511
+    32    %552 = load_const (0x3f000000 = 0.500000)
+    32    %553 = fadd %551, %552 (0.500000)
+    32    %554 = load_const (0x437f0000 = 255.000000)
+    32    %555 = fmin %553, %554 (255.000000)
+    32    %556 = f2u32 %555
+    32    %557 = load_const (0x00000008)
+    32    %558 = ishl %556, %557 (0x8)
+    32    %559 = ior %550, %558
+    32    %560 = fmul %393, %511
+    32    %561 = load_const (0x3f000000 = 0.500000)
+    32    %562 = fadd %560, %561 (0.500000)
+    32    %563 = load_const (0x437f0000 = 255.000000)
+    32    %564 = fmin %562, %563 (255.000000)
+    32    %565 = f2u32 %564
+    32    %566 = load_const (0x00000010 = 16)
+    32    %567 = ishl %565, %566 (0x10)
+    32    %568 = ior %559, %567
+    32    %569 = fmul %401, %511
+    32    %570 = load_const (0x3f000000 = 0.500000)
+    32    %571 = fadd %569, %570 (0.500000)
+    32    %572 = load_const (0x437f0000 = 255.000000)
+    32    %573 = fmin %571, %572 (255.000000)
+    32    %574 = f2u32 %573
+    32    %575 = load_const (0x00000018 = 24)
+    32    %576 = ishl %574, %575 (0x18)
+    32    %577 = ior %568, %576
+                 @store_global (%577, %96) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %578 = fmul %409, %511
+    32    %579 = load_const (0x3f000000 = 0.500000)
+    32    %580 = fadd %578, %579 (0.500000)
+    32    %581 = load_const (0x437f0000 = 255.000000)
+    32    %582 = fmin %580, %581 (255.000000)
+    32    %583 = f2u32 %582
+    32    %584 = fmul %417, %511
+    32    %585 = load_const (0x3f000000 = 0.500000)
+    32    %586 = fadd %584, %585 (0.500000)
+    32    %587 = load_const (0x437f0000 = 255.000000)
+    32    %588 = fmin %586, %587 (255.000000)
+    32    %589 = f2u32 %588
+    32    %590 = load_const (0x00000008)
+    32    %591 = ishl %589, %590 (0x8)
+    32    %592 = ior %583, %591
+    32    %593 = fmul %425, %511
+    32    %594 = load_const (0x3f000000 = 0.500000)
+    32    %595 = fadd %593, %594 (0.500000)
+    32    %596 = load_const (0x437f0000 = 255.000000)
+    32    %597 = fmin %595, %596 (255.000000)
+    32    %598 = f2u32 %597
+    32    %599 = load_const (0x00000010 = 16)
+    32    %600 = ishl %598, %599 (0x10)
+    32    %601 = ior %592, %600
+    32    %602 = fmul %433, %511
+    32    %603 = load_const (0x3f000000 = 0.500000)
+    32    %604 = fadd %602, %603 (0.500000)
+    32    %605 = load_const (0x437f0000 = 255.000000)
+    32    %606 = fmin %604, %605 (255.000000)
+    32    %607 = f2u32 %606
+    32    %608 = load_const (0x00000018 = 24)
+    32    %609 = ishl %607, %608 (0x18)
+    32    %610 = ior %601, %609
+                 @store_global (%610, %167) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %611 = fmul %441, %511
+    32    %612 = load_const (0x3f000000 = 0.500000)
+    32    %613 = fadd %611, %612 (0.500000)
+    32    %614 = load_const (0x437f0000 = 255.000000)
+    32    %615 = fmin %613, %614 (255.000000)
+    32    %616 = f2u32 %615
+    32    %617 = fmul %449, %511
+    32    %618 = load_const (0x3f000000 = 0.500000)
+    32    %619 = fadd %617, %618 (0.500000)
+    32    %620 = load_const (0x437f0000 = 255.000000)
+    32    %621 = fmin %619, %620 (255.000000)
+    32    %622 = f2u32 %621
+    32    %623 = load_const (0x00000008)
+    32    %624 = ishl %622, %623 (0x8)
+    32    %625 = ior %616, %624
+    32    %626 = fmul %457, %511
+    32    %627 = load_const (0x3f000000 = 0.500000)
+    32    %628 = fadd %626, %627 (0.500000)
+    32    %629 = load_const (0x437f0000 = 255.000000)
+    32    %630 = fmin %628, %629 (255.000000)
+    32    %631 = f2u32 %630
+    32    %632 = load_const (0x00000010 = 16)
+    32    %633 = ishl %631, %632 (0x10)
+    32    %634 = ior %625, %633
+    32    %635 = fmul %465, %511
+    32    %636 = load_const (0x3f000000 = 0.500000)
+    32    %637 = fadd %635, %636 (0.500000)
+    32    %638 = load_const (0x437f0000 = 255.000000)
+    32    %639 = fmin %637, %638 (255.000000)
+    32    %640 = f2u32 %639
+    32    %641 = load_const (0x00000018 = 24)
+    32    %642 = ishl %640, %641 (0x18)
+    32    %643 = ior %634, %642
+                 @store_global (%643, %238) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b1
+    block b1:
+}
+
+kernel: softmax, shared 512 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: etna_ml_softmax
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 512
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:    // preds:
+    32x3    %0 = @load_workgroup_id
+    32x3    %1 = @load_num_workgroups
+    32      %2 = imul %1.y, %0.z
+    32      %3 = iadd %0.y, %2
+    32      %4 = imul %1.x, %3
+    32      %5 = iadd %0.x, %4
+    32      %6 = imul %1.x, %1.y
+    32      %7 = imul %6, %1.z
+    32      %8 = load_const (0xffffffff = -1 = 4294967295)
+    32      %9 = iadd %7, %8 (0xffffffff)
+    32     %10 = umin %5, %9
+    32     %11 = @load_shared_base_ptr
+    32     %12 = load_const (0x00000200 = 512)
+    32     %13 = imul %10, %12 (0x200)
+    32     %14 = iadd %11, %13
+    32     %15 = load_const (0x00000000 = 0.000000)
+    32     %16 = @load_kernel_input (%15 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %17 = load_const (0x00000004)
+    32     %18 = @load_kernel_input (%17 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x3   %19 = @load_local_invocation_id
+    32     %20 = load_const (0x0000003f = 63)
+    32     %21 = umin %19.x, %20 (0x3f)
+    32     %22 = load_const (0x000003e9 = 1001)
+    32     %23 = load_const (0x000000fa = 250)
+    32     %24 = umin %21, %23 (0xfa)
+    32     %25 = load_const (0x00000002)
+    32     %26 = imul %24, %17 (0x4)
+    32     %27 = iadd %18, %26
+    32     %28 = @load_global (%27) (access=none, align_mul=4, align_offset=0)
+    32     %29 = iadd %16, %26
+    32     %30 = load_const (0x000000ff = 255)
+    32     %31 = iand %28, %30 (0xff)
+    32     %32 = ult32 %26, %22 (0x3e9)
+    32     %33 = b32csel %32, %31, %15 (0x0)
+    32     %34 = load_const (0x000000fb = 251)
+    32x3   %35 = load_const (0x00000008, 0x00000010, 0x00000018) = (8, 16, 24)
+    32x3   %36 = ushr %28.xxx, %35 (0x8, 0x10, 0x18)
+    32x2   %37 = iand %36.xy, %30 (0xff).xx
+    32x3   %38 = load_const (0x00000001, 0x00000002, 0x00000003)
+    32x3   %39 = iadd %26.xxx, %38 (0x1, 0x2, 0x3)
+    32x3   %40 = ult32 %39, %22 (0x3e9).xxx
+    32x2   %41 = b32csel %40.xy, %37, %15 (0x0).xx
+    32     %42 = umax %33, %41.x
+    32     %43 = umax %42, %41.y
+    32     %44 = load_const (0x00000003)
+    32     %45 = b32csel %40.z, %36.z, %15 (0x0)
+    32     %46 = umax %43, %45
+    32x3   %47 = load_const (0x00000040, 0x00000080, 0x000000c0) = (64, 128, 192)
+    32x3   %48 = iadd %21.xxx, %47 (0x40, 0x80, 0xc0)
+    32x3   %49 = umin %48, %23 (0xfa).xxx
+    32     %50 = imul %49.x, %17 (0x4)
+    32     %51 = imul %49.y, %17 (0x4)
+    32     %52 = imul %49.z, %17 (0x4)
+    32x3   %53 = vec3 %50, %51, %52
+    32x3   %54 = iadd %18.xxx, %53
+    32     %55 = mov %54.z
+    32     %56 = mov %54.x
+    32     %57 = mov %54.y
+    32     %58 = @load_global (%56) (access=none, align_mul=4, align_offset=0)
+    32x3   %59 = iadd %16.xxx, %53
+    32     %60 = mov %59.z
+    32     %61 = mov %59.x
+    32     %62 = mov %59.y
+    32     %63 = iand %58, %30 (0xff)
+    32x3   %64 = ult32 %53, %22 (0x3e9).xxx
+    32     %65 = b32csel %64.x, %63, %15 (0x0)
+    32x3   %66 = ult32 %48, %34 (0xfb).xxx
+    32x3   %67 = iand %66, %64
+    32     %68 = umax %46, %65
+    32x3   %69 = ushr %58.xxx, %35 (0x8, 0x10, 0x18)
+    32x2   %70 = iand %69.xy, %30 (0xff).xx
+    32x4   %71 = load_const (0x00000001, 0x00000002, 0x00000003, 0x00000001)
+    32x4   %72 = iadd %53.xxxy, %71 (0x1, 0x2, 0x3, 0x1)
+    32x4   %73 = ult32 %72, %22 (0x3e9).xxxx
+    32x2   %74 = b32csel %73.xy, %70, %15 (0x0).xx
+    32x4   %75 = iand %66.xxxy, %73
+    32     %76 = umax %68, %74.x
+    32     %77 = umax %76, %74.y
+    32     %78 = b32csel %73.z, %69.z, %15 (0x0)
+    32     %79 = umax %77, %78
+    32     %80 = @load_global (%57) (access=none, align_mul=4, align_offset=0)
+    32     %81 = iand %80, %30 (0xff)
+    32     %82 = b32csel %64.y, %81, %15 (0x0)
+    32     %83 = umax %79, %82
+    32x3   %84 = ushr %80.xxx, %35 (0x8, 0x10, 0x18)
+    32x2   %85 = iand %84.xy, %30 (0xff).xx
+    32     %86 = b32csel %73.w, %85.x, %15 (0x0)
+    32     %87 = umax %83, %86
+    32x4   %88 = load_const (0x00000002, 0x00000003, 0x00000001, 0x00000002)
+    32x4   %89 = iadd %53.yyzz, %88 (0x2, 0x3, 0x1, 0x2)
+    32x4   %90 = ult32 %89, %22 (0x3e9).xxxx
+    32     %91 = b32csel %90.x, %85.y, %15 (0x0)
+    32x4   %92 = iand %66.yyzz, %90
+    32     %93 = umax %87, %91
+    32     %94 = b32csel %90.y, %84.z, %15 (0x0)
+    32     %95 = umax %93, %94
+    32     %96 = @load_global (%55) (access=none, align_mul=4, align_offset=0)
+    32     %97 = iand %96, %30 (0xff)
+    32     %98 = b32csel %64.z, %97, %15 (0x0)
+    32     %99 = umax %95, %98
+    32x3  %100 = ushr %96.xxx, %35 (0x8, 0x10, 0x18)
+    32x2  %101 = iand %100.xy, %30 (0xff).xx
+    32x2  %102 = b32csel %90.zw, %101, %15 (0x0).xx
+    32    %103 = umax %99, %102.x
+    32    %104 = umax %103, %102.y
+    32    %105 = iadd %52, %44 (0x3)
+    32    %106 = ult32 %105, %22 (0x3e9)
+    32    %107 = b32csel %106, %100.z, %15 (0x0)
+    32    %108 = iand %66.z, %106
+    32    %109 = umax %104, %107
+    32    %110 = imul %21, %17 (0x4)
+    32    %111 = iadd %14, %110
+                 @store_global (%109, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %112 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32x4  %113 = load_const (0x00000080, 0x00000040, 0x00000020, 0x00000010) = (128, 64, 32, 16)
+    32x4  %114 = iadd %110.xxxx, %113 (0x80, 0x40, 0x20, 0x10)
+    32x4  %115 = iadd %14.xxxx, %114
+    32    %116 = mov %115.w
+    32    %117 = mov %115.z
+    32    %118 = mov %115.x
+    32    %119 = mov %115.y
+    32    %120 = @load_global (%118) (access=none, align_mul=4, align_offset=0)
+    32x4  %121 = load_const (0x00000020, 0x00000010, 0x00000008, 0x00000004) = (32, 16, 8, 4)
+    32x4  %122 = ult32 %19.xxxx, %121 (0x20, 0x10, 0x8, 0x4)
+    32    %123 = umax %112, %120
+    32    %124 = b32csel %122.x, %123, %112
+                 @store_global (%124, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %125 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %126 = @load_global (%119) (access=none, align_mul=4, align_offset=0)
+    32    %127 = umax %125, %126
+    32    %128 = b32csel %122.y, %127, %125
+                 @store_global (%128, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %129 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %130 = @load_global (%117) (access=none, align_mul=4, align_offset=0)
+    32    %131 = umax %129, %130
+    32    %132 = b32csel %122.z, %131, %129
+                 @store_global (%132, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %133 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %134 = @load_global (%116) (access=none, align_mul=4, align_offset=0)
+    32    %135 = umax %133, %134
+    32    %136 = b32csel %122.w, %135, %133
+                 @store_global (%136, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %137 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32x2  %138 = load_const (0x00000008, 0x00000004)
+    32x2  %139 = iadd %110.xx, %138 (0x8, 0x4)
+    32x2  %140 = iadd %14.xx, %139
+    32    %141 = mov %140.x
+    32    %142 = mov %140.y
+    32    %143 = @load_global (%141) (access=none, align_mul=4, align_offset=0)
+    32    %144 = ult32 %19.x, %25 (0x2)
+    32    %145 = umax %137, %143
+    32    %146 = b32csel %144, %145, %137
+                 @store_global (%146, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %147 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %148 = @load_global (%142) (access=none, align_mul=4, align_offset=0)
+    32    %149 = ieq32 %19.x, %15 (0x0)
+    32    %150 = umax %147, %148
+    32    %151 = b32csel %149, %150, %147
+                 @store_global (%151, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %152 = @load_global (%14) (access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %153 = u2f32 %152
+    32    %154 = u2f32 %33
+    32    %155 = fadd %154, %153
+    32    %156 = load_const (0x3e7561b4 = 0.239631)
+    32    %157 = fmul %155, %156 (0.239631)
+    32    %158 = fexp2 %157
+    32    %159 = b32csel %32, %158, %15 (0x0)
+    32x2  %160 = u2f32 %41
+    32x2  %161 = fadd %160, %153.xx
+    32x2  %162 = fmul %161, %156 (0.239631).xx
+    32    %163 = fexp2 %162.x
+    32    %164 = fexp2 %162.y
+    32x2  %165 = vec2 %163, %164
+    32x2  %166 = b32csel %40.xy, %165, %15 (0x0).xx
+    32    %167 = fadd %159, %166.x
+    32    %168 = fadd %167, %166.y
+    32    %169 = u2f32 %45
+    32    %170 = fadd %169, %153
+    32    %171 = fmul %170, %156 (0.239631)
+    32    %172 = fexp2 %171
+    32    %173 = b32csel %40.z, %172, %15 (0x0)
+    32    %174 = fadd %168, %173
+    32    %175 = u2f32 %65
+    32    %176 = fadd %175, %153
+    32    %177 = fmul %176, %156 (0.239631)
+    32    %178 = fexp2 %177
+    32    %179 = b32csel %67.x, %178, %15 (0x0)
+    32    %180 = fadd %174, %179
+    32x2  %181 = u2f32 %74
+    32x2  %182 = fadd %181, %153.xx
+    32x2  %183 = fmul %182, %156 (0.239631).xx
+    32    %184 = fexp2 %183.x
+    32    %185 = fexp2 %183.y
+    32x2  %186 = vec2 %184, %185
+    32x2  %187 = b32csel %75.xy, %186, %15 (0x0).xx
+    32    %188 = fadd %180, %187.x
+    32    %189 = fadd %188, %187.y
+    32    %190 = u2f32 %78
+    32    %191 = fadd %190, %153
+    32    %192 = fmul %191, %156 (0.239631)
+    32    %193 = fexp2 %192
+    32    %194 = b32csel %75.z, %193, %15 (0x0)
+    32    %195 = fadd %189, %194
+    32    %196 = u2f32 %82
+    32    %197 = fadd %196, %153
+    32    %198 = fmul %197, %156 (0.239631)
+    32    %199 = fexp2 %198
+    32    %200 = b32csel %67.y, %199, %15 (0x0)
+    32    %201 = fadd %195, %200
+    32    %202 = u2f32 %86
+    32    %203 = fadd %202, %153
+    32    %204 = fmul %203, %156 (0.239631)
+    32    %205 = fexp2 %204
+    32    %206 = b32csel %75.w, %205, %15 (0x0)
+    32    %207 = fadd %201, %206
+    32    %208 = u2f32 %91
+    32    %209 = fadd %208, %153
+    32    %210 = fmul %209, %156 (0.239631)
+    32    %211 = fexp2 %210
+    32    %212 = b32csel %92.x, %211, %15 (0x0)
+    32    %213 = fadd %207, %212
+    32    %214 = u2f32 %94
+    32    %215 = fadd %214, %153
+    32    %216 = fmul %215, %156 (0.239631)
+    32    %217 = fexp2 %216
+    32    %218 = b32csel %92.y, %217, %15 (0x0)
+    32    %219 = fadd %213, %218
+    32    %220 = u2f32 %98
+    32    %221 = fadd %220, %153
+    32    %222 = fmul %221, %156 (0.239631)
+    32    %223 = fexp2 %222
+    32    %224 = b32csel %67.z, %223, %15 (0x0)
+    32    %225 = fadd %219, %224
+    32x2  %226 = u2f32 %102
+    32x2  %227 = fadd %226, %153.xx
+    32x2  %228 = fmul %227, %156 (0.239631).xx
+    32    %229 = fexp2 %228.x
+    32    %230 = fexp2 %228.y
+    32x2  %231 = vec2 %229, %230
+    32x2  %232 = b32csel %92.zw, %231, %15 (0x0).xx
+    32    %233 = fadd %225, %232.x
+    32    %234 = fadd %233, %232.y
+    32    %235 = u2f32 %107
+    32    %236 = fadd %235, %153
+    32    %237 = fmul %236, %156 (0.239631)
+    32    %238 = fexp2 %237
+    32    %239 = b32csel %108, %238, %15 (0x0)
+    32    %240 = fadd %234, %239
+                 @store_global (%240, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %241 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %242 = @load_global (%118) (access=none, align_mul=4, align_offset=0)
+    32    %243 = fadd %241, %242
+    32    %244 = b32csel %122.x, %243, %241
+                 @store_global (%244, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %245 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %246 = @load_global (%119) (access=none, align_mul=4, align_offset=0)
+    32    %247 = fadd %245, %246
+    32    %248 = b32csel %122.y, %247, %245
+                 @store_global (%248, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %249 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %250 = @load_global (%117) (access=none, align_mul=4, align_offset=0)
+    32    %251 = fadd %249, %250
+    32    %252 = b32csel %122.z, %251, %249
+                 @store_global (%252, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %253 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %254 = @load_global (%116) (access=none, align_mul=4, align_offset=0)
+    32    %255 = fadd %253, %254
+    32    %256 = b32csel %122.w, %255, %253
+                 @store_global (%256, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %257 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %258 = @load_global (%141) (access=none, align_mul=4, align_offset=0)
+    32    %259 = fadd %257, %258
+    32    %260 = b32csel %144, %259, %257
+                 @store_global (%260, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %261 = @load_global (%111) (access=none, align_mul=4, align_offset=0)
+    32    %262 = @load_global (%142) (access=none, align_mul=4, align_offset=0)
+    32    %263 = fadd %261, %262
+    32    %264 = b32csel %149, %263, %261
+                 @store_global (%264, %111) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %265 = @load_global (%14) (access=none, align_mul=4, align_offset=0)
+                 @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared|global)
+    32    %266 = frcp %265
+    32    %267 = load_const (0x43800000 = 256.000000)
+    32    %268 = fmul %266, %267 (256.000000)
+    32    %269 = load_const (0x3f000000 = 0.500000)
+    32    %270 = ffma %158, %268, %269 (0.500000)
+    32    %271 = load_const (0x437f0000 = 255.000000)
+    32    %272 = fmin %270, %271 (255.000000)
+    32    %273 = f2u32 %272
+    32x2  %274 = ffma %165, %268.xx, %269 (0.500000).xx
+    32x2  %275 = fmin %274, %271 (255.000000).xx
+    32x2  %276 = f2u32 %275
+    32    %277 = load_const (0x00000100 = 256)
+    32x2  %278 = load_const (0x00000100, 0x00010000) = (256, 65536)
+    32    %279 = imul %276.x, %278 (0x100, 0x10000).x
+    32    %280 = imul %276.y, %278 (0x100, 0x10000).y
+    32    %281 = ior %273, %279
+    32    %282 = load_const (0x00010000 = 65536)
+    32    %283 = ior %281, %280
+    32    %284 = ffma %172, %268, %269 (0.500000)
+    32    %285 = fmin %284, %271 (255.000000)
+    32    %286 = f2u32 %285
+    32    %287 = load_const (0x01000000 = 16777216)
+    32    %288 = imul %286, %287 (0x1000000)
+    32    %289 = ior %283, %288
+                 @store_global (%289, %29) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %290 = ffma %178, %268, %269 (0.500000)
+    32    %291 = fmin %290, %271 (255.000000)
+    32    %292 = f2u32 %291
+    32x2  %293 = ffma %186, %268.xx, %269 (0.500000).xx
+    32x2  %294 = fmin %293, %271 (255.000000).xx
+    32x2  %295 = f2u32 %294
+    32    %296 = imul %295.x, %278 (0x100, 0x10000).x
+    32    %297 = imul %295.y, %278 (0x100, 0x10000).y
+    32    %298 = ior %292, %296
+    32    %299 = ior %298, %297
+    32    %300 = ffma %193, %268, %269 (0.500000)
+    32    %301 = fmin %300, %271 (255.000000)
+    32    %302 = f2u32 %301
+    32    %303 = imul %302, %287 (0x1000000)
+    32    %304 = ior %299, %303
+                 @store_global (%304, %61) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %305 = ffma %199, %268, %269 (0.500000)
+    32    %306 = fmin %305, %271 (255.000000)
+    32    %307 = f2u32 %306
+    32    %308 = ffma %205, %268, %269 (0.500000)
+    32    %309 = fmin %308, %271 (255.000000)
+    32    %310 = f2u32 %309
+    32    %311 = imul %310, %277 (0x100)
+    32    %312 = ior %307, %311
+    32    %313 = ffma %211, %268, %269 (0.500000)
+    32    %314 = fmin %313, %271 (255.000000)
+    32    %315 = f2u32 %314
+    32    %316 = imul %315, %282 (0x10000)
+    32    %317 = ior %312, %316
+    32    %318 = ffma %217, %268, %269 (0.500000)
+    32    %319 = fmin %318, %271 (255.000000)
+    32    %320 = f2u32 %319
+    32    %321 = imul %320, %287 (0x1000000)
+    32    %322 = ior %317, %321
+                 @store_global (%322, %62) (wrmask=x, access=none, align_mul=4, align_offset=0)
+    32    %323 = ffma %223, %268, %269 (0.500000)
+    32    %324 = fmin %323, %271 (255.000000)
+    32    %325 = f2u32 %324
+    32x2  %326 = ffma %231, %268.xx, %269 (0.500000).xx
+    32x2  %327 = fmin %326, %271 (255.000000).xx
+    32x2  %328 = f2u32 %327
+    32    %329 = imul %328.x, %278 (0x100, 0x10000).x
+    32    %330 = imul %328.y, %278 (0x100, 0x10000).y
+    32    %331 = ior %325, %329
+    32    %332 = ior %331, %330
+    32    %333 = ffma %238, %268, %269 (0.500000)
+    32    %334 = fmin %333, %271 (255.000000)
+    32    %335 = f2u32 %334
+    32    %336 = imul %335, %287 (0x1000000)
+    32    %337 = ior %332, %336
+                 @store_global (%337, %60) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 15400800 41540050 00000000] imullo0.s32.pack  t0.___w, u0.yyyy, t0.zzzz, void
+001 [04001001 15400800 40000000 003fc008] add.s32.pack      t0.___w, t0.yyyy, void, t0.wwww
+002 [0400103c 00000800 41fe0050 00000000] imullo0.s32.pack  t0.___w, u0.xxxx, t0.wwww, void
+003 [00801001 00000800 40000000 003fc008] add.s32.pack      t0.x___, t0.xxxx, void, t0.wwww
+004 [0100103c 00000800 40aa0050 00000002] imullo0.s32.pack  t0._y__, u0.xxxx, u0.yyyy, void
+005 [0100103c 15400800 41540040 00000002] imullo0.s32.pack  t0._y__, t0.yyyy, u0.zzzz, void
+006 [01001001 15400800 40000000 203fc008] add.s32.pack      t0._y__, t0.yyyy, void, u0.wwww
+007 [0080104f 00200800 80aa0040 00000008] select.gt.u32.pack t0.x___, t0.xxxx, t0.yyyy, t0.xxxx
+008 [0080103c 00000800 400000c0 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u1.xxxx, void
+009 [00801001 15401800 40000010 00000008] add.s32.pack      t0.x___, u1.yyyy, void, t0.xxxx
+010 [0100104f 00201800 815400c0 0000001a] select.gt.u32.pack t0._y__, t1.xxxx, u1.zzzz, t1.xxxx
+011 [0200104f 15600800 81fe00c0 0015400a] select.gt.u32.pack t0.__z_, t0.yyyy, u1.wwww, t0.yyyy
+012 [0200103c 2a800800 40000140 00000002] imullo0.s32.pack  t0.__z_, t0.zzzz, u2.xxxx, void
+013 [04001001 15402800 40000010 002a8008] add.s32.pack      t0.___w, u2.yyyy, void, t0.zzzz
+014 [04011032 3fe00c04 81540140 00000002] load.denorm.u32   t1.___w, t0.wwww, u2.zzzz, void
+015 [04001001 3fc02800 40000010 002a8008] add.s32.pack      t0.___w, u2.wwww, void, t0.zzzz
+016 [0082101d 3fc01800 40010000 20000038] and.s32.pack      t2.x___, t1.wwww, void, u3.xxxx
+017 [010210b1 2aa00800 80aa01c0 76ffdffa] cmp.lt.u32.pack   t2._y__, t0.zzzz, u3.yyyy, -1:s20
+018 [008212cf 15602800 80000140 202a8028] select.nz.u32.pack t2.x___, t2.yyyy, t2.xxxx, u2.zzzz
+019 [0383101a 3fe01800 80010000 20090048] rshift.u32.pack   t3.xyz_, t1.wwww, void, u4.xyzx
+020 [0602101d 10003800 40010000 20000038] and.s32.pack      t2.__zw, t3.xxxy, void, u3.xxxx
+021 [03841001 2a800800 40000000 20090058] add.s32.pack      t4.xyz_, t0.zzzz, void, u5.xyzx
+022 [038410b1 39204800 802a01c0 76ffdffa] cmp.lt.u32.pack   t4.xyz_, t4.xyzw, u3.yyyx, -1:s20
+023 [060212cf 10204800 81d40140 202a8028] select.nz.u32.pack t2.__zw, t4.xxxy, t2.zzzw, u2.zzzz
+024 [0200108f 00202800 81540140 00000028] select.lt.u32.pack t0.__z_, t2.xxxx, t2.zzzz, t2.xxxx
+025 [0200108f 2aa00800 81fe0140 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t2.wwww, t0.zzzz
+026 [040112cf 2aa04800 815401c0 202a8028] select.nz.u32.pack t1.___w, t4.zzzz, t3.zzzz, u2.zzzz
+027 [0200108f 2aa00800 81fe00c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t1.wwww, t0.zzzz
+028 [03831001 15400800 40000000 20090068] add.s32.pack      t3.xyz_, t0.yyyy, void, u6.xyzx
+029 [0385104f 39203800 807e00c0 0039003a] select.gt.u32.pack t5.xyz_, t3.xyzw, u1.wwwx, t3.xyzw
+030 [0086103c 00005800 40000140 00000002] imullo0.s32.pack  t6.x___, t5.xxxx, u2.xxxx, void
+031 [0106103c 15405800 40000140 00000002] imullo0.s32.pack  t6._y__, t5.yyyy, u2.xxxx, void
+032 [0403103c 2a805800 40000140 00000002] imullo0.s32.pack  t3.___w, t5.zzzz, u2.xxxx, void
+033 [02061009 00000000 00000000 003fc038] mov.pack          t6.__z_, void, void, t3.wwww
+034 [03851001 05402800 40000010 00390068] add.s32.pack      t5.xyz_, u2.yyyx, void, t6.xyzw
+035 [04041009 00000000 00000000 002a8058] mov.pack          t4.___w, void, void, t5.zzzz
+036 [04051009 00000000 00000000 00000058] mov.pack          t5.___w, void, void, t5.xxxx
+037 [00851009 00000000 00000000 00004058] mov.pack          t5.x___, void, void, t5.yxxx
+038 [01051032 3fe05c04 81540140 00000002] load.denorm.u32   t5._y__, t5.wwww, u2.zzzz, void
+039 [03871001 0fc02800 40000010 00390068] add.s32.pack      t7.xyz_, u2.wwwx, void, t6.xyzw
+040 [02051009 00000000 00000000 002a8078] mov.pack          t5.__z_, void, void, t7.zzzz
+041 [04051009 00000000 00000000 00000078] mov.pack          t5.___w, void, void, t7.xxxx
+042 [04061009 00000000 00000000 00154078] mov.pack          t6.___w, void, void, t7.yyyy
+043 [0087101d 15405800 40010000 20000038] and.s32.pack      t7.x___, t5.yyyy, void, u3.xxxx
+044 [070710b1 24206800 80aa01c0 76ffdffa] cmp.lt.u32.pack   t7._yzw, t6.xxyz, u3.yyyy, -1:s20
+045 [008712cf 15607800 800003c0 202a8028] select.nz.u32.pack t7.x___, t7.yyyy, t7.xxxx, u2.zzzz
+046 [038310b1 39203800 805401c0 76ffdffa] cmp.lt.u32.pack   t3.xyz_, t3.xyzw, u3.zzzx, -1:s20
+047 [0388101d 39003800 40010000 000e4078] and.s32.pack      t8.xyz_, t3.xyzw, void, t7.yzwx
+048 [0200108f 2aa00800 800003c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t7.xxxx, t0.zzzz
+049 [0389101a 15605800 80010000 20090048] rshift.u32.pack   t9.xyz_, t5.yyyy, void, u4.xyzx
+050 [018a101d 39009800 40010000 20000038] and.s32.pack      t10.xy__, t9.xyzw, void, u3.xxxx
+051 [078b1001 10006800 40000000 20090058] add.s32.pack      t11, t6.xxxy, void, u5.xyzx
+052 [078b10b1 3920b800 80aa01c0 76ffdffa] cmp.lt.u32.pack   t11, t11.xyzw, u3.yyyy, -1:s20
+053 [018a12cf 3920b800 81c80540 20028028] select.nz.u32.pack t10.xy__, t11.xyzw, t10.xyzw, u2.zzxx
+054 [078c101d 10003800 40010000 003900b8] and.s32.pack      t12, t3.xxxy, void, t11.xyzw
+055 [0200108f 2aa00800 80000540 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t10.xxxx, t0.zzzz
+056 [0200108f 2aa00800 80aa0540 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t10.yyyy, t0.zzzz
+057 [010512cf 2aa0b800 815404c0 202a8028] select.nz.u32.pack t5._y__, t11.zzzz, t9.zzzz, u2.zzzz
+058 [0200108f 2aa00800 80aa02c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t5.yyyy, t0.zzzz
+059 [04081032 00205c04 81540140 00000002] load.denorm.u32   t8.___w, t5.xxxx, u2.zzzz, void
+060 [0085101d 3fc08800 40010000 20000038] and.s32.pack      t5.x___, t8.wwww, void, u3.xxxx
+061 [008512cf 15a07800 800002c0 202a8028] select.nz.u32.pack t5.x___, t7.zyyy, t5.xxxx, u2.zzzz
+062 [0200108f 2aa00800 800002c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t5.xxxx, t0.zzzz
+063 [0389101a 3fe08800 80010000 20090048] rshift.u32.pack   t9.xyz_, t8.wwww, void, u4.xyzx
+064 [060a101d 10009800 40010000 20000038] and.s32.pack      t10.__zw, t9.xxxy, void, u3.xxxx
+065 [040812cf 3fe0b800 81540540 202a8028] select.nz.u32.pack t8.___w, t11.wwww, t10.zzzz, u2.zzzz
+066 [0200108f 2aa00800 81fe0440 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t8.wwww, t0.zzzz
+067 [078b1001 29406800 40000000 20124058] add.s32.pack      t11, t6.yyzz, void, u5.yzxy
+068 [078b10b1 3920b800 80aa01c0 76ffdffa] cmp.lt.u32.pack   t11, t11.xyzw, u3.yyyy, -1:s20
+069 [008612cf 0020b800 81560540 202a8028] select.nz.u32.pack t6.x___, t11.xxxx, t10.wzzz, u2.zzzz
+070 [078d101d 29403800 40010000 003900b8] and.s32.pack      t13, t3.yyzz, void, t11.xyzw
+071 [0200108f 2aa00800 80000340 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t6.xxxx, t0.zzzz
+072 [010612cf 1560b800 815404c0 202a8028] select.nz.u32.pack t6._y__, t11.yyyy, t9.zzzz, u2.zzzz
+073 [0200108f 2aa00800 80aa0340 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t6.yyyy, t0.zzzz
+074 [02061032 3fe04c04 81540140 00000002] load.denorm.u32   t6.__z_, t4.wwww, u2.zzzz, void
+075 [0404101d 2a806800 40010000 20000038] and.s32.pack      t4.___w, t6.zzzz, void, u3.xxxx
+076 [040412cf 3fe07800 81fe0240 202a8028] select.nz.u32.pack t4.___w, t7.wwww, t4.wwww, u2.zzzz
+077 [0200108f 2aa00800 81fe0240 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t4.wwww, t0.zzzz
+078 [0707101a 2aa06800 80010000 20240048] rshift.u32.pack   t7._yzw, t6.zzzz, void, u4.xxyz
+079 [0189101d 0e407800 40010000 20000038] and.s32.pack      t9.xy__, t7.yzwx, void, u3.xxxx
+080 [018912cf 3ba0b800 81c804c0 20028028] select.nz.u32.pack t9.xy__, t11.zwzw, t9.xyzw, u2.zzxx
+081 [0200108f 2aa00800 800004c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t9.xxxx, t0.zzzz
+082 [0200108f 2aa00800 80aa04c0 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t9.yyyy, t0.zzzz
+083 [04031001 3fc03800 40000000 203fc038] add.s32.pack      t3.___w, t3.wwww, void, u3.wwww
+084 [040310b1 3fe03800 80aa01c0 76ffdffa] cmp.lt.u32.pack   t3.___w, t3.wwww, u3.yyyy, -1:s20
+085 [020612cf 3fe03800 81fe03c0 202a8028] select.nz.u32.pack t6.__z_, t3.wwww, t7.wwww, u2.zzzz
+086 [0083101d 00803800 40010000 003fc038] and.s32.pack      t3.x___, t3.zxxx, void, t3.wwww
+087 [0200108f 2aa00800 81540340 002a8008] select.lt.u32.pack t0.__z_, t0.zzzz, t6.zzzz, t0.zzzz
+088 [0100103c 15400800 40000140 00000002] imullo0.s32.pack  t0._y__, t0.yyyy, u2.xxxx, void
+089 [01031001 00000800 40000000 00154008] add.s32.pack      t3._y__, t0.xxxx, void, t0.yyyy
+090 [008f0033 15603c04 81540140 0000800a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t0.zxxx	; dontcare bits in store: 000000000000000000000000000f0000
+091 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+092 [02031032 15603c04 81540140 00000002] load.denorm.u32   t3.__z_, t3.yyyy, u2.zzzz, void
+093 [078b1001 15400800 40000000 20390078] add.s32.pack      t11, t0.yyyy, void, u7.xyzw
+094 [078b1001 00000800 40000000 003900b8] add.s32.pack      t11, t0.xxxx, void, t11.xyzw
+095 [04031009 00000000 00000000 003fc0b8] mov.pack          t3.___w, void, void, t11.wwww
+096 [01071009 00000000 00000000 002a80b8] mov.pack          t7._y__, void, void, t11.zzzz
+097 [02071009 00000000 00000000 000000b8] mov.pack          t7.__z_, void, void, t11.xxxx
+098 [04071009 00000000 00000000 001540b8] mov.pack          t7.___w, void, void, t11.yyyy
+099 [02091032 2aa07c04 81540140 00000002] load.denorm.u32   t9.__z_, t7.zzzz, u2.zzzz, void
+100 [078b10b1 00201800 81c80440 76ffdffa] cmp.lt.u32.pack   t11, t1.xxxx, u8.xyzw, -1:s20
+101 [0209108f 2aa03800 815404c0 002a8038] select.lt.u32.pack t9.__z_, t3.zzzz, t9.zzzz, t3.zzzz
+102 [020312cf 0020b800 815404c0 002a8038] select.nz.u32.pack t3.__z_, t11.xxxx, t9.zzzz, t3.zzzz
+103 [008f0033 15603c04 81540140 0000803a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t3.zxxx	; dontcare bits in store: 000000000000000000000000000f0000
+104 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+105 [02091032 15603c04 81540140 00000002] load.denorm.u32   t9.__z_, t3.yyyy, u2.zzzz, void
+106 [04091032 3fe07c04 81540140 00000002] load.denorm.u32   t9.___w, t7.wwww, u2.zzzz, void
+107 [0409108f 2aa09800 81fe04c0 002a8098] select.lt.u32.pack t9.___w, t9.zzzz, t9.wwww, t9.zzzz
+108 [020912cf 1560b800 81fe04c0 002a8098] select.nz.u32.pack t9.__z_, t11.yyyy, t9.wwww, t9.zzzz
+109 [008f0033 15603c04 81540140 0000809a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t9.zxxx	; dontcare bits in store: 000000000000000000000000000f0000
+110 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+111 [04091032 15603c04 81540140 00000002] load.denorm.u32   t9.___w, t3.yyyy, u2.zzzz, void
+112 [020a1032 15607c04 81540140 00000002] load.denorm.u32   t10.__z_, t7.yyyy, u2.zzzz, void
+113 [020a108f 3fe09800 81540540 003fc098] select.lt.u32.pack t10.__z_, t9.wwww, t10.zzzz, t9.wwww
+114 [040912cf 2aa0b800 81540540 003fc098] select.nz.u32.pack t9.___w, t11.zzzz, t10.zzzz, t9.wwww
+115 [008f0033 15603c04 81540140 0000c09a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t9.wxxx	; dontcare bits in store: 000000000000000000000000000f0000
+116 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+117 [020a1032 15603c04 81540140 00000002] load.denorm.u32   t10.__z_, t3.yyyy, u2.zzzz, void
+118 [040a1032 3fe03c04 81540140 00000002] load.denorm.u32   t10.___w, t3.wwww, u2.zzzz, void
+119 [040a108f 2aa0a800 81fe0540 002a80a8] select.lt.u32.pack t10.___w, t10.zzzz, t10.wwww, t10.zzzz
+120 [020a12cf 3fe0b800 81fe0540 002a80a8] select.nz.u32.pack t10.__z_, t11.wwww, t10.wwww, t10.zzzz
+121 [008f0033 15603c04 81540140 000080aa] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t10.zxxx	; dontcare bits in store: 000000000000000000000000000f0000
+122 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+123 [040a1032 15603c04 81540140 00000002] load.denorm.u32   t10.___w, t3.yyyy, u2.zzzz, void
+124 [018e1001 15400800 40000000 20030048] add.s32.pack      t14.xy__, t0.yyyy, void, u4.xwxx
+125 [018e1001 00000800 40000000 003900e8] add.s32.pack      t14.xy__, t0.xxxx, void, t14.xyzw
+126 [01001009 00000000 00000000 000000e8] mov.pack          t0._y__, void, void, t14.xxxx
+127 [008e1009 00000000 00000000 000040e8] mov.pack          t14.x___, void, void, t14.yxxx
+128 [010e1032 15600c04 81540140 00000002] load.denorm.u32   t14._y__, t0.yyyy, u2.zzzz, void
+129 [020e10b1 00201800 80aa02c0 76ffdffa] cmp.lt.u32.pack   t14.__z_, t1.xxxx, u5.yyyy, -1:s20
+130 [010e108f 3fe0a800 80aa0740 003fc0a8] select.lt.u32.pack t14._y__, t10.wwww, t14.yyyy, t10.wwww
+131 [040a12cf 2aa0e800 80aa0740 003fc0a8] select.nz.u32.pack t10.___w, t14.zzzz, t14.yyyy, t10.wwww
+132 [008f0033 15603c04 81540140 0000c0aa] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t10.wxxx	; dontcare bits in store: 000000000000000000000000000f0000
+133 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+134 [010e1032 15603c04 81540140 00000002] load.denorm.u32   t14._y__, t3.yyyy, u2.zzzz, void
+135 [040e1032 0020ec04 81540140 00000002] load.denorm.u32   t14.___w, t14.xxxx, u2.zzzz, void
+136 [00811171 00001800 41540140 76ffdffa] cmp.eq.s32.pack   t1.x___, t1.xxxx, u2.zzzz, -1:s20
+137 [0101108f 1560e800 81fe0740 001540e8] select.lt.u32.pack t1._y__, t14.yyyy, t14.wwww, t14.yyyy
+138 [010112cf 00201800 80aa00c0 001540e8] select.nz.u32.pack t1._y__, t1.xxxx, t1.yyyy, t14.yyyy
+139 [008f0033 15603c04 81540140 0000401a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t1.yxxx	; dontcare bits in store: 000000000000000000000000000f0000
+140 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+141 [02011032 00200c04 81540140 00000002] load.denorm.u32   t1.__z_, t0.xxxx, u2.zzzz, void
+142 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+143 [0201102d 2aa01804 80000000 00000000] i2f.u32           t1.__z_, t1.zzzz, void, void
+144 [0082102d 00202804 80000000 00000000] i2f.u32           t2.x___, t2.xxxx, void, void
+145 [00821001 00002800 00000000 006a8018] add.pack          t2.x___, t2.xxxx, void, -t1.zzzz
+146 [00821003 00002800 01fe02c0 00000002] mul.pack          t2.x___, t2.xxxx, u5.wwww, void
+147 [00821011 00000000 00000000 00000028] exp.pack          t2.x___, void, void, t2.xxxx
+148 [010212cf 15602800 80000140 202a8028] select.nz.u32.pack t2._y__, t2.yyyy, t2.xxxx, u2.zzzz
+149 [0602102d 3aa02804 80000000 00000000] i2f.u32           t2.__zw, t2.zzzw, void, void
+150 [06021001 3a802800 00000000 006a8018] add.pack          t2.__zw, t2.zzzw, void, -t1.zzzz
+151 [06021003 3a802800 01fe02c0 00000002] mul.pack          t2.__zw, t2.zzzw, u5.wwww, void
+152 [010e1011 00000000 00000000 002a8028] exp.pack          t14._y__, void, void, t2.zzzz
+153 [040e1011 00000000 00000000 003fc028] exp.pack          t14.___w, void, void, t2.wwww
+154 [060212cf 10204800 81aa0740 202a8028] select.nz.u32.pack t2.__zw, t4.xxxy, t14.yyyw, u2.zzzz
+155 [01021001 15402800 00000000 002a8028] add.pack          t2._y__, t2.yyyy, void, t2.zzzz
+156 [01021001 15402800 00000000 003fc028] add.pack          t2._y__, t2.yyyy, void, t2.wwww
+157 [0401102d 3fe01804 80000000 00000000] i2f.u32           t1.___w, t1.wwww, void, void
+158 [04011001 3fc01800 00000000 006a8018] add.pack          t1.___w, t1.wwww, void, -t1.zzzz
+159 [04011003 3fc01800 01fe02c0 00000002] mul.pack          t1.___w, t1.wwww, u5.wwww, void
+160 [04011011 00000000 00000000 003fc018] exp.pack          t1.___w, void, void, t1.wwww
+161 [020212cf 2aa04800 81fe00c0 202a8028] select.nz.u32.pack t2.__z_, t4.zzzz, t1.wwww, u2.zzzz
+162 [01021001 15402800 00000000 002a8028] add.pack          t2._y__, t2.yyyy, void, t2.zzzz
+163 [0202102d 00207804 80000000 00000000] i2f.u32           t2.__z_, t7.xxxx, void, void
+164 [02021001 2a802800 00000000 006a8018] add.pack          t2.__z_, t2.zzzz, void, -t1.zzzz
+165 [02021003 2a802800 01fe02c0 00000002] mul.pack          t2.__z_, t2.zzzz, u5.wwww, void
+166 [02021011 00000000 00000000 002a8028] exp.pack          t2.__z_, void, void, t2.zzzz
+167 [040212cf 00208800 81540140 202a8028] select.nz.u32.pack t2.___w, t8.xxxx, t2.zzzz, u2.zzzz
+168 [01021001 15402800 00000000 003fc028] add.pack          t2._y__, t2.yyyy, void, t2.wwww
+169 [0184102d 3920a804 80000000 00000000] i2f.u32           t4.xy__, t10.xyzw, void, void
+170 [01841001 39004800 00000000 006a8018] add.pack          t4.xy__, t4.xyzw, void, -t1.zzzz
+171 [01841003 39004800 001e02c0 00000002] mul.pack          t4.xy__, t4.xyzw, u5.wwxx, void
+172 [008a1011 00000000 00000000 00000048] exp.pack          t10.x___, void, void, t4.xxxx
+173 [010a1011 00000000 00000000 00154048] exp.pack          t10._y__, void, void, t4.yyyy
+174 [018412cf 3920c800 81c80540 20028028] select.nz.u32.pack t4.xy__, t12.xyzw, t10.xyzw, u2.zzxx
+175 [01021001 15402800 00000000 00000048] add.pack          t2._y__, t2.yyyy, void, t4.xxxx
+176 [01021001 15402800 00000000 00154048] add.pack          t2._y__, t2.yyyy, void, t4.yyyy
+177 [0402102d 15605804 80000000 00000000] i2f.u32           t2.___w, t5.yyyy, void, void
+178 [04021001 3fc02800 00000000 006a8018] add.pack          t2.___w, t2.wwww, void, -t1.zzzz
+179 [04021003 3fc02800 01fe02c0 00000002] mul.pack          t2.___w, t2.wwww, u5.wwww, void
+180 [04021011 00000000 00000000 003fc028] exp.pack          t2.___w, void, void, t2.wwww
+181 [008412cf 00a0c800 81fe0140 202a8028] select.nz.u32.pack t4.x___, t12.zxxx, t2.wwww, u2.zzzz
+182 [01021001 15402800 00000000 00000048] add.pack          t2._y__, t2.yyyy, void, t4.xxxx
+183 [0084102d 00205804 80000000 00000000] i2f.u32           t4.x___, t5.xxxx, void, void
+184 [00841001 00004800 00000000 006a8018] add.pack          t4.x___, t4.xxxx, void, -t1.zzzz
+185 [00841003 00004800 01fe02c0 00000002] mul.pack          t4.x___, t4.xxxx, u5.wwww, void
+186 [00841011 00000000 00000000 00000048] exp.pack          t4.x___, void, void, t4.xxxx
+187 [010412cf 15608800 80000240 202a8028] select.nz.u32.pack t4._y__, t8.yyyy, t4.xxxx, u2.zzzz
+188 [01021001 15402800 00000000 00154048] add.pack          t2._y__, t2.yyyy, void, t4.yyyy
+189 [0104102d 3fe08804 80000000 00000000] i2f.u32           t4._y__, t8.wwww, void, void
+190 [01041001 15404800 00000000 006a8018] add.pack          t4._y__, t4.yyyy, void, -t1.zzzz
+191 [01041003 15404800 01fe02c0 00000002] mul.pack          t4._y__, t4.yyyy, u5.wwww, void
+192 [01041011 00000000 00000000 00154048] exp.pack          t4._y__, void, void, t4.yyyy
+193 [020412cf 3fe0c800 80aa0240 202a8028] select.nz.u32.pack t4.__z_, t12.wwww, t4.yyyy, u2.zzzz
+194 [01021001 15402800 00000000 002a8048] add.pack          t2._y__, t2.yyyy, void, t4.zzzz
+195 [0204102d 00206804 80000000 00000000] i2f.u32           t4.__z_, t6.xxxx, void, void
+196 [02041001 2a804800 00000000 006a8018] add.pack          t4.__z_, t4.zzzz, void, -t1.zzzz
+197 [02041003 2a804800 01fe02c0 00000002] mul.pack          t4.__z_, t4.zzzz, u5.wwww, void
+198 [02041011 00000000 00000000 002a8048] exp.pack          t4.__z_, void, void, t4.zzzz
+199 [008512cf 0020d800 81540240 202a8028] select.nz.u32.pack t5.x___, t13.xxxx, t4.zzzz, u2.zzzz
+200 [01021001 15402800 00000000 00000058] add.pack          t2._y__, t2.yyyy, void, t5.xxxx
+201 [0085102d 15606804 80000000 00000000] i2f.u32           t5.x___, t6.yyyy, void, void
+202 [00851001 00005800 00000000 006a8018] add.pack          t5.x___, t5.xxxx, void, -t1.zzzz
+203 [00851003 00005800 01fe02c0 00000002] mul.pack          t5.x___, t5.xxxx, u5.wwww, void
+204 [00851011 00000000 00000000 00000058] exp.pack          t5.x___, void, void, t5.xxxx
+205 [010512cf 1560d800 800002c0 202a8028] select.nz.u32.pack t5._y__, t13.yyyy, t5.xxxx, u2.zzzz
+206 [01021001 15402800 00000000 00154058] add.pack          t2._y__, t2.yyyy, void, t5.yyyy
+207 [0404102d 3fe04804 80000000 00000000] i2f.u32           t4.___w, t4.wwww, void, void
+208 [04041001 3fc04800 00000000 006a8018] add.pack          t4.___w, t4.wwww, void, -t1.zzzz
+209 [04041003 3fc04800 01fe02c0 00000002] mul.pack          t4.___w, t4.wwww, u5.wwww, void
+210 [04041011 00000000 00000000 003fc048] exp.pack          t4.___w, void, void, t4.wwww
+211 [010512cf 2aa08800 81fe0240 202a8028] select.nz.u32.pack t5._y__, t8.zzzz, t4.wwww, u2.zzzz
+212 [01021001 15402800 00000000 00154058] add.pack          t2._y__, t2.yyyy, void, t5.yyyy
+213 [0186102d 39209804 80000000 00000000] i2f.u32           t6.xy__, t9.xyzw, void, void
+214 [01861001 39006800 00000000 006a8018] add.pack          t6.xy__, t6.xyzw, void, -t1.zzzz
+215 [01861003 39006800 001e02c0 00000002] mul.pack          t6.xy__, t6.xyzw, u5.wwxx, void
+216 [00881011 00000000 00000000 00000068] exp.pack          t8.x___, void, void, t6.xxxx
+217 [01081011 00000000 00000000 00154068] exp.pack          t8._y__, void, void, t6.yyyy
+218 [018612cf 3ba0d800 81c80440 20028028] select.nz.u32.pack t6.xy__, t13.zwzw, t8.xyzw, u2.zzxx
+219 [01021001 15402800 00000000 00000068] add.pack          t2._y__, t2.yyyy, void, t6.xxxx
+220 [01021001 15402800 00000000 00154068] add.pack          t2._y__, t2.yyyy, void, t6.yyyy
+221 [0105102d 2aa06804 80000000 00000000] i2f.u32           t5._y__, t6.zzzz, void, void
+222 [02011001 15405800 00000000 006a8018] add.pack          t1.__z_, t5.yyyy, void, -t1.zzzz
+223 [02011003 2a801800 01fe02c0 00000002] mul.pack          t1.__z_, t1.zzzz, u5.wwww, void
+224 [02011011 00000000 00000000 002a8018] exp.pack          t1.__z_, void, void, t1.zzzz
+225 [008312cf 00203800 815400c0 202a8028] select.nz.u32.pack t3.x___, t3.xxxx, t1.zzzz, u2.zzzz
+226 [01021001 15402800 00000000 00000038] add.pack          t2._y__, t2.yyyy, void, t3.xxxx
+227 [008f0033 15603c04 81540140 0000402a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t2.yxxx	; dontcare bits in store: 000000000000000000000000000f0000
+228 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+229 [00831032 15603c04 81540140 00000002] load.denorm.u32   t3.x___, t3.yyyy, u2.zzzz, void
+230 [01051032 2aa07c04 81540140 00000002] load.denorm.u32   t5._y__, t7.zzzz, u2.zzzz, void
+231 [01051001 00003800 00000000 00154058] add.pack          t5._y__, t3.xxxx, void, t5.yyyy
+232 [008312cf 0020b800 80aa02c0 00000038] select.nz.u32.pack t3.x___, t11.xxxx, t5.yyyy, t3.xxxx
+233 [008f0033 15603c04 81540140 0000003a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t3.xxxx	; dontcare bits in store: 000000000000000000000000000f0000
+234 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+235 [01051032 15603c04 81540140 00000002] load.denorm.u32   t5._y__, t3.yyyy, u2.zzzz, void
+236 [00861032 3fe07c04 81540140 00000002] load.denorm.u32   t6.x___, t7.wwww, u2.zzzz, void
+237 [00861001 15405800 00000000 00000068] add.pack          t6.x___, t5.yyyy, void, t6.xxxx
+238 [010512cf 1560b800 80000340 00154058] select.nz.u32.pack t5._y__, t11.yyyy, t6.xxxx, t5.yyyy
+239 [008f0033 15603c04 81540140 0000405a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t5.yxxx	; dontcare bits in store: 000000000000000000000000000f0000
+240 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+241 [00861032 15603c04 81540140 00000002] load.denorm.u32   t6.x___, t3.yyyy, u2.zzzz, void
+242 [01061032 15607c04 81540140 00000002] load.denorm.u32   t6._y__, t7.yyyy, u2.zzzz, void
+243 [01061001 00006800 00000000 00154068] add.pack          t6._y__, t6.xxxx, void, t6.yyyy
+244 [008612cf 00a0b800 80aa0340 00000068] select.nz.u32.pack t6.x___, t11.zxxx, t6.yyyy, t6.xxxx
+245 [008f0033 15603c04 81540140 0000006a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t6.xxxx	; dontcare bits in store: 000000000000000000000000000f0000
+246 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+247 [01061032 15603c04 81540140 00000002] load.denorm.u32   t6._y__, t3.yyyy, u2.zzzz, void
+248 [02061032 3fe03c04 81540140 00000002] load.denorm.u32   t6.__z_, t3.wwww, u2.zzzz, void
+249 [04031001 15406800 00000000 002a8068] add.pack          t3.___w, t6.yyyy, void, t6.zzzz
+250 [040312cf 3fe0b800 81fe01c0 00154068] select.nz.u32.pack t3.___w, t11.wwww, t3.wwww, t6.yyyy
+251 [008f0033 15603c04 81540140 0000c03a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t3.wxxx	; dontcare bits in store: 000000000000000000000000000f0000
+252 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+253 [01061032 15603c04 81540140 00000002] load.denorm.u32   t6._y__, t3.yyyy, u2.zzzz, void
+254 [02061032 15600c04 81540140 00000002] load.denorm.u32   t6.__z_, t0.yyyy, u2.zzzz, void
+255 [01001001 15406800 00000000 002a8068] add.pack          t0._y__, t6.yyyy, void, t6.zzzz
+256 [010012cf 2aa0e800 80aa0040 00154068] select.nz.u32.pack t0._y__, t14.zzzz, t0.yyyy, t6.yyyy
+257 [008f0033 15603c04 81540140 0000400a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t0.yxxx	; dontcare bits in store: 000000000000000000000000000f0000
+258 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+259 [01061032 15603c04 81540140 00000002] load.denorm.u32   t6._y__, t3.yyyy, u2.zzzz, void
+260 [02061032 0020ec04 81540140 00000002] load.denorm.u32   t6.__z_, t14.xxxx, u2.zzzz, void
+261 [02061001 15406800 00000000 002a8068] add.pack          t6.__z_, t6.yyyy, void, t6.zzzz
+262 [008112cf 00201800 81540340 00154068] select.nz.u32.pack t1.x___, t1.xxxx, t6.zzzz, t6.yyyy
+263 [008f0033 15603c04 81540140 0000001a] store.denorm.u32  mem.x___, t3.yyyy, u2.zzzz, t1.xxxx	; dontcare bits in store: 000000000000000000000000000f0000
+264 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+265 [01061032 00200c04 81540140 00000002] load.denorm.u32   t6._y__, t0.xxxx, u2.zzzz, void
+266 [0000002a 00000000 00000000 00000000] barrier           void, void, void, void
+267 [0080100c 00000000 00000000 00154068] rcp.pack          t0.x___, void, void, t6.yyyy
+268 [00801003 00000800 01fe0340 00000002] mul.pack          t0.x___, t0.xxxx, u6.wwww, void
+269 [00821002 00002800 00000040 20000098] mad.pack          t2.x___, t2.xxxx, t0.xxxx, u9.xxxx
+270 [0082104f 00002800 00aa04c0 0000002a] select.gt.pack    t2.x___, t2.xxxx, u9.yyyy, t2.xxxx
+271 [0082102e 00202804 80000000 00000000] f2i.u32           t2.x___, t2.xxxx, void, void
+272 [03061002 3d40e800 00000040 20000098] mad.pack          t6.zy, t14.yyww, t0.xxxx, u9.xxxx
+273 [0306104f 29406800 00aa04c0 0029406a] select.gt.pack    t6.zy, t6.yyzz, u9.yyyy, t6.yyzz
+274 [0306102e 29606804 80000000 00000000] f2i.u32           t6.zy, t6.yyzz, void, void
+275 [0087103c 15406800 415404c0 00000002] imullo0.s32.pack  t7.x___, t6.yyyy, u9.zzzz, void
+276 [0106103c 2a806800 41fe04c0 00000002] imullo0.s32.pack  t6._y__, t6.zzzz, u9.wwww, void
+277 [0082101c 00002800 40010000 00000078] or.s32.pack       t2.x___, t2.xxxx, void, t7.xxxx
+278 [0082101c 00002800 40010000 00154068] or.s32.pack       t2.x___, t2.xxxx, void, t6.yyyy
+279 [04011002 3fc01800 00000040 20000098] mad.pack          t1.___w, t1.wwww, t0.xxxx, u9.xxxx
+280 [0401104f 3fc01800 00aa04c0 003fc01a] select.gt.pack    t1.___w, t1.wwww, u9.yyyy, t1.wwww
+281 [0401102e 3fe01804 80000000 00000000] f2i.u32           t1.___w, t1.wwww, void, void
+282 [0401103c 3fc01800 40000540 00000002] imullo0.s32.pack  t1.___w, t1.wwww, u10.xxxx, void
+283 [0401101c 00002800 40010000 003fc018] or.s32.pack       t1.___w, t2.xxxx, void, t1.wwww
+284 [008f0033 3fe00c04 81540140 0000c01a] store.denorm.u32  mem.x___, t0.wwww, u2.zzzz, t1.wxxx	; dontcare bits in store: 000000000000000000000000000f0000
+285 [00821002 2a802800 00000040 20000098] mad.pack          t2.x___, t2.zzzz, t0.xxxx, u9.xxxx
+286 [0082104f 00002800 00aa04c0 0000002a] select.gt.pack    t2.x___, t2.xxxx, u9.yyyy, t2.xxxx
+287 [0082102e 00202804 80000000 00000000] f2i.u32           t2.x___, t2.xxxx, void, void
+288 [03061002 1400a800 00000040 20000098] mad.pack          t6.zy, t10.xxyy, t0.xxxx, u9.xxxx
+289 [0306104f 29406800 00aa04c0 0029406a] select.gt.pack    t6.zy, t6.yyzz, u9.yyyy, t6.yyzz
+290 [0306102e 29606804 80000000 00000000] f2i.u32           t6.zy, t6.yyzz, void, void
+291 [0202103c 15406800 415404c0 00000002] imullo0.s32.pack  t2.__z_, t6.yyyy, u9.zzzz, void
+292 [0106103c 2a806800 41fe04c0 00000002] imullo0.s32.pack  t6._y__, t6.zzzz, u9.wwww, void
+293 [0082101c 00002800 40010000 002a8028] or.s32.pack       t2.x___, t2.xxxx, void, t2.zzzz
+294 [0082101c 00002800 40010000 00154068] or.s32.pack       t2.x___, t2.xxxx, void, t6.yyyy
+295 [02021002 3fc02800 00000040 20000098] mad.pack          t2.__z_, t2.wwww, t0.xxxx, u9.xxxx
+296 [0202104f 2a802800 00aa04c0 002a802a] select.gt.pack    t2.__z_, t2.zzzz, u9.yyyy, t2.zzzz
+297 [0202102e 2aa02804 80000000 00000000] f2i.u32           t2.__z_, t2.zzzz, void, void
+298 [0202103c 2a802800 40000540 00000002] imullo0.s32.pack  t2.__z_, t2.zzzz, u10.xxxx, void
+299 [0082101c 00002800 40010000 002a8028] or.s32.pack       t2.x___, t2.xxxx, void, t2.zzzz
+300 [008f0033 3fe05c04 81540140 0000002a] store.denorm.u32  mem.x___, t5.wwww, u2.zzzz, t2.xxxx	; dontcare bits in store: 000000000000000000000000000f0000
+301 [02021002 00004800 00000040 20000098] mad.pack          t2.__z_, t4.xxxx, t0.xxxx, u9.xxxx
+302 [0202104f 2a802800 00aa04c0 002a802a] select.gt.pack    t2.__z_, t2.zzzz, u9.yyyy, t2.zzzz
+303 [0202102e 2aa02804 80000000 00000000] f2i.u32           t2.__z_, t2.zzzz, void, void
+304 [04021002 15404800 00000040 20000098] mad.pack          t2.___w, t4.yyyy, t0.xxxx, u9.xxxx
+305 [0402104f 3fc02800 00aa04c0 003fc02a] select.gt.pack    t2.___w, t2.wwww, u9.yyyy, t2.wwww
+306 [0402102e 3fe02804 80000000 00000000] f2i.u32           t2.___w, t2.wwww, void, void
+307 [0402103c 3fc02800 415404c0 00000002] imullo0.s32.pack  t2.___w, t2.wwww, u9.zzzz, void
+308 [0202101c 2a802800 40010000 003fc028] or.s32.pack       t2.__z_, t2.zzzz, void, t2.wwww
+309 [04021002 2a804800 00000040 20000098] mad.pack          t2.___w, t4.zzzz, t0.xxxx, u9.xxxx
+310 [0402104f 3fc02800 00aa04c0 003fc02a] select.gt.pack    t2.___w, t2.wwww, u9.yyyy, t2.wwww
+311 [0402102e 3fe02804 80000000 00000000] f2i.u32           t2.___w, t2.wwww, void, void
+312 [0402103c 3fc02800 41fe04c0 00000002] imullo0.s32.pack  t2.___w, t2.wwww, u9.wwww, void
+313 [0202101c 2a802800 40010000 003fc028] or.s32.pack       t2.__z_, t2.zzzz, void, t2.wwww
+314 [04021002 00005800 00000040 20000098] mad.pack          t2.___w, t5.xxxx, t0.xxxx, u9.xxxx
+315 [0402104f 3fc02800 00aa04c0 003fc02a] select.gt.pack    t2.___w, t2.wwww, u9.yyyy, t2.wwww
+316 [0402102e 3fe02804 80000000 00000000] f2i.u32           t2.___w, t2.wwww, void, void
+317 [0402103c 3fc02800 40000540 00000002] imullo0.s32.pack  t2.___w, t2.wwww, u10.xxxx, void
+318 [0202101c 2a802800 40010000 003fc028] or.s32.pack       t2.__z_, t2.zzzz, void, t2.wwww
+319 [008f0033 3fe06c04 81540140 0000802a] store.denorm.u32  mem.x___, t6.wwww, u2.zzzz, t2.zxxx	; dontcare bits in store: 000000000000000000000000000f0000
+320 [04021002 3fc04800 00000040 20000098] mad.pack          t2.___w, t4.wwww, t0.xxxx, u9.xxxx
+321 [0402104f 3fc02800 00aa04c0 003fc02a] select.gt.pack    t2.___w, t2.wwww, u9.yyyy, t2.wwww
+322 [0402102e 3fe02804 80000000 00000000] f2i.u32           t2.___w, t2.wwww, void, void
+323 [01841002 01008800 00000040 20000098] mad.pack          t4.xy__, t8.xyxx, t0.xxxx, u9.xxxx
+324 [0184104f 39004800 000a04c0 0039004a] select.gt.pack    t4.xy__, t4.xyzw, u9.yyxx, t4.xyzw
+325 [0184102e 39204804 80000000 00000000] f2i.u32           t4.xy__, t4.xyzw, void, void
+326 [0204103c 00004800 415404c0 00000002] imullo0.s32.pack  t4.__z_, t4.xxxx, u9.zzzz, void
+327 [0084103c 15404800 41fe04c0 00000002] imullo0.s32.pack  t4.x___, t4.yyyy, u9.wwww, void
+328 [0402101c 3fc02800 40010000 002a8048] or.s32.pack       t2.___w, t2.wwww, void, t4.zzzz
+329 [0402101c 3fc02800 40010000 00000048] or.s32.pack       t2.___w, t2.wwww, void, t4.xxxx
+330 [00801002 2a801800 00000040 20000098] mad.pack          t0.x___, t1.zzzz, t0.xxxx, u9.xxxx
+331 [0080104f 00000800 00aa04c0 0000000a] select.gt.pack    t0.x___, t0.xxxx, u9.yyyy, t0.xxxx
+332 [0080102e 00200804 80000000 00000000] f2i.u32           t0.x___, t0.xxxx, void, void
+333 [0080103c 00000800 40000540 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u10.xxxx, void
+334 [0080101c 3fc02800 40010000 00000008] or.s32.pack       t0.x___, t2.wwww, void, t0.xxxx
+335 [008f0033 2aa05c04 81540140 0000000a] store.denorm.u32  mem.x___, t5.zzzz, u2.zzzz, t0.xxxx	; dontcare bits in store: 000000000000000000000000000f0000
+num loops: 0
+num temps: 15
+immediates:
+ [0].x = 0.000000 (0x00000000) (13)
+ [0].y = 0.000000 (0x00000001) (13)
+ [0].z = 0.000000 (0x00000002) (13)
+ [0].w = -nan (0xffffffff) (1)
+ [1].x = 0.000000 (0x00000200) (1)
+ [1].y = 0.000000 (0x00000000) (14)
+ [1].z = 0.000000 (0x0000003f) (1)
+ [1].w = 0.000000 (0x000000fa) (1)
+ [2].x = 0.000000 (0x00000004) (1)
+ [2].y = 0.000000 (0x04000004) (12)
+ [2].z = 0.000000 (0x00000000) (1)
+ [2].w = 0.000000 (0x04000000) (12)
+ [3].x = 0.000000 (0x000000ff) (1)
+ [3].y = 0.000000 (0x000003e9) (1)
+ [3].z = 0.000000 (0x000000fb) (1)
+ [3].w = 0.000000 (0x00000003) (1)
+ [4].x = 0.000000 (0x00000008) (1)
+ [4].y = 0.000000 (0x00000010) (1)
+ [4].z = 0.000000 (0x00000018) (1)
+ [4].w = 0.000000 (0x00000004) (1)
+ [5].x = 0.000000 (0x00000001) (1)
+ [5].y = 0.000000 (0x00000002) (1)
+ [5].z = 0.000000 (0x00000003) (1)
+ [5].w = 0.239631 (0x3e7561b4) (1)
+ [6].x = 0.000000 (0x00000040) (1)
+ [6].y = 0.000000 (0x00000080) (1)
+ [6].z = 0.000000 (0x000000c0) (1)
+ [6].w = 256.000000 (0x43800000) (1)
+ [7].x = 0.000000 (0x00000080) (1)
+ [7].y = 0.000000 (0x00000040) (1)
+ [7].z = 0.000000 (0x00000020) (1)
+ [7].w = 0.000000 (0x00000010) (1)
+ [8].x = 0.000000 (0x00000020) (1)
+ [8].y = 0.000000 (0x00000010) (1)
+ [8].z = 0.000000 (0x00000008) (1)
+ [8].w = 0.000000 (0x00000004) (1)
+ [9].x = 0.500000 (0x3f000000) (1)
+ [9].y = 255.000000 (0x437f0000) (1)
+ [9].z = 0.000000 (0x00000100) (1)
+ [9].w = 0.000000 (0x00010000) (1)
+ [10].x = 0.000000 (0x01000000) (1)
+ [10].y = 0.000000 (0x00000000) (0)
+ [10].z = 0.000000 (0x00000000) (0)
+ [10].w = 0.000000 (0x00000000) (0)
+workitem inputs: load_workgroup_id load_local_invocation_id -
+barriers: yes
+GPU addresses: out 0xffffa000 in 0xffff9000 (1004 bytes each)
+grid: 1 dimension(s), 1 x 1 workgroups of 64 x 1 threads
+softmax: 1 rows of 1001, factor 0.2396305: 0 exact, 0 off by 1, 1001 worse (worst 239); row 0 peaks: 190 239 239
+{"result": "OFFLINE", "kernel": "softmax", "rows": 1, "len": 1001, "exact": 0, "off_by_1": 0, "worse": 1001, "worst": 239, "bytes_0xef": 251, "first_launch_ms": 1.707, "median_ms": 1.707, "launches": 1}

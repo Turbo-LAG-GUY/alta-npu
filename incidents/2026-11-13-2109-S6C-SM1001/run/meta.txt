@@ -1,0 +1,10 @@
+label: S6C-SM1001
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel softmax --len 1001 --rows 1 --repeat 10 --out /home/jordan/alta-npu/runs/cs6c-210126/SM1001
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T21:09:05-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1333
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8fd8;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=cf3e67529;t=66033053b1bb3;x=7f93fb43fa34e67f
+end: 2026-11-13T21:09:13-05:00  rc: 3  wall_s: 8

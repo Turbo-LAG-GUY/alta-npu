@@ -1,0 +1,91 @@
+DRM etnaviv 1.4
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: reduce
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 2048
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32x3   %2 = @load_local_invocation_id
+    32     %3 = mov %2.x
+    32     %4 = load_const (0x00000000)
+    32     %5 = @load_kernel_input (%4 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000004)
+    32     %7 = @load_kernel_input (%6 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %8 = load_const (0x00000002)
+    32     %9 = ishl %1, %8 (0x2)
+    32    %10 = load_const (0x00000002)
+    32    %11 = ishl %3, %10 (0x2)
+    32    %12 = iadd %7, %9
+    32    %13 = @load_global (%12) (access=none, align_mul=4, align_offset=0)
+                @store_shared (%13, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %14 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %15 = @load_shared (%11) (base=128, access=none, align_mul=4, align_offset=0)
+    32    %16 = load_const (0x00000020 = 32)
+    1     %17 = ult %3, %16 (0x20)
+    32    %18 = iadd %14, %15
+    32    %19 = bcsel %17, %18, %14
+                @store_shared (%19, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %20 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %21 = @load_shared (%11) (base=64, access=none, align_mul=4, align_offset=0)
+    32    %22 = load_const (0x00000010 = 16)
+    1     %23 = ult %3, %22 (0x10)
+    32    %24 = iadd %20, %21
+    32    %25 = bcsel %23, %24, %20
+                @store_shared (%25, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %26 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %27 = @load_shared (%11) (base=32, access=none, align_mul=4, align_offset=0)
+    32    %28 = load_const (0x00000008)
+    1     %29 = ult %3, %28 (0x8)
+    32    %30 = iadd %26, %27
+    32    %31 = bcsel %29, %30, %26
+                @store_shared (%31, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %32 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %33 = @load_shared (%11) (base=16, access=none, align_mul=4, align_offset=0)
+    32    %34 = load_const (0x00000004)
+    1     %35 = ult %3, %34 (0x4)
+    32    %36 = iadd %32, %33
+    32    %37 = bcsel %35, %36, %32
+                @store_shared (%37, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %38 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %39 = @load_shared (%11) (base=8, access=none, align_mul=4, align_offset=0)
+    32    %40 = load_const (0x00000002)
+    1     %41 = ult %3, %40 (0x2)
+    32    %42 = iadd %38, %39
+    32    %43 = bcsel %41, %42, %38
+                @store_shared (%43, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %44 = @load_shared (%11) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %45 = @load_shared (%11) (base=4, access=none, align_mul=4, align_offset=0)
+    32    %46 = load_const (0x00000001)
+    1     %47 = ult %3, %46 (0x1)
+    32    %48 = iadd %44, %45
+    32    %49 = bcsel %47, %48, %44
+                @store_shared (%49, %11) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %50 = load_const (0x00000000)
+    32    %51 = @load_shared (%50 (0x0)) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %52 = iadd %5, %9
+                @store_global (%51, %52) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: reduce, shared 2048 bytes per workgroup
+GPU addresses: out 0xffffa000 in 0xffff9000 (1024 bytes each)
+grid: 1 dimension(s), 4 x 1 workgroups of 64 x 1 threads
+out[0..3]: 0x3760 0x3760 0x3760 0x3760
+{"result": "PASS", "kernel": "reduce", "threads": "256 x 1", "workgroup": "64 x 1", "hwc": "0x0x0", "mismatched_words": 0, "untouched": 0, "first_mismatch": -1, "got": 0, "want": 0, "launch_to_done_ms": 0.367, "median_ms": 0.367, "launches": 1, "mb_per_s": 0.0}

@@ -1,0 +1,21 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_shader.h b/src/gallium/drivers/etnaviv/etnaviv_shader.h
+index d3dfbf1ef9c..c6777ca3f05 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_shader.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_shader.h
+@@ -84,6 +84,16 @@ struct etna_shader {
+    const struct etna_specs *specs;
+    struct etna_compiler *compiler;
+ 
++   unsigned static_shared_mem;
++
++   /* TODO: Is this the right place? Has this BO the same lifecycle as this etna_shader struct? */
++   struct etna_bo *shared_bo;
++   struct etna_bo *shared_args_bo;
++
++   /* TODO: Is this the right place? Has this BO the same lifecycle as this etna_shader struct? */
++   struct etna_bo *scratch_bo;
++   struct etna_bo *thread_counter_bo;
++
+    struct etna_shader_variant *variants;
+ 
+    cache_key cache_key;     /* shader disk-cache key */

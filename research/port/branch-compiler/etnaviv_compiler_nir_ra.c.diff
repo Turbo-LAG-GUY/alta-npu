@@ -1,0 +1,67 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_ra.c b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_ra.c
+index 2400b9c3087..f33c19b3e4c 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_ra.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_ra.c
+@@ -112,6 +112,20 @@ etna_ra_setup(void *mem_ctx)
+    return regs;
+ }
+ 
++static unsigned
++etna_work_item_func_get_reg(struct etna_shader_variant *variant, nir_intrinsic_op op)
++{
++   for (unsigned i = 0; i < ARRAY_SIZE(variant->workitem_funcs); i++) {
++      if (!variant->workitem_funcs[i]) {
++         variant->workitem_funcs[i] = op;
++         return i;
++      } else if (variant->workitem_funcs[i] == op)
++         return i;
++   }
++
++   unreachable("An invalid op was passed?");
++}
++
+ void
+ etna_ra_assign(struct etna_compile *c, nir_shader *shader)
+ {
+@@ -212,6 +226,17 @@ etna_ra_assign(struct etna_compile *c, nir_shader *shader)
+          case nir_intrinsic_load_instance_id:
+             reg = c->variant->infile.num_reg * NUM_REG_TYPES + REG_TYPE_VIRT_SCALAR_Y;
+             break;
++         case nir_intrinsic_load_global_invocation_id_zero_base:
++         case nir_intrinsic_load_local_invocation_id:
++         case nir_intrinsic_load_workgroup_id: {
++            unsigned reg_base = etna_work_item_func_get_reg(c->variant, intr->intrinsic);
++            reg = reg_base * NUM_REG_TYPES + (unsigned[]) {
++               REG_TYPE_VIRT_SCALAR_X,
++               REG_TYPE_VIRT_VEC2_XY,
++               REG_TYPE_VIRT_VEC3_XYZ,
++               REG_TYPE_VEC4,
++            }[nir_dest_num_components(*dest) - 1];
++         } break;
+          default:
+             continue;
+          }
+@@ -242,7 +267,7 @@ etna_ra_assign(struct etna_compile *c, nir_shader *shader)
+ }
+ 
+ unsigned
+-etna_ra_finish(struct etna_compile *c)
++etna_ra_get_num_temps(struct etna_compile *c)
+ {
+    /* TODO: better way to get number of registers used? */
+    unsigned j = 0;
+@@ -250,8 +275,12 @@ etna_ra_finish(struct etna_compile *c)
+       j = MAX2(j, reg_get_base(c, ra_get_node_reg(c->g, i)) + 1);
+    }
+ 
++   return j;
++}
++
++void
++etna_ra_finish(struct etna_compile *c)
++{
+    ralloc_free(c->g);
+    ralloc_free(c->live_map);
+-
+-   return j;
+ }

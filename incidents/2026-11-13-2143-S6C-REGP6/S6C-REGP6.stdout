@@ -1,0 +1,5 @@
+npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: /home/jordan/alta-npu/runs/20261113-214320-S6C-REGP6/kernel.txt
+[  360.696516] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[  360.696574] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: cs_run (/home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel regp6 -n 256 -w 64 --out /home/jordan/alta-npu/runs/cs6c-ladder-20261113-214252/REGP6)
+[  361.019224] jordan-aml-a311d-cc kernel: Purging 573440 bytes
+[  361.887523] jordan-aml-a311d-cc kernel: Purging 561152 bytes

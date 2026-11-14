@@ -1,0 +1,788 @@
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_compute.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compute.c
+--- step5/src/gallium/drivers/etnaviv/etnaviv_compute.c	2026-11-13 20:32:57.476557351 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compute.c	2026-11-13 20:26:25.549982646 -0500
+@@ -56,19 +56,47 @@
+ #include "util/u_memory.h"
+ #include "util/u_range.h"
+ 
+-static void
+-etna_delete_compute_state(struct pipe_context *pctx, void *cso)
++/* Compute shaders at screen level, so code without a pipe_context (the ML subgraph compiler) can build kernels too.
++ * The shader takes ownership of nir. It has a single variant (nothing in the key depends on state), compiled right
++ * away: compile errors show up here, and a failure is reported again by etna_compute_shader_get_variant.
++ */
++struct etna_shader *
++etna_compute_shader_create(struct etna_screen *screen, nir_shader *nir, struct util_debug_callback *debug)
+ {
+-   struct etna_context *ctx = etna_context(pctx);
+-   struct etna_shader *shader = cso;
+-   struct etna_shader_variant *v, *t;
++   struct etna_compiler *compiler = screen->compiler;
++   struct etna_shader *shader = CALLOC_STRUCT(etna_shader);
+ 
+-   if (ctx->shader.bind_compute == shader) {
+-      ctx->shader.bind_compute = NULL;
+-      ctx->shader.compute = NULL;
+-   }
++   if (!shader)
++      return NULL;
++
++   shader->id = p_atomic_inc_return(&compiler->shader_count);
++   shader->info = screen->info;
++   shader->specs = &screen->specs;
++   shader->compiler = compiler;
++   util_queue_fence_init(&shader->ready);
++   shader->nir = nir;
++
++   etna_disk_cache_init_shader_key(compiler, shader);
++
++   struct etna_shader_key key = {};
++   etna_shader_variant(shader, &key, debug, false);
++
++   return shader;
++}
++
++struct etna_shader_variant *
++etna_compute_shader_get_variant(struct etna_shader *shader, struct util_debug_callback *debug)
++{
++   struct etna_shader_key key = {};
++
++   return etna_shader_variant(shader, &key, debug, false);
++}
++
++void
++etna_compute_shader_destroy(struct etna_shader *shader)
++{
++   struct etna_shader_variant *v = shader->variants, *t;
+ 
+-   v = shader->variants;
+    while (v) {
+       t = v;
+       v = v->next;
+@@ -83,41 +111,32 @@
+    FREE(shader);
+ }
+ 
++static void
++etna_delete_compute_state(struct pipe_context *pctx, void *cso)
++{
++   struct etna_context *ctx = etna_context(pctx);
++   struct etna_shader *shader = cso;
++
++   if (ctx->shader.bind_compute == shader) {
++      ctx->shader.bind_compute = NULL;
++      ctx->shader.compute = NULL;
++   }
++
++   etna_compute_shader_destroy(shader);
++}
++
+ static void *
+ etna_create_compute_state(struct pipe_context *pctx,
+                           const struct pipe_compute_state *pcs)
+ {
+    struct etna_context *ctx = etna_context(pctx);
+-   struct etna_screen *screen = ctx->screen;
+-   struct etna_compiler *compiler = screen->compiler;
+-   struct etna_shader *shader;
+ 
+    if (pcs->ir_type != PIPE_SHADER_IR_NIR) {
+       BUG("compute shaders must be NIR");
+       return NULL;
+    }
+ 
+-   shader = CALLOC_STRUCT(etna_shader);
+-   if (!shader)
+-      return NULL;
+-
+-   shader->id = p_atomic_inc_return(&compiler->shader_count);
+-   shader->info = screen->info;
+-   shader->specs = &screen->specs;
+-   shader->compiler = compiler;
+-   util_queue_fence_init(&shader->ready);
+-   shader->nir = (struct nir_shader *)pcs->prog;
+-
+-   etna_disk_cache_init_shader_key(compiler, shader);
+-
+-   /* Compute shaders have a single variant (nothing in the key depends on state), so compile it right away:
+-    * compile errors then show up here and launch_grid only looks the variant up. A failure is reported again
+-    * by launch_grid, which refuses to dispatch.
+-    */
+-   struct etna_shader_key key = {};
+-   etna_shader_variant(shader, &key, &ctx->base.debug, false);
+-
+-   return shader;
++   return etna_compute_shader_create(ctx->screen, (nir_shader *)pcs->prog, &ctx->base.debug);
+ }
+ 
+ static void
+@@ -247,7 +266,7 @@
+ 
+ static bool
+ etna_compute_uniforms_write(struct etna_context *ctx, const struct etna_shader_variant *v,
+-                            const struct pipe_grid_info *info)
++                            const struct pipe_grid_info *info, const void *input, unsigned input_size)
+ {
+    struct etna_cmd_stream *stream = ctx->stream;
+    const struct etna_shader_uniform_info *uinfo = &v->uniforms;
+@@ -276,8 +295,8 @@
+          const unsigned offset = ETNA_KERNEL_ARG_OFFSET(val), size = ETNA_KERNEL_ARG_SIZE(val);
+          uint32_t arg = 0;
+ 
+-         if (cb[0].user_buffer && size <= 4 && offset + size <= cb[0].buffer_size)
+-            memcpy(&arg, (const uint8_t *)cb[0].user_buffer + offset, size);
++         if (input && size <= 4 && offset + size <= input_size)
++            memcpy(&arg, (const uint8_t *)input + offset, size);
+          else
+             ok = false;
+ 
+@@ -286,8 +305,8 @@
+       }
+ 
+       case ETNA_UNIFORM_UNIFORM:
+-         if (cb[0].user_buffer && (val + 1) * 4 <= cb[0].buffer_size)
+-            etna_cmd_stream_emit(stream, ((const uint32_t *)cb[0].user_buffer)[val]);
++         if (input && (val + 1) * 4 <= input_size)
++            etna_cmd_stream_emit(stream, ((const uint32_t *)input)[val]);
+          else {
+             etna_cmd_stream_emit(stream, 0);
+             ok = false;
+@@ -347,7 +366,8 @@
+  * refused instead.
+  */
+ static bool
+-etna_compute_uniforms_check(struct etna_context *ctx, const struct etna_shader_variant *v)
++etna_compute_uniforms_check(struct etna_context *ctx, const struct etna_shader_variant *v, const void *input,
++                            unsigned input_size)
+ {
+    const struct etna_shader_uniform_info *uinfo = &v->uniforms;
+    const struct pipe_constant_buffer *cb = ctx->constant_buffer[MESA_SHADER_COMPUTE].cb;
+@@ -362,12 +382,12 @@
+          break;
+       case ETNA_UNIFORM_KERNEL_ARG: {
+          const unsigned offset = ETNA_KERNEL_ARG_OFFSET(val), size = ETNA_KERNEL_ARG_SIZE(val);
+-         if (!cb[0].user_buffer || size > 4 || offset + size > cb[0].buffer_size)
++         if (!input || size > 4 || offset + size > input_size)
+             return false;
+          break;
+       }
+       case ETNA_UNIFORM_UNIFORM:
+-         if (!cb[0].user_buffer || (val + 1) * 4 > cb[0].buffer_size)
++         if (!input || (val + 1) * 4 > input_size)
+             return false;
+          break;
+       case ETNA_UNIFORM_UBO_ADDR:
+@@ -453,16 +473,16 @@
+ }
+ 
+ static void
+-etna_emit_compute_state(struct etna_context *ctx, const struct pipe_grid_info *info, int value_order)
++etna_emit_compute_state(struct etna_context *ctx, const struct etna_shader_variant *v,
++                        const struct pipe_grid_info *info, int value_order, const void *input, unsigned input_size)
+ {
+    struct etna_cmd_stream *stream = ctx->stream;
+-   const struct etna_shader_variant *v = ctx->shader.compute;
+    const unsigned workgroup_size = info->block[0] * info->block[1] * info->block[2];
+    const unsigned work_dim = info->work_dim;
+ 
+    etna_stall(stream, SYNC_RECIPIENT_FE, SYNC_RECIPIENT_PE);
+ 
+-   if (!etna_compute_uniforms_write(ctx, v, info))
++   if (!etna_compute_uniforms_write(ctx, v, info, input, input_size))
+       BUG("compute uniforms incomplete (kernel input buffer missing or too small?)");
+ 
+    etna_set_state(stream, VIVS_PA_VARYING_NUM_COMPONENTS(0), 0);
+@@ -561,6 +581,63 @@
+    etna_cmd_stream_ref_bo(ctx->stream, rsc->bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
+ }
+ 
++/* Emit one grid of variant v into the context's command stream. input/input_size is the kernel input (what the
++ * kernel-argument uniforms are read from); buffers are referenced in the submit as read+write. lazy_reset emits the
++ * compute reset state if the stream needs it (launch_grid); the ML path has its own NPU setup and passes false.
++ * Returns false, with nothing emitted, if the grid can't be run.
++ */
++bool
++etna_compute_emit_grid(struct etna_context *ctx, struct etna_shader_variant *v, const struct pipe_grid_info *info,
++                       const void *input, unsigned input_size, struct pipe_resource *const *buffers,
++                       unsigned num_buffers, bool lazy_reset)
++{
++   int value_order = etna_compute_value_order(v);
++   if (value_order < 0) {
++      BUG("unsupported work-item ID combination in compute shader");
++      return false;
++   }
++
++   if (!etna_compute_shared_alloc(ctx, v, info)) {
++      BUG("shared memory allocation failed (%u bytes per workgroup)", v->shared_size);
++      return false;
++   }
++
++   if (!etna_compute_uniforms_check(ctx, v, input, input_size)) {
++      BUG("compute uniforms can't be filled (kernel input buffer missing or too small?): grid refused");
++      return false;
++   }
++
++   if (!etna_icache_upload_shader(ctx, v)) {
++      BUG("compute shader upload failed");
++      return false;
++   }
++
++   ctx->shader.compute = v;
++
++   if (DBG_ENABLED(ETNA_DBG_DUMP_SHADERS))
++      etna_compute_dump_shader(v);
++
++   /* Reserve first: if the stream has to be flushed for space, that happens before the reset state and the
++    * buffer references below. */
++   etna_cmd_stream_reserve(ctx->stream, etna_compute_stream_words(v));
++
++   if (lazy_reset && ctx->needs_gpu_state_reset)
++      etna_compute_reset_state(ctx);
++
++   for (unsigned i = 0; i < num_buffers; i++) {
++      if (buffers[i])
++         etna_compute_use_buffer(ctx, buffers[i]);
++   }
++
++   if (v->shared_size)
++      etna_compute_use_buffer(ctx, ctx->compute_shared);
++
++   etna_emit_compute_state(ctx, v, info, value_order, input, input_size);
++   ctx->compute_in_stream = true;
++
++   return true;
++}
++
+ static void
+ etna_launch_grid(struct pipe_context *pctx, const struct pipe_grid_info *info)
+ {
+@@ -608,51 +685,20 @@
+       return;
+    }
+ 
+-   int value_order = etna_compute_value_order(v);
+-   if (value_order < 0) {
+-      BUG("unsupported work-item ID combination in compute shader");
+-      return;
+-   }
+-
+-   if (!etna_compute_shared_alloc(ctx, v, info)) {
+-      BUG("shared memory allocation failed (%u bytes per workgroup)", v->shared_size);
+-      return;
+-   }
+-
+-   if (!etna_compute_uniforms_check(ctx, v)) {
+-      BUG("compute uniforms can't be filled (kernel input buffer missing or too small?): grid refused");
+-      return;
+-   }
+-
+-   if (!etna_icache_upload_shader(ctx, v)) {
+-      BUG("compute shader upload failed");
+-      return;
+-   }
+-
+-   ctx->shader.compute = v;
+-
+-   if (DBG_ENABLED(ETNA_DBG_DUMP_SHADERS))
+-      etna_compute_dump_shader(v);
+-
+-   /* Reserve first: if the stream has to be flushed for space, that happens before the reset state below. */
+-   etna_cmd_stream_reserve(ctx->stream, etna_compute_stream_words(v));
+-
+-   if (ctx->needs_gpu_state_reset)
+-      etna_compute_reset_state(ctx);
++   /* the buffers the grid reads or writes through their GPU addresses, in the order they are referenced */
++   struct pipe_resource *buffers[ETNA_MAX_GLOBAL_BUFFERS + info->num_globals];
++   unsigned num_buffers = 0;
+ 
+    u_foreach_bit(i, ctx->global_bindings.enabled_mask)
+-      etna_compute_use_buffer(ctx, ctx->global_bindings.buf[i]);
++      buffers[num_buffers++] = ctx->global_bindings.buf[i];
+ 
+    for (unsigned i = 0; i < info->num_globals; i++) {
+       if (info->globals[i])
+-         etna_compute_use_buffer(ctx, info->globals[i]);
++         buffers[num_buffers++] = info->globals[i];
+    }
+ 
+-   if (v->shared_size)
+-      etna_compute_use_buffer(ctx, ctx->compute_shared);
+-
+-   etna_emit_compute_state(ctx, info, value_order);
+-   ctx->compute_in_stream = true;
++   const struct pipe_constant_buffer *cb = ctx->constant_buffer[MESA_SHADER_COMPUTE].cb;
++   etna_compute_emit_grid(ctx, v, info, cb[0].user_buffer, cb[0].buffer_size, buffers, num_buffers, true);
+ 
+    if (DBG_ENABLED(ETNA_DBG_FLUSH_ALL))
+       pctx->flush(pctx, NULL, 0);
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_context.h mesa-compute/src/gallium/drivers/etnaviv/etnaviv_context.h
+--- step5/src/gallium/drivers/etnaviv/etnaviv_context.h	2026-11-13 20:32:57.479890684 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_context.h	2026-11-13 20:26:25.553315975 -0500
+@@ -315,4 +315,24 @@
+ void
+ etna_compute_debug_flush(struct etna_context *ctx);
+ 
++struct etna_shader;
++struct etna_shader_variant;
++struct etna_screen;
++struct nir_shader;
++struct util_debug_callback;
++
++struct etna_shader *
++etna_compute_shader_create(struct etna_screen *screen, struct nir_shader *nir, struct util_debug_callback *debug);
++
++struct etna_shader_variant *
++etna_compute_shader_get_variant(struct etna_shader *shader, struct util_debug_callback *debug);
++
++void
++etna_compute_shader_destroy(struct etna_shader *shader);
++
++bool
++etna_compute_emit_grid(struct etna_context *ctx, struct etna_shader_variant *v, const struct pipe_grid_info *info,
++                       const void *input, unsigned input_size, struct pipe_resource *const *buffers,
++                       unsigned num_buffers, bool lazy_reset);
++
+ #endif
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_ml.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
+--- step5/src/gallium/drivers/etnaviv/etnaviv_ml.c	2026-11-11 05:32:12.198733080 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c	2026-11-13 20:29:46.696477318 -0500
+@@ -17,6 +17,7 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_ml_tp.h"
+ #include "etnaviv_ml.h"
++#include "etnaviv_ml_shader.h"
+ #include "etnaviv_ml_axi_sram.h"
+ #include "etnaviv_ml_disk_cache.h"
+ #include "etnaviv_screen.h"
+@@ -280,6 +281,10 @@
+          ML_DBG("%3d %-4s %3d %3d",
+                 i, "BYPASS", operation->input_tensors[0], operation->output_tensors[0]);
+          break;
++      case ETNA_JOB_TYPE_SHADER:
++         ML_DBG("%3d %-4s %3d %3d",
++                i, "SH", operation->input_tensors[0], operation->output_tensors[0]);
++         break;
+       }
+       ML_DBG("\n");
+       i++;
+@@ -360,6 +365,8 @@
+             ML_DBG("Adding transpose.\n");
+             struct etna_operation *transpose = calloc(1, sizeof(*transpose));
+             etna_ml_lower_transpose(subgraph, poperation->input_tensors[i], transpose);
++            if (etna_ml_shader_wants_transpose(subgraph, transpose))
++               transpose->type = ETNA_JOB_TYPE_SHADER;
+             transpose->input_tensors[0] = input_tensors[i];
+             transpose->output_tensors[0] = etna_ml_allocate_tensor(subgraph);
+             input_tensors[i] = transpose->output_tensors[0];
+@@ -526,6 +533,8 @@
+             ML_DBG("Adding detranspose.\n");
+             struct etna_operation *detranspose = calloc(1, sizeof(*detranspose));
+             etna_ml_lower_detranspose(subgraph, poperation->output_tensors[i], detranspose);
++            if (etna_ml_shader_wants_transpose(subgraph, detranspose))
++               detranspose->type = ETNA_JOB_TYPE_SHADER;
+             operation->output_tensors[i] = etna_ml_allocate_tensor(subgraph);
+             detranspose->input_tensors[0] = operation->output_tensors[i];
+             detranspose->output_tensors[0] = poperation->output_tensors[i]->index;
+@@ -1170,6 +1179,11 @@
+          case ETNA_JOB_TYPE_TP:
+             etna_ml_compile_operation_tp(subgraph, operation, &instruction);
+             break;
++         case ETNA_JOB_TYPE_SHADER:
++            /* lowered as a TP transpose/detranspose, so the TP can take it if the shader core can't */
++            if (!etna_ml_compile_operation_shader(subgraph, operation, &instruction))
++               etna_ml_compile_operation_tp(subgraph, operation, &instruction);
++            break;
+          case ETNA_JOB_TYPE_CONCAT:
+          case ETNA_JOB_TYPE_SPLIT:
+          case ETNA_JOB_TYPE_BYPASS:
+@@ -1329,6 +1343,8 @@
+                dump_bo(operation->configs[0], "nn", i, 0, 0, 0);
+                dump_bo(operation->coefficients, "compressed", i, 0, 0, 0);
+                break;
++            case ETNA_JOB_TYPE_SHADER:
++               break; /* the shader and command stream are dumped by the compute code */
+             default:
+                UNREACHABLE("Unsupported ML operation type");
+          }
+@@ -1362,6 +1378,9 @@
+          case ETNA_JOB_TYPE_NN:
+             etna_ml_emit_operation_nn(pctx, subgraph, operation, i);
+             break;
++         case ETNA_JOB_TYPE_SHADER:
++            etna_ml_emit_operation_shader(pctx, subgraph, operation, i);
++            break;
+          default:
+             UNREACHABLE("Unsupported ML operation type");
+       }
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_ml.h mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
+--- step5/src/gallium/drivers/etnaviv/etnaviv_ml.h	2026-11-11 05:31:18.315951884 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h	2026-11-13 20:29:34.536468463 -0500
+@@ -13,8 +13,14 @@
+ 
+ #define MAX_CONFIG_BOS 4
+ 
++struct etna_shader;
++struct etna_shader_variant;
++
+ struct etna_ml_device {
+    struct pipe_ml_device base;
++
++   /* compute kernel for ETNA_JOB_TYPE_SHADER transposes (etnaviv_ml_shader.c), compiled on first use */
++   struct etna_shader *transpose_kernel;
+ };
+ 
+ static inline struct etna_ml_device *
+@@ -29,6 +35,7 @@
+     ETNA_JOB_TYPE_CONCAT, /* Fake operation, won't execute on HW. Hack will go away after the move to NIR. */
+     ETNA_JOB_TYPE_SPLIT, /* Fake operation, won't execute on HW. Hack will go away after the move to NIR. */
+     ETNA_JOB_TYPE_BYPASS, /* Fake operation, won't execute on HW. Hack will go away after the move to NIR. */
++    ETNA_JOB_TYPE_SHADER, /* compute grid on the shader core (etnaviv_ml_shader.c) */
+ };
+ 
+ enum etna_ml_tp_type {
+@@ -81,6 +88,12 @@
+    unsigned output_offset;
+ 
+    struct etna_bo *kernel;
++
++   /* ETNA_JOB_TYPE_SHADER: the kernel (owned by the screen), its kernel input and grid */
++   struct etna_shader_variant *shader;
++   uint32_t shader_args[8];
++   unsigned grid[3];
++   unsigned block[3];
+ };
+ 
+ #define MAX_TENSORS 10
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
+--- step5/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c	1969-12-31 19:00:00.000000000 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c	2026-11-13 20:30:01.993154409 -0500
+@@ -0,0 +1,265 @@
++/*
++ * SPDX-License-Identifier: MIT
++ */
++
++/*
++ * ML operations run on the NPU's shader core, as compute grids inside the ML command stream (alta port, step 6).
++ *
++ * So far: the implicit layout transposes Teflon adds at the ends of a graph (TFLite tensors are channels-last,
++ * NHWC; the NN cores want channel planes, NCHW). On the TP unit they ran at ~78 MB/s for 256-channel tensors; the
++ * shader-core kernel below (4x4 byte blocks, butterfly shuffle) measured 14.7 ms in / 13.2 ms out at 112x112x256
++ * (RESULTS.md S6-T4B-IN/OUT), about 3x faster. On narrow tensors (4-5 channels) the TP is faster, so only tensors
++ * with enough channels are moved.
++ *
++ * Opt-in: ETNA_ML_SHADER=transpose. ETNA_ML_SHADER_MIN_CHANNELS (default 16) sets the narrowest tensor moved.
++ */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#include "compiler/nir/nir_builder.h"
++
++#include "etnaviv_compiler.h"
++#include "etnaviv_context.h"
++#include "etnaviv_debug.h"
++#include "etnaviv_emit.h"
++#include "etnaviv_ml.h"
++#include "etnaviv_ml_shader.h"
++#include "etnaviv_resource.h"
++#include "etnaviv_screen.h"
++#include "etnaviv_shader.h"
++
++#include "hw/common.xml.h"
++#include "hw/state.xml.h"
++
++#include "util/u_inlines.h"
++
++/* kernel input of the transpose kernel: out, in, RX, RY, RS, WX, WY, WS (see etna_ml_shader_build_transpose) */
++#define TRANSPOSE_ARGS 8
++
++static bool
++shader_option(const char *name)
++{
++   static const char *env = NULL;
++   static bool read = false;
++
++   if (!read) {
++      env = getenv("ETNA_ML_SHADER");
++      read = true;
++   }
++
++   return env && strstr(env, name);
++}
++
++static unsigned
++min_channels(void)
++{
++   const char *env = getenv("ETNA_ML_SHADER_MIN_CHANNELS");
++   return env ? (unsigned)atoi(env) : 16;
++}
++
++/* Workgroup width for a grid of n threads in x: the largest power of two up to 64 that divides n. */
++static unsigned
++block_width(unsigned n)
++{
++   unsigned w = 64;
++
++   while (w > 1 && n % w)
++      w /= 2;
++
++   return w;
++}
++
++bool
++etna_ml_shader_wants_transpose(const struct etna_ml_subgraph *subgraph, const struct etna_operation *operation)
++{
++   const unsigned c = operation->input_channels;
++   const unsigned hw = operation->input_width * operation->input_height;
++
++   if (!shader_option("transpose") || !subgraph->screen->base.caps.compute ||
++       DBG_ENABLED(ETNA_DBG_NPU_PARALLEL))
++      return false;
++
++   if (operation->type != ETNA_JOB_TYPE_TP ||
++       (operation->tp_type != ETNA_ML_TP_TRANSPOSE && operation->tp_type != ETNA_ML_TP_DETRANSPOSE))
++      return false;
++
++   if (!c || !hw || c % 4 || hw % 4 || c < min_channels())
++      return false;
++
++   /* the grid: x = groups of 4 pixels, y = groups of 4 channels, within the 65535 workgroups per dimension */
++   const unsigned gx = hw / 4;
++   return gx / block_width(gx) <= 65535 && c / 4 <= 65535;
++}
++
++/*
++ * 4x4 byte-block transpose, uint8. Thread (x, y) reads 4 words at in + x*RX + y*RY + i*RS (i = 0..3) and writes 4
++ * words at out + x*WX + y*WY + k*WS, where byte i of word k = byte k of word i. The shuffle is a butterfly: 2x2 byte
++ * swaps within word pairs, then 2x2 halfword swaps (28 integer ops). Same kernel as npu-shader/cs_kernels.h t4x4b,
++ * proven byte-exact on the NPU.
++ */
++static nir_shader *
++etna_ml_shader_build_transpose(const nir_shader_compiler_options *opts)
++{
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "etna_ml_transpose4x4");
++   b.shader->info.workgroup_size_variable = true;
++
++   nir_def *arg[TRANSPOSE_ARGS];
++   for (unsigned i = 0; i < TRANSPOSE_ARGS; i++)
++      arg[i] = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, i * 4), .base = 0, .range = TRANSPOSE_ARGS * 4);
++
++   nir_def *gid = nir_load_global_invocation_id(&b, 32);
++   nir_def *x = nir_channel(&b, gid, 0), *y = nir_channel(&b, gid, 1);
++
++   nir_def *raddr = nir_iadd(&b, arg[1], nir_iadd(&b, nir_imul(&b, x, arg[2]), nir_imul(&b, y, arg[3])));
++   nir_def *waddr = nir_iadd(&b, arg[0], nir_iadd(&b, nir_imul(&b, x, arg[5]), nir_imul(&b, y, arg[6])));
++
++   nir_def *w[4];
++   for (unsigned i = 0; i < 4; i++) {
++      w[i] = nir_load_global(&b, 1, 32, raddr, .align_mul = 4);
++      if (i < 3)
++         raddr = nir_iadd(&b, raddr, arg[4]);
++   }
++
++   /* rows a, b, c, d = w0..w3: a' = [a0 b0 a2 b2], b' = [a1 b1 a3 b3] (bytes, low first), same for c, d */
++   nir_def *t[4];
++   for (unsigned p = 0; p < 4; p += 2) {
++      nir_def *lo = w[p], *hi = w[p + 1];
++      t[p] = nir_ior(&b, nir_iand_imm(&b, lo, 0x00ff00ff), nir_ishl_imm(&b, nir_iand_imm(&b, hi, 0x00ff00ff), 8));
++      t[p + 1] = nir_ior(&b, nir_iand_imm(&b, nir_ushr_imm(&b, lo, 8), 0x00ff00ff), nir_iand_imm(&b, hi, 0xff00ff00));
++   }
++
++   /* then halfwords: out0 = [a0 b0 c0 d0], out1 = [a1 b1 c1 d1], ... */
++   nir_def *o[4] = {
++      nir_ior(&b, nir_iand_imm(&b, t[0], 0xffff), nir_ishl_imm(&b, t[2], 16)),
++      nir_ior(&b, nir_iand_imm(&b, t[1], 0xffff), nir_ishl_imm(&b, t[3], 16)),
++      nir_ior(&b, nir_ushr_imm(&b, t[0], 16), nir_iand_imm(&b, t[2], 0xffff0000)),
++      nir_ior(&b, nir_ushr_imm(&b, t[1], 16), nir_iand_imm(&b, t[3], 0xffff0000)),
++   };
++
++   for (unsigned k = 0; k < 4; k++) {
++      nir_store_global(&b, o[k], waddr, .write_mask = 0x1, .align_mul = 4);
++      if (k < 3)
++         waddr = nir_iadd(&b, waddr, arg[7]);
++   }
++
++   return b.shader;
++}
++
++/* The transpose kernel, compiled once per screen (subgraphs are created from one thread at a time). */
++static struct etna_shader_variant *
++transpose_kernel(struct etna_screen *screen)
++{
++   struct etna_ml_device *dev = &screen->ml_device;
++
++   if (!dev->transpose_kernel) {
++      const nir_shader_compiler_options *opts = etna_compiler_get_options(screen->compiler);
++      dev->transpose_kernel = etna_compute_shader_create(screen, etna_ml_shader_build_transpose(opts), NULL);
++      if (!dev->transpose_kernel)
++         return NULL;
++   }
++
++   return etna_compute_shader_get_variant(dev->transpose_kernel, NULL);
++}
++
++bool
++etna_ml_compile_operation_shader(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                                 struct etna_vip_instruction *instruction)
++{
++   struct pipe_resource *input = etna_ml_get_resource(subgraph, operation->input_tensors[0]);
++   struct pipe_resource *output = etna_ml_get_resource(subgraph, operation->output_tensors[0]);
++   const unsigned in_offset = etna_ml_get_offset(subgraph, operation->input_tensors[0]);
++   const unsigned out_offset = etna_ml_get_offset(subgraph, operation->output_tensors[0]);
++   const unsigned c = operation->input_channels;
++   const unsigned hw = operation->input_width * operation->input_height;
++
++   /* word accesses: both tensors must start on a 4-byte boundary, and only plain RAM (not the AXI SRAM) */
++   if (!input || !output || in_offset % 4 || out_offset % 4 ||
++       input == subgraph->axi_sram || output == subgraph->axi_sram)
++      return false;
++
++   struct etna_shader_variant *v = transpose_kernel(subgraph->screen);
++   if (!v)
++      return false;
++
++   memset(instruction, 0, sizeof(*instruction));
++   instruction->type = ETNA_JOB_TYPE_SHADER;
++   instruction->tp_type = operation->tp_type;
++   instruction->shader = v;
++   pipe_resource_reference(&instruction->input, input);
++   pipe_resource_reference(&instruction->output, output);
++   instruction->input_offset = in_offset;
++   instruction->output_offset = out_offset;
++
++   const uint32_t in_va = etna_bo_gpu_va(etna_buffer_resource(input)->bo) + in_offset;
++   const uint32_t out_va = etna_bo_gpu_va(etna_buffer_resource(output)->bo) + out_offset;
++   uint32_t *a = instruction->shader_args;
++
++   a[0] = out_va;
++   a[1] = in_va;
++   if (operation->tp_type == ETNA_ML_TP_TRANSPOSE) {
++      /* NHWC -> NCHW: read 4 pixels x 4 channels, write 4 channel planes x 4 pixels */
++      a[2] = 4 * c; a[3] = 4; a[4] = c;
++      a[5] = 4; a[6] = 4 * hw; a[7] = hw;
++   } else {
++      /* NCHW -> NHWC */
++      a[2] = 4; a[3] = 4 * hw; a[4] = hw;
++      a[5] = 4 * c; a[6] = 4; a[7] = c;
++   }
++
++   const unsigned gx = hw / 4;
++   instruction->block[0] = block_width(gx);
++   instruction->block[1] = instruction->block[2] = 1;
++   instruction->grid[0] = gx / instruction->block[0];
++   instruction->grid[1] = c / 4;
++   instruction->grid[2] = 1;
++
++   ML_DBG("shader %s: %ux%u channels %u, grid %ux%u of %ux1, in 0x%x out 0x%x\n",
++          operation->tp_type == ETNA_ML_TP_TRANSPOSE ? "transpose" : "detranspose", operation->input_width,
++          operation->input_height, c, instruction->grid[0], instruction->grid[1], instruction->block[0], in_va,
++          out_va);
++
++   return true;
++}
++
++/* Caches the NN and TP units write through, flushed before a grid reads their output and after it, so the next
++ * NN/TP job sees what the grid wrote. Same bits as close_batch in etnaviv_ml.c (non-parallel mode).
++ */
++static void
++flush_and_stall(struct etna_cmd_stream *stream)
++{
++   const uint32_t cache = VIVS_GL_FLUSH_CACHE_DEPTH | VIVS_GL_FLUSH_CACHE_COLOR | VIVS_GL_FLUSH_CACHE_UNK10 |
++                          VIVS_GL_FLUSH_CACHE_UNK11 | VIVS_GL_FLUSH_CACHE_SHADER_L1;
++
++   etna_set_state(stream, VIVS_GL_FLUSH_CACHE, cache);
++   etna_stall(stream, SYNC_RECIPIENT_FE, SYNC_RECIPIENT_PE);
++}
++
++void
++etna_ml_emit_operation_shader(struct pipe_context *pctx, struct etna_ml_subgraph *subgraph,
++                              struct etna_vip_instruction *operation, unsigned idx)
++{
++   struct etna_context *ctx = etna_context(pctx);
++   const struct pipe_grid_info info = {
++      .work_dim = 2,
++      .block = { operation->block[0], operation->block[1], operation->block[2] },
++      .grid = { operation->grid[0], operation->grid[1], operation->grid[2] },
++   };
++   struct pipe_resource *buffers[2] = { operation->input, operation->output };
++
++   flush_and_stall(ctx->stream);
++   if (!etna_compute_emit_grid(ctx, operation->shader, &info, operation->shader_args,
++                               sizeof(operation->shader_args), buffers, 2, false))
++      BUG("ML shader operation %u could not be emitted", idx);
++   flush_and_stall(ctx->stream);
++}
++
++void
++etna_ml_shader_screen_fini(struct etna_screen *screen)
++{
++   if (screen->ml_device.transpose_kernel) {
++      etna_compute_shader_destroy(screen->ml_device.transpose_kernel);
++      screen->ml_device.transpose_kernel = NULL;
++   }
++}
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
+--- step5/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h	1969-12-31 19:00:00.000000000 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h	2026-11-13 20:29:34.526468456 -0500
+@@ -0,0 +1,28 @@
++/*
++ * SPDX-License-Identifier: MIT
++ */
++
++#ifndef H_ETNA_ML_SHADER
++#define H_ETNA_ML_SHADER
++
++#include "etnaviv_ml.h"
++
++struct etna_screen;
++
++/* operation: an implicit TP transpose/detranspose; true if it should run on the shader core instead */
++bool
++etna_ml_shader_wants_transpose(const struct etna_ml_subgraph *subgraph, const struct etna_operation *operation);
++
++/* false: the operation can't run on the shader core after all (alignment, AXI SRAM, compile); compile it for the TP */
++bool
++etna_ml_compile_operation_shader(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                                 struct etna_vip_instruction *instruction);
++
++void
++etna_ml_emit_operation_shader(struct pipe_context *pctx, struct etna_ml_subgraph *subgraph,
++                              struct etna_vip_instruction *operation, unsigned idx);
++
++void
++etna_ml_shader_screen_fini(struct etna_screen *screen);
++
++#endif
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/etnaviv_screen.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_screen.c
+--- step5/src/gallium/drivers/etnaviv/etnaviv_screen.c	2026-11-13 20:32:57.479890684 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_screen.c	2026-11-13 20:29:46.699810653 -0500
+@@ -35,6 +35,7 @@
+ #include "etnaviv_fence.h"
+ #include "etnaviv_format.h"
+ #include "etnaviv_ml.h"
++#include "etnaviv_ml_shader.h"
+ #include "etnaviv_query.h"
+ #include "etnaviv_resource.h"
+ #include "etnaviv_translate.h"
+@@ -102,6 +103,8 @@
+    if (screen->perfmon)
+       etna_perfmon_del(screen->perfmon);
+ 
++   etna_ml_shader_screen_fini(screen);
++
+    util_dynarray_fini(&screen->supported_pm_queries);
+ 
+    etna_shader_screen_fini(pscreen);
+diff -ruN -x '*.orig' step5/src/gallium/drivers/etnaviv/meson.build mesa-compute/src/gallium/drivers/etnaviv/meson.build
+--- step5/src/gallium/drivers/etnaviv/meson.build	2026-11-13 19:53:07.015575709 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/meson.build	2026-11-13 20:29:46.703143989 -0500
+@@ -34,6 +34,8 @@
+   'etnaviv_format.h',
+   'etnaviv_internal.h',
+   'etnaviv_ml.c',
++  'etnaviv_ml_shader.c',
++  'etnaviv_ml_shader.h',
+   'etnaviv_ml.h',
+   'etnaviv_ml_nn_v7.c',
+   'etnaviv_ml_nn_v8.c',

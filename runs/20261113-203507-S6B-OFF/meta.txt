@@ -1,0 +1,11 @@
+label: S6B-OFF
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite -r /home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 10 --save /home/jordan/alta-npu/runs/cs6b-203500/off_out.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T20:35:07-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1282
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8d27;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=c7c2166de;t=660328d760d65;x=9046c028dec26ac2
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-13T20:35:12-05:00  rc: 0  wall_s: 5

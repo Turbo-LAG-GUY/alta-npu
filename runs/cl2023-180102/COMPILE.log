@@ -1,0 +1,105 @@
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: copy
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = mov ssa_0.x
+	vec1 32 ssa_2 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_3 = intrinsic load_kernel_input (ssa_2) (base=0, range=8, align_mul=4, align_offset=0)
+	vec1 32 ssa_4 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_5 = intrinsic load_kernel_input (ssa_4) (base=0, range=8, align_mul=4, align_offset=0)
+	vec1 32 ssa_6 = load_const (0x00000002 = 0.000000)
+	vec1 32 ssa_7 = ishl ssa_1, ssa_6
+	vec1 32 ssa_8 = iadd ssa_5, ssa_7
+	vec1 32 ssa_9 = intrinsic load_global (ssa_8) (access=0, align_mul=4, align_offset=0, dest_type=uint32 /*36*/)
+	vec1 32 ssa_10 = iadd ssa_3, ssa_7
+	intrinsic store_global (ssa_9, ssa_10) (wrmask=x /*1*/, access=0, align_mul=4, align_offset=0, src_type=uint32 /*36*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: copy
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_2 = intrinsic load_uniform (ssa_1) (base=0, range=8, dest_type=float32 /*160*/)
+	vec1 32 ssa_3 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_4 = intrinsic load_uniform (ssa_3) (base=0, range=8, dest_type=float32 /*160*/)
+	vec1 32 ssa_5 = imul ssa_0.x, ssa_3
+	vec1 32 ssa_6 = iadd ssa_4, ssa_5
+	vec2 32 ssa_7 = vec2 ssa_6, ssa_1
+	vec1 32 ssa_8 = intrinsic load_global_ir3 (ssa_7, ssa_1) (access=0, align_mul=4, align_offset=0, dest_type=uint32 /*36*/)
+	vec1 32 ssa_9 = iadd ssa_2, ssa_5
+	vec2 32 ssa_10 = vec2 ssa_9, ssa_1
+	intrinsic store_global_ir3 (ssa_8, ssa_10, ssa_1) (access=0, align_mul=4, align_offset=0, src_type=uint32 /*36*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: copy
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_11 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_3 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_12 = load_const (0x00000010 = 0.000000)
+	vec1 32 ssa_5 = imul ssa_0.x, ssa_3
+	vec1 32 ssa_6 = iadd ssa_12, ssa_5
+	vec1 32 ssa_13 = mov ssa_1
+	vec2 32 ssa_7 = vec2 ssa_6, ssa_13
+	vec1 32 ssa_8 = intrinsic load_global_ir3 (ssa_7, ssa_1) (access=0, align_mul=4, align_offset=0, dest_type=uint32 /*36*/)
+	vec1 32 ssa_9 = iadd ssa_11, ssa_5
+	vec1 32 ssa_14 = mov ssa_1
+	vec2 32 ssa_10 = vec2 ssa_9, ssa_14
+	intrinsic store_global_ir3 (ssa_8, ssa_10, ssa_1) (access=0, align_mul=4, align_offset=0, src_type=uint32 /*36*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+compile only: nothing launched
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-180108-CL23-COMPILE

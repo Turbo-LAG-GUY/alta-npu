@@ -1,0 +1,99 @@
+DRM etnaviv 1.4
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: tgather
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32     %2 = mov %0.y
+    32     %3 = load_const (0x00000000)
+    32     %4 = @load_kernel_input (%3 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000004)
+    32     %6 = @load_kernel_input (%5 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %7 = load_const (0x00000008)
+    32     %8 = @load_kernel_input (%7 (0x8)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %9 = load_const (0x0000000c = 12)
+    32    %10 = @load_kernel_input (%9 (0xc)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %11 = load_const (0x00000002)
+    32    %12 = ishl %1, %11 (0x2)
+    32    %13 = imul %12, %8
+    32    %14 = iadd %13, %2
+    32    %15 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %16 = iand %14, %15 (0xfffffffc)
+    32    %17 = iadd %6, %16
+    32    %18 = @load_global (%17) (access=none, align_mul=4, align_offset=0)
+    32    %19 = load_const (0x00000003)
+    32    %20 = iand %14, %19 (0x3)
+    32    %21 = load_const (0x00000003)
+    32    %22 = ishl %20, %21 (0x3)
+    32    %23 = ushr %18, %22
+    32    %24 = load_const (0x000000ff = 255)
+    32    %25 = iand %23, %24 (0xff)
+    32    %26 = iadd %14, %8
+    32    %27 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %28 = iand %26, %27 (0xfffffffc)
+    32    %29 = iadd %6, %28
+    32    %30 = @load_global (%29) (access=none, align_mul=4, align_offset=0)
+    32    %31 = load_const (0x00000003)
+    32    %32 = iand %26, %31 (0x3)
+    32    %33 = load_const (0x00000003)
+    32    %34 = ishl %32, %33 (0x3)
+    32    %35 = ushr %30, %34
+    32    %36 = load_const (0x000000ff = 255)
+    32    %37 = iand %35, %36 (0xff)
+    32    %38 = load_const (0x00000008)
+    32    %39 = ishl %37, %38 (0x8)
+    32    %40 = ior %25, %39
+    32    %41 = iadd %26, %8
+    32    %42 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %43 = iand %41, %42 (0xfffffffc)
+    32    %44 = iadd %6, %43
+    32    %45 = @load_global (%44) (access=none, align_mul=4, align_offset=0)
+    32    %46 = load_const (0x00000003)
+    32    %47 = iand %41, %46 (0x3)
+    32    %48 = load_const (0x00000003)
+    32    %49 = ishl %47, %48 (0x3)
+    32    %50 = ushr %45, %49
+    32    %51 = load_const (0x000000ff = 255)
+    32    %52 = iand %50, %51 (0xff)
+    32    %53 = load_const (0x00000010 = 16)
+    32    %54 = ishl %52, %53 (0x10)
+    32    %55 = ior %40, %54
+    32    %56 = iadd %41, %8
+    32    %57 = load_const (0xfffffffc = -4 = 4294967292)
+    32    %58 = iand %56, %57 (0xfffffffc)
+    32    %59 = iadd %6, %58
+    32    %60 = @load_global (%59) (access=none, align_mul=4, align_offset=0)
+    32    %61 = load_const (0x00000003)
+    32    %62 = iand %56, %61 (0x3)
+    32    %63 = load_const (0x00000003)
+    32    %64 = ishl %62, %63 (0x3)
+    32    %65 = ushr %60, %64
+    32    %66 = load_const (0x000000ff = 255)
+    32    %67 = iand %65, %66 (0xff)
+    32    %68 = load_const (0x00000018 = 24)
+    32    %69 = ishl %67, %68 (0x18)
+    32    %70 = ior %55, %69
+    32    %71 = imul %2, %10
+    32    %72 = load_const (0x00000002)
+    32    %73 = ishl %1, %72 (0x2)
+    32    %74 = iadd %71, %73
+    32    %75 = iadd %4, %74
+                @store_global (%70, %75) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: tgather, shared 0 bytes per workgroup
+GPU addresses: out 0xffc7b000 in 0xff8fb000 (3211264 bytes each)
+grid: 2 dimension(s), 49 x 256 workgroups of 64 x 1 threads
+out[0..3]: 0x160f0801 0x322b241d 0x4e474039 0x6a635c55
+{"result": "PASS", "kernel": "tgather in", "threads": "3136 x 256", "workgroup": "64 x 1", "hwc": "112x112x256", "mismatched_words": 0, "untouched": 0, "first_mismatch": -1, "got": 0, "want": 0, "launch_to_done_ms": 48.005, "median_ms": 50.024, "launches": 10, "mb_per_s": 64.2}

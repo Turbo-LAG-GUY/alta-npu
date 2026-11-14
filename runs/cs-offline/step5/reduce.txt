@@ -1,0 +1,26 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+kernel: reduce, 65 instructions, num_temps 5 (driver programs 6), uniforms 20, shared 2048 bytes per workgroup, barriers yes
+  input t0: load_workgroup_id
+  input t1: load_global_invocation_id
+  input t2: load_local_invocation_id
+  u0.x: group_count 0x00000000
+  u0.y: group_count 0x00000001
+  u0.z: group_count 0x00000002
+  u0.w: constant    0x00000800
+  u1.x: shared_addr 0x00000000
+  u1.y: constant    0x00000004
+  u1.z: kernel_arg  offset 4 size 4
+  u1.w: constant    0x00000000
+  u2.x: constant    0x00000080
+  u2.y: constant    0x00000040
+  u2.z: constant    0x00000020
+  u2.w: constant    0x00000010
+  u3.x: constant    0x00000020
+  u3.y: constant    0x00000010
+  u3.z: constant    0x00000008
+  u3.w: constant    0x00000004
+  u4.x: constant    0x00000002
+  u4.y: kernel_arg  offset 0 size 4
+  u4.z: unused      0x00000000
+  u4.w: unused      0x00000000
+wrote /home/jordan/alta-npu/runs/cs-offline/step5/reduce.bin

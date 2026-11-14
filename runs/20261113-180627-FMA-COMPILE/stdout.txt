@@ -1,0 +1,589 @@
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: fma
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_2 = intrinsic load_uniform (ssa_1) (base=0, range=8, dest_type=float32 /*160*/)
+	vec1 32 ssa_3 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_4 = intrinsic load_uniform (ssa_3) (base=0, range=8, dest_type=float32 /*160*/)
+	vec1 32 ssa_5 = load_const (0x00000010 = 0.000000)
+	vec1 32 ssa_6 = imul ssa_0.x, ssa_5
+	vec1 32 ssa_7 = iadd ssa_4, ssa_6
+	vec2 32 ssa_8 = vec2 ssa_7, ssa_1
+	vec4 32 ssa_9 = intrinsic load_global_ir3 (ssa_8, ssa_1) (access=0, align_mul=4, align_offset=0, dest_type=float32 /*160*/)
+	vec1 32 ssa_10 = load_const (0x3f7fbe77 = 0.999000)
+	vec1 32 ssa_11 = load_const (0x3a83126f = 0.001000)
+	vec4 32 ssa_781 = ffma ssa_9, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_780 = ffma ssa_781, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_779 = ffma ssa_780, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_778 = ffma ssa_779, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_777 = ffma ssa_778, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_776 = ffma ssa_777, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_775 = ffma ssa_776, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_774 = ffma ssa_775, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_773 = ffma ssa_774, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_772 = ffma ssa_773, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_771 = ffma ssa_772, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_770 = ffma ssa_771, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_769 = ffma ssa_770, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_768 = ffma ssa_769, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_767 = ffma ssa_768, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_766 = ffma ssa_767, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_765 = ffma ssa_766, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_764 = ffma ssa_765, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_763 = ffma ssa_764, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_762 = ffma ssa_763, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_761 = ffma ssa_762, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_760 = ffma ssa_761, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_759 = ffma ssa_760, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_758 = ffma ssa_759, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_757 = ffma ssa_758, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_756 = ffma ssa_757, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_755 = ffma ssa_756, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_754 = ffma ssa_755, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_753 = ffma ssa_754, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_752 = ffma ssa_753, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_751 = ffma ssa_752, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_750 = ffma ssa_751, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_749 = ffma ssa_750, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_748 = ffma ssa_749, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_747 = ffma ssa_748, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_746 = ffma ssa_747, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_745 = ffma ssa_746, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_744 = ffma ssa_745, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_743 = ffma ssa_744, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_742 = ffma ssa_743, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_741 = ffma ssa_742, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_740 = ffma ssa_741, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_739 = ffma ssa_740, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_738 = ffma ssa_739, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_737 = ffma ssa_738, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_736 = ffma ssa_737, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_735 = ffma ssa_736, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_734 = ffma ssa_735, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_733 = ffma ssa_734, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_732 = ffma ssa_733, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_731 = ffma ssa_732, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_730 = ffma ssa_731, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_729 = ffma ssa_730, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_728 = ffma ssa_729, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_727 = ffma ssa_728, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_726 = ffma ssa_727, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_725 = ffma ssa_726, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_724 = ffma ssa_725, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_723 = ffma ssa_724, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_722 = ffma ssa_723, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_721 = ffma ssa_722, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_720 = ffma ssa_721, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_719 = ffma ssa_720, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_718 = ffma ssa_719, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_717 = ffma ssa_718, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_716 = ffma ssa_717, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_715 = ffma ssa_716, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_714 = ffma ssa_715, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_713 = ffma ssa_714, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_712 = ffma ssa_713, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_711 = ffma ssa_712, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_710 = ffma ssa_711, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_709 = ffma ssa_710, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_708 = ffma ssa_709, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_707 = ffma ssa_708, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_706 = ffma ssa_707, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_705 = ffma ssa_706, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_704 = ffma ssa_705, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_703 = ffma ssa_704, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_702 = ffma ssa_703, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_701 = ffma ssa_702, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_700 = ffma ssa_701, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_699 = ffma ssa_700, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_698 = ffma ssa_699, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_697 = ffma ssa_698, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_696 = ffma ssa_697, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_695 = ffma ssa_696, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_694 = ffma ssa_695, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_693 = ffma ssa_694, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_692 = ffma ssa_693, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_691 = ffma ssa_692, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_690 = ffma ssa_691, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_689 = ffma ssa_690, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_688 = ffma ssa_689, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_687 = ffma ssa_688, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_686 = ffma ssa_687, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_685 = ffma ssa_686, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_684 = ffma ssa_685, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_683 = ffma ssa_684, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_682 = ffma ssa_683, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_681 = ffma ssa_682, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_680 = ffma ssa_681, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_679 = ffma ssa_680, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_678 = ffma ssa_679, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_677 = ffma ssa_678, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_676 = ffma ssa_677, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_675 = ffma ssa_676, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_674 = ffma ssa_675, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_673 = ffma ssa_674, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_672 = ffma ssa_673, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_671 = ffma ssa_672, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_670 = ffma ssa_671, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_669 = ffma ssa_670, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_668 = ffma ssa_669, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_667 = ffma ssa_668, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_666 = ffma ssa_667, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_665 = ffma ssa_666, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_664 = ffma ssa_665, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_663 = ffma ssa_664, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_662 = ffma ssa_663, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_661 = ffma ssa_662, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_660 = ffma ssa_661, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_659 = ffma ssa_660, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_658 = ffma ssa_659, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_657 = ffma ssa_658, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_656 = ffma ssa_657, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_655 = ffma ssa_656, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_654 = ffma ssa_655, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_653 = ffma ssa_654, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_652 = ffma ssa_653, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_651 = ffma ssa_652, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_650 = ffma ssa_651, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_649 = ffma ssa_650, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_648 = ffma ssa_649, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_647 = ffma ssa_648, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_646 = ffma ssa_647, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_645 = ffma ssa_646, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_644 = ffma ssa_645, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_643 = ffma ssa_644, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_642 = ffma ssa_643, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_641 = ffma ssa_642, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_640 = ffma ssa_641, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_639 = ffma ssa_640, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_638 = ffma ssa_639, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_637 = ffma ssa_638, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_636 = ffma ssa_637, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_635 = ffma ssa_636, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_634 = ffma ssa_635, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_633 = ffma ssa_634, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_632 = ffma ssa_633, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_631 = ffma ssa_632, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_630 = ffma ssa_631, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_629 = ffma ssa_630, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_628 = ffma ssa_629, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_627 = ffma ssa_628, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_626 = ffma ssa_627, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_625 = ffma ssa_626, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_624 = ffma ssa_625, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_623 = ffma ssa_624, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_622 = ffma ssa_623, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_621 = ffma ssa_622, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_620 = ffma ssa_621, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_619 = ffma ssa_620, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_618 = ffma ssa_619, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_617 = ffma ssa_618, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_616 = ffma ssa_617, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_615 = ffma ssa_616, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_614 = ffma ssa_615, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_613 = ffma ssa_614, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_612 = ffma ssa_613, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_611 = ffma ssa_612, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_610 = ffma ssa_611, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_609 = ffma ssa_610, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_608 = ffma ssa_609, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_607 = ffma ssa_608, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_606 = ffma ssa_607, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_605 = ffma ssa_606, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_604 = ffma ssa_605, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_603 = ffma ssa_604, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_602 = ffma ssa_603, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_601 = ffma ssa_602, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_600 = ffma ssa_601, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_599 = ffma ssa_600, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_598 = ffma ssa_599, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_597 = ffma ssa_598, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_596 = ffma ssa_597, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_595 = ffma ssa_596, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_594 = ffma ssa_595, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_593 = ffma ssa_594, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_592 = ffma ssa_593, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_591 = ffma ssa_592, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_590 = ffma ssa_591, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_589 = ffma ssa_590, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_588 = ffma ssa_589, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_587 = ffma ssa_588, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_586 = ffma ssa_587, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_585 = ffma ssa_586, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_584 = ffma ssa_585, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_583 = ffma ssa_584, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_582 = ffma ssa_583, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_581 = ffma ssa_582, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_580 = ffma ssa_581, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_579 = ffma ssa_580, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_578 = ffma ssa_579, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_577 = ffma ssa_578, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_576 = ffma ssa_577, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_575 = ffma ssa_576, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_574 = ffma ssa_575, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_573 = ffma ssa_574, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_572 = ffma ssa_573, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_571 = ffma ssa_572, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_570 = ffma ssa_571, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_569 = ffma ssa_570, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_568 = ffma ssa_569, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_567 = ffma ssa_568, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_566 = ffma ssa_567, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_565 = ffma ssa_566, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_564 = ffma ssa_565, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_563 = ffma ssa_564, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_562 = ffma ssa_563, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_561 = ffma ssa_562, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_560 = ffma ssa_561, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_559 = ffma ssa_560, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_558 = ffma ssa_559, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_557 = ffma ssa_558, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_556 = ffma ssa_557, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_555 = ffma ssa_556, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_554 = ffma ssa_555, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_553 = ffma ssa_554, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_552 = ffma ssa_553, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_551 = ffma ssa_552, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_550 = ffma ssa_551, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_549 = ffma ssa_550, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_548 = ffma ssa_549, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_547 = ffma ssa_548, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_546 = ffma ssa_547, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_545 = ffma ssa_546, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_544 = ffma ssa_545, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_543 = ffma ssa_544, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_542 = ffma ssa_543, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_541 = ffma ssa_542, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_540 = ffma ssa_541, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_539 = ffma ssa_540, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_538 = ffma ssa_539, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_537 = ffma ssa_538, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_536 = ffma ssa_537, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_535 = ffma ssa_536, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_534 = ffma ssa_535, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_533 = ffma ssa_534, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_532 = ffma ssa_533, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_531 = ffma ssa_532, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_530 = ffma ssa_531, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_529 = ffma ssa_530, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_528 = ffma ssa_529, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_527 = ffma ssa_528, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_526 = ffma ssa_527, ssa_10.xxxx, ssa_11.xxxx
+	vec1 32 ssa_524 = iadd ssa_2, ssa_6
+	vec2 32 ssa_525 = vec2 ssa_524, ssa_1
+	intrinsic store_global_ir3 (ssa_526, ssa_525, ssa_1) (access=0, align_mul=4, align_offset=0, src_type=float32 /*160*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: fma
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_782 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_3 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_783 = load_const (0x00000010 = 0.000000)
+	vec1 32 ssa_5 = load_const (0x00000010 = 0.000000)
+	vec1 32 ssa_6 = imul ssa_0.x, ssa_5
+	vec1 32 ssa_7 = iadd ssa_783, ssa_6
+	vec1 32 ssa_784 = mov ssa_1
+	vec2 32 ssa_8 = vec2 ssa_7, ssa_784
+	vec4 32 ssa_9 = intrinsic load_global_ir3 (ssa_8, ssa_1) (access=0, align_mul=4, align_offset=0, dest_type=float32 /*160*/)
+	vec1 32 ssa_10 = load_const (0x3f7fbe77 = 0.999000)
+	vec1 32 ssa_11 = load_const (0x3a83126f = 0.001000)
+	vec4 32 ssa_781 = ffma ssa_9, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_780 = ffma ssa_781, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_779 = ffma ssa_780, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_778 = ffma ssa_779, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_777 = ffma ssa_778, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_776 = ffma ssa_777, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_775 = ffma ssa_776, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_774 = ffma ssa_775, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_773 = ffma ssa_774, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_772 = ffma ssa_773, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_771 = ffma ssa_772, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_770 = ffma ssa_771, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_769 = ffma ssa_770, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_768 = ffma ssa_769, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_767 = ffma ssa_768, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_766 = ffma ssa_767, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_765 = ffma ssa_766, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_764 = ffma ssa_765, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_763 = ffma ssa_764, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_762 = ffma ssa_763, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_761 = ffma ssa_762, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_760 = ffma ssa_761, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_759 = ffma ssa_760, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_758 = ffma ssa_759, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_757 = ffma ssa_758, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_756 = ffma ssa_757, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_755 = ffma ssa_756, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_754 = ffma ssa_755, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_753 = ffma ssa_754, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_752 = ffma ssa_753, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_751 = ffma ssa_752, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_750 = ffma ssa_751, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_749 = ffma ssa_750, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_748 = ffma ssa_749, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_747 = ffma ssa_748, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_746 = ffma ssa_747, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_745 = ffma ssa_746, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_744 = ffma ssa_745, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_743 = ffma ssa_744, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_742 = ffma ssa_743, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_741 = ffma ssa_742, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_740 = ffma ssa_741, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_739 = ffma ssa_740, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_738 = ffma ssa_739, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_737 = ffma ssa_738, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_736 = ffma ssa_737, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_735 = ffma ssa_736, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_734 = ffma ssa_735, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_733 = ffma ssa_734, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_732 = ffma ssa_733, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_731 = ffma ssa_732, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_730 = ffma ssa_731, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_729 = ffma ssa_730, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_728 = ffma ssa_729, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_727 = ffma ssa_728, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_726 = ffma ssa_727, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_725 = ffma ssa_726, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_724 = ffma ssa_725, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_723 = ffma ssa_724, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_722 = ffma ssa_723, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_721 = ffma ssa_722, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_720 = ffma ssa_721, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_719 = ffma ssa_720, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_718 = ffma ssa_719, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_717 = ffma ssa_718, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_716 = ffma ssa_717, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_715 = ffma ssa_716, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_714 = ffma ssa_715, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_713 = ffma ssa_714, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_712 = ffma ssa_713, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_711 = ffma ssa_712, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_710 = ffma ssa_711, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_709 = ffma ssa_710, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_708 = ffma ssa_709, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_707 = ffma ssa_708, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_706 = ffma ssa_707, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_705 = ffma ssa_706, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_704 = ffma ssa_705, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_703 = ffma ssa_704, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_702 = ffma ssa_703, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_701 = ffma ssa_702, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_700 = ffma ssa_701, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_699 = ffma ssa_700, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_698 = ffma ssa_699, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_697 = ffma ssa_698, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_696 = ffma ssa_697, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_695 = ffma ssa_696, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_694 = ffma ssa_695, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_693 = ffma ssa_694, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_692 = ffma ssa_693, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_691 = ffma ssa_692, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_690 = ffma ssa_691, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_689 = ffma ssa_690, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_688 = ffma ssa_689, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_687 = ffma ssa_688, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_686 = ffma ssa_687, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_685 = ffma ssa_686, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_684 = ffma ssa_685, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_683 = ffma ssa_684, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_682 = ffma ssa_683, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_681 = ffma ssa_682, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_680 = ffma ssa_681, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_679 = ffma ssa_680, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_678 = ffma ssa_679, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_677 = ffma ssa_678, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_676 = ffma ssa_677, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_675 = ffma ssa_676, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_674 = ffma ssa_675, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_673 = ffma ssa_674, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_672 = ffma ssa_673, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_671 = ffma ssa_672, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_670 = ffma ssa_671, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_669 = ffma ssa_670, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_668 = ffma ssa_669, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_667 = ffma ssa_668, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_666 = ffma ssa_667, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_665 = ffma ssa_666, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_664 = ffma ssa_665, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_663 = ffma ssa_664, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_662 = ffma ssa_663, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_661 = ffma ssa_662, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_660 = ffma ssa_661, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_659 = ffma ssa_660, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_658 = ffma ssa_659, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_657 = ffma ssa_658, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_656 = ffma ssa_657, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_655 = ffma ssa_656, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_654 = ffma ssa_655, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_653 = ffma ssa_654, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_652 = ffma ssa_653, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_651 = ffma ssa_652, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_650 = ffma ssa_651, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_649 = ffma ssa_650, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_648 = ffma ssa_649, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_647 = ffma ssa_648, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_646 = ffma ssa_647, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_645 = ffma ssa_646, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_644 = ffma ssa_645, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_643 = ffma ssa_644, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_642 = ffma ssa_643, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_641 = ffma ssa_642, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_640 = ffma ssa_641, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_639 = ffma ssa_640, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_638 = ffma ssa_639, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_637 = ffma ssa_638, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_636 = ffma ssa_637, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_635 = ffma ssa_636, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_634 = ffma ssa_635, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_633 = ffma ssa_634, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_632 = ffma ssa_633, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_631 = ffma ssa_632, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_630 = ffma ssa_631, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_629 = ffma ssa_630, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_628 = ffma ssa_629, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_627 = ffma ssa_628, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_626 = ffma ssa_627, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_625 = ffma ssa_626, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_624 = ffma ssa_625, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_623 = ffma ssa_624, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_622 = ffma ssa_623, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_621 = ffma ssa_622, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_620 = ffma ssa_621, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_619 = ffma ssa_620, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_618 = ffma ssa_619, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_617 = ffma ssa_618, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_616 = ffma ssa_617, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_615 = ffma ssa_616, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_614 = ffma ssa_615, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_613 = ffma ssa_614, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_612 = ffma ssa_613, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_611 = ffma ssa_612, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_610 = ffma ssa_611, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_609 = ffma ssa_610, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_608 = ffma ssa_609, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_607 = ffma ssa_608, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_606 = ffma ssa_607, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_605 = ffma ssa_606, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_604 = ffma ssa_605, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_603 = ffma ssa_604, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_602 = ffma ssa_603, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_601 = ffma ssa_602, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_600 = ffma ssa_601, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_599 = ffma ssa_600, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_598 = ffma ssa_599, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_597 = ffma ssa_598, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_596 = ffma ssa_597, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_595 = ffma ssa_596, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_594 = ffma ssa_595, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_593 = ffma ssa_594, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_592 = ffma ssa_593, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_591 = ffma ssa_592, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_590 = ffma ssa_591, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_589 = ffma ssa_590, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_588 = ffma ssa_589, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_587 = ffma ssa_588, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_586 = ffma ssa_587, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_585 = ffma ssa_586, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_584 = ffma ssa_585, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_583 = ffma ssa_584, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_582 = ffma ssa_583, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_581 = ffma ssa_582, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_580 = ffma ssa_581, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_579 = ffma ssa_580, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_578 = ffma ssa_579, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_577 = ffma ssa_578, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_576 = ffma ssa_577, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_575 = ffma ssa_576, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_574 = ffma ssa_575, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_573 = ffma ssa_574, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_572 = ffma ssa_573, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_571 = ffma ssa_572, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_570 = ffma ssa_571, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_569 = ffma ssa_570, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_568 = ffma ssa_569, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_567 = ffma ssa_568, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_566 = ffma ssa_567, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_565 = ffma ssa_566, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_564 = ffma ssa_565, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_563 = ffma ssa_564, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_562 = ffma ssa_563, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_561 = ffma ssa_562, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_560 = ffma ssa_561, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_559 = ffma ssa_560, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_558 = ffma ssa_559, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_557 = ffma ssa_558, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_556 = ffma ssa_557, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_555 = ffma ssa_556, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_554 = ffma ssa_555, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_553 = ffma ssa_554, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_552 = ffma ssa_553, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_551 = ffma ssa_552, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_550 = ffma ssa_551, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_549 = ffma ssa_550, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_548 = ffma ssa_549, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_547 = ffma ssa_548, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_546 = ffma ssa_547, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_545 = ffma ssa_546, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_544 = ffma ssa_545, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_543 = ffma ssa_544, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_542 = ffma ssa_543, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_541 = ffma ssa_542, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_540 = ffma ssa_541, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_539 = ffma ssa_540, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_538 = ffma ssa_539, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_537 = ffma ssa_538, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_536 = ffma ssa_537, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_535 = ffma ssa_536, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_534 = ffma ssa_535, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_533 = ffma ssa_534, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_532 = ffma ssa_533, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_531 = ffma ssa_532, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_530 = ffma ssa_531, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_529 = ffma ssa_530, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_528 = ffma ssa_529, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_527 = ffma ssa_528, ssa_10.xxxx, ssa_11.xxxx
+	vec4 32 ssa_526 = ffma ssa_527, ssa_10.xxxx, ssa_11.xxxx
+	vec1 32 ssa_524 = iadd ssa_782, ssa_6
+	vec1 32 ssa_785 = mov ssa_1
+	vec2 32 ssa_525 = vec2 ssa_524, ssa_785
+	intrinsic store_global_ir3 (ssa_526, ssa_525, ssa_1) (access=0, align_mul=4, align_offset=0, src_type=float32 /*160*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+compile only: nothing launched

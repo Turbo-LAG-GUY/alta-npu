@@ -1,0 +1,5 @@
+# pipe 0 exec_state 0 flags 0x8 nr_bos 3 nr_relocs 0 nr_pmrs 0 stream_size 464
+# index handle flags va size
+0 3 0x3 0xffff9000 0x2000
+1 4 0x3 0xffff7000 0x2000
+2 6 0x1 0xffef6000 0x1000

@@ -1,0 +1,24 @@
+000 [0400103c 00000800 40000040 00000002] imullo0.s32.pack  t0.___w, t0.xxxx, u0.xxxx, void
+001 [0080103c 00000800 40aa0040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.yyyy, void
+002 [01001001 2a800800 40000010 003fc008] add.s32.pack      t0._y__, u0.zzzz, void, t0.wwww
+003 [02001032 15600c04 81fe0040 00000002] load.denorm.u32   t0.__z_, t0.yyyy, u0.wwww, void
+004 [0100101d 2a800800 40010000 20000018] and.s32.pack      t0._y__, t0.zzzz, void, u1.xxxx
+005 [0100102d 15600804 80000000 00000000] i2f.u32           t0._y__, t0.yyyy, void, void
+006 [03811003 15400800 007200c0 00000002] mul.pack          t1.xyz_, t0.yyyy, u1.yzwx, void
+007 [06001001 10001800 00000000 20100028] add.pack          t0.__zw, t1.xxxy, void, u2.xxxy
+008 [01821001 15400800 00000000 20038028] add.pack          t2.xy__, t0.yyyy, void, u2.zwxx
+009 [0401100c 00000000 00000000 00000028] rcp.pack          t1.___w, void, void, t2.xxxx
+010 [0082100c 00000000 00000000 00154028] rcp.pack          t2.x___, void, void, t2.yyyy
+011 [00831011 00000000 00000000 002a8008] exp.pack          t3.x___, void, void, t0.zzzz
+012 [01021003 2a800800 000001c0 00000002] mul.pack          t2._y__, t0.zzzz, u3.xxxx, void
+013 [01031011 00000000 00000000 00154028] exp.pack          t3._y__, void, void, t2.yyyy
+014 [04031003 15400800 00000140 00000000] mul.pack          t3.___w, t0.yyyy, t2.xxxx, void
+015 [02031009 00000000 00000000 003fc018] mov.pack          t3.__z_, void, void, t1.wwww
+016 [0082108f 2a800800 00aa01c0 002a800a] select.lt.pack    t2.x___, t0.zzzz, u3.yyyy, t0.zzzz
+017 [0102102e 3fe00804 80000000 00000000] f2i.u32           t2._y__, t0.wwww, void, void
+018 [02021025 00000000 00000000 002a8018] floor.pack        t2.__z_, void, void, t1.zzzz
+019 [0402104f 3fc01800 00aa0140 003fc01a] select.gt.pack    t2.___w, t1.wwww, u2.yyyy, t1.wwww
+020 [00801001 2a803800 40000010 00000008] add.s32.pack      t0.x___, u3.zzzz, void, t0.xxxx
+021 [07840033 00200c04 81fe0040 0039003a] store.denorm.u32  mem, t0.xxxx, u0.wwww, t3.xyzw	; dontcare bits in 
+022 [01001001 00000800 40000000 203fc038] add.s32.pack      t0._y__, t0.xxxx, void, u3.wwww
+023 [07840033 15600c04 81fe0040 0039002a] store.denorm.u32  mem, t0.yyyy, u0.wwww, t2.xyzw	; dontcare bits in 

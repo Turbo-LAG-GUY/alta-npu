@@ -1,0 +1,48 @@
+000 [0400103c 00000800 40000040 00000002] imullo0.s32.pack  t0.___w, t0.xxxx, u0.xxxx, void
+001 [0081103c 15400800 40aa0040 00000002] imullo0.s32.pack  t1.x___, t0.yyyy, u0.yyyy, void
+002 [04001001 3fc00800 40000000 00000018] add.s32.pack      t0.___w, t0.wwww, void, t1.xxxx
+003 [04001001 2a800800 40000010 003fc008] add.s32.pack      t0.___w, u0.zzzz, void, t0.wwww
+004 [0081103c 00000800 41fe0040 00000002] imullo0.s32.pack  t1.x___, t0.xxxx, u0.wwww, void
+005 [0080103c 15400800 400000c0 00000002] imullo0.s32.pack  t0.x___, t0.yyyy, u1.xxxx, void
+006 [00801001 00001800 40000000 00000008] add.s32.pack      t0.x___, t1.xxxx, void, t0.xxxx
+007 [00801001 15401800 40000010 00000008] add.s32.pack      t0.x___, u1.yyyy, void, t0.xxxx
+008 [01001032 3fe00c04 815400c0 00000002] load.denorm.u32   t0._y__, t0.wwww, u1.zzzz, void
+009 [02001001 3fc00800 40000000 203fc018] add.s32.pack      t0.__z_, t0.wwww, void, u1.wwww
+010 [04001032 2aa00c04 815400c0 00000002] load.denorm.u32   t0.___w, t0.zzzz, u1.zzzz, void
+011 [02001001 2a800800 40000000 203fc018] add.s32.pack      t0.__z_, t0.zzzz, void, u1.wwww
+012 [00811032 2aa00c04 815400c0 00000002] load.denorm.u32   t1.x___, t0.zzzz, u1.zzzz, void
+013 [02001001 2a800800 40000000 203fc018] add.s32.pack      t0.__z_, t0.zzzz, void, u1.wwww
+014 [01011032 2aa00c04 815400c0 00000002] load.denorm.u32   t1._y__, t0.zzzz, u1.zzzz, void
+015 [0200101d 15400800 40010000 20000028] and.s32.pack      t0.__z_, t0.yyyy, void, u2.xxxx
+016 [0601101d 3fc00800 40010000 20100028] and.s32.pack      t1.__zw, t0.wwww, void, u2.xxxy
+017 [0400103c 2a801800 41540140 00000002] imullo0.s32.pack  t0.___w, t1.zzzz, u2.zzzz, void
+018 [0200101c 2a800800 40010000 003fc008] or.s32.pack       t0.__z_, t0.zzzz, void, t0.wwww
+019 [0100101a 15600800 80010000 203fc028] rshift.u32.pack   t0._y__, t0.yyyy, void, u2.wwww
+020 [0100101d 15400800 40010000 20000028] and.s32.pack      t0._y__, t0.yyyy, void, u2.xxxx
+021 [0100101c 15400800 40010000 003fc018] or.s32.pack       t0._y__, t0.yyyy, void, t1.wwww
+022 [0400101d 00001800 40010000 20000028] and.s32.pack      t0.___w, t1.xxxx, void, u2.xxxx
+023 [0301101d 15401800 40010000 20140028] and.s32.pack      t1.zy, t1.yyyy, void, u2.xxyy
+024 [0401103c 15401800 41540140 00000002] imullo0.s32.pack  t1.___w, t1.yyyy, u2.zzzz, void
+025 [0400101c 3fc00800 40010000 003fc018] or.s32.pack       t0.___w, t0.wwww, void, t1.wwww
+026 [0081101a 00201800 80010000 203fc028] rshift.u32.pack   t1.x___, t1.xxxx, void, u2.wwww
+027 [0081101d 00001800 40010000 20000028] and.s32.pack      t1.x___, t1.xxxx, void, u2.xxxx
+028 [0081101c 00001800 40010000 00158018] or.s32.pack       t1.x___, t1.xxxx, void, t1.zyyy
+029 [0101101d 2a800800 40010000 20000038] and.s32.pack      t1._y__, t0.zzzz, void, u3.xxxx
+030 [0201103c 3fc00800 40aa01c0 00000002] imullo0.s32.pack  t1.__z_, t0.wwww, u3.yyyy, void
+031 [0101101c 15401800 40010000 002a8018] or.s32.pack       t1._y__, t1.yyyy, void, t1.zzzz
+032 [0201101d 15400800 40010000 20000038] and.s32.pack      t1.__z_, t0.yyyy, void, u3.xxxx
+033 [0401103c 00001800 40aa01c0 00000002] imullo0.s32.pack  t1.___w, t1.xxxx, u3.yyyy, void
+034 [0201101c 2a801800 40010000 003fc018] or.s32.pack       t1.__z_, t1.zzzz, void, t1.wwww
+035 [0200101a 2aa00800 80010000 202a8038] rshift.u32.pack   t0.__z_, t0.zzzz, void, u3.zzzz
+036 [0400101d 3fc00800 40010000 203fc038] and.s32.pack      t0.___w, t0.wwww, void, u3.wwww
+037 [0200101c 2a800800 40010000 003fc008] or.s32.pack       t0.__z_, t0.zzzz, void, t0.wwww
+038 [0100101a 15600800 80010000 202a8038] rshift.u32.pack   t0._y__, t0.yyyy, void, u3.zzzz
+039 [0400101d 00001800 40010000 203fc038] and.s32.pack      t0.___w, t1.xxxx, void, u3.wwww
+040 [0100101c 15400800 40010000 003fc008] or.s32.pack       t0._y__, t0.yyyy, void, t0.wwww
+041 [00820033 00200c04 815400c0 0000401a] store.denorm.u32  mem.x___, t0.xxxx, u1.zzzz, t1.yxxx	; dontcare bits in store: 00000000000000000000000000020000
+042 [04001001 00000800 40000000 20000048] add.s32.pack      t0.___w, t0.xxxx, void, u4.xxxx
+043 [00820033 3fe00c04 815400c0 0000801a] store.denorm.u32  mem.x___, t0.wwww, u1.zzzz, t1.zxxx	; dontcare bits in store: 00000000000000000000000000020000
+044 [00811001 3fc00800 40000000 20000048] add.s32.pack      t1.x___, t0.wwww, void, u4.xxxx
+045 [00820033 00201c04 815400c0 0000800a] store.denorm.u32  mem.x___, t1.xxxx, u1.zzzz, t0.zxxx	; dontcare bits in store: 00000000000000000000000000020000
+046 [04011001 00001800 40000000 20000048] add.s32.pack      t1.___w, t1.xxxx, void, u4.xxxx
+047 [00820033 3fe01c04 815400c0 0000400a] store.denorm.u32  mem.x___, t1.wwww, u1.zzzz, t0.yxxx	; dontcare bits in store: 00000000000000000000000000020000

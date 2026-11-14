@@ -1,0 +1,21 @@
+diff --git a/src/gallium/drivers/etnaviv/meson.build b/src/gallium/drivers/etnaviv/meson.build
+index d6d43c1b441..3ccbd3a16f3 100644
+--- a/src/gallium/drivers/etnaviv/meson.build
++++ b/src/gallium/drivers/etnaviv/meson.build
+@@ -41,6 +41,7 @@ files_etnaviv = files(
+   'etnaviv_compiler_nir_emit.c',
+   'etnaviv_compiler_nir_liveness.c',
+   'etnaviv_compiler_nir_ra.c',
++  'etnaviv_compute.c',
+   'etnaviv_context.c',
+   'etnaviv_context.h',
+   'etnaviv_debug.h',
+@@ -58,6 +59,8 @@ files_etnaviv = files(
+   'etnaviv_format.h',
+   'etnaviv_internal.h',
+   'etnaviv_nir_lower_ubo_to_uniform.c',
++  'etnaviv_nir_lower_global.c',
++  'etnaviv_nir_lower_64b.c',
+   'etnaviv_nir.c',
+   'etnaviv_nir.h',
+   'etnaviv_perfmon.c',

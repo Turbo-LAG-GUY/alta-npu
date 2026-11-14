@@ -1,0 +1,11 @@
+label: PLANAR16-540p
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/npu_detail_test.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_reference_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap -n 20
+cwd: /home/jordan/alta-npu
+start: 2026-11-12T09:37:59-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1454
+deadline_s: 120
+journal_cursor: s=34e9d89724f14199ba3108e469c360c3;i=efa14;b=46d8402b9c78431a93b36209e5da1d3c;m=dd12af216;t=660153d93799a;x=2291765b916a94cd
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-12T09:38:02-05:00  rc: 0  wall_s: 3

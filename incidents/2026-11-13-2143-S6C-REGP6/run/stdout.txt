@@ -1,0 +1,117 @@
+DRM etnaviv 1.4
+/dev/dri/renderD129: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: regp
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+shared_size: 2048
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32x3   %2 = @load_local_invocation_id
+    32     %3 = mov %2.x
+    32     %4 = load_const (0x00000000)
+    32     %5 = @load_kernel_input (%4 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000004)
+    32     %7 = @load_kernel_input (%6 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %8 = load_const (0x00000008)
+    32     %9 = @load_kernel_input (%8 (0x8)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %10 = load_const (0x0000000c = 12)
+    32    %11 = @load_kernel_input (%10 (0xc)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %12 = load_const (0x00000002)
+    32    %13 = ishl %1, %12 (0x2)
+    32    %14 = load_const (0x00000060 = 96)
+    32    %15 = imul %1, %14 (0x60)
+    32    %16 = iadd %9, %15
+    32    %17 = iadd %7, %16
+    32x4  %18 = @load_global (%17) (access=none, align_mul=16, align_offset=0)
+    32    %19 = load_const (0x00000010 = 16)
+    32    %20 = iadd %17, %19 (0x10)
+    32x4  %21 = @load_global (%20) (access=none, align_mul=16, align_offset=0)
+    32    %22 = load_const (0x00000020 = 32)
+    32    %23 = iadd %17, %22 (0x20)
+    32x4  %24 = @load_global (%23) (access=none, align_mul=16, align_offset=0)
+    32    %25 = load_const (0x00000030 = 48)
+    32    %26 = iadd %17, %25 (0x30)
+    32x4  %27 = @load_global (%26) (access=none, align_mul=16, align_offset=0)
+    32    %28 = load_const (0x00000040 = 64)
+    32    %29 = iadd %17, %28 (0x40)
+    32x4  %30 = @load_global (%29) (access=none, align_mul=16, align_offset=0)
+    32    %31 = load_const (0x00000050 = 80)
+    32    %32 = iadd %17, %31 (0x50)
+    32x4  %33 = @load_global (%32) (access=none, align_mul=16, align_offset=0)
+    32    %34 = iadd %7, %13
+    32    %35 = @load_global (%34) (access=none, align_mul=4, align_offset=0)
+    32    %36 = load_const (0x00000002)
+    32    %37 = ishl %3, %36 (0x2)
+                @store_shared (%35, %37) (base=0, access=none, wrmask=x, align_mul=4, align_offset=0)
+                @barrier (execution_scope=WORKGROUP, memory_scope=WORKGROUP, mem_semantics=ACQ|REL, mem_modes=shared)
+    32    %38 = isub %11, %3
+    32    %39 = load_const (0x00000002)
+    32    %40 = ishl %38, %39 (0x2)
+    32    %41 = @load_shared (%40) (base=0, access=none, align_mul=4, align_offset=0)
+    32    %42 = mov %18.x
+    32    %43 = mov %18.y
+    32    %44 = iadd %42, %43
+    32    %45 = mov %18.z
+    32    %46 = mov %18.w
+    32    %47 = iadd %45, %46
+    32    %48 = iadd %44, %47
+    32    %49 = iadd %41, %48
+    32    %50 = mov %21.x
+    32    %51 = mov %21.y
+    32    %52 = iadd %50, %51
+    32    %53 = mov %21.z
+    32    %54 = mov %21.w
+    32    %55 = iadd %53, %54
+    32    %56 = iadd %52, %55
+    32    %57 = iadd %49, %56
+    32    %58 = mov %24.x
+    32    %59 = mov %24.y
+    32    %60 = iadd %58, %59
+    32    %61 = mov %24.z
+    32    %62 = mov %24.w
+    32    %63 = iadd %61, %62
+    32    %64 = iadd %60, %63
+    32    %65 = iadd %57, %64
+    32    %66 = mov %27.x
+    32    %67 = mov %27.y
+    32    %68 = iadd %66, %67
+    32    %69 = mov %27.z
+    32    %70 = mov %27.w
+    32    %71 = iadd %69, %70
+    32    %72 = iadd %68, %71
+    32    %73 = iadd %65, %72
+    32    %74 = mov %30.x
+    32    %75 = mov %30.y
+    32    %76 = iadd %74, %75
+    32    %77 = mov %30.z
+    32    %78 = mov %30.w
+    32    %79 = iadd %77, %78
+    32    %80 = iadd %76, %79
+    32    %81 = iadd %73, %80
+    32    %82 = mov %33.x
+    32    %83 = mov %33.y
+    32    %84 = iadd %82, %83
+    32    %85 = mov %33.z
+    32    %86 = mov %33.w
+    32    %87 = iadd %85, %86
+    32    %88 = iadd %84, %87
+    32    %89 = iadd %81, %88
+    32    %90 = iadd %5, %13
+                @store_global (%89, %90) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: regp6, shared 2048 bytes per workgroup
+GPU addresses: out 0xffff4000 in 0xfffed000 (25600 bytes each)
+grid: 1 dimension(s), 4 x 1 workgroups of 64 x 1 threads
+out[0..3]: 0xdeadbeef 0xdeadbeef 0xdeadbeef 0xdeadbeef
+{"result": "MISMATCH", "kernel": "regp6", "threads": "256 x 1", "workgroup": "64 x 1", "hwc": "0x0x0", "mismatched_words": 256, "untouched": 256, "first_mismatch": 0, "got": 3735928559, "want": 45406, "launch_to_done_ms": 1055.811, "median_ms": 1055.811, "launches": 1, "mb_per_s": 0.0}

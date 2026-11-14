@@ -1,0 +1,84 @@
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: fma
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = load_const (0x00000000)
+    32     %2 = @load_kernel_input (%1 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %3 = load_const (0x00000004)
+    32     %4 = @load_kernel_input (%3 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %5 = load_const (0x00000010 = 16)
+    32     %6 = imul %0.x, %5 (0x10)
+    32     %7 = iadd %4, %6
+    32x4   %8 = @load_global (%7) (access=none, align_mul=16, align_offset=0)
+    32     %9 = load_const (0x3f7fbe77 = 0.999000)
+    32    %10 = load_const (0x3a83126f = 0.001000)
+    32x4  %11 = ffma %8, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %12 = ffma %11, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %13 = ffma %12, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %14 = ffma %13, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %15 = ffma %14, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %16 = ffma %15, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %17 = ffma %16, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %18 = ffma %17, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %19 = ffma %18, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %20 = ffma %19, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %21 = ffma %20, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %22 = ffma %21, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %23 = ffma %22, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %24 = ffma %23, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %25 = ffma %24, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32x4  %26 = ffma %25, %9 (0.999000).xxxx, %10 (0.001000).xxxx
+    32    %27 = iadd %2, %6
+                @store_global (%26, %27) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0080103c 00000800 40000040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.xxxx, void
+001 [01001001 15400800 40000010 00000008] add.s32.pack      t0._y__, u0.yyyy, void, t0.xxxx
+002 [07811032 15600c04 81540040 00000002] load.denorm.u32   t1, t0.yyyy, u0.zzzz, void
+003 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+004 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+005 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+006 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+007 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+008 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+009 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+010 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+011 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+012 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+013 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+014 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+015 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+016 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+017 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+018 [07811002 39001800 01fe0040 2000001a] mad.pack          t1, t1.xyzw, u0.wwww, u1.xxxx
+019 [00801001 15401800 40000010 00000008] add.s32.pack      t0.x___, u1.yyyy, void, t0.xxxx
+020 [07820033 00200c04 81540040 0039001a] store.denorm.u32  mem, t0.xxxx, u0.zzzz, t1.xyzw	; dontcare bits in store: 00000000000000000000000000020000
+num loops: 0
+num temps: 2
+immediates:
+ [0].x = 0.000000 (0x00000010) (1)
+ [0].y = 0.000000 (0x04000004) (12)
+ [0].z = 0.000000 (0x00000000) (1)
+ [0].w = 0.999000 (0x3f7fbe77) (1)
+ [1].x = 0.001000 (0x3a83126f) (1)
+ [1].y = 0.000000 (0x04000000) (12)
+ [1].z = 0.000000 (0x00000000) (0)
+ [1].w = 0.000000 (0x00000000) (0)
+workitem inputs: load_global_invocation_id - -
+barriers: no
+GPU addresses: out 0xffffa000 in 0xffff9000 (1024 bytes each)
+out[0..3]: -6259853398707798016.000000 -6259853398707798016.000000 -6259853398707798016.000000 -6259853398707798016.000000
+{"result": "OFFLINE", "kernel": "fma", "threads": 64, "workgroup": 64, "fma_per_thread": 16, "mismatches": 256, "untouched": 256, "worst_abs_error": 6.26e+18, "first_launch_ms": 1.839, "median_ms": 1.192, "launches": 3, "gflops": 0.007}

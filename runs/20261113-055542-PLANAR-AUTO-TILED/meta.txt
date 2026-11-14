@@ -1,0 +1,11 @@
+label: PLANAR-AUTO-TILED
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-bench/npu_planar_bench.py -m /home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite --mode auto -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -n 10
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T05:55:42-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2471
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f4935;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=b45d847;t=660261c9a7ed3;x=7472550501d353a1
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-13T05:55:45-05:00  rc: 0  wall_s: 3

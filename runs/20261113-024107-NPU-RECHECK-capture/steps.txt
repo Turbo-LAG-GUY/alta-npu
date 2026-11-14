@@ -1,0 +1,49 @@
+[ 4445.331555] pid=18872 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap model=/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite | npu=active irqs=0
+[ 4445.336815] pid=18872 load_delegate: begin | npu=active irqs=0
+[ 4445.494298] pid=18872 load_delegate: done | npu=active irqs=0
+[ 4445.497582] pid=18872 Interpreter(): begin | npu=active irqs=0
+[ 4445.583120] pid=18872 Interpreter(): done | npu=active irqs=0
+[ 4445.611121] pid=18872 allocate_tensors: begin | npu=active irqs=0
+[ 4445.646746] pid=18872 allocate_tensors: done (149.1 ms) | npu=active irqs=0
+[ 4445.654378] pid=18872 input set | npu=active irqs=0
+[ 4445.666554] pid=18872 invoke 1/20: begin | npu=active irqs=0
+[ 4445.704724] pid=18872 invoke 1/20: done (27.93 ms) | npu=active irqs=2
+[ 4445.724210] pid=18872 invoke 2/20: begin | npu=active irqs=2
+[ 4445.753673] pid=18872 invoke 2/20: done (20.96 ms) | npu=active irqs=3
+[ 4445.758774] pid=18872 invoke 3/20: begin | npu=active irqs=3
+[ 4445.783833] pid=18872 invoke 3/20: done (21.02 ms) | npu=active irqs=4
+[ 4445.800427] pid=18872 invoke 4/20: begin | npu=active irqs=4
+[ 4445.844571] pid=18872 invoke 4/20: done (22.50 ms) | npu=active irqs=5
+[ 4445.855520] pid=18872 invoke 5/20: begin | npu=active irqs=5
+[ 4445.880959] pid=18872 invoke 5/20: done (20.95 ms) | npu=active irqs=6
+[ 4445.902486] pid=18872 invoke 6/20: begin | npu=active irqs=6
+[ 4445.934039] pid=18872 invoke 6/20: done (20.42 ms) | npu=active irqs=7
+[ 4445.953913] pid=18872 invoke 7/20: begin | npu=active irqs=7
+[ 4445.985024] pid=18872 invoke 7/20: done (20.45 ms) | npu=active irqs=8
+[ 4446.002222] pid=18872 invoke 8/20: begin | npu=active irqs=8
+[ 4446.029796] pid=18872 invoke 8/20: done (15.20 ms) | npu=active irqs=9
+[ 4446.038665] pid=18872 invoke 9/20: begin | npu=active irqs=9
+[ 4446.066458] pid=18872 invoke 9/20: done (13.97 ms) | npu=active irqs=10
+[ 4446.078829] pid=18872 invoke 10/20: begin | npu=active irqs=10
+[ 4446.105901] pid=18872 invoke 10/20: done (15.12 ms) | npu=active irqs=11
+[ 4446.113309] pid=18872 invoke 11/20: begin | npu=active irqs=11
+[ 4446.152031] pid=18872 invoke 11/20: done (20.88 ms) | npu=active irqs=12
+[ 4446.168004] pid=18872 invoke 12/20: begin | npu=active irqs=12
+[ 4446.201054] pid=18872 invoke 12/20: done (21.15 ms) | npu=active irqs=13
+[ 4446.217699] pid=18872 invoke 13/20: begin | npu=active irqs=13
+[ 4446.240452] pid=18872 invoke 13/20: done (13.09 ms) | npu=active irqs=14
+[ 4446.244171] pid=18872 invoke 14/20: begin | npu=active irqs=14
+[ 4446.267814] pid=18872 invoke 14/20: done (14.50 ms) | npu=active irqs=15
+[ 4446.276300] pid=18872 invoke 15/20: begin | npu=active irqs=15
+[ 4446.299509] pid=18872 invoke 15/20: done (11.67 ms) | npu=active irqs=16
+[ 4446.313604] pid=18872 invoke 16/20: begin | npu=active irqs=16
+[ 4446.330253] pid=18872 invoke 16/20: done (12.97 ms) | npu=active irqs=17
+[ 4446.337321] pid=18872 invoke 17/20: begin | npu=active irqs=17
+[ 4446.363778] pid=18872 invoke 17/20: done (14.06 ms) | npu=active irqs=18
+[ 4446.371502] pid=18872 invoke 18/20: begin | npu=active irqs=18
+[ 4446.392946] pid=18872 invoke 18/20: done (14.77 ms) | npu=active irqs=19
+[ 4446.411439] pid=18872 invoke 19/20: begin | npu=active irqs=19
+[ 4446.439857] pid=18872 invoke 19/20: done (14.41 ms) | npu=active irqs=20
+[ 4446.448412] pid=18872 invoke 20/20: begin | npu=active irqs=20
+[ 4446.465429] pid=18872 invoke 20/20: done (13.66 ms) | npu=active irqs=21
+[ 4446.543579] pid=18872 finished | npu=active irqs=21

@@ -1,0 +1,28 @@
+180997 openat(AT_FDCWD, "/home/jordan/Documents/AI_Projects/npu-shader/shim/libnpu_etna_shim.so", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libdrm.so.2", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libz.so.1", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libzstd.so.1", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+180997 openat(AT_FDCWD, "/dev/null", O_RDWR) = 4
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/possible", O_RDONLY|O_CLOEXEC) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu0/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu1/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu2/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu3/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu4/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu5/cpu_capacity", O_RDONLY) = 6
+180997 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/index", O_RDWR|O_CREAT|O_CLOEXEC, 0644) = 6
+180997 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/bc/3537735821330e639cde9ea0e2c684d25832cc27de914e188f365bd34f3d8c", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+180998 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/bc/3537735821330e639cde9ea0e2c684d25832cc27de914e188f365bd34f3d8c.tmp", O_WRONLY|O_CREAT|O_CLOEXEC, 0644) = 6
+180998 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/bc/3537735821330e639cde9ea0e2c684d25832cc27de914e188f365bd34f3d8c", O_RDONLY|O_CLOEXEC <unfinished ...>
+180997 openat(AT_FDCWD, "/home/jordan/alta-npu/runs/cs-offline/step6c-shim/rev64-default/shim_submit_0000.stream", O_WRONLY|O_CREAT|O_TRUNC, 0666 <unfinished ...>
+180998 <... openat resumed>)            = -1 ENOENT (No such file or directory)
+180997 <... openat resumed>)            = 7
+180997 openat(AT_FDCWD, "/home/jordan/alta-npu/runs/cs-offline/step6c-shim/rev64-default/shim_submit_0000.bos", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 7
+180999 +++ exited with 0 +++
+180998 +++ exited with 0 +++
+180997 +++ exited with 0 +++

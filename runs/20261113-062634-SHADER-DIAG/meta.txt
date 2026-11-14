@@ -1,0 +1,10 @@
+label: SHADER-DIAG
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/hello --kernel diag -n 1 -w 1
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T06:26:34-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2473
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f4935;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=b45d847;t=660261c9a7ed3;x=7472550501d353a1
+end: 2026-11-13T06:26:36-05:00  rc: 3  wall_s: 2

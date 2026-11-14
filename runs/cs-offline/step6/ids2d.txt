@@ -1,0 +1,14 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+kernel: ids2d, 11 instructions, num_temps 4 (driver programs 5), uniforms 8, shared 0 bytes per workgroup, barriers no
+  input t0: load_global_invocation_id
+  input t1: load_local_invocation_id
+  input t2: load_workgroup_id
+  u0.x: kernel_arg  offset 8 size 4
+  u0.y: constant    0x00000020
+  u0.z: kernel_arg  offset 0 size 4
+  u0.w: constant    0x00000000
+  u1.x: group_count 0x00000000
+  u1.y: group_count 0x00000001
+  u1.z: constant    0x00000010
+  u1.w: unused      0x00000000
+wrote /home/jordan/alta-npu/runs/cs-offline/step6/ids2d.bin

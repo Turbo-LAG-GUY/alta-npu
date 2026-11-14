@@ -1,0 +1,19 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap",
+ "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_64x64.tflite",
+ "setup_ms": 21.8,
+ "invoke_ms": [
+  0.46,
+  0.42,
+  0.35,
+  0.37,
+  0.36
+ ],
+ "invoke_ms_median": 0.37,
+ "diff_vs_cpu_mean": 0.0,
+ "diff_vs_cpu_p999": 0.0,
+ "diff_vs_cpu_max": 1,
+ "output_mean": 127.897,
+ "output_std": 10.585,
+ "match": true
+}

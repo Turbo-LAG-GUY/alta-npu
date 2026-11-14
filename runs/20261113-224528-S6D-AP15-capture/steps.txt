@@ -1,0 +1,15 @@
+[ 3069.906293] pid=18738 open: begin
+[ 3069.928588] pid=18738 context: done
+[ 3069.981887] pid=18738 compute state: created
+[ 3069.993330] pid=18738 launch 1: begin
+[ 3070.005402] pid=18738 launch: begin
+[ 3070.011380] pid=18738 launch: begin
+[ 3070.013644] pid=18738 launch: begin
+[ 3070.016030] pid=18738 launch: begin
+[ 3070.021406] pid=18738 launch: begin
+[ 3070.027172] pid=18738 launch: begin
+[ 3070.029092] pid=18738 launch: begin
+[ 3070.030945] pid=18738 launch: begin
+[ 3070.032673] pid=18738 launch: begin
+[ 3070.034371] pid=18738 launches: done
+[ 3070.038645] pid=18738 finished

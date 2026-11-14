@@ -1,0 +1,153 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_emit.c b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_emit.c
+index f926057fcc2..c373622a32d 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_emit.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_compiler_nir_emit.c
+@@ -77,16 +77,29 @@ static const struct etna_op_info etna_ops[] = {
+ 
+    /* type convert */
+    IOP(i2f32, I2F, 0_X_X),
++   IOP(i2i32, I2I, 0_X_X),
++   OPCT(i2i16, I2I, 0_X_X, TRUE, S16),
++   OPCT(i2i8, I2I, 0_X_X, TRUE, S8),
+    UOP(u2f32, I2F, 0_X_X),
++   UOP(u2u32, I2I, 0_X_X),
++   OPCT(u2u16, I2I, 0_X_X, TRUE, U16),
++   OPCT(u2u8, I2I, 0_X_X, TRUE, U8),
+    IOP(f2i32, F2I, 0_X_X),
+    UOP(f2u32, F2I, 0_X_X),
++   UOP(f2u8, F2I, 0_X_X),
+    UOP(b2f32, AND, 0_X_X), /* AND with fui(1.0f) */
+    UOP(b2i32, AND, 0_X_X), /* AND with 1 */
++   UOP(b2i8, AND, 0_X_X), /* AND with 1 */
+    OPC(f2b32, CMP, 0_X_X, NE), /* != 0.0 */
+ 
++   OP(f2f32, MOV, X_X_0), /* TEMP */
++
+    /* arithmetic */
+    IOP(iadd, ADD, 0_X_1),
++   IOP(iadd_sat, IADDSAT, 0_X_1),
++   IOP(uadd_sat, IADDSAT, 0_X_1),
+    IOP(imul, IMULLO0, 0_1_X),
++   IOP(umul_high, IMULHI0, 0_1_X),
+    /* IOP(imad, IMADLO0, 0_1_2), */
+    IOP(ineg, ADD, X_X_0), /* ADD 0, -x */
+    IOP(iabs, IABS, X_X_0),
+@@ -119,11 +132,20 @@ static const struct etna_op_info etna_ops[] = {
+    IOP(ishl, LSHIFT, 0_X_1),
+    IOP(ishr, RSHIFT, 0_X_1),
+    UOP(ushr, RSHIFT, 0_X_1),
++   UOP(uclz, LEADZERO, X_X_0),
+ };
+ 
++// TODO: promote this to nir.c from nir_opt_if ?
++static bool
++alu_instr_is_type_conversion(nir_op op)
++{
++   return nir_op_infos[op].num_inputs == 1 &&
++          nir_op_infos[op].output_type != nir_op_infos[op].input_types[0];
++}
++
+ void
+ etna_emit_alu(struct etna_compile *c, nir_op op, struct etna_inst_dst dst,
+-              struct etna_inst_src src[3], bool saturate)
++              struct etna_inst_src src[3], nir_alu_type type_override, bool saturate)
+ {
+    struct etna_op_info ei = etna_ops[op];
+    unsigned swiz_scalar = INST_SWIZ_BROADCAST(ffs(dst.write_mask) - 1);
+@@ -139,6 +161,20 @@ etna_emit_alu(struct etna_compile *c, nir_op op, struct etna_inst_dst dst,
+       .sat = saturate,
+    };
+ 
++   // TODO: does this work?
++   if (alu_instr_is_type_conversion(op)) {
++      nir_rounding_mode rmode =
++         nir_get_rounding_mode_from_float_controls(
++               c->nir->info.float_controls_execution_mode,
++               nir_op_infos[op].output_type);
++      if (rmode == nir_rounding_mode_rtz)
++         inst.tex.amode = 0x4 + INST_ROUND_MODE_RTZ;
++      else if (rmode == nir_rounding_mode_rtne)
++         inst.tex.amode = 0x4 + INST_ROUND_MODE_RTNE;
++      else
++         inst.tex.amode = 0x4 + INST_ROUND_MODE_DEFAULT;
++   }
++
+    switch (op) {
+    case nir_op_fdiv:
+    case nir_op_flog2:
+@@ -184,6 +220,32 @@ etna_emit_alu(struct etna_compile *c, nir_op op, struct etna_inst_dst dst,
+          inst.src[j] = src[i];
+    }
+ 
++   inst.type = type_override != nir_type_invalid ? etna_type_from_nir(type_override) : ei.type;
++
++   /* Seems to be some kind of masking of the value being converted*/
++   if (inst.opcode == INST_OPCODE_I2I) {
++      switch(inst.type) {
++         case INST_TYPE_U8:
++         case INST_TYPE_U16:
++         case INST_TYPE_U32:
++            inst.src[1].imm_type = 0x1;
++            inst.src[1].imm_val = 5 << 4;
++            inst.src[1].use = 1;
++            inst.src[1].rgroup = 0x7;
++            break;
++         case INST_TYPE_S8:
++         case INST_TYPE_S16:
++         case INST_TYPE_S32:
++            inst.src[1].imm_type = 0x1;
++            inst.src[1].imm_val = 2 << 4;
++            inst.src[1].use = 1;
++            inst.src[1].rgroup = 0x7;
++            break;
++         default:
++            break;
++      }
++   }
++
+    emit_inst(c, &inst);
+ }
+ 
+@@ -194,26 +256,33 @@ etna_emit_tex(struct etna_compile *c, nir_texop op, unsigned texid, unsigned dst
+ {
+    struct etna_inst inst = {
+       .dst = dst,
+-      .tex.id = texid + (is_fs(c) ? 0 : c->specs->vertex_sampler_offset),
+-      .tex.swiz = dst_swiz,
++      .tex.id = texid + (is_vs(c) ? c->specs->vertex_sampler_offset : 0),
++      .tex.swiz = 0x80, //dst_swiz,
+       .src[0] = coord,
+    };
+ 
+-   if (src1.use)
+-      inst.src[1] = src1;
+-
+-   if (src2.use)
+-      inst.src[2] = src2;
+-
+    switch (op) {
+    case nir_texop_tex: inst.opcode = INST_OPCODE_TEXLD; break;
+    case nir_texop_txb: inst.opcode = INST_OPCODE_TEXLDB; break;
+    case nir_texop_txd: inst.opcode = INST_OPCODE_TEXLDD; break;
+-   case nir_texop_txl: inst.opcode = INST_OPCODE_TEXLDL; break;
++   case nir_texop_txl: inst.opcode = INST_OPCODE_img_load; break;
++   case nir_texop_txf: inst.opcode = INST_OPCODE_img_load; break;
+    default:
+       compile_error(c, "Unhandled NIR tex type: %d\n", op);
+    }
+ 
++   if (inst.opcode == INST_OPCODE_img_load) {
++      inst.src[0] = src1;
++      inst.src[1] = coord;
++      inst.tex.swiz = 0x80;
++   } else {
++      if (src1.use)
++         inst.src[1] = src1;
++
++      if (src2.use)
++         inst.src[2] = src2;
++   }
++
+    emit_inst(c, &inst);
+ }
+ 

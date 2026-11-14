@@ -1,0 +1,15 @@
+[  998.247857] pid=4100 open: begin
+[  998.291615] pid=4100 context: done
+[  998.304214] pid=4100 compute state: created
+[  998.307543] pid=4100 launch 1: begin
+[  998.312295] pid=4100 launch: begin
+[  998.316013] pid=4100 launch: begin
+[  998.318136] pid=4100 launch: begin
+[  998.324700] pid=4100 launch: begin
+[  998.326979] pid=4100 launch: begin
+[  998.329295] pid=4100 launch: begin
+[  998.333274] pid=4100 launch: begin
+[  998.337159] pid=4100 launch: begin
+[  998.339516] pid=4100 launch: begin
+[  998.345309] pid=4100 launches: done
+[  998.350935] pid=4100 finished

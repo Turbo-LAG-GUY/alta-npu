@@ -1,0 +1,61 @@
+/dev/dri/renderD128: etnaviv
+screen: Vivante GC8000 rev 7120
+shader: MESA_SHADER_KERNEL
+source_sha1: {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000}
+name: copy
+workgroup-size: 0, 0, 0 (variable)
+shared-size: 0
+stage: 14
+next_stage: 0
+subgroup_size: 0
+Unhandled stage 14
+inputs: 0
+outputs: 0
+uniforms: 0
+decl_function main (0 params)
+
+impl main {
+	block block_0:
+	/* preds: */
+	vec3 32 ssa_0 = intrinsic load_global_invocation_id_zero_base () ()
+	vec1 32 ssa_1 = mov ssa_0.x
+	vec1 32 ssa_2 = load_const (0x00000000 = 0.000000)
+	vec1 32 ssa_3 = intrinsic load_kernel_input (ssa_2) (base=0, range=8, align_mul=4, align_offset=0)
+	vec1 32 ssa_4 = load_const (0x00000004 = 0.000000)
+	vec1 32 ssa_5 = intrinsic load_kernel_input (ssa_4) (base=0, range=8, align_mul=4, align_offset=0)
+	vec1 32 ssa_6 = load_const (0x00000002 = 0.000000)
+	vec1 32 ssa_7 = ishl ssa_1, ssa_6
+	vec1 32 ssa_8 = iadd ssa_5, ssa_7
+	vec1 32 ssa_9 = intrinsic load_global (ssa_8) (access=0, align_mul=4, align_offset=0, dest_type=uint32 /*36*/)
+	vec1 32 ssa_10 = iadd ssa_3, ssa_7
+	intrinsic store_global (ssa_9, ssa_10) (wrmask=x /*1*/, access=0, align_mul=4, align_offset=0, src_type=uint32 /*36*/)
+	/* succs: block_1 */
+	block block_1:
+}
+
+GPU addresses: out 0xffffa000 in 0xffff9000
+0000: 0080103c 00000800 40000040 00000002  IMULLO0.s32 t0.x___, t0.xxxx, u0.xxxx, void
+0001: 01001001 15400800 40000010 00000008  ADD.s32 t0._y__, u0.yyyy, void, t0.xxxx
+0002: 02001009 00000000 00000000 202a8008  MOV t0.__z_, void, void, u0.zzzz
+0003: 04001032 15600c04 81540040 00000002  LOAD.u32 t0.___w, t0.yyyy, u0.zzzz, void
+0004: 00801001 3fc00800 40000010 00000008  ADD.s32 t0.x___, u0.wwww, void, t0.xxxx
+0005: 01001009 00000000 00000000 202a8008  MOV t0._y__, void, void, u0.zzzz
+0006: 00810033 00200c04 81540040 0000c00a  STORE.u32 mem.x___, t0.xxxx, u0.zzzz, t0.wxxx
+num loops: 0
+num temps: 1
+immediates:
+ [0].x = 0.000000 (0x00000004) (1)
+ [0].y = 0.000000 (0x00000010) (2)
+ [0].z = 0.000000 (0x00000000) (1)
+ [0].w = 0.000000 (0x00000000) (2)
+inputs:
+ [0] name=VARYING_SLOT_POS comps=0
+outputs:
+special:
+  input_count_unk8=0x00000001
+out[0..7]: 0x1
+want[0..7]: 0x1
+{"result": "PASS", "threads": 1, "workgroup": 1, "mismatches": 0, "untouched": 0, "first_mismatch": -1, "launch_to_done_ms": 0.643}
+*** etna_emit_compute_state
+Dumping shader to mesa-shader-00000000.bin
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-180125-CL23-COPY1

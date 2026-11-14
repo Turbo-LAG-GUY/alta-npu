@@ -1,0 +1,10 @@
+label: S6-T4-IN-16x4
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel t4x4 --hwc 112 112 256 --dir in -w 16 --wy 4 --repeat 10 --out /home/jordan/alta-npu/runs/cs6-201222/T4-IN-16x4
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T20:21:26-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1185
+deadline_s: 120
+journal_cursor: s=d7f411d4c0d8423aa6ff78b9416904c8;i=f8b95;b=d5fe88d6cdf84fd7938a6ddc95fd10b4;m=c2ec3e72a;t=6603240188db5;x=bb1890e5b19d3808
+end: 2026-11-13T20:21:27-05:00  rc: 0  wall_s: 1

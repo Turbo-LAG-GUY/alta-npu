@@ -1,0 +1,12 @@
+label: STRIPS-OFF
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/npu_detail_test.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_reference_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.ba78010c-strips -n 20
+cwd: /home/jordan/alta-npu
+start: 2026-11-12T09:52:10-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1373
+deadline_s: 120
+journal_cursor: s=34e9d89724f14199ba3108e469c360c3;i=efc0a;b=46d8402b9c78431a93b36209e5da1d3c;m=e082b4c0b;t=660157493d38f;x=ab3f65e7c1e76e01
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_DISK_CACHE=0
+end: 2026-11-12T09:52:14-05:00  rc: 0  wall_s: 4

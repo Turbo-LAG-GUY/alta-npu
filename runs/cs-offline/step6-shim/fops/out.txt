@@ -1,0 +1,171 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+DRM etnaviv 1.4
+offline: fake NPU (shim), submits are recorded, not executed
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: fops
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32     %2 = load_const (0x00000000)
+    32     %3 = @load_kernel_input (%2 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %4 = load_const (0x00000004)
+    32     %5 = @load_kernel_input (%4 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000002)
+    32     %7 = ishl %1, %6 (0x2)
+    32     %8 = iadd %5, %7
+    32     %9 = @load_global (%8) (access=none, align_mul=4, align_offset=0)
+    32    %10 = load_const (0x000000ff = 255)
+    32    %11 = iand %9, %10 (0xff)
+    32    %12 = u2f32 %11
+    32    %13 = load_const (0x3d000000 = 0.031250)
+    32    %14 = fmul %12, %13 (0.031250)
+    32    %15 = load_const (0xc0800000 = -4.000000)
+    32    %16 = fadd %14, %15 (-4.000000)
+    32    %17 = load_const (0x3f800000 = 1.000000)
+    32    %18 = fadd %12, %17 (1.000000)
+    32    %19 = frcp %18
+    32    %20 = fexp2 %16
+    32    %21 = load_const (0x3fb8aa3b = 1.442695)
+    32    %22 = fmul %16, %21 (1.442695)
+    32    %23 = fexp2 %22
+    32    %24 = load_const (0x40400000 = 3.000000)
+    32    %25 = fadd %12, %24 (3.000000)
+    32    %26 = fdiv %12, %25
+    32x4  %27 = vec4 %20, %23, %19, %26
+    32    %28 = load_const (0x3e800000 = 0.250000)
+    32    %29 = fmax %16, %28 (0.250000)
+    32    %30 = load_const (0x3f400000 = 0.750000)
+    32    %31 = fmul %12, %30 (0.750000)
+    32    %32 = load_const (0x3f000000 = 0.500000)
+    32    %33 = fadd %31, %32 (0.500000)
+    32    %34 = f2u32 %33
+    32    %35 = load_const (0x3e99999a = 0.300000)
+    32    %36 = fmul %12, %35 (0.300000)
+    32    %37 = ffloor %36
+    32    %38 = load_const (0x3f000000 = 0.500000)
+    32    %39 = fmin %19, %38 (0.500000)
+    32x4  %40 = vec4 %29, %34, %37, %39
+    32    %41 = load_const (0x00000005)
+    32    %42 = ishl %1, %41 (0x5)
+    32    %43 = iadd %3, %42
+                @store_global (%27, %43) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+    32    %44 = load_const (0x00000010 = 16)
+    32    %45 = iadd %43, %44 (0x10)
+                @store_global (%40, %45) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+kernel: fops, shared 0 bytes per workgroup
+shader: MESA_SHADER_KERNEL
+name: fops
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = load_const (0x00000000)
+    32     %2 = @load_kernel_input (%1 (0x0)) (base=0, range=8, align_mul=4, align_offset=0)
+    32     %3 = load_const (0x00000004)
+    32     %4 = @load_kernel_input (%3 (0x4)) (base=0, range=8, align_mul=4, align_offset=0)
+    32x2   %5 = load_const (0x00000004, 0x00000020) = (4, 32)
+    32     %6 = imul %0.x, %5 (0x4, 0x20).x
+    32     %7 = imul %0.x, %5 (0x4, 0x20).y
+    32     %8 = iadd %4, %6
+    32     %9 = @load_global (%8) (access=none, align_mul=4, align_offset=0)
+    32    %10 = load_const (0x000000ff = 255)
+    32    %11 = iand %9, %10 (0xff)
+    32    %12 = u2f32 %11
+    32x3  %13 = load_const (0x3d000000, 0x3f400000, 0x3e99999a) = (0.031250, 0.750000, 0.300000)
+    32x3  %14 = fmul %12.xxx, %13 (0.031250, 0.750000, 0.300000)
+    32x2  %15 = load_const (0xc0800000, 0x3f000000) = (-4.000000, 0.500000)
+    32x2  %16 = fadd %14.xy, %15 (-4.000000, 0.500000)
+    32x2  %17 = load_const (0x3f800000, 0x40400000) = (1.000000, 3.000000)
+    32x2  %18 = fadd %12.xx, %17 (1.000000, 3.000000)
+    32    %19 = frcp %18.x
+    32    %20 = frcp %18.y
+    32    %21 = fexp2 %16.x
+    32    %22 = load_const (0x3fb8aa3b = 1.442695)
+    32    %23 = fmul %16.x, %22 (1.442695)
+    32    %24 = fexp2 %23
+    32    %25 = fmul %12, %20
+    32x4  %26 = vec4 %21, %24, %19, %25
+    32    %27 = load_const (0x3e800000 = 0.250000)
+    32    %28 = fmax %16.x, %27 (0.250000)
+    32    %29 = load_const (0x3f000000 = 0.500000)
+    32    %30 = f2u32 %16.y
+    32    %31 = ffloor %14.z
+    32    %32 = fmin %19, %29 (0.500000)
+    32x4  %33 = vec4 %28, %30, %31, %32
+    32    %34 = iadd %2, %7
+                @store_global (%26, %34) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+    32    %35 = load_const (0x00000010 = 16)
+    32    %36 = iadd %34, %35 (0x10)
+                @store_global (%33, %36) (wrmask=xyzw, access=none, align_mul=16, align_offset=0)
+                // succs: b1
+    block b1:
+}
+
+COMPUTE
+000 [0400103c 00000800 40000040 00000002] imullo0.s32.pack  t0.___w, t0.xxxx, u0.xxxx, void
+001 [0080103c 00000800 40aa0040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.yyyy, void
+002 [01001001 2a800800 40000010 003fc008] add.s32.pack      t0._y__, u0.zzzz, void, t0.wwww
+003 [02001032 15600c04 81fe0040 00000002] load.denorm.u32   t0.__z_, t0.yyyy, u0.wwww, void
+004 [0100101d 2a800800 40010000 20000018] and.s32.pack      t0._y__, t0.zzzz, void, u1.xxxx
+005 [0100102d 15600804 80000000 00000000] i2f.u32           t0._y__, t0.yyyy, void, void
+006 [03811003 15400800 007200c0 00000002] mul.pack          t1.xyz_, t0.yyyy, u1.yzwx, void
+007 [06001001 10001800 00000000 20100028] add.pack          t0.__zw, t1.xxxy, void, u2.xxxy
+008 [01821001 15400800 00000000 20038028] add.pack          t2.xy__, t0.yyyy, void, u2.zwxx
+009 [0401100c 00000000 00000000 00000028] rcp.pack          t1.___w, void, void, t2.xxxx
+010 [0082100c 00000000 00000000 00154028] rcp.pack          t2.x___, void, void, t2.yyyy
+011 [00831011 00000000 00000000 002a8008] exp.pack          t3.x___, void, void, t0.zzzz
+012 [01021003 2a800800 000001c0 00000002] mul.pack          t2._y__, t0.zzzz, u3.xxxx, void
+013 [01031011 00000000 00000000 00154028] exp.pack          t3._y__, void, void, t2.yyyy
+014 [04031003 15400800 00000140 00000000] mul.pack          t3.___w, t0.yyyy, t2.xxxx, void
+015 [02031009 00000000 00000000 003fc018] mov.pack          t3.__z_, void, void, t1.wwww
+016 [0082108f 2a800800 00aa01c0 002a800a] select.lt.pack    t2.x___, t0.zzzz, u3.yyyy, t0.zzzz
+017 [0102102e 3fe00804 80000000 00000000] f2i.u32           t2._y__, t0.wwww, void, void
+018 [02021025 00000000 00000000 002a8018] floor.pack        t2.__z_, void, void, t1.zzzz
+019 [0402104f 3fc01800 00aa0140 003fc01a] select.gt.pack    t2.___w, t1.wwww, u2.yyyy, t1.wwww
+020 [00801001 2a803800 40000010 00000008] add.s32.pack      t0.x___, u3.zzzz, void, t0.xxxx
+021 [07840033 00200c04 81fe0040 0039003a] store.denorm.u32  mem, t0.xxxx, u0.wwww, t3.xyzw	; dontcare bits in store: 00000000000000000000000000040000
+022 [01001001 00000800 40000000 203fc038] add.s32.pack      t0._y__, t0.xxxx, void, u3.wwww
+023 [07840033 15600c04 81fe0040 0039002a] store.denorm.u32  mem, t0.yyyy, u0.wwww, t2.xyzw	; dontcare bits in store: 00000000000000000000000000040000
+num loops: 0
+num temps: 4
+immediates:
+ [0].x = 0.000000 (0x00000004) (1)
+ [0].y = 0.000000 (0x00000020) (1)
+ [0].z = 0.000000 (0x04000004) (12)
+ [0].w = 0.000000 (0x00000000) (1)
+ [1].x = 0.000000 (0x000000ff) (1)
+ [1].y = 0.031250 (0x3d000000) (1)
+ [1].z = 0.750000 (0x3f400000) (1)
+ [1].w = 0.300000 (0x3e99999a) (1)
+ [2].x = -4.000000 (0xc0800000) (1)
+ [2].y = 0.500000 (0x3f000000) (1)
+ [2].z = 1.000000 (0x3f800000) (1)
+ [2].w = 3.000000 (0x40400000) (1)
+ [3].x = 1.442695 (0x3fb8aa3b) (1)
+ [3].y = 0.250000 (0x3e800000) (1)
+ [3].z = 0.000000 (0x04000000) (12)
+ [3].w = 0.000000 (0x00000010) (1)
+workitem inputs: load_global_invocation_id - -
+barriers: no
+GPU addresses: out 0xffff9000 in 0xffff7000 (8192 bytes each)
+grid: 1 dimension(s), 4 x 1 workgroups of 64 x 1 threads
+fops worst relative error: exp2 1e+20 exp 3.42e+20 rcp 1.6e+21 div 2.5e+19 fmax 2.5e+19 f2u 1 floor 6.26e+18 fmin 1.6e+21
+thread 1: -6.25985e+18 -6.25985e+18 -6.25985e+18 -6.25985e+18 -6.25985e+18 3735928559 -6.25985e+18 -6.25985e+18
+{"result": "OFFLINE", "kernel": "fops", "threads": 256, "results_out_of_tolerance": 8, "untouched": 2048, "worst": [1e+20, 3.42e+20, 1.6e+21, 2.5e+19, 2.5e+19, 1, 6.26e+18, 1.6e+21], "ms": 3.011}

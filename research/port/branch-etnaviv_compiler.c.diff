@@ -1,0 +1,40 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_compiler.c b/src/gallium/drivers/etnaviv/etnaviv_compiler.c
+index f8eb5d4ba26..a8d3ffb8427 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_compiler.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_compiler.c
+@@ -36,6 +36,7 @@ etna_compiler_create(const char *renderer, const struct etna_specs *specs)
+    struct etna_compiler *compiler = rzalloc(NULL, struct etna_compiler);
+ 
+    compiler->options = (nir_shader_compiler_options) {
++      .has_cs_global_id = true,
+       .lower_fpow = true,
+       .lower_ftrunc = true,
+       .fuse_ffma16 = true,
+@@ -48,9 +49,12 @@ etna_compiler_create(const char *renderer, const struct etna_specs *specs)
+       .lower_all_io_to_temps = true,
+       .vertex_id_zero_based = true,
+       .lower_flrp32 = true,
++      .lower_fround_even = true,
+       .lower_fmod = true,
+       .lower_vector_cmp = true,
+       .lower_fdph = true,
++      .lower_extract_byte = true,
++      .lower_extract_word = true,
+       .lower_insert_byte = true,
+       .lower_insert_word = true,
+       .lower_fdiv = true, /* !specs->has_new_transcendentals */
+@@ -65,6 +69,14 @@ etna_compiler_create(const char *renderer, const struct etna_specs *specs)
+       .force_indirect_unrolling = nir_var_all,
+       .max_unroll_iterations = 32,
+       .vectorize_io = true,
++      .lower_int64_options = ~0,
++      .lower_find_lsb = true,
++      .lower_ifind_msb = true,
++      .lower_ufind_msb = true,
++      .lower_pack_32_2x16_split = true,
++      .lower_pack_64_2x32_split = true,
++      .lower_unpack_32_2x16_split = true,
++      .lower_unpack_64_2x32_split = true,
+    };
+ 
+    compiler->regs = etna_ra_setup(compiler);

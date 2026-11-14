@@ -1,0 +1,12 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_emit.h b/src/gallium/drivers/etnaviv/etnaviv_emit.h
+index 6018af91dfd..95edb1d976d 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_emit.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_emit.h
+@@ -220,4 +220,7 @@ etna_coalsence_emit_reloc(struct etna_cmd_stream *stream,
+ void
+ etna_emit_state(struct etna_context *ctx);
+ 
++void
++etna_emit_compute_state(struct etna_context *ctx, const struct pipe_grid_info *grid);
++
+ #endif

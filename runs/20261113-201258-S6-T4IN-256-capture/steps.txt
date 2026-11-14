@@ -1,0 +1,15 @@
+[52308.867794] pid=134666 open: begin
+[52308.886823] pid=134666 context: done
+[52308.891553] pid=134666 compute state: created
+[52308.929255] pid=134666 launch 1: begin
+[52308.957529] pid=134666 launch: begin
+[52309.001215] pid=134666 launch: begin
+[52309.035781] pid=134666 launch: begin
+[52309.057420] pid=134666 launch: begin
+[52309.095731] pid=134666 launch: begin
+[52309.134571] pid=134666 launch: begin
+[52309.166241] pid=134666 launch: begin
+[52309.200384] pid=134666 launch: begin
+[52309.238812] pid=134666 launch: begin
+[52309.272386] pid=134666 launches: done
+[52309.316277] pid=134666 finished

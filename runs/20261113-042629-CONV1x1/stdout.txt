@@ -1,0 +1,24 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv1x1.tflite",
+ "setup_ms": 62.2,
+ "invoke_ms": [
+  93.63,
+  95.33,
+  96.94,
+  110.76,
+  114.23,
+  92.38,
+  112.06,
+  96.94,
+  94.02,
+  120.11
+ ],
+ "invoke_ms_median": 96.94,
+ "diff_vs_cpu_mean": 0.001,
+ "diff_vs_cpu_p999": 0.0,
+ "diff_vs_cpu_max": 1,
+ "output_mean": 128.28,
+ "output_std": 40.313,
+ "match": true
+}

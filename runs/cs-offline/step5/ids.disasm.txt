@@ -1,0 +1,10 @@
+000 [0400103c 00001800 40000040 00000002] imullo0.s32.pack  t0.___w, t1.xxxx, u0.xxxx, void
+001 [04001001 15400800 40000010 003fc008] add.s32.pack      t0.___w, u0.yyyy, void, t0.wwww
+002 [00811009 00000000 00000000 00000018] mov.pack          t1.x___, void, void, t1.xxxx
+003 [01011009 00000000 00000000 00000028] mov.pack          t1._y__, void, void, t2.xxxx
+004 [06011009 00000000 00000000 00100008] mov.pack          t1.__zw, void, void, t0.xxxy
+005 [00821009 00000000 00000000 002a8008] mov.pack          t2.x___, void, void, t0.zzzz
+006 [07021009 00000000 00000000 20240018] mov.pack          t2._yzw, void, void, u1.xxyz
+007 [07830033 3fe00c04 81540040 0039001a] store.denorm.u32  mem, t0.wwww, u0.zzzz, t1.xyzw	; dontcare bits in store: 00000000000000000000000000030000
+008 [00801001 3fc00800 40000000 203fc008] add.s32.pack      t0.x___, t0.wwww, void, u0.wwww
+009 [07830033 00200c04 81540040 0039002a] store.denorm.u32  mem, t0.xxxx, u0.zzzz, t2.xyzw	; dontcare bits in store: 00000000000000000000000000030000

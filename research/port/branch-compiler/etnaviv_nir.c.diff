@@ -1,0 +1,57 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_nir.c b/src/gallium/drivers/etnaviv/etnaviv_nir.c
+index 57bc2bc8d59..84beaa42bf7 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_nir.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_nir.c
+@@ -95,7 +95,9 @@ etna_lower_io(nir_shader *shader, struct etna_shader_variant *v)
+             nir_src *src1 = NULL;
+             unsigned src1_idx;
+ 
+-            assert(tex->sampler_index == tex->texture_index);
++            /* Image writes have sampler views but no samplers */
++            if (shader->info.stage != MESA_SHADER_KERNEL)
++               assert(tex->sampler_index == tex->texture_index);
+ 
+             for (unsigned i = 0; i < tex->num_srcs; i++) {
+                switch (tex->src[i].src_type) {
+@@ -214,3 +216,41 @@ etna_lower_alu(nir_shader *shader, bool has_new_transcendentals)
+          etna_lower_alu_impl(function->impl, has_new_transcendentals);
+    }
+ }
++
++static void
++etna_lower_load_kernel_input_impl(nir_function_impl *impl)
++{
++   nir_builder b;
++   nir_builder_init(&b, impl);
++
++   nir_foreach_block(block, impl) {
++      nir_foreach_instr_safe(instr, block) {
++         if (instr->type != nir_instr_type_intrinsic)
++            continue;
++
++         nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
++         if (intr->intrinsic != nir_intrinsic_load_kernel_input)
++            continue;
++
++         // TODO: range_base vs base?
++         b.cursor = nir_before_instr(&intr->instr);
++         nir_ssa_def *uniform = nir_load_uniform(&b, intr->num_components, intr->dest.ssa.bit_size,
++               nir_ssa_for_src(&b, intr->src[0], 1),
++               .base = nir_intrinsic_base(intr) /*/ 16*/,
++               .range = nir_intrinsic_range(intr) /*/ 16*/,
++               .dest_type = nir_type_float | intr->dest.ssa.bit_size);
++
++         nir_ssa_def_rewrite_uses(&intr->dest.ssa, uniform);
++
++         nir_instr_remove(instr);
++      }
++   }
++}
++
++void
++etna_nir_lower_load_kernel_input(nir_shader *shader) {
++   nir_foreach_function(function, shader) {
++      if (function->impl)
++         etna_lower_load_kernel_input_impl(function->impl);
++   }
++}

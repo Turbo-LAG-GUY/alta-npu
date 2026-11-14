@@ -1,0 +1,358 @@
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_compiler.h mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compiler.h
+--- step4/src/gallium/drivers/etnaviv/etnaviv_compiler.h	2026-11-13 19:53:07.005575721 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compiler.h	2026-11-13 19:46:10.332772138 -0500
+@@ -109,6 +109,9 @@
+    nir_intrinsic_op workitem_funcs[3];
+    /* compute only: shader uses workgroup barriers */
+    bool has_barriers;
++   /* compute only: bytes of shared memory per workgroup slice (multiple of 16, 0 = none); the driver allocates
++    * one slice per workgroup of a grid (shared memory is emulated in DDR, see etna_lower_shared_to_global) */
++   unsigned shared_size;
+ 
+    /* ETNA_DIRTY_* flags that, when set in context dirty, mean that the
+     * uniforms have to get (partial) reloaded. */
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.c
+--- step4/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.c	2026-11-13 19:53:07.018909038 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compiler_nir.c	2026-11-13 19:48:17.875945822 -0500
+@@ -730,6 +730,24 @@
+    case nir_intrinsic_load_workgroup_id:
+       /* compute: preloaded by the hardware into the registers RA pinned them to */
+       break;
++   case nir_intrinsic_barrier:
++      if (!is_cs(c)) {
++         compile_error(c, "Unhandled NIR intrinsic type: %s\n", nir_intrinsic_infos[intr->intrinsic].name);
++         break;
++      }
++      /* compute: an execution barrier across the workgroup is one BARRIER instruction (no operands; words
++       * 0x2a, 0, 0, 0 as Mesa's ISA test vector and the 2023 etnaviv-opencl compiler, i.e. with pmode set); the
++       * driver then allocates the workgroup's threads together (VIVS_CL_THREAD_ALLOCATION). Memory-only
++       * barriers emit nothing, as in 2023: there is a single shader core, and all memory goes through its L1.
++       */
++      if (nir_intrinsic_execution_scope(intr) >= SCOPE_WORKGROUP) {
++         emit_inst(c, &(struct etna_inst) {
++            .opcode = ISA_OPC_BARRIER,
++            .pmode = 1,
++         });
++         c->variant->has_barriers = true;
++      }
++      break;
+    case nir_intrinsic_load_front_face:
+    case nir_intrinsic_load_frag_coord:
+       break;
+@@ -1082,6 +1100,30 @@
+          case nir_instr_type_intrinsic: {
+             nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
+ 
++            /* compute: the shared-memory base address and the workgroup counts are uniforms filled by the
++             * driver at launch (etna_compute_uniforms_write)
++             */
++            if (intr->intrinsic == nir_intrinsic_load_shared_base_ptr ||
++                intr->intrinsic == nir_intrinsic_load_num_workgroups) {
++               if (intr->def.bit_size != 32) {
++                  compile_error(c, "%s: %u-bit not supported\n", nir_intrinsic_infos[intr->intrinsic].name,
++                                intr->def.bit_size);
++                  break;
++               }
++
++               nir_const_value value[3];
++               for (unsigned i = 0; i < intr->def.num_components; i++)
++                  value[i] = intr->intrinsic == nir_intrinsic_load_shared_base_ptr ?
++                             CONST_VAL(ETNA_UNIFORM_SHARED_ADDR, 0) : CONST_VAL(ETNA_UNIFORM_GROUP_COUNT, i);
++
++               b.cursor = nir_after_instr(instr);
++               nir_def *def = nir_build_imm(&b, intr->def.num_components, 32, value);
++
++               nir_def_rewrite_uses(&intr->def, def);
++               nir_instr_remove(instr);
++               break;
++            }
++
+             /* compute: kernel arguments become uniforms filled by the driver from the kernel input buffer */
+             if (intr->intrinsic == nir_intrinsic_load_kernel_input) {
+                nir_const_value *off = nir_src_as_const_value(intr->src[0]);
+@@ -1305,6 +1347,79 @@
+    return 4;
+ }
+ 
++/* compute: shared (workgroup-local) memory is emulated in DDR, as the 2023 etnaviv-opencl driver did: the driver
++ * allocates one slice of v->shared_size bytes per workgroup of a grid, and a workgroup's slice starts at
++ *    shared base + (id.x + count.x * (id.y + count.y * id.z)) * shared_size
++ * The slice address is computed once at the start of the shader; shared loads/stores become global loads/stores on
++ * slice + offset (the path proven on the NPU's shader core). load_shared_base_ptr and load_num_workgroups become
++ * driver-filled uniforms in emit_shader. Barriers that order shared memory now also order global memory, so no pass
++ * moves the lowered accesses across them.
++ */
++static nir_def *
++etna_shared_slot(nir_builder *b, unsigned shared_size)
++{
++   nir_def *id = nir_load_workgroup_id(b);
++   nir_def *count = nir_load_num_workgroups(b);
++   nir_def *yz = nir_iadd(b, nir_channel(b, id, 1), nir_imul(b, nir_channel(b, count, 1), nir_channel(b, id, 2)));
++   nir_def *linear = nir_iadd(b, nir_channel(b, id, 0), nir_imul(b, nir_channel(b, count, 0), yz));
++
++   return nir_iadd(b, nir_load_shared_base_ptr(b, 1, 32), nir_imul_imm(b, linear, shared_size));
++}
++
++static bool
++etna_lower_shared_to_global(nir_shader *s, unsigned shared_size)
++{
++   nir_function_impl *impl = nir_shader_get_entrypoint(s);
++   nir_builder b = nir_builder_create(impl);
++   nir_def *slot = NULL;
++   bool progress = false;
++
++   nir_foreach_block(block, impl) {
++      nir_foreach_instr_safe(instr, block) {
++         if (instr->type != nir_instr_type_intrinsic)
++            continue;
++
++         nir_intrinsic_instr *intr = nir_instr_as_intrinsic(instr);
++
++         if (intr->intrinsic == nir_intrinsic_barrier) {
++            nir_variable_mode modes = nir_intrinsic_memory_modes(intr);
++            if (modes & nir_var_mem_shared)
++               nir_intrinsic_set_memory_modes(intr, modes | nir_var_mem_global);
++            continue;
++         }
++
++         if (intr->intrinsic != nir_intrinsic_load_shared && intr->intrinsic != nir_intrinsic_store_shared)
++            continue;
++
++         if (!slot) {
++            b.cursor = nir_before_impl(impl);
++            slot = etna_shared_slot(&b, shared_size);
++         }
++
++         b.cursor = nir_before_instr(instr);
++         const bool is_load = intr->intrinsic == nir_intrinsic_load_shared;
++         nir_def *offset = intr->src[is_load ? 0 : 1].ssa;
++         nir_def *addr = nir_iadd(&b, slot, nir_iadd_imm(&b, offset, nir_intrinsic_base(intr)));
++
++         if (is_load) {
++            nir_def *def = nir_load_global(&b, intr->def.num_components, intr->def.bit_size, addr,
++                                           .align_mul = nir_intrinsic_align_mul(intr),
++                                           .align_offset = nir_intrinsic_align_offset(intr));
++            nir_def_replace(&intr->def, def);
++         } else {
++            nir_store_global(&b, intr->src[0].ssa, addr,
++                             .write_mask = nir_intrinsic_write_mask(intr),
++                             .align_mul = nir_intrinsic_align_mul(intr),
++                             .align_offset = nir_intrinsic_align_offset(intr));
++            nir_instr_remove(instr);
++         }
++         progress = true;
++      }
++   }
++
++   return nir_progress(progress, impl, nir_metadata_control_flow);
++}
++
+ bool
+ etna_compile_shader(struct etna_shader_variant *v)
+ {
+@@ -1381,6 +1496,12 @@
+    NIR_PASS(_, s, nir_lower_io, nir_var_shader_in | nir_var_uniform, etna_glsl_type_size,
+             (nir_lower_io_options)0);
+ 
++   if (mesa_shader_stage_is_compute(s->info.stage)) {
++      /* the driver allocates the slices; keep them 16-byte aligned like the vec4 accesses into them */
++      v->shared_size = align(s->info.shared_size, 16);
++      NIR_PASS(_, s, etna_lower_shared_to_global, v->shared_size);
++   }
++
+    NIR_PASS(_, s, nir_lower_vars_to_ssa);
+    NIR_PASS(_, s, nir_lower_indirect_derefs_to_if_else_trees, nir_var_all,
+             UINT32_MAX);
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_compute.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compute.c
+--- step4/src/gallium/drivers/etnaviv/etnaviv_compute.c	2026-11-13 19:53:07.005575721 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_compute.c	2026-11-13 19:47:38.635995228 -0500
+@@ -298,6 +298,19 @@
+          etna_cmd_stream_emit(stream, val < 3 ? info->grid[val] : 0);
+          break;
+ 
++      case ETNA_UNIFORM_SHARED_ADDR:
++         if (ctx->compute_shared) {
++            etna_cmd_stream_reloc(stream, &(struct etna_reloc) {
++               .bo = etna_buffer_resource(ctx->compute_shared)->bo,
++               .flags = ETNA_RELOC_READ | ETNA_RELOC_WRITE,
++               .offset = 0,
++            });
++         } else {
++            etna_cmd_stream_emit(stream, 0);
++            ok = false;
++         }
++         break;
++
+       case ETNA_UNIFORM_UBO_ADDR:
+          if (cb[val].buffer) {
+             etna_cmd_stream_reloc(stream, &(struct etna_reloc) {
+@@ -329,6 +342,75 @@
+    return ok;
+ }
+ 
++/* The checks of etna_compute_uniforms_write, made before anything is emitted: a uniform the driver can't fill
++ * would be written as 0, and a zero address sends the shader to unmapped memory (an MMU fault), so such a grid is
++ * refused instead.
++ */
++static bool
++etna_compute_uniforms_check(struct etna_context *ctx, const struct etna_shader_variant *v)
++{
++   const struct etna_shader_uniform_info *uinfo = &v->uniforms;
++   const struct pipe_constant_buffer *cb = ctx->constant_buffer[MESA_SHADER_COMPUTE].cb;
++
++   for (uint32_t i = 0; i < uinfo->count; i++) {
++      const uint32_t val = uinfo->data[i];
++
++      switch (uinfo->contents[i]) {
++      case ETNA_UNIFORM_CONSTANT:
++      case ETNA_UNIFORM_GROUP_COUNT:
++      case ETNA_UNIFORM_UNUSED:
++         break;
++      case ETNA_UNIFORM_KERNEL_ARG: {
++         const unsigned offset = ETNA_KERNEL_ARG_OFFSET(val), size = ETNA_KERNEL_ARG_SIZE(val);
++         if (!cb[0].user_buffer || size > 4 || offset + size > cb[0].buffer_size)
++            return false;
++         break;
++      }
++      case ETNA_UNIFORM_UNIFORM:
++         if (!cb[0].user_buffer || (val + 1) * 4 > cb[0].buffer_size)
++            return false;
++         break;
++      case ETNA_UNIFORM_UBO_ADDR:
++         if (!cb[val].buffer)
++            return false;
++         break;
++      case ETNA_UNIFORM_SHARED_ADDR:
++         if (!v->shared_size || !ctx->compute_shared)
++            return false;
++         break;
++      default:
++         return false;
++      }
++   }
++
++   return true;
++}
++
++/* Shared memory of a grid: one slice of v->shared_size bytes per workgroup, in one buffer that grows as needed and
++ * is kept for later grids (see etna_lower_shared_to_global for the addressing).
++ */
++static bool
++etna_compute_shared_alloc(struct etna_context *ctx, const struct etna_shader_variant *v,
++                          const struct pipe_grid_info *info)
++{
++   if (!v->shared_size)
++      return true;
++
++   const uint64_t groups = (uint64_t)info->grid[0] * info->grid[1] * info->grid[2];
++   const uint64_t bytes = groups * v->shared_size;
++
++   if (bytes > ctx->base.screen->compute_caps.max_global_size)
++      return false;
++
++   if (!ctx->compute_shared || ctx->compute_shared->width0 < bytes) {
++      pipe_resource_reference(&ctx->compute_shared, NULL);
++      ctx->compute_shared = pipe_buffer_create(ctx->base.screen, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT,
++                                               MAX2(bytes, 4096));
++   }
++
++   return ctx->compute_shared != NULL;
++}
++
+ static void
+ etna_compute_dump_shader(const struct etna_shader_variant *v)
+ {
+@@ -503,6 +585,11 @@
+       return;
+    }
+ 
++   if (info->variable_shared_mem) {
++      BUG("variable shared memory is not supported");
++      return;
++   }
++
+    if (info->work_dim < 1 || info->work_dim > 3 ||
+        info->block[0] * info->block[1] * info->block[2] > caps->max_threads_per_block) {
+       BUG("unsupported grid: %u dimensions, block %ux%ux%u", info->work_dim,
+@@ -527,6 +614,16 @@
+       return;
+    }
+ 
++   if (!etna_compute_shared_alloc(ctx, v, info)) {
++      BUG("shared memory allocation failed (%u bytes per workgroup)", v->shared_size);
++      return;
++   }
++
++   if (!etna_compute_uniforms_check(ctx, v)) {
++      BUG("compute uniforms can't be filled (kernel input buffer missing or too small?): grid refused");
++      return;
++   }
++
+    if (!etna_icache_upload_shader(ctx, v)) {
+       BUG("compute shader upload failed");
+       return;
+@@ -551,6 +648,9 @@
+          etna_compute_use_buffer(ctx, info->globals[i]);
+    }
+ 
++   if (v->shared_size)
++      etna_compute_use_buffer(ctx, ctx->compute_shared);
++
+    etna_emit_compute_state(ctx, info, value_order);
+    ctx->compute_in_stream = true;
+ 
+@@ -583,5 +683,7 @@
+    for (unsigned i = 0; i < ETNA_MAX_GLOBAL_BUFFERS; i++)
+       pipe_resource_reference(&ctx->global_bindings.buf[i], NULL);
+ 
++   pipe_resource_reference(&ctx->compute_shared, NULL);
++
+    ctx->global_bindings.enabled_mask = 0;
+ }
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_context.h mesa-compute/src/gallium/drivers/etnaviv/etnaviv_context.h
+--- step4/src/gallium/drivers/etnaviv/etnaviv_context.h	2026-11-13 19:53:07.008909051 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_context.h	2026-11-13 19:44:38.602885075 -0500
+@@ -133,6 +133,8 @@
+    ETNA_UNIFORM_KERNEL_ARG,
+    /* compute: number of workgroups in dimension data (0..2) */
+    ETNA_UNIFORM_GROUP_COUNT,
++   /* compute: GPU address of the launch's shared-memory buffer (one slice per workgroup, see etnaviv_compute.c) */
++   ETNA_UNIFORM_SHARED_ADDR,
+ };
+ 
+ /* data of an ETNA_UNIFORM_KERNEL_ARG uniform: byte offset into the kernel input buffer (bits 0..23) and the
+@@ -229,6 +231,8 @@
+    struct etna_index_buffer index_buffer;
+    struct etna_shader_state shader;
+    struct etna_global_bindings_stateobj global_bindings;
++   /* compute: shared (workgroup-local) memory, emulated in DDR with one slice per workgroup; grows, never shrinks */
++   struct pipe_resource *compute_shared;
+ 
+    /* saved parameter-like state. these are mainly kept around for the blitter */
+    struct pipe_framebuffer_state framebuffer_s;
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_screen.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_screen.c
+--- step4/src/gallium/drivers/etnaviv/etnaviv_screen.c	2026-11-13 19:53:07.008909051 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_screen.c	2026-11-13 19:47:38.639328557 -0500
+@@ -259,8 +259,9 @@
+    caps->max_block_size[2] = 256;
+    caps->max_threads_per_block =
+    caps->max_variable_threads_per_block = 256;
+-   /* no shared (local) memory yet */
+-   caps->max_local_size = 0;
++   /* shared (local) memory is emulated in DDR, one slice per workgroup (etnaviv_compute.c); 32 KiB per workgroup
++    * is OpenCL's full-profile minimum */
++   caps->max_local_size = 32 * 1024;
+    /* not known to the driver; the A311D's NPU runs at 800 MHz */
+    caps->max_clock_frequency = 800;
+    caps->max_compute_units = MAX2(screen->info->gpu.shader_core_count, 1);
+diff -ruN step4/src/gallium/drivers/etnaviv/etnaviv_uniforms.c mesa-compute/src/gallium/drivers/etnaviv/etnaviv_uniforms.c
+--- step4/src/gallium/drivers/etnaviv/etnaviv_uniforms.c	2026-11-13 19:53:07.015575709 -0500
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_uniforms.c	2026-11-13 19:44:38.606218404 -0500
+@@ -194,6 +194,7 @@
+ 
+       case ETNA_UNIFORM_KERNEL_ARG:
+       case ETNA_UNIFORM_GROUP_COUNT:
++      case ETNA_UNIFORM_SHARED_ADDR:
+          /* compute only, written by etna_compute_uniforms_write */
+          assert(!"compute uniform in a graphics shader");
+          etna_cmd_stream_emit(stream, 0);

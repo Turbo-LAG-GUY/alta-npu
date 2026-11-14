@@ -1,0 +1,11 @@
+label: STRIP16-sram
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/npu_detail_test.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_960x28.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_reference_960x28.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.485b4624-1gib-cap -n 20
+cwd: /home/jordan/alta-npu
+start: 2026-11-12T09:29:25-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1369
+deadline_s: 120
+journal_cursor: s=34e9d89724f14199ba3108e469c360c3;i=ef984;b=46d8402b9c78431a93b36209e5da1d3c;m=db6fae557;t=6601523636cdb;x=59690143f3d52eeb
+ETNA_ML_AXI_SRAM=all
+end: 2026-11-12T09:29:27-05:00  rc: 0  wall_s: 2

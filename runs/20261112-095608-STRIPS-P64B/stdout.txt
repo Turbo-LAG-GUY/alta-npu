@@ -1,0 +1,19 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.ba78010c-strips",
+ "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_64x64.tflite",
+ "setup_ms": 20.1,
+ "invoke_ms": [
+  0.48,
+  0.29,
+  0.3,
+  0.25,
+  0.29
+ ],
+ "invoke_ms_median": 0.29,
+ "diff_vs_cpu_mean": 53.06,
+ "diff_vs_cpu_p999": 186.0,
+ "diff_vs_cpu_max": 239,
+ "output_mean": 80.255,
+ "output_std": 62.727,
+ "match": false
+}

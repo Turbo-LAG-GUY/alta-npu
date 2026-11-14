@@ -1,0 +1,29 @@
+[10715.155944] pid=111038 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x4.tflite | npu=active irqs=40931
+[10715.167410] pid=111038 load_delegate: begin | npu=active irqs=40931
+[10715.201618] pid=111038 load_delegate: done | npu=active irqs=40931
+[10715.205278] pid=111038 Interpreter(): begin | npu=active irqs=40931
+[10715.568055] pid=111038 Interpreter(): done | npu=active irqs=40931
+[10715.583472] pid=111038 allocate_tensors: begin | npu=active irqs=40931
+[10715.600110] pid=111038 allocate_tensors: done (394.8 ms) | npu=active irqs=40931
+[10715.625373] pid=111038 input set | npu=active irqs=40931
+[10715.641635] pid=111038 invoke 1/10: begin | npu=active irqs=40931
+[10715.775782] pid=111038 invoke 1/10: done (122.15 ms) | npu=active irqs=40933
+[10715.792555] pid=111038 invoke 2/10: begin | npu=active irqs=40933
+[10715.934159] pid=111038 invoke 2/10: done (133.54 ms) | npu=active irqs=40934
+[10715.951387] pid=111038 invoke 3/10: begin | npu=active irqs=40934
+[10716.085408] pid=111038 invoke 3/10: done (121.33 ms) | npu=active irqs=40935
+[10716.103227] pid=111038 invoke 4/10: begin | npu=active irqs=40935
+[10716.245690] pid=111038 invoke 4/10: done (127.37 ms) | npu=active irqs=40936
+[10716.264684] pid=111038 invoke 5/10: begin | npu=active irqs=40936
+[10716.409137] pid=111038 invoke 5/10: done (136.62 ms) | npu=active irqs=40937
+[10716.421649] pid=111038 invoke 6/10: begin | npu=active irqs=40937
+[10716.559759] pid=111038 invoke 6/10: done (129.72 ms) | npu=active irqs=40938
+[10716.567984] pid=111038 invoke 7/10: begin | npu=active irqs=40938
+[10716.699072] pid=111038 invoke 7/10: done (121.59 ms) | npu=active irqs=40939
+[10716.714811] pid=111038 invoke 8/10: begin | npu=active irqs=40939
+[10716.870338] pid=111038 invoke 8/10: done (142.74 ms) | npu=active irqs=40940
+[10716.890438] pid=111038 invoke 9/10: begin | npu=active irqs=40940
+[10717.025023] pid=111038 invoke 9/10: done (122.46 ms) | npu=active irqs=40941
+[10717.039587] pid=111038 invoke 10/10: begin | npu=active irqs=40941
+[10717.179798] pid=111038 invoke 10/10: done (122.77 ms) | npu=active irqs=40942
+[10717.350125] pid=111038 finished | npu=active irqs=40942

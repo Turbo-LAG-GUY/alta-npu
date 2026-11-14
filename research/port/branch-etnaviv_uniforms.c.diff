@@ -1,0 +1,341 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_uniforms.c b/src/gallium/drivers/etnaviv/etnaviv_uniforms.c
+index 92d5665e973..2daefb24dce 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_uniforms.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_uniforms.c
+@@ -60,43 +60,289 @@ get_texrect_scale(const struct etna_context *ctx, bool frag,
+    return fui(1.0f / dim);
+ }
+ 
++static uint32_t
++get_dimension(struct pipe_resource *resource, enum etna_uniform_contents contents, uint32_t index)
++{
++   /* TODO: The blob seems to shove more than one value in order to save uniform registers */
++   switch (contents) {
++      case ETNA_UNIFORM_SAMPLER_WIDTH:
++      case ETNA_UNIFORM_IMAGE_WIDTH:
++         return resource->width0;
++      case ETNA_UNIFORM_SAMPLER_HEIGHT:
++      case ETNA_UNIFORM_IMAGE_HEIGHT:
++         return resource->height0;
++      case ETNA_UNIFORM_SAMPLER_DEPTH:
++      case ETNA_UNIFORM_IMAGE_DEPTH:
++         return resource->depth0;
++      default:
++         unreachable("Invalid uniform content type");
++   }
++}
++
++static unsigned
++get_format_type(const struct util_format_description *desc)
++{
++   switch(desc->channel[0].type) {
++      case UTIL_FORMAT_TYPE_SIGNED:
++         switch(desc->channel[0].size) {
++            case 8:
++               return CL_CHANNEL_TYPE_SINT8;
++            case 16:
++               return CL_CHANNEL_TYPE_SINT16;
++            case 32:
++               return CL_CHANNEL_TYPE_SINT32;
++            default:
++               unreachable("Unhandled channel size for signed integers.");
++         }
++      case UTIL_FORMAT_TYPE_UNSIGNED:
++         switch(desc->channel[0].size) {
++            case 8:
++               return CL_CHANNEL_TYPE_UINT8;
++            case 16:
++               return CL_CHANNEL_TYPE_UINT16;
++            case 32:
++               return CL_CHANNEL_TYPE_UINT32;
++            default:
++               unreachable("Unhandled channel size for unsigned integers.");
++         }
++      case UTIL_FORMAT_TYPE_FLOAT:
++         switch(desc->channel[0].size) {
++            case 16:
++               return CL_CHANNEL_TYPE_HALF;
++            case 32:
++               return CL_CHANNEL_TYPE_FLOAT;
++            default:
++               unreachable("Unhandled channel size for floats.");
++         }
++      default:
++         unreachable("Unhandled channel type.");
++   }
++}
++
++static unsigned
++get_channel_order(const struct util_format_description *desc)
++{
++   if (desc->swizzle[0] == PIPE_SWIZZLE_X &&
++       desc->swizzle[1] == PIPE_SWIZZLE_Y &&
++       desc->swizzle[2] == PIPE_SWIZZLE_Z &&
++       desc->swizzle[3] == PIPE_SWIZZLE_W)
++      return CL_CHANNEL_ORDER_RGBA;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_Z &&
++       desc->swizzle[1] == PIPE_SWIZZLE_Y &&
++       desc->swizzle[2] == PIPE_SWIZZLE_X &&
++       desc->swizzle[3] == PIPE_SWIZZLE_W)
++      return CL_CHANNEL_ORDER_BGRA;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_X &&
++       desc->swizzle[1] == PIPE_SWIZZLE_Y &&
++       desc->swizzle[2] == PIPE_SWIZZLE_Z &&
++       desc->swizzle[3] == PIPE_SWIZZLE_1)
++      return CL_CHANNEL_ORDER_RGB;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_X &&
++       desc->swizzle[1] == PIPE_SWIZZLE_Y &&
++       desc->swizzle[2] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[3] == PIPE_SWIZZLE_1)
++      return CL_CHANNEL_ORDER_RG;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_X &&
++       desc->swizzle[1] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[2] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[3] == PIPE_SWIZZLE_Y)
++      return CL_CHANNEL_ORDER_RA;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_X &&
++       desc->swizzle[1] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[2] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[3] == PIPE_SWIZZLE_1)
++      return CL_CHANNEL_ORDER_R;
++   else if (desc->swizzle[0] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[1] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[2] == PIPE_SWIZZLE_0 &&
++       desc->swizzle[3] == PIPE_SWIZZLE_X)
++      return CL_CHANNEL_ORDER_A;
++   else {
++      unreachable("Unhandled channel order.");
++   }
++}
++
++static unsigned
++get_bpp_value(const struct util_format_description *desc)
++{
++   switch(desc->block.bits / 8) {
++      case 16:
++         return 0x4;
++      case 8:
++         return 0x3;
++      case 4:
++         return 0x2;
++      case 2:
++         return 0x1;
++      case 1:
++         return 0x0;
++      default:
++         unreachable("Unhandled block bit size");
++   }
++}
++
++static unsigned
++get_amode(const struct pipe_sampler_state *sampler)
++{
++   /* OpenCL supports only a single addressing mode per sampler, so use `r` */
++   switch(sampler->wrap_r) {
++      case 0:
++         return 0;
++      case PIPE_TEX_WRAP_CLAMP_TO_BORDER:
++         return 1;
++      case PIPE_TEX_WRAP_CLAMP_TO_EDGE:
++         return 3;
++      /* PIPE_TEX_WRAP_*_REPEAT are implemented in the kernel */
++      default:
++            unreachable("Unhandled block bit size");
++   }
++}
++
+ void
+ etna_uniforms_write(const struct etna_context *ctx,
+                     const struct etna_shader_variant *sobj,
+-                    struct pipe_constant_buffer *cb)
++                    struct pipe_constant_buffer *cb,
++                    const struct pipe_grid_info *grid)
+ {
+    struct etna_screen *screen = ctx->screen;
+    struct etna_cmd_stream *stream = ctx->stream;
+    const struct etna_shader_uniform_info *uinfo = &sobj->uniforms;
+-   bool frag = (sobj == ctx->shader.fs);
+-   uint32_t base = frag ? screen->specs.ps_uniforms_offset : screen->specs.vs_uniforms_offset;
++   uint32_t base;
+    unsigned idx;
+ 
+    if (!uinfo->count)
+       return;
+ 
+-   etna_cmd_stream_reserve(stream, align(uinfo->count + 1, 2));
+-   etna_emit_load_state(stream, base >> 2, uinfo->count, 0);
++   if(sobj == ctx->shader.fs)
++      base = screen->specs.ps_uniforms_offset;
++   else if(sobj == ctx->shader.vs)
++      base = screen->specs.vs_uniforms_offset;
++   else if(sobj == ctx->shader.compute)
++      base = screen->specs.cs_uniforms_offset;
++   else
++      unreachable("Invalid shader object");
++
++   etna_cmd_stream_reserve(stream, align(uinfo->count + 1 + uinfo->count % 4, 2));
+ 
+    for (uint32_t i = 0; i < uinfo->count; i++) {
+       uint32_t val = uinfo->data[i];
+ 
++      if (i % 4 == 0) {
++         if (i > 0)
++            etna_cmd_stream_emit(stream, VIV_FE_NOP_HEADER_OP_NOP);
++         etna_emit_load_state(stream, (base >> 2) + i, MIN2(uinfo->count - i, 4), 0);
++      }
++
+       switch (uinfo->contents[i]) {
+       case ETNA_UNIFORM_CONSTANT:
+          etna_cmd_stream_emit(stream, val);
+          break;
+ 
+       case ETNA_UNIFORM_UNIFORM:
+-         assert(cb->user_buffer && val * 4 < cb->buffer_size);
+-         etna_cmd_stream_emit(stream, ((uint32_t*) cb->user_buffer)[val]);
++         if (sobj == ctx->shader.compute) {
++            unsigned offset = 0;
++            offset = val / 4;  /* To bytes */
++
++            uint8_t *buf = ((uint8_t *)cb->user_buffer) + offset;
++            if (uinfo->sizes[i] == 8)
++               val = *((uint8_t *)buf);
++            else if (uinfo->sizes[i] == 16)
++               val = *((uint16_t *)buf);
++            else if (uinfo->sizes[i] == 32)
++               val = *((uint32_t *)buf);
++
++            etna_cmd_stream_emit(stream, val);
++         } else {
++            assert(cb->user_buffer && val * 4 < cb->buffer_size);
++            etna_cmd_stream_emit(stream, ((uint32_t*) cb->user_buffer)[val]);
++         }
+          break;
+ 
+       case ETNA_UNIFORM_TEXRECT_SCALE_X:
+       case ETNA_UNIFORM_TEXRECT_SCALE_Y:
+          etna_cmd_stream_emit(stream,
+-            get_texrect_scale(ctx, frag, uinfo->contents[i], val));
++            get_texrect_scale(ctx, sobj == ctx->shader.fs, uinfo->contents[i], val));
+          break;
+ 
++      case ETNA_UNIFORM_SAMPLER_WIDTH:
++      case ETNA_UNIFORM_SAMPLER_HEIGHT:
++      case ETNA_UNIFORM_SAMPLER_DEPTH: {
++         struct pipe_resource *resource = ctx->sampler_view[val]->texture;
++         etna_cmd_stream_emit(stream, get_dimension(resource, uinfo->contents[i], val));
++      } break;
++
++      case ETNA_UNIFORM_SAMPLER_ADDRESS: {
++         struct pipe_resource *resource = ctx->sampler_view[val]->texture;
++         struct etna_bo *bo = etna_resource(resource)->bo;
++         etna_cmd_stream_ref_bo(stream, bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);  /* TODO: Optimize? */
++         etna_cmd_stream_emit(stream, etna_bo_gpu_va(bo));
++      } break;
++
++      case ETNA_UNIFORM_SAMPLER_STRIDE: {
++         struct pipe_resource *resource = ctx->sampler_view[val]->texture;
++         etna_cmd_stream_emit(stream, etna_resource(resource)->levels[0].stride);
++      } break;
++
++      case ETNA_UNIFORM_SAMPLER_SIZE: {
++         struct pipe_resource *resource = ctx->sampler_view[val]->texture;
++         etna_cmd_stream_emit(stream, resource->height0 << 16 | resource->width0);
++      } break;
++
++      case ETNA_UNIFORM_SAMPLER_FORMAT: {
++         unsigned texture_index = val & 0xffff0000;
++         unsigned sampler_index = val >> 16;
++         struct pipe_resource *resource = ctx->sampler_view[texture_index]->texture;
++         const struct util_format_description *desc = util_format_description(resource->format);
++         etna_cmd_stream_emit(stream, CL_SAMPLER_FORMAT_BPP(get_bpp_value(desc)) |
++                                      CL_SAMPLER_FORMAT_AMODE(get_amode(ctx->sampler[sampler_index])) |
++                                      CL_SAMPLER_FORMAT_TYPE(get_format_type(desc)) |
++                                      COND(desc->is_unorm || desc->is_snorm, CL_SAMPLER_FORMAT_NORMALIZED) |
++                                      CL_SAMPLER_FORMAT_UNK10(0x4) |
++                                      CL_SAMPLER_FORMAT_CHANNEL_ORDER(get_channel_order(desc)));
++      } break;
++
++      case ETNA_UNIFORM_IMAGE_WIDTH:
++      case ETNA_UNIFORM_IMAGE_HEIGHT:
++      case ETNA_UNIFORM_IMAGE_DEPTH: {
++         struct pipe_resource *resource = ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].resource;
++         etna_cmd_stream_emit(stream, get_dimension(resource, uinfo->contents[i], val));
++      } break;
++
++      case ETNA_UNIFORM_IMAGE_ADDRESS: {
++         struct pipe_resource *resource = ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].resource;
++         struct etna_bo *bo = etna_resource(resource)->bo;
++         etna_cmd_stream_ref_bo(stream, bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);  /* TODO: Optimize? */
++         etna_cmd_stream_emit(stream, etna_bo_gpu_va(bo));
++      } break;
++
++      case ETNA_UNIFORM_IMAGE_STRIDE: {
++         struct pipe_resource *resource = ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].resource;
++         etna_cmd_stream_emit(stream, etna_resource(resource)->levels[0].stride);
++      } break;
++
++      case ETNA_UNIFORM_IMAGE_SIZE: {
++         struct pipe_resource *resource = ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].resource;
++         etna_cmd_stream_emit(stream, resource->height0 << 16 | resource->width0);
++      } break;
++
++      case ETNA_UNIFORM_IMAGE_FORMAT: {
++         struct pipe_resource *resource = ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].resource;
++         const struct util_format_description *desc = util_format_description(resource->format);
++
++         unsigned amode;
++         if (ctx->shader_images[PIPE_SHADER_COMPUTE].si[val].access == PIPE_IMAGE_ACCESS_READ)
++            amode = get_amode(ctx->sampler[val]);
++         else
++            amode = 0;
++
++         etna_cmd_stream_emit(stream, CL_SAMPLER_FORMAT_BPP(get_bpp_value(desc)) |
++                                      CL_SAMPLER_FORMAT_AMODE(amode) |
++                                      CL_SAMPLER_FORMAT_TYPE(get_format_type(desc)) |
++                                      COND(desc->is_unorm || desc->is_snorm, CL_SAMPLER_FORMAT_NORMALIZED) |
++                                      CL_SAMPLER_FORMAT_UNK10(0x4) |
++                                      CL_SAMPLER_FORMAT_CHANNEL_ORDER(get_channel_order(desc)));
++      } break;
++
+       case ETNA_UNIFORM_UBO0_ADDR ... ETNA_UNIFORM_UBOMAX_ADDR:
+          idx = uinfo->contents[i] - ETNA_UNIFORM_UBO0_ADDR;
+          etna_cmd_stream_reloc(stream, &(struct etna_reloc) {
+@@ -105,10 +351,37 @@ etna_uniforms_write(const struct etna_context *ctx,
+             .offset = cb[idx].buffer_offset + val,
+          });
+          break;
+-
++      case ETNA_UNIFORM_SHARED: {
++         assert(sobj == ctx->shader.compute);
++         struct etna_bo *bo = ctx->shader.compute->shader->shared_bo;
++         etna_cmd_stream_ref_bo(stream, bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++         etna_cmd_stream_emit(stream, etna_bo_gpu_va(bo));
++      } break;
++      case ETNA_UNIFORM_SHARED_SIZE: {
++         assert(sobj == ctx->shader.compute);
++         struct etna_shader *shader = ctx->shader.compute->shader;
++         etna_cmd_stream_emit(stream, shader->static_shared_mem + grid->variable_shared_mem);
++      } break;
++      case ETNA_UNIFORM_SCRATCH: {
++         assert(sobj == ctx->shader.compute);
++         struct etna_bo *bo = ctx->shader.compute->shader->scratch_bo;
++         etna_cmd_stream_ref_bo(stream, bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++         etna_cmd_stream_emit(stream, etna_bo_gpu_va(bo));
++      } break;
++      case ETNA_UNIFORM_THREAD_COUNTER: {
++         assert(sobj == ctx->shader.compute);
++         struct etna_bo *bo = ctx->shader.compute->shader->thread_counter_bo;
++         etna_cmd_stream_ref_bo(stream, bo, ETNA_RELOC_READ | ETNA_RELOC_WRITE);
++         etna_cmd_stream_emit(stream, etna_bo_gpu_va(bo));
++      } break;
++      case ETNA_UNIFORM_GROUP_COUNT:
++         etna_cmd_stream_emit(stream, grid->grid[val]);
++         break;
+       case ETNA_UNIFORM_UNUSED:
+          etna_cmd_stream_emit(stream, 0);
+          break;
++      default:
++         unreachable("Invalid uniform type.");
+       }
+    }
+ 

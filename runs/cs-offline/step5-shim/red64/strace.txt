@@ -1,0 +1,31 @@
+118016 openat(AT_FDCWD, "/home/jordan/Documents/AI_Projects/npu-shader/shim/libnpu_etna_shim.so", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libdrm.so.2", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libz.so.1", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libzstd.so.1", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libstdc++.so.6", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/lib/aarch64-linux-gnu/libgcc_s.so.1", O_RDONLY|O_CLOEXEC) = 3
+118016 openat(AT_FDCWD, "/dev/null", O_RDWR) = 4
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/possible", O_RDONLY|O_CLOEXEC) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu0/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu1/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu2/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu3/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu4/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/sys/devices/system/cpu/cpu5/cpu_capacity", O_RDONLY) = 6
+118016 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/index", O_RDWR|O_CREAT|O_CLOEXEC, 0644) = 6
+118016 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/f8/42cf7c7e0f1a1ea9cd68c11767730f54fec4df675b83fb846c17d69dede7b7", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+118016 openat(AT_FDCWD, "/dev/null", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 6
+118017 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/f8/42cf7c7e0f1a1ea9cd68c11767730f54fec4df675b83fb846c17d69dede7b7.tmp", O_WRONLY|O_CREAT|O_CLOEXEC, 0644 <unfinished ...>
+118016 ioctl(6, TCGETS, 0xfffff01a31a0) = -1 ENOTTY (Inappropriate ioctl for device)
+118017 <... openat resumed>)            = 7
+118017 openat(AT_FDCWD, "/home/jordan/.cache/mesa_shader_cache/f8/42cf7c7e0f1a1ea9cd68c11767730f54fec4df675b83fb846c17d69dede7b7", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+118016 openat(AT_FDCWD, "mesa-shader-00000000.bin", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 6
+118016 openat(AT_FDCWD, "base_submit_00000000_cmdstream", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 6
+118016 openat(AT_FDCWD, "/home/jordan/alta-npu/runs/cs-offline/step5-shim/red64/shim_submit_0000.stream", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 6
+118016 openat(AT_FDCWD, "/home/jordan/alta-npu/runs/cs-offline/step5-shim/red64/shim_submit_0000.bos", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 6
+118018 +++ exited with 0 +++
+118017 +++ exited with 0 +++
+118016 +++ exited with 0 +++

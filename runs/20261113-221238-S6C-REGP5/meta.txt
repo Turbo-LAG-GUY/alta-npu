@@ -1,0 +1,11 @@
+label: S6C-REGP5
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel regp5 -n 256 -w 64 --out /home/jordan/alta-npu/runs/cs6c-ladder-20261113-221056/REGP5
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T22:12:38-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2128
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=faec2;b=8f7f01abe08248ae908ecbfc43c3e05b;m=401289f7;t=66033e9a6d0be;x=e09e71605ee64e89
+ETNA_CS_BARRIER_REG_BUDGET=512
+end: 2026-11-13T22:12:39-05:00  rc: 0  wall_s: 1

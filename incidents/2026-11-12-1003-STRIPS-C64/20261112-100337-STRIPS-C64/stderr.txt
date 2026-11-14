@@ -1,0 +1,8 @@
+etnaviv/ml: strips: strip 0 op 0 (conv): input columns 0..35 -> output 0..34, offset -1, input plane rows 0 pitch 64, output pitch 0, tensors 14 (+0) -> 15 (+0)
+etnaviv/ml: strips: strip 0 op 1 (conv): input columns 0..34 -> output 0..33, offset -1, input plane rows 0 pitch 0, output pitch 0, tensors 15 (+0) -> 16 (+0)
+etnaviv/ml: strips: strip 0 op 2 (conv): input columns 0..33 -> output 0..32, offset -1, input plane rows 0 pitch 0, output pitch 64, tensors 16 (+0) -> 17 (+0)
+etnaviv/ml: strips: strip 1 op 0 (conv): input columns 29..64 -> output 30..64, offset 0, input plane rows 0 pitch 64, output pitch 0, tensors 18 (+29) -> 19 (+0)
+etnaviv/ml: strips: strip 1 op 1 (conv): input columns 30..64 -> output 31..64, offset 0, input plane rows 0 pitch 0, output pitch 0, tensors 19 (+0) -> 20 (+0)
+etnaviv/ml: strips: strip 1 op 2 (conv): input columns 31..64 -> output 32..64, offset 0, input plane rows 0 pitch 0, output pitch 64, tensors 20 (+0) -> 21 (+32)
+etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 columns, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 40 of 1024 KiB

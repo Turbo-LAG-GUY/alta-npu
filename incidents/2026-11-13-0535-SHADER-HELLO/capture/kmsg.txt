@@ -1,0 +1,6 @@
+# kmsg-catch start 2026-11-13T05:35:03-0500 uptime=14874.14
+[14880.379783] <3> etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[14880.380256] <3> etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00084000
+[14880.399060] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+[14880.399130] <3> etnaviv-gpu ff100000.npu: offending task: hello (/home/jordan/Documents/AI_Projects/npu-shader/hello -n 256 -w 64)
+# kmsg-catch end uptime=14891.95

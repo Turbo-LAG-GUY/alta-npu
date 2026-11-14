@@ -1,0 +1,31 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_internal.h b/src/gallium/drivers/etnaviv/etnaviv_internal.h
+index 7115abced6e..0a07f559d14 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_internal.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_internal.h
+@@ -107,6 +107,8 @@ struct etna_specs {
+    unsigned fragment_sampler_count;
+    /* number of vertex sampler units */
+    unsigned vertex_sampler_count;
++   /* number of compute sampler units */
++   unsigned compute_sampler_count;
+    /* size of vertex shader output buffer */
+    unsigned vertex_output_buffer_size;
+    /* maximum number of vertex element configurations */
+@@ -125,6 +127,8 @@ struct etna_specs {
+    uint32_t vs_uniforms_offset;
+    /* pixel shader uniforms address*/
+    uint32_t ps_uniforms_offset;
++   /* compute shader uniforms address*/
++   uint32_t cs_uniforms_offset;
+    /* vertex/fragment shader max instructions */
+    uint32_t max_instructions;
+    /* maximum number of varyings */
+@@ -135,6 +139,8 @@ struct etna_specs {
+    unsigned max_vs_uniforms;
+    /* maximum pixel uniforms */
+    unsigned max_ps_uniforms;
++   /* maximum compute uniforms */
++   unsigned max_cs_uniforms;
+    /* maximum texture size */
+    unsigned max_texture_size;
+    /* maximum texture size */

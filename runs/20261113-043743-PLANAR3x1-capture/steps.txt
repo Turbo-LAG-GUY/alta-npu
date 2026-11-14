@@ -1,0 +1,29 @@
+[11440.823952] pid=118432 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1_planar.tflite | npu=active irqs=40964
+[11440.835544] pid=118432 load_delegate: begin | npu=active irqs=40964
+[11440.871649] pid=118432 load_delegate: done | npu=active irqs=40964
+[11440.891945] pid=118432 Interpreter(): begin | npu=active irqs=40964
+[11440.995784] pid=118432 Interpreter(): done | npu=active irqs=40964
+[11441.009813] pid=118432 allocate_tensors: begin | npu=active irqs=40964
+[11441.023334] pid=118432 allocate_tensors: done (131.4 ms) | npu=active irqs=40964
+[11441.043118] pid=118432 input set | npu=active irqs=40964
+[11441.061409] pid=118432 invoke 1/10: begin | npu=active irqs=40964
+[11441.099751] pid=118432 invoke 1/10: done (22.84 ms) | npu=active irqs=40966
+[11441.105294] pid=118432 invoke 2/10: begin | npu=active irqs=40966
+[11441.133413] pid=118432 invoke 2/10: done (19.20 ms) | npu=active irqs=40967
+[11441.149692] pid=118432 invoke 3/10: begin | npu=active irqs=40967
+[11441.216253] pid=118432 invoke 3/10: done (16.53 ms) | npu=active irqs=40968
+[11441.224912] pid=118432 invoke 4/10: begin | npu=active irqs=40968
+[11441.245736] pid=118432 invoke 4/10: done (17.72 ms) | npu=active irqs=40969
+[11441.252920] pid=118432 invoke 5/10: begin | npu=active irqs=40969
+[11441.283042] pid=118432 invoke 5/10: done (17.23 ms) | npu=active irqs=40970
+[11441.292619] pid=118432 invoke 6/10: begin | npu=active irqs=40970
+[11441.316474] pid=118432 invoke 6/10: done (15.87 ms) | npu=active irqs=40971
+[11441.330729] pid=118432 invoke 7/10: begin | npu=active irqs=40971
+[11441.358295] pid=118432 invoke 7/10: done (17.51 ms) | npu=active irqs=40972
+[11441.370738] pid=118432 invoke 8/10: begin | npu=active irqs=40972
+[11441.398326] pid=118432 invoke 8/10: done (18.47 ms) | npu=active irqs=40973
+[11441.415875] pid=118432 invoke 9/10: begin | npu=active irqs=40973
+[11441.439700] pid=118432 invoke 9/10: done (16.35 ms) | npu=active irqs=40974
+[11441.444992] pid=118432 invoke 10/10: begin | npu=active irqs=40974
+[11441.470214] pid=118432 invoke 10/10: done (18.38 ms) | npu=active irqs=40975
+[11441.586062] pid=118432 finished | npu=active irqs=40975

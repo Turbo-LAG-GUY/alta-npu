@@ -1,0 +1,2 @@
+worker said: NPU_PLANAR=auto: using planar copy /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_960x540.planar.tflite | worker ready | worker frames=50 median_ms=14.70 p95_ms=19.83 max_ms=30.64
+NPU_PLANAR=auto: worker vs planar reference: max difference 2, mean 0.003

@@ -23,6 +23,14 @@ klog() {  # kernel log, with or without journal group membership
     asroot journalctl -k --no-pager -q "$@"
   fi
 }
+# Searches of $HOME skip FUSE mounts under it. xrdp (remote desktop) mounts the remote computer's drives at
+# ~/thinclient_drives; walking them goes over the network, can stall for many minutes, and lists files that are
+# not on this board.
+HOME_PRUNE=(-path "$HOME/thinclient_drives" -prune -o)
+while read -r _ mnt fstype _; do
+  case "$fstype" in fuse|fuse.*) ;; *) continue ;; esac
+  case "$mnt" in "$HOME"/*) [ "$mnt" = "$HOME/thinclient_drives" ] || HOME_PRUNE+=(-path "$mnt" -prune -o) ;; esac
+done < /proc/self/mounts
 
 sec "1. System"
 date -Is
@@ -146,7 +154,7 @@ for f in /usr/lib/teflon/libteflon.so /usr/lib/aarch64-linux-gnu/libteflon.so /u
          /usr/local/lib/aarch64-linux-gnu/libteflon.so; do
   [ -e "$f" ] && echo "  teflon: $f"
 done
-find "$HOME" -maxdepth 7 -name 'libteflon.so' -not -path '*/.cache/*' 2>/dev/null | sed 's/^/  teflon (home): /'
+find "$HOME" -maxdepth 7 "${HOME_PRUNE[@]}" -name 'libteflon.so' -not -path '*/.cache/*' -print 2>/dev/null | sed 's/^/  teflon (home): /'
 python3 -c 'import sys; print("  python", sys.version.split()[0])' 2>/dev/null
 for py in python3 "$HOME/alta-npu/venv/bin/python"; do
   for mod in tflite_runtime ai_edge_litert; do
@@ -198,12 +206,12 @@ klog -b 0 | grep -iE "$PAT" | tail -60
 sec "16. Artifacts from the earlier NPU work"
 for d in "$HOME" /usr/src /opt /usr/local/src; do
   [ -d "$d" ] || continue
-  find "$d" -maxdepth 5 \( -name '*.patch' -o -name '*.diff' -o -name 'etnaviv*.ko*' -o -iname '*teflon*' \
+  find "$d" -maxdepth 5 "${HOME_PRUNE[@]}" \( -name '*.patch' -o -name '*.diff' -o -name 'etnaviv*.ko*' -o -iname '*teflon*' \
        -o -iname '*etnaviv*' -o \( -iname '*npu*' -not -iname '*input*' \) \) -not -path '*/.cache/*' -not -path '*/node_modules/*' \
-       -not -path '*/.git/*' 2>/dev/null | head -80 | sed 's/^/  /'
+       -not -path '*/.git/*' -print 2>/dev/null | head -80 | sed 's/^/  /'
 done
 echo "--- patch/diff files that touch clock gating, 0x7120 or mutter tags"
-find "$HOME" /usr/src /usr/local/src -maxdepth 6 \( -name '*.patch' -o -name '*.diff' \) -size -2M -print0 2>/dev/null \
+find "$HOME" /usr/src /usr/local/src -maxdepth 6 "${HOME_PRUNE[@]}" \( -name '*.patch' -o -name '*.diff' \) -size -2M -print0 2>/dev/null \
   | xargs -0 -r grep -l -E '0x7120|CLOCK_GATING|enable_mlcg|mutter-device-ignore' 2>/dev/null | head -20 | sed 's/^/  /'
 echo "--- shell history hints"
 grep -h -E 'etnaviv|teflon|mutter-device|0x7120|PAN_I_WANT|modprobe|insmod|M=|CC=gcc-1[0-9]' \
