@@ -1,0 +1,257 @@
+mean requant: n 768, estimate (S*9102-299892776)>>22
+DRM etnaviv 1.4
+/dev/dri/renderD129: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: etna_ml_mean_channels
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    decl_var  INTERP_MODE_NONE none uint sum
+    decl_var  INTERP_MODE_NONE none uint sum#0
+    decl_var  INTERP_MODE_NONE none uint sum#1
+    decl_var  INTERP_MODE_NONE none uint sum#2
+    decl_var  INTERP_MODE_NONE none uint k
+    decl_var  INTERP_MODE_NONE none uint addr
+    block b0:    // preds:
+    32      %0 = load_const (0x00000000)
+    32      %1 = @load_kernel_input (%0 (0x0)) (base=0, range=24, align_mul=4, align_offset=0)
+    32      %2 = load_const (0x00000004)
+    32      %3 = @load_kernel_input (%2 (0x4)) (base=0, range=24, align_mul=4, align_offset=0)
+    32      %4 = load_const (0x00000008)
+    32      %5 = @load_kernel_input (%4 (0x8)) (base=0, range=24, align_mul=4, align_offset=0)
+    32      %6 = load_const (0x0000000c = 12)
+    32      %7 = @load_kernel_input (%6 (0xc)) (base=0, range=24, align_mul=4, align_offset=0)
+    32      %8 = load_const (0x00000010 = 16)
+    32      %9 = @load_kernel_input (%8 (0x10)) (base=0, range=24, align_mul=4, align_offset=0)
+    32     %10 = load_const (0x00000014 = 20)
+    32     %11 = @load_kernel_input (%10 (0x14)) (base=0, range=24, align_mul=4, align_offset=0)
+    32     %12 = load_const (0x0000ffff = 65535)
+    32     %13 = umin %7, %12 (0xffff)
+    32x3   %14 = @load_global_invocation_id
+    32     %15 = mov %14.x
+    32     %16 = umin %15, %11
+    32     %17 = load_const (0x00000000)
+    0      %18 = deref_var &sum (function_temp uint)
+                 @store_deref (%18, %17 (0x0)) (wrmask=x, access=none)
+    32     %19 = load_const (0x00000000)
+    0      %20 = deref_var &sum#0 (function_temp uint)
+                 @store_deref (%20, %19 (0x0)) (wrmask=x, access=none)
+    32     %21 = load_const (0x00000000)
+    0      %22 = deref_var &sum#1 (function_temp uint)
+                 @store_deref (%22, %21 (0x0)) (wrmask=x, access=none)
+    32     %23 = load_const (0x00000000)
+    0      %24 = deref_var &sum#2 (function_temp uint)
+                 @store_deref (%24, %23 (0x0)) (wrmask=x, access=none)
+    32     %25 = load_const (0x00000000)
+    0      %26 = deref_var &k (function_temp uint)
+                 @store_deref (%26, %25 (0x0)) (wrmask=x, access=none)
+    32     %27 = load_const (0x00000002)
+    32     %28 = ishl %16, %27 (0x2)
+    32     %29 = iadd %3, %28
+    0      %30 = deref_var &addr (function_temp uint)
+                 @store_deref (%30, %29) (wrmask=x, access=none)
+                 // succs: b1
+    loop {
+        block b1:    // preds: b0 b4
+        0      %31 = deref_var &k (function_temp uint)
+        32     %32 = @load_deref (%31) (access=none)
+        1      %33 = uge %32, %13
+                     // succs: b2 b3
+        if %33 {
+            block b2:// preds: b1
+            break
+            // succs: b5
+        } else {
+            block b3:  // preds: b1, succs: b4
+        }
+        block b4:    // preds: b3
+        0      %34 = deref_var &addr (function_temp uint)
+        32     %35 = @load_deref (%34) (access=none)
+        32     %36 = @load_global (%35) (access=none, align_mul=4, align_offset=0)
+        32     %37 = load_const (0x000000ff = 255)
+        32     %38 = iand %36, %37 (0xff)
+        0      %39 = deref_var &sum (function_temp uint)
+        32     %40 = @load_deref (%39) (access=none)
+        32     %41 = iadd %40, %38
+        0      %42 = deref_var &sum (function_temp uint)
+                     @store_deref (%42, %41) (wrmask=x, access=none)
+        32     %43 = load_const (0x00000008)
+        32     %44 = ushr %36, %43 (0x8)
+        32     %45 = load_const (0x000000ff = 255)
+        32     %46 = iand %44, %45 (0xff)
+        0      %47 = deref_var &sum#0 (function_temp uint)
+        32     %48 = @load_deref (%47) (access=none)
+        32     %49 = iadd %48, %46
+        0      %50 = deref_var &sum#0 (function_temp uint)
+                     @store_deref (%50, %49) (wrmask=x, access=none)
+        32     %51 = load_const (0x00000010 = 16)
+        32     %52 = ushr %36, %51 (0x10)
+        32     %53 = load_const (0x000000ff = 255)
+        32     %54 = iand %52, %53 (0xff)
+        0      %55 = deref_var &sum#1 (function_temp uint)
+        32     %56 = @load_deref (%55) (access=none)
+        32     %57 = iadd %56, %54
+        0      %58 = deref_var &sum#1 (function_temp uint)
+                     @store_deref (%58, %57) (wrmask=x, access=none)
+        32     %59 = load_const (0x00000018 = 24)
+        32     %60 = ushr %36, %59 (0x18)
+        32     %61 = load_const (0x000000ff = 255)
+        32     %62 = iand %60, %61 (0xff)
+        0      %63 = deref_var &sum#2 (function_temp uint)
+        32     %64 = @load_deref (%63) (access=none)
+        32     %65 = iadd %64, %62
+        0      %66 = deref_var &sum#2 (function_temp uint)
+                     @store_deref (%66, %65) (wrmask=x, access=none)
+        32     %67 = iadd %35, %9
+        0      %68 = deref_var &addr (function_temp uint)
+                     @store_deref (%68, %67) (wrmask=x, access=none)
+        32     %69 = load_const (0x00000001)
+        32     %70 = iadd %32, %69 (0x1)
+        0      %71 = deref_var &k (function_temp uint)
+                     @store_deref (%71, %70) (wrmask=x, access=none)
+                     // succs: b1
+    }
+    block b5:    // preds: b2
+    0      %72 = deref_var &sum (function_temp uint)
+    32     %73 = @load_deref (%72) (access=none)
+    32     %74 = load_const (0x0000238e = 9102)
+    32     %75 = imul %73, %74 (0x238e)
+    32     %76 = load_const (0xee1fffd8 = -299892776 = 3995074520)
+    32     %77 = iadd %75, %76 (0xee1fffd8)
+    32     %78 = load_const (0x00000016 = 22)
+    32     %79 = ishr %77, %78 (0x16)
+    32     %80 = load_const (0x00000000)
+    32     %81 = imax %79, %80 (0x0)
+    32     %82 = load_const (0x000000ff = 255)
+    32     %83 = imin %81, %82 (0xff)
+    32     %84 = load_const (0x00000002)
+    32     %85 = ishl %83, %84 (0x2)
+    32     %86 = iadd %5, %85
+    32     %87 = @load_global (%86) (access=none, align_mul=4, align_offset=0)
+    32     %88 = load_const (0x00000004)
+    32     %89 = iadd %86, %88 (0x4)
+    32     %90 = @load_global (%89) (access=none, align_mul=4, align_offset=0)
+    1      %91 = uge %73, %90
+    32     %92 = load_const (0x00000001)
+    32     %93 = load_const (0x00000000)
+    32     %94 = bcsel %91, %92 (0x1), %93 (0x0)
+    1      %95 = ult %73, %87
+    32     %96 = load_const (0x00000001)
+    32     %97 = load_const (0x00000000)
+    32     %98 = bcsel %95, %96 (0x1), %97 (0x0)
+    32     %99 = iadd %83, %94
+    32    %100 = isub %99, %98
+    0     %101 = deref_var &sum#0 (function_temp uint)
+    32    %102 = @load_deref (%101) (access=none)
+    32    %103 = load_const (0x0000238e = 9102)
+    32    %104 = imul %102, %103 (0x238e)
+    32    %105 = load_const (0xee1fffd8 = -299892776 = 3995074520)
+    32    %106 = iadd %104, %105 (0xee1fffd8)
+    32    %107 = load_const (0x00000016 = 22)
+    32    %108 = ishr %106, %107 (0x16)
+    32    %109 = load_const (0x00000000)
+    32    %110 = imax %108, %109 (0x0)
+    32    %111 = load_const (0x000000ff = 255)
+    32    %112 = imin %110, %111 (0xff)
+    32    %113 = load_const (0x00000002)
+    32    %114 = ishl %112, %113 (0x2)
+    32    %115 = iadd %5, %114
+    32    %116 = @load_global (%115) (access=none, align_mul=4, align_offset=0)
+    32    %117 = load_const (0x00000004)
+    32    %118 = iadd %115, %117 (0x4)
+    32    %119 = @load_global (%118) (access=none, align_mul=4, align_offset=0)
+    1     %120 = uge %102, %119
+    32    %121 = load_const (0x00000001)
+    32    %122 = load_const (0x00000000)
+    32    %123 = bcsel %120, %121 (0x1), %122 (0x0)
+    1     %124 = ult %102, %116
+    32    %125 = load_const (0x00000001)
+    32    %126 = load_const (0x00000000)
+    32    %127 = bcsel %124, %125 (0x1), %126 (0x0)
+    32    %128 = iadd %112, %123
+    32    %129 = isub %128, %127
+    32    %130 = load_const (0x00000008)
+    32    %131 = ishl %129, %130 (0x8)
+    32    %132 = ior %100, %131
+    0     %133 = deref_var &sum#1 (function_temp uint)
+    32    %134 = @load_deref (%133) (access=none)
+    32    %135 = load_const (0x0000238e = 9102)
+    32    %136 = imul %134, %135 (0x238e)
+    32    %137 = load_const (0xee1fffd8 = -299892776 = 3995074520)
+    32    %138 = iadd %136, %137 (0xee1fffd8)
+    32    %139 = load_const (0x00000016 = 22)
+    32    %140 = ishr %138, %139 (0x16)
+    32    %141 = load_const (0x00000000)
+    32    %142 = imax %140, %141 (0x0)
+    32    %143 = load_const (0x000000ff = 255)
+    32    %144 = imin %142, %143 (0xff)
+    32    %145 = load_const (0x00000002)
+    32    %146 = ishl %144, %145 (0x2)
+    32    %147 = iadd %5, %146
+    32    %148 = @load_global (%147) (access=none, align_mul=4, align_offset=0)
+    32    %149 = load_const (0x00000004)
+    32    %150 = iadd %147, %149 (0x4)
+    32    %151 = @load_global (%150) (access=none, align_mul=4, align_offset=0)
+    1     %152 = uge %134, %151
+    32    %153 = load_const (0x00000001)
+    32    %154 = load_const (0x00000000)
+    32    %155 = bcsel %152, %153 (0x1), %154 (0x0)
+    1     %156 = ult %134, %148
+    32    %157 = load_const (0x00000001)
+    32    %158 = load_const (0x00000000)
+    32    %159 = bcsel %156, %157 (0x1), %158 (0x0)
+    32    %160 = iadd %144, %155
+    32    %161 = isub %160, %159
+    32    %162 = load_const (0x00000010 = 16)
+    32    %163 = ishl %161, %162 (0x10)
+    32    %164 = ior %132, %163
+    0     %165 = deref_var &sum#2 (function_temp uint)
+    32    %166 = @load_deref (%165) (access=none)
+    32    %167 = load_const (0x0000238e = 9102)
+    32    %168 = imul %166, %167 (0x238e)
+    32    %169 = load_const (0xee1fffd8 = -299892776 = 3995074520)
+    32    %170 = iadd %168, %169 (0xee1fffd8)
+    32    %171 = load_const (0x00000016 = 22)
+    32    %172 = ishr %170, %171 (0x16)
+    32    %173 = load_const (0x00000000)
+    32    %174 = imax %172, %173 (0x0)
+    32    %175 = load_const (0x000000ff = 255)
+    32    %176 = imin %174, %175 (0xff)
+    32    %177 = load_const (0x00000002)
+    32    %178 = ishl %176, %177 (0x2)
+    32    %179 = iadd %5, %178
+    32    %180 = @load_global (%179) (access=none, align_mul=4, align_offset=0)
+    32    %181 = load_const (0x00000004)
+    32    %182 = iadd %179, %181 (0x4)
+    32    %183 = @load_global (%182) (access=none, align_mul=4, align_offset=0)
+    1     %184 = uge %166, %183
+    32    %185 = load_const (0x00000001)
+    32    %186 = load_const (0x00000000)
+    32    %187 = bcsel %184, %185 (0x1), %186 (0x0)
+    1     %188 = ult %166, %180
+    32    %189 = load_const (0x00000001)
+    32    %190 = load_const (0x00000000)
+    32    %191 = bcsel %188, %189 (0x1), %190 (0x0)
+    32    %192 = iadd %176, %187
+    32    %193 = isub %192, %191
+    32    %194 = load_const (0x00000018 = 24)
+    32    %195 = ishl %193, %194 (0x18)
+    32    %196 = ior %164, %195
+    32    %197 = load_const (0x00000002)
+    32    %198 = ishl %16, %197 (0x2)
+    32    %199 = iadd %1, %198
+                 @store_global (%196, %199) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b6
+    block b6:
+}
+
+kernel: mean, shared 0 bytes per workgroup
+GPU addresses: out 0xfffe3000 in 0xfffcb000 (98304 bytes each)
+grid: 1 dimension(s), 1 x 1 workgroups of 32 x 1 threads
+mean channels: 1x128 x 768, n 768, uint8, q 0.05/120 -> 0.03/128: 128/128 exact, 0 wrong, 0 stray bytes; first: 255 0 146 139
+{"result": "PASS", "kernel": "mean", "axes": "ch", "h": 1, "w": 128, "c": 768, "exact": 128, "outputs": 128, "wrong": 0, "stray": 0, "first_launch_ms": 0.832, "median_ms": 0.706, "launches": 10}

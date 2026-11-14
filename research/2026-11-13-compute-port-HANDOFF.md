@@ -5,7 +5,18 @@ Read first: `research/2026-11-13-etnaviv-compute-port-survey.md` (what to port a
 explicit OK for that step and only via `scripts/npu-attempt`, builds at -j2, never rebuild the kit library
 (`mesa-axi-sram/build`, sha 41b08ede).
 
-## START HERE: state at the end of the first long session (2026-11-13 22:20, boot 8f7f01ab)
+## START HERE (updated at the end of the second session, 2026-11-14 ~00:00, boot 8f7f01ab)
+
+Second session in one line: **6d global AVGPOOL on the shader core** (MobileNet in one NPU submit, 6.77 vs 7.54 ms,
+byte-identical), **6e loops/branches work** (S6E-LOOP*), **6e MEAN on the shader core** (channel + spatial, exact to the
+CPU's XNNPACK, `ETNA_ML_SHADER=mean`). Read the "Step 6d" and "Step 6e" bullets below (end of this START HERE block),
+then the **NEXT (d)** entry and the two **open findings** there. Patches added this session: research/port/
+step6d-avgpool.diff (base research/port/base-step6c), step6e-loop-harness.diff, step6e-mean.diff (base
+research/port/base-step6d); tools in research/port/tools/ (reduce_models.py, mean_fit_xnnpack.py, make_mean_tests.py,
+teflon_check.py copy). Switches can be combined: `ETNA_ML_SHADER=transpose,softmax,avgpool,mean`. Lesson from 6e:
+judge a shader op by ON vs the CPU reference (exact), not only ON vs OFF - OFF can be wrong (finding 1).
+
+### State at the end of the first long session (2026-11-13 22:20, boot 8f7f01ab)
 
 - Port tree `~/Documents/AI_Projects/mesa-compute` (never meson-regenerate its build; add sources with
   research/port/ninja_add_source.py). Patches in order: research/port/step2-driver.diff, step3-compiler.diff,
@@ -78,7 +89,52 @@ explicit OK for that step and only via `scripts/npu-attempt`, builds at -j2, nev
     256x1000 = 2.80 ms/launch (~365 MB/s strided). Loops and branches work on the shader core** (RESULTS.md S6E-LOOP*,
     runs/cs6e-loop-20261113-232209). The harness pattern: nir_local_variable_create + nir_push_loop / nir_push_if +
     nir_jump(break); keep a compile-time cap on the trip count inside the kernel.
-  - **NEXT (CPU first, then a ladder for Jordan's OK):** (a) gallium `PIPE_ML_OPERATION_TYPE_MEAN` (axes bitmask over
+  - **MEAN CPU part DONE 2026-11-13 ~23:50** (Jordan: "Start the MEAN kernel"; patch research/port/step6e-mean.diff
+    against research/port/base-step6d; build clean -j2; kit lib 41b08ede untouched): (a)-(c) below are implemented.
+    `ETNA_ML_SHADER=mean`; channel MEAN = etna_ml_shader_build_mean_channels (loop over channels, 89 instructions,
+    6 temps, kernel input out, in, table, channels, plane bytes, last thread); spatial MEAN = build_pool with the
+    table (avgpool's binary stays byte-identical to 6d); etna_ml_mean_requant builds + checks table and estimate
+    over every S; table = etna_vip_instruction.table, a third grid buffer, freed in etna_ml_shader_instruction_fini.
+    Harness `cs_run/cs_compile --kernel mean --axes ch|sp --hwc H W C [--int8] [--q IS IZ OS OZ]` (cs_run's
+    reference is an independent copy of the formula). Test models npu-shader/models/mean/ (make_mean_tests.py, copy in
+    research/port/tools): mean_ch384_u8, mean_ch768_i8, mean_sp7x7_u8 (1x1 CONV in front), mean_ch64_in_u8 (MEAN on
+    the graph input). Offline: switch off = kit streams; on = TP, NN conv, SH mean in one submit.
+    **Ladder run 1 2026-11-13 23:38 (Jordan's OK; runs/cs6e-mean-20261113-233843): kernel rungs PASS exact, 0 stray,
+    0 NPU kernel lines** (MCH384 64/64 0.33 ms, MCH768I8 32/32 0.56, MSP7 1024/1024 0.27, MCH128x768 128/128 0.71):
+    the MEAN kernels, signed shift/selects and the table as third buffer work on the NPU. **Stopped at S6E-T384-OFF**
+    (rc 3 = teflon_check mismatch, no STOP): the synthetic identity-like 1x1 CONV in front of MEAN differs on the NN
+    from the CPU (MEAN after it off by max 22 / mean 6.8 levels vs the 2.0 limit) - an NN-side deviation for that
+    weight pattern, worth a look later, not a shader issue. Fix: teflon_check --cpu-mean-limit (default 2.0 unchanged);
+    the ladder's conv-model rungs pass 32 and are judged by ON == OFF byte for byte.
+    **Run 2 23:42 (Jordan's OK, runs/cs6e-mean-20261113-234220): T384-OFF PASS (limit 32); T384-ON output EXACT vs
+    the CPU reference (diff 0) but != OFF - and OFF is the wrong one.** Correction of the note above: the NN conv is
+    fine; **etnaviv bug (kit library too): lower_operations adds the partition-output detranspose only if is_3d (H>1 &&
+    W>1 && C>1), so a [1,1,W,C] / [1,H,1,C] NN output reaches the CPU still in channel planes** (confirmed byte-exact on
+    the CPU with a numpy model of the misread). Affects transformer-shaped [1,1,T,C] partition outputs, not MobileNet.
+    Possible fix (needs Jordan's decision, it changes switch-off streams for those shapes): detranspose when C > 1 and
+    H*W > 1. Ladder revised: ON rungs must equal the CPU exactly (--cpu-mean-limit 0), OFF of [1,1,T,C] models only
+    documents the bug. **Run 3 23:45 (runs/cs6e-mean-20261113-234507): S6E-T384-ON PASS - the shader MEAN inside
+    Teflon is EXACT vs the CPU (10/10, 2.42 ms).** Stopped at the T768-OFF documentation rung: int8 [1,1,32,768] OFF
+    is off by mean 151 levels and neither the planar-misread model nor planar+128 reproduces it (read_output does
+    subtract 128), so the int8 OFF cause is open; T768-ON (exact vs CPU) will show whether the NN int8 conv is right.
+    OFF documentation rungs are now non-gating (`doc`). **Run 4 23:47 (runs/cs6e-mean-20261113-234733): T384-ON PASS
+    exact again; T768-ON rc 3: int8 OFF and ON are both all 127 - the NN's int8 conv saturates on this synthetic model**
+    (second NN-side finding, worth a look later with a real int8 model; explains the unmatched int8 OFF). int8 inside
+    Teflon is now tested without the NN: new model mean_ch64_in_i8 (int8 MEAN on the graph input, TP + SH, offline OK);
+    T768-ON checks ON == OFF only.
+  - **MEAN DONE 2026-11-13 23:53 (run 5, Jordan's OK, runs/cs6e-mean-20261113-235031 + kernel rungs of run 1): the
+    shader-core MEAN works inside Teflon.** Every ON rung exact vs the CPU (XNNPACK) where checkable: T384 (64 tokens x
+    384, uint8) 10/10 and 50/50, TSP7 (7x7x1024 spatial) 1.10 ms vs 1.73 OFF, TIN64 uint8 and TIN64I8 int8 on the graph
+    input; ON == OFF byte for byte wherever OFF is valid. 0 NPU kernel lines, no STOP. RESULTS.md S6E-M*/T*.
+  - **Open findings (not shader issues, need Jordan's decision):** (1) etnaviv skips the partition-output detranspose
+    when H or W is 1 (is_3d in lower_operations), so [1,1,T,C] NN outputs reach the CPU in channel planes - kit library
+    too; fix = detranspose when C > 1 && H*W > 1 (changes switch-off streams for those shapes). (2) The NN's int8 conv
+    saturates (all 127) on the synthetic identity-like int8 1x1 conv of mean_ch768_i8 - check with a real int8 model.
+  - **NEXT (d): the rest of a decomposed layernorm** - SQUARED_DIFFERENCE, RSQRT, MUL (elementwise, exact to XNNPACK
+    like MEAN: fit each formula against the interpreter first, research/port/tools/mean_fit_xnnpack.py shows how), then
+    a test model with the whole MEAN -> SQUARED_DIFFERENCE -> MEAN -> ADD -> RSQRT -> MUL/SUB/ADD chain. Fixing
+    finding (1) first would make the [1,1,T,C] OFF baselines meaningful. Then transpose tuning.
+  - (plan, kept for reference) (a) gallium `PIPE_ML_OPERATION_TYPE_MEAN` (axes bitmask over
     the 4 right-aligned dims + keep_dims) and tfl_device.c mapping of kTfLiteBuiltinMean (axes from the constant
     input 1, negative axes, rank remap); (b) etnaviv_ml_shader.c: threshold table builder (C, fmaf/nearbyintf, the
     formula above, verify |q0 - q| <= 1 over every S) + channel-MEAN kernel with a loop over C (thread per 4

@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-13T23:42:39-05:00 duration=300s interval=1s
+23:42:39 up=6494.49 npu=active active_ms=6482932 npu_irqs=372 cma_free_kb=1424 memavail_mb=2065 temps_c=cpu:32,ddr:34
+23:42:40 up=6495.59 npu=active active_ms=6484033 npu_irqs=372 cma_free_kb=1424 memavail_mb=2063 temps_c=cpu:31,ddr:33
+23:42:41 up=6496.72 npu=active active_ms=6485167 npu_irqs=372 cma_free_kb=1424 memavail_mb=2063 temps_c=cpu:32,ddr:34
+23:42:42 up=6497.83 npu=active active_ms=6486268 npu_irqs=372 cma_free_kb=1424 memavail_mb=2064 temps_c=cpu:31,ddr:32
+23:42:43 up=6498.97 npu=active active_ms=6487416 npu_irqs=372 cma_free_kb=1424 memavail_mb=2064 temps_c=cpu:31,ddr:32
+23:42:45 up=6500.15 npu=active active_ms=6488586 npu_irqs=372 cma_free_kb=1424 memavail_mb=2058 temps_c=cpu:33,ddr:35
+23:42:46 up=6501.26 npu=active active_ms=6489704 npu_irqs=383 cma_free_kb=1424 memavail_mb=2047 temps_c=cpu:33,ddr:35
+23:42:47 up=6502.40 npu=active active_ms=6490849 npu_irqs=383 cma_free_kb=1308 memavail_mb=2049 temps_c=cpu:32,ddr:34
+23:42:48 up=6503.52 npu=active active_ms=6491963 npu_irqs=383 cma_free_kb=1308 memavail_mb=2047 temps_c=cpu:33,ddr:36
+23:42:49 up=6504.64 npu=active active_ms=6493080 npu_irqs=383 cma_free_kb=1308 memavail_mb=2046 temps_c=cpu:32,ddr:34
+23:42:50 up=6505.78 npu=active active_ms=6494223 npu_irqs=383 cma_free_kb=1308 memavail_mb=2046 temps_c=cpu:31,ddr:33
+23:42:51 up=6506.94 npu=active active_ms=6495385 npu_irqs=383 cma_free_kb=1308 memavail_mb=2046 temps_c=cpu:31,ddr:33
+23:42:52 up=6508.06 npu=active active_ms=6496499 npu_irqs=383 cma_free_kb=1316 memavail_mb=2046 temps_c=cpu:31,ddr:33
+23:42:54 up=6509.18 npu=active active_ms=6497619 npu_irqs=383 cma_free_kb=1316 memavail_mb=2047 temps_c=cpu:31,ddr:34
+23:42:55 up=6510.28 npu=active active_ms=6498718 npu_irqs=383 cma_free_kb=1316 memavail_mb=2048 temps_c=cpu:31,ddr:33
+23:42:56 up=6511.37 npu=active active_ms=6499817 npu_irqs=383 cma_free_kb=1320 memavail_mb=2050 temps_c=cpu:30,ddr:32
+awk: close failed on file "/dev/stdout" (Broken pipe)

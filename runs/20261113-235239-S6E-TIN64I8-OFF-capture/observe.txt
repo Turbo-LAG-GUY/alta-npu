@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-13T23:52:39-05:00 duration=300s interval=1s
+23:52:39 up=7094.93 npu=active active_ms=7083366 npu_irqs=504 cma_free_kb=904 memavail_mb=2072 temps_c=cpu:32,ddr:34
+23:52:40 up=7096.05 npu=active active_ms=7084491 npu_irqs=504 cma_free_kb=908 memavail_mb=2071 temps_c=cpu:31,ddr:33
+23:52:42 up=7097.19 npu=active active_ms=7085631 npu_irqs=504 cma_free_kb=960 memavail_mb=2070 temps_c=cpu:31,ddr:32
+23:52:43 up=7098.35 npu=active active_ms=7086790 npu_irqs=504 cma_free_kb=960 memavail_mb=2070 temps_c=cpu:31,ddr:33
+23:52:44 up=7099.49 npu=active active_ms=7087934 npu_irqs=504 cma_free_kb=960 memavail_mb=2071 temps_c=cpu:31,ddr:33
+23:52:45 up=7100.62 npu=active active_ms=7089067 npu_irqs=504 cma_free_kb=1172 memavail_mb=2068 temps_c=cpu:35,ddr:35
+23:52:46 up=7101.73 npu=active active_ms=7090171 npu_irqs=504 cma_free_kb=1332 memavail_mb=2070 temps_c=cpu:33,ddr:35
+23:52:47 up=7102.86 npu=active active_ms=7091297 npu_irqs=504 cma_free_kb=1420 memavail_mb=2071 temps_c=cpu:33,ddr:34
+23:52:48 up=7103.96 npu=active active_ms=7092404 npu_irqs=504 cma_free_kb=1420 memavail_mb=2072 temps_c=cpu:31,ddr:33
+23:52:50 up=7105.08 npu=active active_ms=7093527 npu_irqs=504 cma_free_kb=1424 memavail_mb=2072 temps_c=cpu:31,ddr:33
+23:52:51 up=7106.26 npu=active active_ms=7094700 npu_irqs=504 cma_free_kb=1424 memavail_mb=2073 temps_c=cpu:31,ddr:32
+23:52:52 up=7107.38 npu=active active_ms=7095827 npu_irqs=504 cma_free_kb=1424 memavail_mb=2073 temps_c=cpu:31,ddr:32
+23:52:53 up=7108.52 npu=active active_ms=7096964 npu_irqs=504 cma_free_kb=1460 memavail_mb=2073 temps_c=cpu:32,ddr:35
+23:52:54 up=7109.61 npu=active active_ms=7098052 npu_irqs=504 cma_free_kb=1464 memavail_mb=2073 temps_c=cpu:32,ddr:34
+23:52:55 up=7110.71 npu=active active_ms=7099154 npu_irqs=504 cma_free_kb=1464 memavail_mb=2072 temps_c=cpu:31,ddr:33
+23:52:56 up=7111.84 npu=active active_ms=7100283 npu_irqs=504 cma_free_kb=1464 memavail_mb=2072 temps_c=cpu:31,ddr:33
+awk: close failed on file "/dev/stdout" (Broken pipe)

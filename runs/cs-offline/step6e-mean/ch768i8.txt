@@ -1,0 +1,27 @@
+core: GC8000 rev 0x7120 halti 5, compute_only 1, temps 64, constants 320, oneconst limit no
+mean requant: estimate (S*4779-356515840)>>20
+kernel: mean, 89 instructions, num_temps 5 (driver programs 6), uniforms 20, shared 0 bytes per workgroup, barriers no
+  input t0: load_global_invocation_id
+  input t1: -
+  input t2: -
+  u0.x: kernel_arg  offset 12 size 4
+  u0.y: constant    0x0000ffff
+  u0.z: kernel_arg  offset 20 size 4
+  u0.w: constant    0x00000004
+  u1.x: kernel_arg  offset 4 size 4
+  u1.y: constant    0x00000000
+  u1.z: constant    0x000000ff
+  u1.w: kernel_arg  offset 16 size 4
+  u2.x: constant    0x00000008
+  u2.y: constant    0x00000010
+  u2.z: constant    0x00000018
+  u2.w: constant    0x00000001
+  u3.x: constant    0x000012ab
+  u3.y: constant    0xeac00000
+  u3.z: constant    0x00000014
+  u3.w: kernel_arg  offset 8 size 4
+  u4.x: constant    0x00000100
+  u4.y: constant    0x00010000
+  u4.z: constant    0x01000000
+  u4.w: kernel_arg  offset 0 size 4
+wrote /home/jordan/alta-npu/runs/cs-offline/step6e-mean/ch768i8.bin

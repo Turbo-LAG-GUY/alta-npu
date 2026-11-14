@@ -1,0 +1,52 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_sp7x7_u8.tflite",
+ "etna_ml_shader": "mean",
+ "setup_ms": 52.1,
+ "invoke_ms": [
+  1.28,
+  1.11,
+  1.22,
+  1.43,
+  1.06,
+  1.05,
+  1.09,
+  1.1,
+  1.11,
+  1.1
+ ],
+ "invoke_ms_median": 1.1,
+ "invoke_ms_median_after_first": 1.1,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "tolerance": 0,
+ "cpu_mean_limit": 0.0,
+ "bytes_beyond_tolerance": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "match": true
+}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-235150-S6E-TSP7-ON

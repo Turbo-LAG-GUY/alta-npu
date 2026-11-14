@@ -1,0 +1,15 @@
+[ 6305.715929] pid=32328 open: begin
+[ 6305.721272] pid=32328 context: done
+[ 6305.734918] pid=32328 compute state: created
+[ 6305.747283] pid=32328 launch 1: begin
+[ 6305.763267] pid=32328 launch: begin
+[ 6305.780165] pid=32328 launch: begin
+[ 6305.786897] pid=32328 launch: begin
+[ 6305.795478] pid=32328 launch: begin
+[ 6305.797898] pid=32328 launch: begin
+[ 6305.801774] pid=32328 launch: begin
+[ 6305.806873] pid=32328 launch: begin
+[ 6305.815782] pid=32328 launch: begin
+[ 6305.822620] pid=32328 launch: begin
+[ 6305.830286] pid=32328 launches: done
+[ 6305.833928] pid=32328 finished

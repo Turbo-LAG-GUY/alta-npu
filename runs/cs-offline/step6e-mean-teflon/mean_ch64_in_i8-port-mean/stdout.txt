@@ -1,0 +1,57 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 MEAN            v2  supported   in: 0(i8) 1(i32) out: 2(i8)
+
+teflon: compiling graph: 3 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.100000 fffffffd no       1x4x4x64
+  1 0.000000   0 yes      1x1x1x1
+  2 0.080000 ffffffd8 no       1x4x4x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 MEAN            0,1                  2                   
+
+Adding transpose.
+operation 16 input tensor 3 layouts 1 2.
+Copying layout to output tensor 2.
+type 16 i 0 tensor 2 layout 1 == 2
+created resource 0x3545a930 for tensor 0 with size 1024
+created resource 0x35476880 for tensor 3 with size 1024
+Ensuring all output tensors have their memory backing.
+created resource 0x35478150 for tensor 2 with size 16
+
+dumping intermediate graph: 2 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   3
+  1 SH     3   2
+
+shader mean channels: 4x4 channels 64, n 64, estimate (S*81920-284164096)>>22, grid 1 of 4, 89 instructions, 6 temps
+teflon: compiled graph, took 6 ms
+Running the NN job took 1 ms.
+teflon: invoked graph, took 3 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "models/mean/mean_ch64_in_i8.tflite",
+ "etna_ml_shader": "mean",
+ "setup_ms": 24.1,
+ "invoke_ms": [
+  3.13
+ ],
+ "invoke_ms_median": 3.13,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 118,
+ "diff_vs_cpu_mean_worst": 89.125,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}

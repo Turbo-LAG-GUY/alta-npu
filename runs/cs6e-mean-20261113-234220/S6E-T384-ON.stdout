@@ -1,0 +1,52 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch384_u8.tflite",
+ "etna_ml_shader": "mean",
+ "setup_ms": 19.3,
+ "invoke_ms": [
+  2.61,
+  2.4,
+  2.47,
+  2.48,
+  2.43,
+  2.47,
+  2.45,
+  2.43,
+  2.64,
+  2.61
+ ],
+ "invoke_ms_median": 2.47,
+ "invoke_ms_median_after_first": 2.47,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": [
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61
+ ],
+ "tolerance": 0,
+ "cpu_mean_limit": 32.0,
+ "bytes_beyond_tolerance": [
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61,
+  61
+ ],
+ "match": false
+}
+npu-run: rc=3 record=/home/jordan/alta-npu/runs/20261113-234245-S6E-T384-ON

@@ -1,0 +1,930 @@
+# step 6e MEAN on the shader core (ETNA_ML_SHADER=mean), against research/port/base-step6d (mesa-compute at step 6d;
+# npu-shader at step 6d + the loop probe of step6e-loop-harness.diff)
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -348,7 +348,8 @@
+          if (poperation->type == PIPE_ML_OPERATION_TYPE_CONVOLUTION ||
+              poperation->type == PIPE_ML_OPERATION_TYPE_FULLY_CONNECTED ||
+              poperation->type == PIPE_ML_OPERATION_TYPE_CONCATENATION ||
+-             poperation->type == PIPE_ML_OPERATION_TYPE_POOLING)
++             poperation->type == PIPE_ML_OPERATION_TYPE_POOLING ||
++             poperation->type == PIPE_ML_OPERATION_TYPE_MEAN)
+             operation_layout = ETNA_ML_LAYOUT_NCHW;
+ 
+          if (!etna_ml_find_producer(poperations, count, poperation->input_tensors[i]->index)) {
+@@ -493,6 +494,14 @@
+             list_addtail(&operation->link, etna_operations);
+             break;
+          }
++         case PIPE_ML_OPERATION_TYPE_MEAN: {
++            /* over the channels or the spatial dimensions (etna_ml_shader_mean_supported); input 1 is the axes */
++            etna_ml_lower_mean(subgraph, poperation, operation);
++            operation->input_tensors[0] = input_tensors[0];
++            operation->output_tensors[0] = poperation->output_tensors[0]->index;
++            list_addtail(&operation->link, etna_operations);
++            break;
++         }
+          case PIPE_ML_OPERATION_TYPE_RELU: {
+             etna_ml_lower_relu(subgraph, poperation, poperation->input_tensors[0], operation);
+             operation->input_tensors[0] = input_tensors[0];
+@@ -658,6 +667,7 @@
+       case PIPE_ML_OPERATION_TYPE_TRANSPOSE:
+       case PIPE_ML_OPERATION_TYPE_SOFTMAX:
+       case PIPE_ML_OPERATION_TYPE_POOLING:
++      case PIPE_ML_OPERATION_TYPE_MEAN:
+          break;
+       default:
+          UNREACHABLE("Unsupported ML operation type");
+@@ -772,6 +782,9 @@
+       case PIPE_ML_OPERATION_TYPE_POOLING:
+          supported = etna_ml_shader_avgpool_supported(etna_ml_device_screen(pdevice), operation);
+          break;
++      case PIPE_ML_OPERATION_TYPE_MEAN:
++         supported = etna_ml_shader_mean_supported(etna_ml_device_screen(pdevice), operation);
++         break;
+       default:
+          return false;
+    }
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -43,6 +43,7 @@
+    ETNA_ML_SHADER_TRANSPOSE, /* direction in tp_type (ETNA_ML_TP_TRANSPOSE / DETRANSPOSE) */
+    ETNA_ML_SHADER_SOFTMAX,
+    ETNA_ML_SHADER_AVGPOOL, /* global average pool: input_width x input_height x input_channels -> 1x1 */
++   ETNA_ML_SHADER_MEAN,    /* TFLite MEAN over the channels or the spatial dimensions, with XNNPACK's requantization */
+ };
+ 
+ enum etna_ml_tp_type {
+@@ -101,6 +102,7 @@
+     * owned_shader, freed with the subgraph. */
+    struct etna_shader_variant *shader;
+    struct etna_shader *owned_shader;
++   struct pipe_resource *table; /* ETNA_ML_SHADER_MEAN: the requantization thresholds, a third buffer of the grid */
+    uint32_t shader_args[8];
+    unsigned work_dim;
+    unsigned grid[3];
+@@ -120,6 +122,13 @@
+    unsigned softmax_rows;
+    float softmax_factor;
+ 
++   /* ETNA_ML_SHADER_MEAN: reduced dimensions (bitmask over the 4 dims: 0x8 channels, 0x6 spatial) and the
++    * quantization in the tensors' own domain (int8 zero points as in the model, not the +128 stored form) */
++   unsigned mean_axes;
++   float mean_in_scale, mean_out_scale;
++   int mean_in_zp, mean_out_zp;
++   bool mean_signed;
++
+    bool addition;
+    bool depthwise;
+    bool pointwise;
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
+@@ -308,22 +308,30 @@
+  * division is a multiply and shift (udiv_magic). Thread g writes channels 4g..4g+3 as one word, so the output is
+  * exactly channels bytes. Kernel input: out, in.
+  */
+-nir_shader *
+-etna_ml_shader_build_avgpool(const nir_shader_compiler_options *opts, unsigned hw, unsigned channels)
++static nir_def *mean_requant_nir(nir_builder *b, nir_def *sum, nir_def *table_addr,
++                                 const struct etna_ml_mean_requant *rq);
++
++/* The pool kernel below; with rq (MEAN over the spatial dimensions) each channel's sum goes through MEAN's
++ * requantization table instead of the division, and the kernel input has a third address (the table). */
++static nir_shader *
++build_pool(const nir_shader_compiler_options *opts, unsigned hw, unsigned channels,
++           const struct etna_ml_mean_requant *rq)
+ {
+    const unsigned groups = channels / 4;
+-   uint32_t m;
+-   unsigned s;
++   const unsigned range = rq ? 12 : 8;
++   uint32_t m = 1;
++   unsigned s = 0;
+ 
+    if (!hw || hw > ETNA_ML_AVGPOOL_MAX_HW || !channels || channels % 4 ||
+-       !udiv_magic(hw, 255 * hw + hw / 2, &m, &s))
++       (!rq && !udiv_magic(hw, 255 * hw + hw / 2, &m, &s)))
+       return NULL;
+ 
+-   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "etna_ml_avgpool");
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, rq ? "etna_ml_mean_spatial" : "etna_ml_avgpool");
+    b.shader->info.workgroup_size_variable = true;
+ 
+-   nir_def *out_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 0), .base = 0, .range = 8);
+-   nir_def *in_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 4), .base = 0, .range = 8);
++   nir_def *out_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 0), .base = 0, .range = range);
++   nir_def *in_addr = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 4), .base = 0, .range = range);
++   nir_def *table_addr = rq ? nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, 8), .base = 0, .range = range) : NULL;
+    /* the ID clamped to the grid, so a wrong ID can only give wrong values, never a stray address */
+    nir_def *g = nir_umin(&b, nir_channel(&b, nir_load_global_invocation_id(&b, 32), 0), nir_imm_int(&b, groups - 1));
+    nir_def *src = nir_iadd(&b, in_addr, nir_imul_imm(&b, g, 4 * hw));
+@@ -351,7 +359,8 @@
+    nir_def *out_word = NULL;
+    for (unsigned c = 0; c < 4; c++) {
+       nir_def *sum = nir_iadd(&b, nir_iand_imm(&b, acc[c], 0xffff), nir_ushr_imm(&b, acc[c], 16));
+-      nir_def *q = nir_ushr_imm(&b, nir_imul_imm(&b, nir_iadd_imm(&b, sum, hw / 2), m), s);
++      nir_def *q = rq ? mean_requant_nir(&b, sum, table_addr, rq)
++                      : nir_ushr_imm(&b, nir_imul_imm(&b, nir_iadd_imm(&b, sum, hw / 2), m), s);
+       if (c)
+          q = nir_ishl_imm(&b, q, 8 * c);
+       out_word = out_word ? nir_ior(&b, out_word, q) : q;
+@@ -362,6 +371,175 @@
+    return b.shader;
+ }
+ 
++nir_shader *
++etna_ml_shader_build_avgpool(const nir_shader_compiler_options *opts, unsigned hw, unsigned channels)
++{
++   return build_pool(opts, hw, channels, NULL);
++}
++
++/*
++ * MEAN (step 6e). The CPU path beside Teflon is XNNPACK (its leftover ops run there, not on TFLite's builtin
++ * kernels), and its quantized mean is, with S the int32 sum of the n values in the tensors' own domain:
++ *    s_eff = fl(fl(in_scale / out_scale) * fl(1 / n)),  zp' = fma(-(n * in_zp), s_eff, out_zp),
++ *    q = clamp(nearbyint(fma(S, s_eff, zp')))
++ * (XNNPACK's reduce-nd.c + reference convert; the two multiply-adds are fused in the aarch64 build: fitted exact on
++ * 205200 outputs, research/port/tools/mean_fit_xnnpack.py).
++ */
++#define ETNA_ML_MEAN_MAX_N 65535
++
++int
++etna_ml_mean_xnnpack(int64_t s, unsigned n, float in_scale, int in_zp, float out_scale, int out_zp, bool is_signed)
++{
++   const float io = in_scale / out_scale;
++   const float inv_n = 1.0f / (float)n;
++   const float s_eff = io * inv_n;
++   const float zp = fmaf(-(float)((int32_t)n * in_zp), s_eff, (float)out_zp);
++   const float v = nearbyintf(fmaf((float)s, s_eff, zp));
++   const int lo = is_signed ? -128 : 0, hi = is_signed ? 127 : 255;
++
++   return v < lo ? lo : v > hi ? hi : (int)v;
++}
++
++/* Builds and checks the table and the estimate over every sum of n stored bytes (etnaviv stores int8 +128, so S is
++ * unsigned for both types and the stored output is q + 128 for int8). */
++bool
++etna_ml_mean_requant(unsigned n, float in_scale, int in_zp, float out_scale, int out_zp, bool is_signed,
++                     struct etna_ml_mean_requant *rq)
++{
++   const int lo = is_signed ? -128 : 0;
++   const uint32_t s_max = 255 * n;
++
++   if (!n || n > ETNA_ML_MEAN_MAX_N || !(in_scale > 0.0f) || !(out_scale > 0.0f))
++      return false;
++
++   /* the table: stored output as a step function of S, which must not decrease */
++   unsigned k = 1;
++   int prev = 0;
++   rq->table[0] = 0;
++   for (uint32_t s = 0; s <= s_max; s++) {
++      const int q = etna_ml_mean_xnnpack((int64_t)s + (int64_t)n * lo, n, in_scale, in_zp, out_scale, out_zp,
++                                         is_signed) - lo;
++      if (q < prev)
++         return false;
++      prev = q;
++      while (k <= 255 && (int)k <= q)
++         rq->table[k++] = s;
++   }
++   for (; k <= 256; k++)
++      rq->table[k] = UINT32_MAX;
++
++   /* the estimate: the straight line through the steps in the stored domain (S = sum of stored bytes = the own-domain
++    * sum - n * lo, output stored = q - lo), stored ~ S * slope + zp, rounded: (S * m + b) >> sh in int32 */
++   const double slope = (double)(in_scale / out_scale) / n;
++   const double zp = (double)out_zp - (double)n * in_zp * slope - lo + (double)n * lo * slope;
++   unsigned sh = 30;
++   for (;; sh--) {
++      const double m = floor(slope * (double)(1u << sh) + 0.5);
++      const double b = floor((zp + 0.5) * (double)(1u << sh));
++      if (m >= 1.0 && (double)s_max * m + fabs(b) < 2147483647.0) {
++         rq->m = (int32_t)m;
++         rq->b = (int32_t)b;
++         rq->sh = sh;
++         break;
++      }
++      if (sh == 0)
++         return false;
++   }
++
++   /* the kernel's correction is exact only if the estimate is never more than one step off */
++   for (uint32_t s = 0; s <= s_max; s++) {
++      int64_t e = (int64_t)s * rq->m + rq->b;
++      int q0 = (int)(e >> rq->sh); /* arithmetic shift, as the kernel's ishr */
++      q0 = q0 < 0 ? 0 : q0 > 255 ? 255 : q0;
++      const int q = q0 + (s >= rq->table[q0 + 1]) - (s < rq->table[q0]);
++      if (q < 0 || q > 255 || q != etna_ml_mean_xnnpack((int64_t)s + (int64_t)n * lo, n, in_scale, in_zp,
++                                                         out_scale, out_zp, is_signed) - lo)
++         return false;
++   }
++   return true;
++}
++
++/* The stored output byte for one sum (see struct etna_ml_mean_requant): the estimate, then two table loads. */
++static nir_def *
++mean_requant_nir(nir_builder *b, nir_def *sum, nir_def *table_addr, const struct etna_ml_mean_requant *rq)
++{
++   nir_def *e = nir_iadd_imm(b, nir_imul_imm(b, sum, rq->m), rq->b);
++   nir_def *q0 = nir_imin(b, nir_imax(b, nir_ishr_imm(b, e, rq->sh), nir_imm_int(b, 0)), nir_imm_int(b, 255));
++   nir_def *t = nir_iadd(b, table_addr, nir_ishl_imm(b, q0, 2));
++   nir_def *t_lo = nir_load_global(b, 1, 32, t, .align_mul = 4);
++   nir_def *t_hi = nir_load_global(b, 1, 32, nir_iadd_imm(b, t, 4), .align_mul = 4);
++   nir_def *up = nir_bcsel(b, nir_uge(b, sum, t_hi), nir_imm_int(b, 1), nir_imm_int(b, 0));
++   nir_def *down = nir_bcsel(b, nir_ult(b, sum, t_lo), nir_imm_int(b, 1), nir_imm_int(b, 0));
++   return nir_isub(b, nir_iadd(b, q0, up), down);
++}
++
++nir_shader *
++etna_ml_shader_build_mean_spatial(const nir_shader_compiler_options *opts, unsigned hw, unsigned channels,
++                                  const struct etna_ml_mean_requant *rq)
++{
++   return rq ? build_pool(opts, hw, channels, rq) : NULL;
++}
++
++/*
++ * MEAN over the channels (the reduction in a layernorm) of NCHW planes, positions = H*W bytes each, positions % 4 ==
++ * 0: thread t owns positions 4t..4t+3, i.e. word t of every plane, and loops over the planes (one word load, four
++ * byte sums per channel; the first kernel that loops, proven by S6E-LOOP*). The trip count and the plane length
++ * are kernel arguments, so the loop isn't unrolled; the count is capped inside the kernel. Each sum is
++ * requantized through the table. Kernel input: out, in, table, channels, plane bytes, last thread index.
++ */
++nir_shader *
++etna_ml_shader_build_mean_channels(const nir_shader_compiler_options *opts, const struct etna_ml_mean_requant *rq)
++{
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "etna_ml_mean_channels");
++   b.shader->info.workgroup_size_variable = true;
++
++   nir_def *arg[6];
++   for (unsigned i = 0; i < 6; i++)
++      arg[i] = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, i * 4), .base = 0, .range = 24);
++   nir_def *channels = nir_umin(&b, arg[3], nir_imm_int(&b, ETNA_ML_MEAN_MAX_N));
++   /* the ID clamped to the grid, so a wrong ID can only give wrong values, never a stray address */
++   nir_def *t = nir_umin(&b, nir_channel(&b, nir_load_global_invocation_id(&b, 32), 0), arg[5]);
++
++   nir_variable *sum_v[4], *k_v, *addr_v;
++   for (unsigned i = 0; i < 4; i++) {
++      sum_v[i] = nir_local_variable_create(b.impl, glsl_uint_type(), "sum");
++      nir_store_var(&b, sum_v[i], nir_imm_int(&b, 0), 0x1);
++   }
++   k_v = nir_local_variable_create(b.impl, glsl_uint_type(), "k");
++   addr_v = nir_local_variable_create(b.impl, glsl_uint_type(), "addr");
++   nir_store_var(&b, k_v, nir_imm_int(&b, 0), 0x1);
++   nir_store_var(&b, addr_v, nir_iadd(&b, arg[1], nir_ishl_imm(&b, t, 2)), 0x1);
++
++   nir_loop *loop = nir_push_loop(&b);
++   {
++      nir_def *k = nir_load_var(&b, k_v);
++      nir_push_if(&b, nir_uge(&b, k, channels));
++      nir_jump(&b, nir_jump_break);
++      nir_pop_if(&b, NULL);
++
++      nir_def *addr = nir_load_var(&b, addr_v);
++      nir_def *w = nir_load_global(&b, 1, 32, addr, .align_mul = 4);
++      for (unsigned i = 0; i < 4; i++) {
++         nir_def *v = nir_iand_imm(&b, i ? nir_ushr_imm(&b, w, 8 * i) : w, 0xff);
++         nir_store_var(&b, sum_v[i], nir_iadd(&b, nir_load_var(&b, sum_v[i]), v), 0x1);
++      }
++      nir_store_var(&b, addr_v, nir_iadd(&b, addr, arg[4]), 0x1);
++      nir_store_var(&b, k_v, nir_iadd_imm(&b, k, 1), 0x1);
++   }
++   nir_pop_loop(&b, loop);
++
++   nir_def *out_word = NULL;
++   for (unsigned i = 0; i < 4; i++) {
++      nir_def *q = mean_requant_nir(&b, nir_load_var(&b, sum_v[i]), arg[2], rq);
++      if (i)
++         q = nir_ishl_imm(&b, q, 8 * i);
++      out_word = out_word ? nir_ior(&b, out_word, q) : q;
++   }
++   nir_store_global(&b, out_word, nir_iadd(&b, arg[0], nir_ishl_imm(&b, t, 2)), .write_mask = 0x1, .align_mul = 4);
++
++   return b.shader;
++}
++
+ /* The transpose kernel, compiled once per screen (subgraphs are created from one thread at a time). */
+ static struct etna_shader_variant *
+ transpose_kernel(struct etna_screen *screen)
+@@ -732,6 +910,211 @@
+    return true;
+ }
+ 
++static bool
++mean_enabled(const struct etna_screen *screen)
++{
++   return shader_option("mean") && screen->base.caps.compute && !DBG_ENABLED(ETNA_DBG_NPU_PARALLEL);
++}
++
++/* The MEANs the kernels handle: 8-bit per-tensor quantization (same signedness in and out), batch 1, over the
++ * channels (axes 0x8: positions = H*W, a multiple of 4, up to ETNA_ML_MEAN_MAX_N channels) or over the spatial
++ * dimensions (axes 0x6: at most ETNA_ML_AVGPOOL_MAX_HW values per channel, channels % 4 == 0). keep_dims doesn't
++ * matter: the output holds the same bytes either way. */
++static bool
++mean_params(const struct pipe_ml_operation *poperation, unsigned *n, unsigned *threads)
++{
++   const struct pipe_tensor *in = poperation->input_tensors[0], *out = poperation->output_tensors[0];
++
++   if (poperation->type != PIPE_ML_OPERATION_TYPE_MEAN || poperation->output_count != 1 || in->data)
++      return false;
++   if (in->type_size != 1 || out->type_size != 1 || in->is_signed != out->is_signed || in->scales || out->scales ||
++       in->zero_points || out->zero_points || !(in->scale > 0.0f) || !(out->scale > 0.0f))
++      return false;
++   if (in->dims[0] != 1)
++      return false;
++
++   const unsigned hw = in->dims[1] * in->dims[2], c = in->dims[3];
++   const unsigned out_elems = out->dims[0] * out->dims[1] * out->dims[2] * out->dims[3];
++   unsigned groups;
++
++   if (poperation->reduce.axes == 0x8) {
++      if (!hw || hw % 4 || !c || c > ETNA_ML_MEAN_MAX_N || out_elems != hw)
++         return false;
++      *n = c;
++      groups = hw / 4;
++   } else if (poperation->reduce.axes == 0x6) {
++      if (!hw || hw > ETNA_ML_AVGPOOL_MAX_HW || c < 4 || c % 4 || out_elems != c)
++         return false;
++      *n = hw;
++      groups = c / 4;
++   } else {
++      return false;
++   }
++
++   *threads = groups;
++   return groups / block_width(groups) <= 65535;
++}
++
++/* The kernel for this MEAN (caller owns the shader), with its requantization in *rq, or NULL */
++static struct etna_shader *
++mean_kernel(struct etna_screen *screen, unsigned axes, unsigned hw,
++            unsigned channels, float in_scale, int in_zp, float out_scale, int out_zp, bool is_signed,
++            struct etna_ml_mean_requant *rq, struct etna_shader_variant **variant)
++{
++   const unsigned n = axes == 0x8 ? channels : hw;
++
++   if (!etna_ml_mean_requant(n, in_scale, in_zp, out_scale, out_zp, is_signed, rq)) {
++      ML_DBG("mean: no exact requantization for n %u, scales %g -> %g: left to the CPU\n", n, in_scale, out_scale);
++      return NULL;
++   }
++
++   const nir_shader_compiler_options *opts = etna_compiler_get_options(screen->compiler);
++   nir_shader *nir = axes == 0x8 ? etna_ml_shader_build_mean_channels(opts, rq)
++                                 : etna_ml_shader_build_mean_spatial(opts, hw, channels, rq);
++   if (!nir)
++      return NULL;
++
++   struct etna_shader *shader = etna_compute_shader_create(screen, nir, NULL);
++   struct etna_shader_variant *v = shader ? etna_compute_shader_get_variant(shader, NULL) : NULL;
++   if (!v) {
++      ML_DBG("mean kernel did not compile: left to the CPU\n");
++      if (shader)
++         etna_compute_shader_destroy(shader);
++      return NULL;
++   }
++
++   *variant = v;
++   return shader;
++}
++
++bool
++etna_ml_shader_mean_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation)
++{
++   const struct pipe_tensor *in = poperation->input_tensors[0], *out = poperation->output_tensors[0];
++   unsigned n, threads;
++
++   if (!mean_enabled(screen) || !mean_params(poperation, &n, &threads))
++      return false;
++
++   /* build the table and compile now: if either fails, the operation stays on the CPU instead of failing later */
++   struct etna_ml_mean_requant *rq = malloc(sizeof(*rq));
++   struct etna_shader_variant *v;
++   struct etna_shader *shader = rq ? mean_kernel(screen, poperation->reduce.axes,
++                                                 in->dims[1] * in->dims[2], in->dims[3], in->scale, in->zero_point,
++                                                 out->scale, out->zero_point, in->is_signed, rq, &v) : NULL;
++   free(rq);
++   if (!shader)
++      return false;
++
++   etna_compute_shader_destroy(shader);
++   return true;
++}
++
++void
++etna_ml_lower_mean(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                   struct etna_operation *operation)
++{
++   const struct pipe_tensor *in = poperation->input_tensors[0], *out = poperation->output_tensors[0];
++   unsigned n, threads;
++   ASSERTED bool ok = mean_params(poperation, &n, &threads);
++   assert(ok);
++
++   const unsigned hw = in->dims[1] * in->dims[2], c = in->dims[3];
++   operation->type = ETNA_JOB_TYPE_SHADER;
++   operation->shader_op = ETNA_ML_SHADER_MEAN;
++   operation->input_count = 1;
++   operation->output_count = 1;
++   operation->input_width = in->dims[1];
++   operation->input_height = in->dims[2];
++   operation->input_channels = c;
++   operation->input_tensor_sizes[0] = hw * c;
++   operation->output_tensor_sizes[0] = poperation->reduce.axes == 0x8 ? hw : c;
++   operation->output_width = poperation->reduce.axes == 0x8 ? in->dims[1] : 1;
++   operation->output_height = poperation->reduce.axes == 0x8 ? in->dims[2] : 1;
++   operation->output_channels = poperation->reduce.axes == 0x8 ? 1 : c;
++   operation->mean_axes = poperation->reduce.axes;
++   operation->mean_in_scale = in->scale;
++   operation->mean_out_scale = out->scale;
++   operation->mean_in_zp = in->zero_point;
++   operation->mean_out_zp = out->zero_point;
++   operation->mean_signed = in->is_signed;
++}
++
++static bool
++compile_mean(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++             struct etna_vip_instruction *instruction)
++{
++   struct pipe_resource *input = etna_ml_get_resource(subgraph, operation->input_tensors[0]);
++   struct pipe_resource *output = etna_ml_get_resource(subgraph, operation->output_tensors[0]);
++   const unsigned in_offset = etna_ml_get_offset(subgraph, operation->input_tensors[0]);
++   const unsigned out_offset = etna_ml_get_offset(subgraph, operation->output_tensors[0]);
++   const unsigned hw = operation->input_width * operation->input_height, c = operation->input_channels;
++   const bool channel_mean = operation->mean_axes == 0x8;
++
++   if (!input || !output || in_offset % 4 || out_offset % 4 ||
++       input == subgraph->axi_sram || output == subgraph->axi_sram)
++      return false;
++
++   struct etna_bo *in_bo = etna_buffer_resource(input)->bo, *out_bo = etna_buffer_resource(output)->bo;
++   if (etna_bo_size(in_bo) < in_offset + hw * c ||
++       etna_bo_size(out_bo) < out_offset + operation->output_tensor_sizes[0])
++      return false;
++
++   struct etna_ml_mean_requant *rq = malloc(sizeof(*rq));
++   struct etna_shader_variant *v;
++   struct etna_shader *shader = rq ? mean_kernel(subgraph->screen, operation->mean_axes, hw, c,
++                                                 operation->mean_in_scale, operation->mean_in_zp,
++                                                 operation->mean_out_scale, operation->mean_out_zp,
++                                                 operation->mean_signed, rq, &v) : NULL;
++   if (!shader) {
++      free(rq);
++      return false;
++   }
++
++   /* the thresholds, read by the kernel as a third buffer */
++   struct pipe_resource *table = etna_ml_create_resource(&subgraph->screen->base, sizeof(rq->table));
++   if (!table) {
++      etna_compute_shader_destroy(shader);
++      free(rq);
++      return false;
++   }
++   struct etna_bo *table_bo = etna_buffer_resource(table)->bo;
++   etna_bo_cpu_prep(table_bo, DRM_ETNA_PREP_WRITE);
++   memcpy(etna_bo_map(table_bo), rq->table, sizeof(rq->table));
++   etna_bo_cpu_fini(table_bo);
++
++   const unsigned groups = channel_mean ? hw / 4 : c / 4;
++   memset(instruction, 0, sizeof(*instruction));
++   instruction->type = ETNA_JOB_TYPE_SHADER;
++   instruction->owned_shader = shader;
++   instruction->shader = v;
++   instruction->table = table; /* the reference from etna_ml_create_resource */
++   pipe_resource_reference(&instruction->input, input);
++   pipe_resource_reference(&instruction->output, output);
++   instruction->input_offset = in_offset;
++   instruction->output_offset = out_offset;
++   instruction->shader_args[0] = etna_bo_gpu_va(out_bo) + out_offset;
++   instruction->shader_args[1] = etna_bo_gpu_va(in_bo) + in_offset;
++   instruction->shader_args[2] = etna_bo_gpu_va(table_bo);
++   if (channel_mean) {
++      instruction->shader_args[3] = c;      /* trip count */
++      instruction->shader_args[4] = hw;     /* plane bytes */
++      instruction->shader_args[5] = groups - 1;
++   }
++   instruction->work_dim = 1;
++   instruction->block[0] = block_width(groups);
++   instruction->block[1] = instruction->block[2] = 1;
++   instruction->grid[0] = groups / instruction->block[0];
++   instruction->grid[1] = instruction->grid[2] = 1;
++
++   ML_DBG("shader mean %s: %ux%u channels %u, n %u, estimate (S*%d%+d)>>%u, grid %u of %u, %u instructions, %u temps\n",
++          channel_mean ? "channels" : "spatial", operation->input_width, operation->input_height, c,
++          channel_mean ? c : hw, rq->m, rq->b, rq->sh, instruction->grid[0], instruction->block[0], v->code_size / 4,
++          v->num_temps + 1);
++   free(rq);
++   return true;
++}
++
+ bool
+ etna_ml_compile_operation_shader(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
+                                  struct etna_vip_instruction *instruction)
+@@ -743,6 +1126,8 @@
+       return compile_softmax(subgraph, operation, instruction);
+    case ETNA_ML_SHADER_AVGPOOL:
+       return compile_avgpool(subgraph, operation, instruction);
++   case ETNA_ML_SHADER_MEAN:
++      return compile_mean(subgraph, operation, instruction);
+    }
+    return false;
+ }
+@@ -754,6 +1139,7 @@
+       etna_compute_shader_destroy(instruction->owned_shader);
+       instruction->owned_shader = NULL;
+    }
++   pipe_resource_reference(&instruction->table, NULL);
+ }
+ 
+ /* Caches the NN and TP units write through, flushed before a grid reads their output and after it, so the next
+@@ -779,11 +1165,11 @@
+       .block = { operation->block[0], operation->block[1], operation->block[2] },
+       .grid = { operation->grid[0], operation->grid[1], operation->grid[2] },
+    };
+-   struct pipe_resource *buffers[2] = { operation->input, operation->output };
++   struct pipe_resource *buffers[3] = { operation->input, operation->output, operation->table };
+ 
+    flush_and_stall(ctx->stream);
+    if (!etna_compute_emit_grid(ctx, operation->shader, &info, operation->shader_args,
+-                               sizeof(operation->shader_args), buffers, 2, false))
++                               sizeof(operation->shader_args), buffers, operation->table ? 3 : 2, false))
+       BUG("ML shader operation %u could not be emitted", idx);
+    flush_and_stall(ctx->stream);
+ }
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
+@@ -44,6 +44,14 @@
+ etna_ml_lower_avgpool(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
+                       struct etna_operation *operation);
+ 
++/* MEAN on the shader core (ETNA_ML_SHADER=mean) */
++bool
++etna_ml_shader_mean_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation);
++
++void
++etna_ml_lower_mean(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                   struct etna_operation *operation);
++
+ void
+ etna_ml_shader_instruction_fini(struct etna_vip_instruction *instruction);
+ 
+@@ -64,4 +72,33 @@
+ struct nir_shader *
+ etna_ml_shader_build_avgpool(const struct nir_shader_compiler_options *opts, unsigned hw, unsigned channels);
+ 
++/* MEAN's requantization, exact to XNNPACK (the CPU path beside Teflon): for S = the sum of the n stored bytes of one
++ * output (int8 is stored +128), the stored output byte is q0 + (S >= table[q0 + 1]) - (S < table[q0]) with the
++ * estimate q0 = clamp((S * m + b) >> sh, 0, 255); table[k] = the smallest S whose output is >= k, table[0] = 0,
++ * table[256] = UINT32_MAX. etna_ml_mean_requant checks every S in 0..255n (false: no exact form, stay on the CPU). */
++struct etna_ml_mean_requant {
++   int32_t m, b;
++   unsigned sh;
++   uint32_t table[257];
++};
++
++bool
++etna_ml_mean_requant(unsigned n, float in_scale, int in_zp, float out_scale, int out_zp, bool is_signed,
++                     struct etna_ml_mean_requant *rq);
++
++/* XNNPACK's quantized mean of n values whose sum (in the tensors' own domain) is s */
++int
++etna_ml_mean_xnnpack(int64_t s, unsigned n, float in_scale, int in_zp, float out_scale, int out_zp, bool is_signed);
++
++/* MEAN over the channels of NCHW planes: positions = H*W (% 4 == 0) planes' length, one thread per 4 positions,
++ * a loop over the channels. Kernel input: out, in, table, channels, plane bytes (= positions). */
++struct nir_shader *
++etna_ml_shader_build_mean_channels(const struct nir_shader_compiler_options *opts, const struct etna_ml_mean_requant *rq);
++
++/* MEAN over the spatial dimensions: the average pool kernel with the requantization table instead of its
++ * division. Kernel input: out, in, table. */
++struct nir_shader *
++etna_ml_shader_build_mean_spatial(const struct nir_shader_compiler_options *opts, unsigned hw, unsigned channels,
++                                  const struct etna_ml_mean_requant *rq);
++
+ #endif
+--- base/mesa-compute/src/gallium/frontends/teflon/tfl_device.c
++++ mesa-compute/src/gallium/frontends/teflon/tfl_device.c
+@@ -286,6 +286,33 @@
+       operation->softmax.beta = params ? params->beta : 1.0f;
+       break;
+    }
++   case kTfLiteBuiltinMean: {
++      /* axes come from the constant second input; tensors are right-aligned to 4 dimensions (fill_tensor), so an
++       * axis of a rank-r tensor is dimension axis + 4 - r here */
++      const TfLiteReducerParams *params = node->builtin_data;
++      const TfLiteTensor *in = &tf_context->tensors[node->inputs->data[0]];
++      const TfLiteTensor *axes = node->inputs->size > 1 ? &tf_context->tensors[node->inputs->data[1]] : NULL;
++      const int rank = in->dims->size;
++
++      if (!axes || axes->allocation_type != kTfLiteMmapRo || axes->type != kTfLiteInt32 || rank < 1 || rank > 4)
++         return false;
++
++      operation->type = PIPE_ML_OPERATION_TYPE_MEAN;
++      operation->reduce.keep_dims = params && params->keep_dims;
++      operation->reduce.axes = 0;
++      int axis_count = 1;
++      for (int i = 0; i < axes->dims->size; i++)
++         axis_count *= axes->dims->data[i];
++      for (int i = 0; i < axis_count; i++) {
++         int a = axes->data.i32[i];
++         if (a < 0)
++            a += rank;
++         if (a < 0 || a >= rank)
++            return false;
++         operation->reduce.axes |= 1u << (a + 4 - rank);
++      }
++      break;
++   }
+    case kTfLiteBuiltinSqueeze: {
+       /* removes dimensions of size 1: the data doesn't move, so it is a reshape to the output's shape */
+       const TfLiteTensor *out = &tf_context->tensors[node->outputs->data[0]];
+@@ -512,6 +539,9 @@
+       case PIPE_ML_OPERATION_TYPE_SOFTMAX:
+          teflon_debug("%-15s ", "SOFTMAX");
+          break;
++      case PIPE_ML_OPERATION_TYPE_MEAN:
++         teflon_debug("%-15s ", "MEAN");
++         break;
+       }
+ 
+       char *input_buf = ralloc_strdup(NULL, "");
+--- base/mesa-compute/src/gallium/include/pipe/p_state.h
++++ mesa-compute/src/gallium/include/pipe/p_state.h
+@@ -1066,6 +1066,7 @@
+    PIPE_ML_OPERATION_TYPE_STRIDED_SLICE,
+    PIPE_ML_OPERATION_TYPE_RESIZE,
+    PIPE_ML_OPERATION_TYPE_SOFTMAX,
++   PIPE_ML_OPERATION_TYPE_MEAN,
+ };
+ 
+ enum pipe_ml_pooling_type {
+@@ -1284,6 +1285,20 @@
+           */
+          float beta;
+       } softmax;
++
++      struct {
++         /**
++          * Dimensions reduced, as a bitmask over the 4 dimensions of the
++          * input tensor (bit i = dims[i], after the frontend's
++          * right-alignment of lower-rank tensors to 4 dimensions).
++          */
++         unsigned axes;
++
++         /**
++          * Whether the reduced dimensions are kept with size 1.
++          */
++         bool keep_dims;
++      } reduce;
+    };
+ };
+ 
+--- base/npu-shader/cs_compile.c
++++ npu-shader/cs_compile.c
+@@ -63,6 +63,8 @@
+ main(int argc, char **argv)
+ {
+    unsigned fma_iters = 0, wg = 64, len = 1001, pool_hw = 49, pool_ch = 1024;
++   bool mean_ch = true, mean_int8 = false;
++   float mq[4] = { 0.05f, 120, 0.03f, 128 };
+    float factor = 0.16609922f * 1.4426950409f;
+    const char *out = NULL, *kernel = NULL;
+    bool dump = false;
+@@ -82,6 +84,13 @@
+          pool_hw = atoi(argv[++i]);
+       else if (!strcmp(argv[i], "--ch") && i + 1 < argc)
+          pool_ch = atoi(argv[++i]);
++      else if (!strcmp(argv[i], "--axes") && i + 1 < argc)
++         mean_ch = !strcmp(argv[++i], "ch");
++      else if (!strcmp(argv[i], "--int8"))
++         mean_int8 = true;
++      else if (!strcmp(argv[i], "--q") && i + 4 < argc)
++         for (unsigned k = 0; k < 4; k++)
++            mq[k] = atof(argv[++i]);
+       else if (!strcmp(argv[i], "--out") && i + 1 < argc)
+          out = argv[++i];
+       else if (!strcmp(argv[i], "--dump"))
+@@ -166,7 +175,21 @@
+       nir = cs_build_tgather(opts);
+    else if (!strcmp(kernel, "loopsum"))
+       nir = cs_build_loopsum(opts);
+-   else if (!strcmp(kernel, "avgpool")) {
++   else if (!strcmp(kernel, "mean")) {
++      /* --axes ch: --ch channels reduced (positions are runtime); --axes sp: --hw values per channel, --ch channels */
++      static struct etna_ml_mean_requant rq;
++      if (!etna_ml_mean_requant(mean_ch ? pool_ch : pool_hw, mq[0], (int)mq[1], mq[2], (int)mq[3], mean_int8, &rq)) {
++         fprintf(stderr, "mean: no exact requantization\n");
++         return 2;
++      }
++      printf("mean requant: estimate (S*%d%+d)>>%u\n", rq.m, rq.b, rq.sh);
++      nir = mean_ch ? etna_ml_shader_build_mean_channels(opts, &rq)
++                    : etna_ml_shader_build_mean_spatial(opts, pool_hw, pool_ch, &rq);
++      if (!nir) {
++         fprintf(stderr, "mean: kernel builder refused these parameters\n");
++         return 2;
++      }
++   } else if (!strcmp(kernel, "avgpool")) {
+       nir = etna_ml_shader_build_avgpool(opts, pool_hw, pool_ch);
+       if (!nir) {
+          fprintf(stderr, "avgpool: --hw 1..256, --ch a multiple of 4\n");
+--- base/npu-shader/cs_kernels.h
++++ npu-shader/cs_kernels.h
+@@ -19,6 +19,7 @@
+ #define CS_KERNELS_H
+ 
+ #include "compiler/nir/nir_builder.h"
++#include "etnaviv_ml_shader.h" /* the driver's ML kernels (softmax, avgpool, mean) and MEAN's requantization */
+ 
+ static nir_shader *
+ cs_build_copy(const nir_shader_compiler_options *opts)
+--- base/npu-shader/cs_run.c
++++ npu-shader/cs_run.c
+@@ -103,7 +103,8 @@
+ {
+    unsigned n = 1, wg = 1, fma_iters = 0, repeat = 1, ny = 1, wy = 1, H = 0, W = 0, C = 0, len = 1001, rows = 1;
+    float factor = 0.16609922f * 1.4426950409f; /* MobileNet's softmax: beta 1, input scale 0.16609922 */
+-   bool compile_only = false, offline = false, self = false, dir_out = false;
++   bool compile_only = false, offline = false, self = false, dir_out = false, mean_ch = true, mean_int8 = false;
++   float mq[4] = { 0.05f, 120, 0.03f, 128 }; /* MEAN: in scale, in zero point, out scale, out zero point */
+    const char *kernel = NULL;
+    for (int i = 1; i < argc; i++) {
+       if (!strcmp(argv[i], "-n") && i + 1 < argc)
+@@ -138,6 +139,13 @@
+          }
+          dir_out = !strcmp(d, "out");
+       }
++      else if (!strcmp(argv[i], "--axes") && i + 1 < argc)
++         mean_ch = !strcmp(argv[++i], "ch");
++      else if (!strcmp(argv[i], "--int8"))
++         mean_int8 = true;
++      else if (!strcmp(argv[i], "--q") && i + 4 < argc)
++         for (unsigned k = 0; k < 4; k++)
++            mq[k] = strtof(argv[++i], NULL);
+       else if (!strcmp(argv[i], "--repeat") && i + 1 < argc)
+          repeat = strtoul(argv[++i], NULL, 0);
+       else if (!strcmp(argv[i], "--compile-only"))
+@@ -159,7 +167,7 @@
+    }
+    if (!kernel)
+       kernel = fma_iters ? "fma" : "copy";
+-   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL, K_LOOPSUM } kid;
++   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL, K_LOOPSUM, K_MEAN } kid;
+    unsigned k4 = 0;
+    if (!strcmp(kernel, "copy"))
+       kid = K_COPY;
+@@ -193,6 +201,8 @@
+       kid = K_AVGPOOL;
+    else if (!strcmp(kernel, "loopsum"))
+       kid = K_LOOPSUM; /* -n threads, --len trip count */
++   else if (!strcmp(kernel, "mean"))
++      kid = K_MEAN; /* --hwc H W C (NCHW planes), --axes ch|sp, [--int8] [--q IS IZ OS OZ] */
+    else if (!strncmp(kernel, "regp", 4)) {
+       kid = K_REGP; /* regpK: K vec4 values live across the barrier */
+       k4 = atoi(kernel + 4);
+@@ -242,6 +252,20 @@
+       }
+       n = C / 4;
+    }
++   static struct etna_ml_mean_requant rq;
++   const unsigned mean_n = mean_ch ? C : HW;
++   if (kid == K_MEAN) {
++      if (!HW || !C || (mean_ch && HW % 4) || (!mean_ch && (HW > 256 || C % 4))) {
++         fprintf(stderr, "mean: --hwc H W C; --axes ch needs H*W %% 4 == 0, --axes sp H*W <= 256 and C %% 4 == 0\n");
++         return 2;
++      }
++      if (!etna_ml_mean_requant(mean_n, mq[0], (int)mq[1], mq[2], (int)mq[3], mean_int8, &rq)) {
++         fprintf(stderr, "mean: no exact requantization for these scales\n");
++         return 2;
++      }
++      printf("mean requant: n %u, estimate (S*%d%+d)>>%u\n", mean_n, rq.m, rq.b, rq.sh);
++      n = mean_ch ? HW / 4 : C / 4;
++   }
+    if (!wg || !wy || wg * wy > 256 || !n || n % wg || !ny || ny % wy || !repeat) {
+       fprintf(stderr, "threads (%u x %u) must be nonzero multiples of the workgroup (%u x %u, at most 256 threads), "
+                       "repeat >= 1\n", n, ny, wg, wy);
+@@ -289,6 +313,8 @@
+                      kid == K_SOFTMAX ? etna_ml_shader_build_softmax(opts, len, rows, factor, wg) :
+                      kid == K_AVGPOOL ? etna_ml_shader_build_avgpool(opts, HW, C) :
+                      kid == K_LOOPSUM ? cs_build_loopsum(opts) :
++                     kid == K_MEAN ? (mean_ch ? etna_ml_shader_build_mean_channels(opts, &rq)
++                                              : etna_ml_shader_build_mean_spatial(opts, HW, C, &rq)) :
+                      kid == K_IDS_GL ? cs_build_ids_gl(opts) :
+                      kid == K_REGP ? cs_build_regp(opts, k4) : cs_build_copy(opts);
+    if (!nir) {
+@@ -326,8 +352,8 @@
+       bytes = (size_t)n * 4 + (size_t)n * k4 * 16; /* out uses the first n words; in holds the extras after them */
+    if (kid == K_LOOPSUM)
+       bytes = (size_t)n * 4 * len; /* in: len rows of n words; out: the first n words, the rest must stay 0xdeadbeef */
+-   if (kid == K_AVGPOOL)
+-      bytes = (size_t)HW * C; /* in: C planes of HW bytes; out: the first C bytes, the rest must stay 0xdeadbeef */
++   if (kid == K_AVGPOOL || kid == K_MEAN)
++      bytes = (size_t)HW * C; /* in: C planes of HW bytes; out: the first C (or HW) bytes, the rest stays 0xdeadbeef */
+    uint32_t *in = malloc(bytes), *out = malloc(bytes), *want = malloc(bytes);
+    float *fin = (float *)in, *fout = (float *)out;
+    uint8_t *in8 = (uint8_t *)in, *want8 = (uint8_t *)want;
+@@ -348,6 +374,17 @@
+          in8[(size_t)r * len + (len - 1)] = 200;
+       }
+    }
++   if (kid == K_MEAN) {
++      /* reduced groups 0-3 all 255 (the largest sums), 4-7 all 0, the rest pseudo-random bytes */
++      uint32_t x = 0x2545f491u;
++      for (size_t i = 0; i < bytes; i++) {
++         const size_t c = i / HW, p = i % HW, g = mean_ch ? p : c;
++         x ^= x << 13;
++         x ^= x >> 17;
++         x ^= x << 5;
++         in8[i] = g < 4 ? 255 : g < 8 ? 0 : (uint8_t)(x >> 24);
++      }
++   }
+    if (kid == K_AVGPOOL) {
+       /* channels 0-3 all 255 (the largest lane sums), 4-7 all 0, the rest pseudo-random bytes */
+       uint32_t x = 0x9e3779b9u;
+@@ -364,19 +401,23 @@
+       for (size_t i = 0; i < bytes; i++)
+          in8[i] = (uint8_t)(i * 131u + (i >> 8) * 7u + (i >> 16) * 3u + 1u);
+    }
+-   struct pipe_resource *res[2] = {
++   struct pipe_resource *res[3] = {
+       pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, bytes < 4096 ? 4096 : bytes),
+       pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, bytes < 4096 ? 4096 : bytes),
++      kid == K_MEAN ? pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, 4096) : NULL,
+    };
+-   if (!res[0] || !res[1]) {
++   const unsigned nbind = kid == K_MEAN ? 3 : 2; /* MEAN: the requantization table is a third buffer */
++   if (!res[0] || !res[1] || (kid == K_MEAN && !res[2])) {
+       fprintf(stderr, "buffer allocation failed\n");
+       return 2;
+    }
+    pipe_buffer_write(pc, res[0], 0, bytes, out);
+    pipe_buffer_write(pc, res[1], 0, bytes, in);
+-   uint32_t addr[2] = { 0, 0 }; /* offsets into the buffers on entry, GPU addresses on return */
+-   uint32_t *handles[2] = { &addr[0], &addr[1] };
+-   pc->set_global_binding(pc, 0, 2, res, handles);
++   if (kid == K_MEAN)
++      pipe_buffer_write(pc, res[2], 0, sizeof(rq.table), rq.table);
++   uint32_t addr[3] = { 0, 0, 0 }; /* offsets into the buffers on entry, GPU addresses on return */
++   uint32_t *handles[3] = { &addr[0], &addr[1], &addr[2] };
++   pc->set_global_binding(pc, 0, nbind, res, handles);
+    printf("GPU addresses: out 0x%x in 0x%x (%zu bytes each)\n", addr[0], addr[1], bytes);
+    /* kernel input buffer = constant buffer 0 (offset 0 = out address, 4 = in address, 8 = A, 12 = B); read by
+     * launch_grid. reverse: shared index = A + B * local id (mirror: A = wg - 1, B = -1; --self: A = 0, B = 1) */
+@@ -389,6 +430,12 @@
+       args[2] = n * 4;
+       args[3] = wg - 1;
+    }
++   if (kid == K_MEAN) {
++      args[2] = addr[2]; /* table */
++      args[3] = C;       /* channels mean: trip count, plane bytes, last thread */
++      args[4] = HW;
++      args[5] = n - 1;
++   }
+    if (kid == K_LOOPSUM) {
+       args[2] = len;   /* trip count */
+       args[3] = n * 4; /* bytes between a thread's words */
+@@ -520,6 +567,49 @@
+       for (size_t i = n; i < bytes / 4; i++)
+          want[i] = 0xdeadbeef; /* only the first n words are written */
+    pipe_buffer_read(pc, res[0], 0, bytes, out);
++   if (kid == K_MEAN) {
++      /* reference: XNNPACK's quantized mean, written out here independently of the driver's table and estimate */
++      const uint8_t *out8 = (const uint8_t *)out;
++      const uint32_t fill = 0xdeadbeef;
++      const int lo = mean_int8 ? -128 : 0, hi = mean_int8 ? 127 : 255;
++      const float s_eff = (mq[0] / mq[2]) * (1.0f / (float)mean_n);
++      const float zp = fmaf(-(float)((int32_t)mean_n * (int)mq[1]), s_eff, mq[3]);
++      const unsigned outs = mean_ch ? HW : C;
++      unsigned exact = 0, wrong = 0, stray = 0;
++      for (unsigned o = 0; o < outs; o++) {
++         int64_t sum = 0;
++         for (unsigned k = 0; k < mean_n; k++)
++            sum += (int)in8[mean_ch ? (size_t)k * HW + o : (size_t)o * HW + k] + lo;
++         float v = nearbyintf(fmaf((float)sum, s_eff, zp));
++         const int q = v < lo ? lo : v > hi ? hi : (int)v;
++         const unsigned want_b = (unsigned)(q - lo);
++         if (out8[o] == want_b) {
++            exact++;
++         } else {
++            if (wrong < 8)
++               printf("output %u: got %u want %u (sum %lld)\n", o, out8[o], want_b, (long long)sum);
++            wrong++;
++         }
++      }
++      for (size_t i = outs; i < bytes; i++)
++         stray += out8[i] != ((const uint8_t *)&fill)[i % 4];
++      printf("mean %s: %ux%u x %u, n %u, %s, q %g/%d -> %g/%d: %u/%u exact, %u wrong, %u stray bytes; first: %u %u %u %u\n",
++             mean_ch ? "channels" : "spatial", H, W, C, mean_n, mean_int8 ? "int8" : "uint8", mq[0], (int)mq[1], mq[2],
++             (int)mq[3], exact, outs, wrong, stray, out8[0], out8[4], out8[8], out8[9]);
++      const char *mres = offline ? "OFFLINE" : (wrong || stray ? "MISMATCH" : "PASS");
++      printf("{\"result\": \"%s\", \"kernel\": \"mean\", \"axes\": \"%s\", \"h\": %u, \"w\": %u, \"c\": %u, "
++             "\"exact\": %u, \"outputs\": %u, \"wrong\": %u, \"stray\": %u, \"first_launch_ms\": %.3f, "
++             "\"median_ms\": %.3f, \"launches\": %u}\n", mres, mean_ch ? "ch" : "sp", H, W, C, exact, outs, wrong,
++             stray, first_ms, ms, repeat);
++      step("finished");
++      pc->set_global_binding(pc, 0, 3, NULL, NULL);
++      for (unsigned r = 0; r < 3; r++)
++         pipe_resource_reference(&res[r], NULL);
++      pc->delete_compute_state(pc, cso);
++      pc->destroy(pc);
++      ps->destroy(ps);
++      return offline ? 0 : (wrong || stray ? 3 : 0);
++   }
+    if (kid == K_AVGPOOL) {
+       const uint8_t *out8 = (const uint8_t *)out;
+       const uint32_t fill = 0xdeadbeef;

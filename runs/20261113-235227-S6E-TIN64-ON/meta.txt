@@ -1,0 +1,11 @@
+label: S6E-TIN64-ON
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch64_in_u8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch64_in_u8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 10 --compare /home/jordan/alta-npu/runs/cs6e-mean-20261113-235031/tin64_off.npy --cpu-mean-limit 0
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T23:52:27-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2066
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=fb9a0;b=8f7f01abe08248ae908ecbfc43c3e05b;m=164491a4e;t=660350ddd6116;x=a2b2e7b46fda9485
+ETNA_ML_SHADER=mean
+end: 2026-11-13T23:52:29-05:00  rc: 0  wall_s: 2

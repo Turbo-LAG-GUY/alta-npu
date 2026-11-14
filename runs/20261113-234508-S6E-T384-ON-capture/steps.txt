@@ -1,0 +1,25 @@
+[ 6649.675789] pid=35112 start: delegate=/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch384_u8.tflite ETNA_ML_SHADER=mean
+[ 6649.689182] pid=35112 load_delegate: begin
+[ 6649.725258] pid=35112 load_delegate: done
+[ 6649.763379] pid=35112 allocate_tensors: done (21.9 ms)
+[ 6649.768954] pid=35112 invoke 1/10: begin
+[ 6649.777384] pid=35112 invoke 1/10: done (2.67 ms)
+[ 6649.783338] pid=35112 invoke 2/10: begin
+[ 6649.788790] pid=35112 invoke 2/10: done (2.42 ms)
+[ 6649.791991] pid=35112 invoke 3/10: begin
+[ 6649.798188] pid=35112 invoke 3/10: done (2.39 ms)
+[ 6649.802826] pid=35112 invoke 4/10: begin
+[ 6649.825464] pid=35112 invoke 4/10: done (4.04 ms)
+[ 6649.834462] pid=35112 invoke 5/10: begin
+[ 6649.843898] pid=35112 invoke 5/10: done (2.38 ms)
+[ 6649.850225] pid=35112 invoke 6/10: begin
+[ 6649.859115] pid=35112 invoke 6/10: done (2.38 ms)
+[ 6649.871514] pid=35112 invoke 7/10: begin
+[ 6649.879853] pid=35112 invoke 7/10: done (2.41 ms)
+[ 6649.885446] pid=35112 invoke 8/10: begin
+[ 6649.895207] pid=35112 invoke 8/10: done (2.38 ms)
+[ 6649.902208] pid=35112 invoke 9/10: begin
+[ 6649.912320] pid=35112 invoke 9/10: done (2.55 ms)
+[ 6649.922021] pid=35112 invoke 10/10: begin
+[ 6649.937955] pid=35112 invoke 10/10: done (2.57 ms)
+[ 6649.948433] pid=35112 finished

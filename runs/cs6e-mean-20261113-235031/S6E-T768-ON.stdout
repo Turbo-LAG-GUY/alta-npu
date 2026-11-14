@@ -1,0 +1,52 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch768_i8.tflite",
+ "etna_ml_shader": "mean",
+ "setup_ms": 25.1,
+ "invoke_ms": [
+  6.13,
+  5.81,
+  5.88,
+  5.92,
+  6.13,
+  6.07,
+  7.19,
+  6.12,
+  6.08,
+  6.22
+ ],
+ "invoke_ms_median": 6.1,
+ "invoke_ms_median_after_first": 6.08,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 175,
+ "diff_vs_cpu_mean_worst": 151.188,
+ "bytes_differing_from_saved": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "tolerance": 0,
+ "cpu_mean_limit": 255.0,
+ "bytes_beyond_tolerance": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "match": true
+}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-235114-S6E-T768-ON

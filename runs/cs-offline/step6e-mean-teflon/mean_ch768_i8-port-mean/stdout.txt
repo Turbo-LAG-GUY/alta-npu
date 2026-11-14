@@ -1,0 +1,75 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 0(i8) 1(i8) 2(i32) out: 3(i8)
+  1 MEAN            v2  supported   in: 3(i8) 4(i32) out: 5(i8)
+
+teflon: compiling graph: 6 tensors 2 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.070000   5 no       1x1x32x768
+  1 0.010000   0 yes      768x1x1x768
+  2 0.000700   0 yes      1x1x1x768
+  3 0.070000   5 no       1x1x32x768
+  4 0.000000   0 yes      1x1x1x1
+  5 0.020000 fffffffd no       1x1x32x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,1,2                3                   
+  1 MEAN            3,4                  5                   
+
+Adding transpose.
+operation 1 input tensor 6 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+operation 16 input tensor 3 layouts 1 2.
+Copying layout to output tensor 5.
+type 16 i 0 tensor 5 layout 1 == 2
+created resource 0x18b5530 for tensor 0 with size 24576
+created resource 0x18d11e0 for tensor 6 with size 24576
+created resource 0x18d29f0 for tensor 3 with size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x11f7560 for tensor 5 with size 32
+
+dumping intermediate graph: 3 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   6
+  1 NN     6   3 in2:   0
+  2 SH     3   5
+
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x91a00 (596480) image_size 0x6000 (24576)
+shader mean channels: 1x32 channels 768, n 768, estimate (S*4779-356515840)>>20, grid 1 of 8, 89 instructions, 6 temps
+teflon: compiled graph, took 44 ms
+Running the NN job took 1 ms.
+teflon: invoked graph, took 2 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_ch768_i8.tflite",
+ "etna_ml_shader": "mean",
+ "setup_ms": 70.6,
+ "invoke_ms": [
+  2.46
+ ],
+ "invoke_ms_median": 2.46,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 121,
+ "diff_vs_cpu_mean_worst": 103.812,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}
