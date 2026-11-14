@@ -211,5 +211,11 @@ before running it. The root steps change the system.
 
 ## License
 
-The kernel patches (`patches/base-6.12.73-lc`, `patches/etnaviv-reset-keepon`, `upstream/`) modify the Linux kernel
-and are GPL-2.0, like the code they change. The rest of this repository has no license yet.
+This repository is under the MIT license ([LICENSE](LICENSE)), with these exceptions:
+
+- The kernel patches (`patches/base-6.12.73-lc`, `patches/etnaviv-reset-keepon`, `patches/etnaviv-axi-sram`,
+  `upstream/`, and the `ALTA-etnaviv_gpu.diff` build records under `build/`) modify the Linux kernel and are
+  GPL-2.0, like the code they change.
+- The Mesa patches (`patches/mesa/`, `research/port/*.diff`) change Mesa, which is itself MIT-licensed. The copies of
+  Mesa source files in `research/port/base-step6c/` and the Collabora branch diffs (`research/port/branch-*.diff`)
+  keep their original authors' copyright under Mesa's MIT license.
