@@ -1,0 +1,132 @@
+--- step6d/npu-shader/cs_kernels.h
++++ npu-shader/cs_kernels.h
+@@ -390,4 +390,46 @@
+    return b.shader;
+ }
+ 
++/* loopsum (step 6e, the first kernel with control flow): thread i sums n words, out[i] = sum of in[i + k * S / 4]
++ * for k < n, in a real loop (n is a kernel argument, so the compiler can't unroll it; capped at CS_LOOP_MAX inside the
++ * kernel so a wrong argument can't make it run away). Kernel input: out, in, n, S (bytes between the words). */
++#define CS_LOOP_MAX 4096
++
++static nir_shader *
++cs_build_loopsum(const nir_shader_compiler_options *opts)
++{
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "loopsum");
++   b.shader->info.workgroup_size_variable = true;
++
++   nir_def *i = nir_channel(&b, nir_load_global_invocation_id(&b, 32), 0);
++   nir_def *out_addr = cs_arg(&b, 0, 16), *in_addr = cs_arg(&b, 1, 16);
++   nir_def *n = nir_umin(&b, cs_arg(&b, 2, 16), nir_imm_int(&b, CS_LOOP_MAX)), *stride = cs_arg(&b, 3, 16);
++
++   nir_variable *acc_v = nir_local_variable_create(b.impl, glsl_uint_type(), "acc");
++   nir_variable *k_v = nir_local_variable_create(b.impl, glsl_uint_type(), "k");
++   nir_variable *addr_v = nir_local_variable_create(b.impl, glsl_uint_type(), "addr");
++   nir_store_var(&b, acc_v, nir_imm_int(&b, 0), 0x1);
++   nir_store_var(&b, k_v, nir_imm_int(&b, 0), 0x1);
++   nir_store_var(&b, addr_v, nir_iadd(&b, in_addr, nir_ishl_imm(&b, i, 2)), 0x1);
++
++   nir_loop *loop = nir_push_loop(&b);
++   {
++      nir_def *k = nir_load_var(&b, k_v);
++      nir_push_if(&b, nir_uge(&b, k, n));
++      nir_jump(&b, nir_jump_break);
++      nir_pop_if(&b, NULL);
++
++      nir_def *addr = nir_load_var(&b, addr_v);
++      nir_def *w = nir_load_global(&b, 1, 32, addr, .align_mul = 4);
++      nir_store_var(&b, acc_v, nir_iadd(&b, nir_load_var(&b, acc_v), w), 0x1);
++      nir_store_var(&b, addr_v, nir_iadd(&b, addr, stride), 0x1);
++      nir_store_var(&b, k_v, nir_iadd_imm(&b, k, 1), 0x1);
++   }
++   nir_pop_loop(&b, loop);
++
++   nir_store_global(&b, nir_load_var(&b, acc_v), nir_iadd(&b, out_addr, nir_ishl_imm(&b, i, 2)), .write_mask = 0x1,
++                    .align_mul = 4);
++   return b.shader;
++}
++
+ #endif
+--- step6d/npu-shader/cs_run.c
++++ npu-shader/cs_run.c
+@@ -159,7 +159,7 @@
+    }
+    if (!kernel)
+       kernel = fma_iters ? "fma" : "copy";
+-   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL } kid;
++   enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL, K_LOOPSUM } kid;
+    unsigned k4 = 0;
+    if (!strcmp(kernel, "copy"))
+       kid = K_COPY;
+@@ -191,6 +191,8 @@
+       kid = K_IDS_GL;
+    else if (!strcmp(kernel, "avgpool"))
+       kid = K_AVGPOOL;
++   else if (!strcmp(kernel, "loopsum"))
++      kid = K_LOOPSUM; /* -n threads, --len trip count */
+    else if (!strncmp(kernel, "regp", 4)) {
+       kid = K_REGP; /* regpK: K vec4 values live across the barrier */
+       k4 = atoi(kernel + 4);
+@@ -286,6 +288,7 @@
+                      kid == K_FOPS ? cs_build_fops(opts) :
+                      kid == K_SOFTMAX ? etna_ml_shader_build_softmax(opts, len, rows, factor, wg) :
+                      kid == K_AVGPOOL ? etna_ml_shader_build_avgpool(opts, HW, C) :
++                     kid == K_LOOPSUM ? cs_build_loopsum(opts) :
+                      kid == K_IDS_GL ? cs_build_ids_gl(opts) :
+                      kid == K_REGP ? cs_build_regp(opts, k4) : cs_build_copy(opts);
+    if (!nir) {
+@@ -321,6 +324,8 @@
+       bytes = ((size_t)rows * len + 3) / 4 * 4; /* whole words: the kernel writes up to 3 bytes past the end */
+    if (kid == K_REGP)
+       bytes = (size_t)n * 4 + (size_t)n * k4 * 16; /* out uses the first n words; in holds the extras after them */
++   if (kid == K_LOOPSUM)
++      bytes = (size_t)n * 4 * len; /* in: len rows of n words; out: the first n words, the rest must stay 0xdeadbeef */
+    if (kid == K_AVGPOOL)
+       bytes = (size_t)HW * C; /* in: C planes of HW bytes; out: the first C bytes, the rest must stay 0xdeadbeef */
+    uint32_t *in = malloc(bytes), *out = malloc(bytes), *want = malloc(bytes);
+@@ -384,6 +389,10 @@
+       args[2] = n * 4;
+       args[3] = wg - 1;
+    }
++   if (kid == K_LOOPSUM) {
++      args[2] = len;   /* trip count */
++      args[3] = n * 4; /* bytes between a thread's words */
++   }
+    if (kid == K_IDS2D) {
+       args[2] = n; /* threads in x */
+       args[3] = n - 1;
+@@ -483,6 +492,13 @@
+          want[i] = sum;
+          break;
+       }
++      case K_LOOPSUM: {
++         uint32_t sum = 0;
++         for (unsigned k = 0; k < len && k < CS_LOOP_MAX; k++)
++            sum += in[i + (size_t)k * n];
++         want[i] = sum;
++         break;
++      }
+       case K_IDS_GL:
+          want[2 * i] = g;
+          want[2 * i + 1] = l;
+@@ -500,6 +516,9 @@
+       }
+    }
+ 
++   if (kid == K_LOOPSUM)
++      for (size_t i = n; i < bytes / 4; i++)
++         want[i] = 0xdeadbeef; /* only the first n words are written */
+    pipe_buffer_read(pc, res[0], 0, bytes, out);
+    if (kid == K_AVGPOOL) {
+       const uint8_t *out8 = (const uint8_t *)out;
+--- step6d/npu-shader/cs_compile.c
++++ npu-shader/cs_compile.c
+@@ -164,6 +164,8 @@
+       nir = cs_build_t4x4(opts, 2);
+    else if (!strcmp(kernel, "tgather"))
+       nir = cs_build_tgather(opts);
++   else if (!strcmp(kernel, "loopsum"))
++      nir = cs_build_loopsum(opts);
+    else if (!strcmp(kernel, "avgpool")) {
+       nir = etna_ml_shader_build_avgpool(opts, pool_hw, pool_ch);
+       if (!nir) {

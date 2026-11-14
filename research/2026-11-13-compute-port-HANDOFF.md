@@ -53,9 +53,39 @@ explicit OK for that step and only via `scripts/npu-attempt`, builds at -j2, nev
   the longest programs yet). MobileNet: OFF 7.54 ms (2 partitions), `avgpool` 7.16 (10/10 byte-identical),
   `avgpool,softmax` = the whole model in ONE NPU submit, 6.77 ms (10/10) and 7.04 over 50 invokes (50/50
   byte-identical); about 0.4-0.8 ms saved per invoke (single runs each).
-- **NEXT (Jordan's order): layernorm-style reductions** for transformer graphs (barrier kernels: stay inside the
-  512-register budget, give each reduction its own shared region as softmax does), then transpose tuning (16x4
-  workgroups, ETNA_ML_SHADER_MIN_CHANNELS crossover vs the TP). A new session is a good idea before starting it.
+- **Step 6e IN PROGRESS (started 2026-11-13 ~23:00, same session, Jordan: "Start the layernorm reductions")**; then
+  transpose tuning (16x4 workgroups, ETNA_ML_SHADER_MIN_CHANNELS crossover vs the TP). Findings so far (CPU only):
+  - TFLite has no layernorm op: converters emit MEAN(axis -1) -> SQUARED_DIFFERENCE -> MEAN -> ADD(eps) -> RSQRT ->
+    MUL/SUB/ADD. Gallium/Teflon have no MEAN (needs a new PIPE_ML_OPERATION_TYPE + tfl_device.c mapping with the
+    axes from the constant input 1). Teflon right-aligns dims to 4 ([1,T,C] -> [1,1,T,C]), so remap axes. MEAN over
+    axes 1,2 is also how Keras models (MobileNetV2/V3, EfficientNet) do global pooling.
+  - **Reference = XNNPACK, not TFLite's builtin kernels**: with Teflon loaded the leftover CPU ops run on XNNPACK
+    (shim test, 109/109 discriminating inputs). XNNPACK's quantized MEAN (source read via GitHub, then fitted):
+    `q = clamp(rne(fma(S, s_eff, zp')))`, `zp' = fma(-(N*zp_in), s_eff, zp_out)` (float), `S` = raw int32 sum of
+    the stored values, `s_eff = fl(fl(s_in/s_out) * fl(1/N))`: exact on 205200/205200 outputs (11 cases: u8/i8,
+    channel/spatial, same/different quant). Builtin TFLite differs (integer QuantizeMultiplier path).
+    Tools: npu-shader/models/reduce_models.py (`make` MEAN test models, optional 1x1 CONV in front), mean_fit_xnnpack.py.
+  - Kernel plan for MEAN: sum the stored bytes (etnaviv stores int8 +128, so the sum is unsigned in both cases), an
+    integer estimate q0 = (S*M + B) >> sh, then q = q0 + (S >= T[q0+1]) - (S < T[q0]) from a 257-entry threshold table
+    the driver computes on the CPU from the XNNPACK formula (fmaf + nearbyintf) over every possible S, verifying
+    |q0 - q| <= 1 at the same time: exact by construction, independent of the shader core's float rounding.
+    Channel MEAN on NCHW planes, P = H*W positions, P % 4 == 0: one thread per 4 positions, one word per plane,
+    SWAR lanes (widen every 256 channels). Spatial MEAN: the avgpool kernel with the table requant.
+  - **Loops**: C = 384..768 unrolled would be ~5000 instructions, so a loop probe: cs_kernels.h `cs_build_loopsum`
+    (15 instructions: compare, conditional branch, body, branch back; runtime trip count capped at 4096), compiles,
+    shim clean (runs/cs-offline/step6e, step6e-shim). **Loop ladder DONE 2026-11-13 23:22 (boot 8f7f01ab, Jordan's
+    OK): LOOP1 1x1, LOOP64 64x100, LOOP256 256x1000 all exact, 0 NPU kernel lines, words past the output untouched;
+    256x1000 = 2.80 ms/launch (~365 MB/s strided). Loops and branches work on the shader core** (RESULTS.md S6E-LOOP*,
+    runs/cs6e-loop-20261113-232209). The harness pattern: nir_local_variable_create + nir_push_loop / nir_push_if +
+    nir_jump(break); keep a compile-time cap on the trip count inside the kernel.
+  - **NEXT (CPU first, then a ladder for Jordan's OK):** (a) gallium `PIPE_ML_OPERATION_TYPE_MEAN` (axes bitmask over
+    the 4 right-aligned dims + keep_dims) and tfl_device.c mapping of kTfLiteBuiltinMean (axes from the constant
+    input 1, negative axes, rank remap); (b) etnaviv_ml_shader.c: threshold table builder (C, fmaf/nearbyintf, the
+    formula above, verify |q0 - q| <= 1 over every S) + channel-MEAN kernel with a loop over C (thread per 4
+    positions, NCHW, P % 4 == 0; MEAN input needs NCHW like the pool) + spatial MEAN via the avgpool kernel with the
+    table; table in a BO bound as a third buffer; (c) test models from reduce_models.py make (--conv puts an NN op in
+    front), offline shim (switch off = kit streams), CPU reference = XNNPACK (teflon_check.py's CPU run), then an NPU
+    ladder; (d) after MEAN: SQUARED_DIFFERENCE, RSQRT, MUL for a whole decomposed layernorm.
 
 ## What works today (proven on this board, RESULTS.md 2026-11-13)
 

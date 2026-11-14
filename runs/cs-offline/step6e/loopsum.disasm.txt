@@ -1,0 +1,18 @@
+000 [0400104f 00200800 80aa0050 2000000a] select.gt.u32.pack t0.___w, u0.xxxx, u0.yyyy, u0.xxxx
+001 [0080103c 00000800 41540040 00000002] imullo0.s32.pack  t0.x___, t0.xxxx, u0.zzzz, void
+002 [01001001 3fc00800 40000010 00000008] add.s32.pack      t0._y__, u0.wwww, void, t0.xxxx
+003 [01811009 00000000 00000000 20000018] mov.pack          t1.xy__, void, void, u1.xxxx
+004 [02001009 00000000 00000000 00154018] l4:
+004 [02001009 00000000 00000000 00154018] mov.pack          t0.__z_, void, void, t1.yyyy
+005 [020110f1 00201800 81fe0040 76ffdff8] cmp.ge.u32.pack   t1.__z_, t1.xxxx, t0.wwww, -1:s20
+006 [00000296 2aa01800 80000000 00000400] branch.not.u32    void, t1.zzzz, void, l8
+007 [00000016 00000000 00000000 00000680] branch            void, void, void, l13
+008 [02011032 15600c04 800000c0 00000002] l8:
+008 [02011032 15600c04 800000c0 00000002] load.denorm.u32   t1.__z_, t0.yyyy, u1.xxxx, void
+009 [01011001 15401800 40000000 002a8018] add.s32.pack      t1._y__, t1.yyyy, void, t1.zzzz
+010 [01001001 15400800 40000000 20154018] add.s32.pack      t0._y__, t0.yyyy, void, u1.yyyy
+011 [00811001 00001800 40000000 202a8018] add.s32.pack      t1.x___, t1.xxxx, void, u1.zzzz
+012 [00000016 00000000 00000000 00000200] branch            void, void, void, l4
+013 [00801001 3fc01800 40000010 00000008] l13:
+013 [00801001 3fc01800 40000010 00000008] add.s32.pack      t0.x___, u1.wwww, void, t0.xxxx
+014 [00820033 00200c04 800000c0 0000800a] store.denorm.u32  mem.x___, t0.xxxx, u1.xxxx, t0.zxxx	; dontcare bits in store: 00000000000000000000000000020000

@@ -1,0 +1,88 @@
+DRM etnaviv 1.4
+/dev/dri/renderD129: etnaviv
+screen: Vivante GC8000 rev 7120, compute yes
+shader: MESA_SHADER_KERNEL
+name: loopsum
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    decl_var  INTERP_MODE_NONE none uint acc
+    decl_var  INTERP_MODE_NONE none uint k
+    decl_var  INTERP_MODE_NONE none uint addr
+    block b0:   // preds:
+    32x3   %0 = @load_global_invocation_id
+    32     %1 = mov %0.x
+    32     %2 = load_const (0x00000000)
+    32     %3 = @load_kernel_input (%2 (0x0)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %4 = load_const (0x00000004)
+    32     %5 = @load_kernel_input (%4 (0x4)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %6 = load_const (0x00000008)
+    32     %7 = @load_kernel_input (%6 (0x8)) (base=0, range=16, align_mul=4, align_offset=0)
+    32     %8 = load_const (0x00001000 = 4096)
+    32     %9 = umin %7, %8 (0x1000)
+    32    %10 = load_const (0x0000000c = 12)
+    32    %11 = @load_kernel_input (%10 (0xc)) (base=0, range=16, align_mul=4, align_offset=0)
+    32    %12 = load_const (0x00000000)
+    0     %13 = deref_var &acc (function_temp uint)
+                @store_deref (%13, %12 (0x0)) (wrmask=x, access=none)
+    32    %14 = load_const (0x00000000)
+    0     %15 = deref_var &k (function_temp uint)
+                @store_deref (%15, %14 (0x0)) (wrmask=x, access=none)
+    32    %16 = load_const (0x00000002)
+    32    %17 = ishl %1, %16 (0x2)
+    32    %18 = iadd %5, %17
+    0     %19 = deref_var &addr (function_temp uint)
+                @store_deref (%19, %18) (wrmask=x, access=none)
+                // succs: b1
+    loop {
+        block b1:   // preds: b0 b4
+        0     %20 = deref_var &k (function_temp uint)
+        32    %21 = @load_deref (%20) (access=none)
+        1     %22 = uge %21, %9
+                    // succs: b2 b3
+        if %22 {
+            block b2:// preds: b1
+            break
+            // succs: b5
+        } else {
+            block b3:  // preds: b1, succs: b4
+        }
+        block b4:   // preds: b3
+        0     %23 = deref_var &addr (function_temp uint)
+        32    %24 = @load_deref (%23) (access=none)
+        32    %25 = @load_global (%24) (access=none, align_mul=4, align_offset=0)
+        0     %26 = deref_var &acc (function_temp uint)
+        32    %27 = @load_deref (%26) (access=none)
+        32    %28 = iadd %27, %25
+        0     %29 = deref_var &acc (function_temp uint)
+                    @store_deref (%29, %28) (wrmask=x, access=none)
+        32    %30 = iadd %24, %11
+        0     %31 = deref_var &addr (function_temp uint)
+                    @store_deref (%31, %30) (wrmask=x, access=none)
+        32    %32 = load_const (0x00000001)
+        32    %33 = iadd %21, %32 (0x1)
+        0     %34 = deref_var &k (function_temp uint)
+                    @store_deref (%34, %33) (wrmask=x, access=none)
+                    // succs: b1
+    }
+    block b5:   // preds: b2
+    0     %35 = deref_var &acc (function_temp uint)
+    32    %36 = @load_deref (%35) (access=none)
+    32    %37 = load_const (0x00000002)
+    32    %38 = ishl %1, %37 (0x2)
+    32    %39 = iadd %3, %38
+                @store_global (%36, %39) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                // succs: b6
+    block b6:
+}
+
+kernel: loopsum, shared 0 bytes per workgroup
+GPU addresses: out 0xffffa000 in 0xffff9000 (4 bytes each)
+grid: 1 dimension(s), 1 x 1 workgroups of 1 x 1 threads
+out[0..3]: 0x1
+{"result": "PASS", "kernel": "loopsum", "threads": "1 x 1", "workgroup": "1 x 1", "hwc": "0x0x0", "mismatched_words": 0, "untouched": 0, "first_mismatch": -1, "got": 0, "want": 0, "launch_to_done_ms": 0.296, "median_ms": 0.296, "launches": 1, "mb_per_s": 0.0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261113-232215-S6E-LOOP1

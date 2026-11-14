@@ -1,0 +1,10 @@
+label: S6E-LOOP64
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel loopsum -n 64 -w 64 --len 100 --out /home/jordan/alta-npu/runs/cs6e-loop-20261113-232209/LOOP64
+cwd: /home/jordan/alta-npu
+start: 2026-11-13T23:22:33-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2168
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=fb84d;b=8f7f01abe08248ae908ecbfc43c3e05b;m=127be7e4c;t=66034d152c513;x=5aa36cf9a48540d
+end: 2026-11-13T23:22:34-05:00  rc: 0  wall_s: 1
