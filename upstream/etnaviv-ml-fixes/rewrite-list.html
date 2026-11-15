@@ -57,6 +57,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
       <li><label><input type="checkbox" id="c2"><span><code>etnaviv_ml.c</code><small>Above the helper that checks for an operand in NCHW order (patch 7)</small></span></label></li>
       <li><label><input type="checkbox" id="c3"><span><code>etnaviv_ml.c</code><small>Inside <code>lower_operations</code>, near line 371 (patch 7)</small></span></label></li>
       <li><label><input type="checkbox" id="c8"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_operation_supported</code>, in the ADD / SUBTRACT case (patch 8)</small></span></label></li>
+      <li><label><input type="checkbox" id="c9"><span><code>etnaviv_ml.c</code><small>In <code>lower_operations</code>, after the <code>recreate_tensor</code> call for additions (patch 9)</small></span></label></li>
       <li><label><input type="checkbox" id="c4"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_calculate_tiling_v7</code>, near line 87 (patch 2)</small></span></label></li>
       <li><label><input type="checkbox" id="c5"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>calculate_bias_correction</code>, near line 124 (patch 6)</small></span></label></li>
       <li><label><input type="checkbox" id="c6"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_create_coeffs_v7</code>, near line 538 (patch 3)</small></span></label></li>
@@ -80,6 +81,7 @@ git rebase -i 8a9009e0482</pre>
       <li><label><input type="checkbox" id="m6"><span>6. Don't read past the weights of an addition on V7</span></label></li>
       <li><label><input type="checkbox" id="m7"><span>7. Bring the operands of an addition to the same layout</span></label></li>
       <li><label><input type="checkbox" id="m8"><span>8. Don't accept subtractions on V7</span></label></li>
+      <li><label><input type="checkbox" id="m9"><span>9. Keep the size of the first operand of an addition</span></label></li>
     </ul>
   </section>
 
@@ -95,7 +97,7 @@ git rebase -i 8a9009e0482</pre>
   <section>
     <h2>Do not edit by hand</h2>
     <ul class="plain">
-      <li><strong>Patch files <code>0001</code> to <code>0008</code></strong> in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code>: exports of the branch. Mesa takes the pushed branch, so they only need regenerating if the folder should match.</li>
+      <li><strong>Patch files <code>0001</code> to <code>0009</code></strong> in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code>: exports of the branch. Mesa takes the pushed branch, so they only need regenerating if the folder should match.</li>
       <li><strong><code>make_series.py</code></strong> in the same folder still holds the old wording, and only the first seven patches.</li>
       <li><strong>The second package</strong> in <code>~/Documents/AI_Projects/upstream/etnaviv-ml-fixes/</code>: out of date, not what gets sent.</li>
     </ul>
