@@ -1,0 +1,47 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Note: Google Test filter = teflon/ds_cnn.0014
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/ds_cnn
+[ RUN      ] teflon/ds_cnn.0014
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 FC              v4  supported   in: 0(i8) 1(i8) 2(i32) out: 3(i8)
+
+teflon: compiling graph: 10 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.039729 ffffff80 no       1x1x1x276
+  1 0.005407   0 yes      1x1x12x276
+  2 0.000215   0 yes      1x1x1x12
+  3 0.257021  22 no       1x1x1x12
+  0 0.000000   0 no       0x0x0x0
+  0 0.000000   0 no       0x0x0x0
+  0 0.000000   0 no       0x0x0x0
+  0 0.000000   0 no       0x0x0x0
+  0 0.000000   0 no       0x0x0x0
+  0 0.000000   0 no       0x0x0x0
+
+idx type            inputs               outputs             
+==========================================================================
+  0 FCON            0,1,2                3                   
+
+teflon: compiled graph, took 1 ms
+teflon: invoked graph, took 1 ms
+CPU: 80 1b 80 b9 80 a1 92 80 80 80 80 b0 
+NPU: 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (80) doesn't match that from the CPU (1b).
+[  FAILED  ] teflon/ds_cnn.0014 (13 ms)
+[----------] 1 test from teflon/ds_cnn (13 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (13 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/ds_cnn.0014
+
+ 1 FAILED TEST

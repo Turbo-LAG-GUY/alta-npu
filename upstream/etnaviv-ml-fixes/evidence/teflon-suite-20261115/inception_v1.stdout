@@ -1,0 +1,187 @@
+Note: Google Test filter = teflon/inception_v1.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 84 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 84 tests from teflon/inception_v1
+[ RUN      ] teflon/inception_v1.0000
+[       OK ] teflon/inception_v1.0000 (612 ms)
+[ RUN      ] teflon/inception_v1.0001
+[       OK ] teflon/inception_v1.0001 (74 ms)
+[ RUN      ] teflon/inception_v1.0002
+[       OK ] teflon/inception_v1.0002 (56 ms)
+[ RUN      ] teflon/inception_v1.0003
+[       OK ] teflon/inception_v1.0003 (356 ms)
+[ RUN      ] teflon/inception_v1.0004
+[       OK ] teflon/inception_v1.0004 (67 ms)
+[ RUN      ] teflon/inception_v1.0005
+[       OK ] teflon/inception_v1.0005 (45 ms)
+[ RUN      ] teflon/inception_v1.0006
+[       OK ] teflon/inception_v1.0006 (53 ms)
+[ RUN      ] teflon/inception_v1.0007
+[       OK ] teflon/inception_v1.0007 (116 ms)
+[ RUN      ] teflon/inception_v1.0008
+[       OK ] teflon/inception_v1.0008 (36 ms)
+[ RUN      ] teflon/inception_v1.0009
+[       OK ] teflon/inception_v1.0009 (32 ms)
+[ RUN      ] teflon/inception_v1.0010
+[       OK ] teflon/inception_v1.0010 (45 ms)
+[ RUN      ] teflon/inception_v1.0011
+[       OK ] teflon/inception_v1.0011 (40 ms)
+[ RUN      ] teflon/inception_v1.0012
+[       OK ] teflon/inception_v1.0012 (43 ms)
+[ RUN      ] teflon/inception_v1.0013
+[       OK ] teflon/inception_v1.0013 (62 ms)
+[ RUN      ] teflon/inception_v1.0014
+[       OK ] teflon/inception_v1.0014 (61 ms)
+[ RUN      ] teflon/inception_v1.0015
+[       OK ] teflon/inception_v1.0015 (199 ms)
+[ RUN      ] teflon/inception_v1.0016
+[       OK ] teflon/inception_v1.0016 (40 ms)
+[ RUN      ] teflon/inception_v1.0017
+[       OK ] teflon/inception_v1.0017 (55 ms)
+[ RUN      ] teflon/inception_v1.0018
+[       OK ] teflon/inception_v1.0018 (53 ms)
+[ RUN      ] teflon/inception_v1.0019
+[       OK ] teflon/inception_v1.0019 (46 ms)
+[ RUN      ] teflon/inception_v1.0020
+[       OK ] teflon/inception_v1.0020 (53 ms)
+[ RUN      ] teflon/inception_v1.0021
+[       OK ] teflon/inception_v1.0021 (45 ms)
+[ RUN      ] teflon/inception_v1.0022
+[       OK ] teflon/inception_v1.0022 (47 ms)
+[ RUN      ] teflon/inception_v1.0023
+[       OK ] teflon/inception_v1.0023 (39 ms)
+[ RUN      ] teflon/inception_v1.0024
+[       OK ] teflon/inception_v1.0024 (83 ms)
+[ RUN      ] teflon/inception_v1.0025
+[       OK ] teflon/inception_v1.0025 (30 ms)
+[ RUN      ] teflon/inception_v1.0026
+[       OK ] teflon/inception_v1.0026 (29 ms)
+[ RUN      ] teflon/inception_v1.0027
+[       OK ] teflon/inception_v1.0027 (37 ms)
+[ RUN      ] teflon/inception_v1.0028
+[       OK ] teflon/inception_v1.0028 (37 ms)
+[ RUN      ] teflon/inception_v1.0029
+[       OK ] teflon/inception_v1.0029 (32 ms)
+[ RUN      ] teflon/inception_v1.0030
+[       OK ] teflon/inception_v1.0030 (45 ms)
+[ RUN      ] teflon/inception_v1.0031
+[       OK ] teflon/inception_v1.0031 (40 ms)
+[ RUN      ] teflon/inception_v1.0032
+[       OK ] teflon/inception_v1.0032 (96 ms)
+[ RUN      ] teflon/inception_v1.0033
+[       OK ] teflon/inception_v1.0033 (32 ms)
+[ RUN      ] teflon/inception_v1.0034
+[       OK ] teflon/inception_v1.0034 (33 ms)
+[ RUN      ] teflon/inception_v1.0035
+[       OK ] teflon/inception_v1.0035 (39 ms)
+[ RUN      ] teflon/inception_v1.0036
+[       OK ] teflon/inception_v1.0036 (35 ms)
+[ RUN      ] teflon/inception_v1.0037
+[       OK ] teflon/inception_v1.0037 (32 ms)
+[ RUN      ] teflon/inception_v1.0038
+[       OK ] teflon/inception_v1.0038 (43 ms)
+[ RUN      ] teflon/inception_v1.0039
+[       OK ] teflon/inception_v1.0039 (42 ms)
+[ RUN      ] teflon/inception_v1.0040
+[       OK ] teflon/inception_v1.0040 (113 ms)
+[ RUN      ] teflon/inception_v1.0041
+[       OK ] teflon/inception_v1.0041 (32 ms)
+[ RUN      ] teflon/inception_v1.0042
+[       OK ] teflon/inception_v1.0042 (32 ms)
+[ RUN      ] teflon/inception_v1.0043
+[       OK ] teflon/inception_v1.0043 (37 ms)
+[ RUN      ] teflon/inception_v1.0044
+[       OK ] teflon/inception_v1.0044 (36 ms)
+[ RUN      ] teflon/inception_v1.0045
+[       OK ] teflon/inception_v1.0045 (31 ms)
+[ RUN      ] teflon/inception_v1.0046
+[       OK ] teflon/inception_v1.0046 (41 ms)
+[ RUN      ] teflon/inception_v1.0047
+[       OK ] teflon/inception_v1.0047 (46 ms)
+[ RUN      ] teflon/inception_v1.0048
+[       OK ] teflon/inception_v1.0048 (140 ms)
+[ RUN      ] teflon/inception_v1.0049
+[       OK ] teflon/inception_v1.0049 (39 ms)
+[ RUN      ] teflon/inception_v1.0050
+[       OK ] teflon/inception_v1.0050 (32 ms)
+[ RUN      ] teflon/inception_v1.0051
+[       OK ] teflon/inception_v1.0051 (40 ms)
+[ RUN      ] teflon/inception_v1.0052
+[       OK ] teflon/inception_v1.0052 (39 ms)
+[ RUN      ] teflon/inception_v1.0053
+[       OK ] teflon/inception_v1.0053 (32 ms)
+[ RUN      ] teflon/inception_v1.0054
+[       OK ] teflon/inception_v1.0054 (57 ms)
+[ RUN      ] teflon/inception_v1.0055
+[       OK ] teflon/inception_v1.0055 (45 ms)
+[ RUN      ] teflon/inception_v1.0056
+[       OK ] teflon/inception_v1.0056 (166 ms)
+[ RUN      ] teflon/inception_v1.0057
+[       OK ] teflon/inception_v1.0057 (36 ms)
+[ RUN      ] teflon/inception_v1.0058
+[       OK ] teflon/inception_v1.0058 (41 ms)
+[ RUN      ] teflon/inception_v1.0059
+[       OK ] teflon/inception_v1.0059 (36 ms)
+[ RUN      ] teflon/inception_v1.0060
+[       OK ] teflon/inception_v1.0060 (43 ms)
+[ RUN      ] teflon/inception_v1.0061
+[       OK ] teflon/inception_v1.0061 (36 ms)
+[ RUN      ] teflon/inception_v1.0062
+[       OK ] teflon/inception_v1.0062 (30 ms)
+[ RUN      ] teflon/inception_v1.0063
+[       OK ] teflon/inception_v1.0063 (46 ms)
+[ RUN      ] teflon/inception_v1.0064
+[       OK ] teflon/inception_v1.0064 (42 ms)
+[ RUN      ] teflon/inception_v1.0065
+[       OK ] teflon/inception_v1.0065 (111 ms)
+[ RUN      ] teflon/inception_v1.0066
+[       OK ] teflon/inception_v1.0066 (32 ms)
+[ RUN      ] teflon/inception_v1.0067
+[       OK ] teflon/inception_v1.0067 (33 ms)
+[ RUN      ] teflon/inception_v1.0068
+[       OK ] teflon/inception_v1.0068 (30 ms)
+[ RUN      ] teflon/inception_v1.0069
+[       OK ] teflon/inception_v1.0069 (35 ms)
+[ RUN      ] teflon/inception_v1.0070
+[       OK ] teflon/inception_v1.0070 (31 ms)
+[ RUN      ] teflon/inception_v1.0071
+[       OK ] teflon/inception_v1.0071 (56 ms)
+[ RUN      ] teflon/inception_v1.0072
+[       OK ] teflon/inception_v1.0072 (41 ms)
+[ RUN      ] teflon/inception_v1.0073
+[       OK ] teflon/inception_v1.0073 (159 ms)
+[ RUN      ] teflon/inception_v1.0074
+[       OK ] teflon/inception_v1.0074 (33 ms)
+[ RUN      ] teflon/inception_v1.0075
+[       OK ] teflon/inception_v1.0075 (36 ms)
+[ RUN      ] teflon/inception_v1.0076
+[       OK ] teflon/inception_v1.0076 (30 ms)
+[ RUN      ] teflon/inception_v1.0077
+[       OK ] teflon/inception_v1.0077 (34 ms)
+[ RUN      ] teflon/inception_v1.0078
+[       OK ] teflon/inception_v1.0078 (29 ms)
+[ RUN      ] teflon/inception_v1.0079
+[       OK ] teflon/inception_v1.0079 (27 ms)
+[ RUN      ] teflon/inception_v1.0080
+[       OK ] teflon/inception_v1.0080 (82 ms)
+[ RUN      ] teflon/inception_v1.0081
+[       OK ] teflon/inception_v1.0081 (24 ms)
+[ RUN      ] teflon/inception_v1.0082
+[       OK ] teflon/inception_v1.0082 (23 ms)
+[ RUN      ] teflon/inception_v1.whole
+CPU: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+NPU: 00 00 48 00 00 00 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 2 from the NPU (48) doesn't match that from the CPU (00).
+[  FAILED  ] teflon/inception_v1.whole (2671 ms)
+[----------] 84 tests from teflon/inception_v1 (7795 ms total)
+
+[----------] Global test environment tear-down
+[==========] 84 tests from 1 test suite ran. (7795 ms total)
+[  PASSED  ] 83 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/inception_v1.whole
+
+ 1 FAILED TEST
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-143501-TFS-inception_v1

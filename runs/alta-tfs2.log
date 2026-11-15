@@ -1,0 +1,5 @@
+== TFS-mobilenet_v2 rc=0 passed=66 failed=0
+== TFS-posenet_mobilenet_v1 rc=1 passed=29 failed=4
+== TFS-inception_v1 rc=1 passed=83 failed=1
+== TFS-ds_cnn rc=90 passed=0 failed=0
+STOPPED at TFS-ds_cnn (see /home/jordan/alta-npu/runs/teflon-suite-20261115-074242/ds_cnn.stdout and PROGRESS.md)

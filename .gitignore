@@ -37,3 +37,6 @@ __pycache__/
 /runs/cs-offline/step6h-tiling/
 /runs/cs-offline/step6i-int8nn/
 /runs/cs-offline/step6i-upstream/
+
+# Fake-NPU dumps of Mesa's Teflon test suite (1568 tests); regenerate with research/port/tools/teflon_suite_offline.sh
+/runs/cs-offline/teflon-suite*/

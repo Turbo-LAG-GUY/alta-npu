@@ -1,7 +1,7 @@
 From 7703cd7f5afe9126e6dcc90c317cfd27f298968b Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 5/7] etnaviv/ml: Use the shifted zero points for the bias of
+Subject: [PATCH 5/8] etnaviv/ml: Use the shifted zero points for the bias of
  V7 additions
 
 etna_ml_lower_add_v7() passes the raw zero points of its inputs to

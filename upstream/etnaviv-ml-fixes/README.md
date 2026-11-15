@@ -1,7 +1,7 @@
 # Sending the etnaviv ML (Teflon) fixes to Mesa
 
-Seven patches against Mesa `main` (commit 8a9009e0482, 2026-11-14) for the etnaviv NPU driver, found while
-porting compute to the NPU's shader core on the Alta (Amlogic A311D, VIPNano-QI.7120). All seven bugs are in
+Eight patches against Mesa `main` (commit 8a9009e0482, 2026-11-14) for the etnaviv NPU driver, found while
+porting compute to the NPU's shader core on the Alta (Amlogic A311D, VIPNano-QI.7120). All eight bugs are in
 upstream `main` today. **Nothing has been sent.** You review, decide and send.
 
 | Patch | What it fixes | Seen on the board as |
@@ -13,6 +13,7 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
 | 0005 | V7 addition bias used the raw int8 zero points | int8 ADD all -128 |
 | 0006 | V7 addition bias correction summed 256 bytes of an 8-byte weight tensor | ADD bias changed from run to run, uint8 too |
 | 0007 | Addition of an NHWC operand and an NCHW operand, output not converted back | uint8 ADD up to 154 levels off |
+| 0008 | V7 accepted SUBTRACT but can only lower ADD | assertion (abort) in `etna_ml_lower_add_v7`; found by Mesa's own `test_teflon` (6 tests) |
 
 ## What was tested, and what was not
 - **On the NPU:** the same code changes in the port tree (`mesa-compute`, based on Mesa main of 2026-04-10).
@@ -34,13 +35,17 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
     (`etnaviv_ml_nn_v7.c:126`), 0 bytes after the 8-byte addition weights;
   - with all seven: MobileNetV1 and six of the test models compile with no report.
   You can quote these in the messages of patches 3 and 6 when you rewrite them.
+- **Patch 8 (added 2026-11-15):** branch tip 5b20ad12973, library a05298e9. Under the fake NPU the six
+  `test_teflon` cases that aborted (movenet `0095`, `0136`, `whole`) no longer abort, and 19 of the proven models
+  compile to byte-identical streams as with the seven-patch library 549408ab (kept beside the new one as
+  `libteflon.so.549408ab-7patches`). The two ladders above ran with the seven-patch library.
 - **Not done:** Mesa's own Teflon test suite has not been run (it needs gtest, a C++ TensorFlow Lite library and
   a downloaded model zoo, none of which are on the board).
   Nothing was tested on V8 hardware; the patches touch V7 code and the shared layout pass (0001, 0007).
 - **Not included:** per-channel int8 convolutions are still refused by the driver.
 
 ## Before you send
-1. **Read all seven patches.** Each message says what was wrong, why, and what was tested. You will be the one
+1. **Read all eight patches.** Each message says what was wrong, why, and what was tested. You will be the one
    answering review questions.
 2. **Mesa's rules on AI** (`docs/submittingpatches.rst` and `AGENTS.md` at 8a9009e0482, read 2026-11-15):
    - Commits must carry `Generated-by: LLM`; no `Co-authored-by` for tools, no model name. The commits now
@@ -69,9 +74,9 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
    reviewers.
 
 ## Files
-- `0001` to `0007`: the patches (`git am` applies them to main 8a9009e0482).
+- `0001` to `0008`: the patches (`git am` applies them to main 8a9009e0482).
 - `MR-DESCRIPTION.md`: text for the merge request.
-- `make_series.py`: how the commits were made (edits plus messages), for regenerating on a newer `main`.
+- `make_series.py`: how the first seven commits were made (patch 8 was committed by hand on top; do not rerun it) (edits plus messages), for regenerating on a newer `main`.
 - `models/` (18 small models with CPU references, `manifest.json` has the hashes), `reproduce.py` (checks a model
   against its reference on the CPU, or on hardware with `--delegate`; on this board only through
   `scripts/npu-attempt` with an OK) and `validate_offline.py`: merged 2026-11-15 from the second package that

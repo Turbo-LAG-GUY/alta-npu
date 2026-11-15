@@ -1,6 +1,6 @@
 etnaviv/ml: V7 int8, addition and layout fixes
 
-Seven fixes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
+Eight fixes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
 running small synthetic models through Teflon and comparing every output with the CPU interpreter.
 
 1. **Detranspose outputs with a single row or column.** `is_3d()` skipped `[1,1,W,C]` and `[1,H,1,C]` graph
@@ -16,6 +16,8 @@ running small synthetic models through Teflon and comparing every output with th
    of the 8-byte addition kernel; the bias depended on heap contents, for uint8 too.
 7. **Bring the operands of an addition to the same layout.** NHWC graph input + NCHW convolution output were
    added byte by byte, and the output wasn't detransposed.
+8. **Don't accept subtractions on V7.** Only V8 can lower SUBTRACT; on V7 it hit the assertion in
+   `etna_ml_lower_add_v7()` (six `test_teflon` cases abort).
 
 ### Testing
 

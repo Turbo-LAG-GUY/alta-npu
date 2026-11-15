@@ -1,0 +1,141 @@
+Note: Google Test filter = teflon/mobilenet_v2.*
+[==========] Running 66 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 66 tests from teflon/mobilenet_v2
+[ RUN      ] teflon/mobilenet_v2.0000
+[       OK ] teflon/mobilenet_v2.0000 (109 ms)
+[ RUN      ] teflon/mobilenet_v2.0001
+[       OK ] teflon/mobilenet_v2.0001 (88 ms)
+[ RUN      ] teflon/mobilenet_v2.0002
+[       OK ] teflon/mobilenet_v2.0002 (57 ms)
+[ RUN      ] teflon/mobilenet_v2.0003
+[       OK ] teflon/mobilenet_v2.0003 (125 ms)
+[ RUN      ] teflon/mobilenet_v2.0004
+[       OK ] teflon/mobilenet_v2.0004 (116 ms)
+[ RUN      ] teflon/mobilenet_v2.0005
+[       OK ] teflon/mobilenet_v2.0005 (59 ms)
+[ RUN      ] teflon/mobilenet_v2.0006
+[       OK ] teflon/mobilenet_v2.0006 (76 ms)
+[ RUN      ] teflon/mobilenet_v2.0007
+[       OK ] teflon/mobilenet_v2.0007 (105 ms)
+[ RUN      ] teflon/mobilenet_v2.0008
+[       OK ] teflon/mobilenet_v2.0008 (61 ms)
+[ RUN      ] teflon/mobilenet_v2.0009
+[       OK ] teflon/mobilenet_v2.0009 (35 ms)
+[ RUN      ] teflon/mobilenet_v2.0010
+[       OK ] teflon/mobilenet_v2.0010 (70 ms)
+[ RUN      ] teflon/mobilenet_v2.0011
+[       OK ] teflon/mobilenet_v2.0011 (70 ms)
+[ RUN      ] teflon/mobilenet_v2.0012
+[       OK ] teflon/mobilenet_v2.0012 (34 ms)
+[ RUN      ] teflon/mobilenet_v2.0013
+[       OK ] teflon/mobilenet_v2.0013 (38 ms)
+[ RUN      ] teflon/mobilenet_v2.0014
+[       OK ] teflon/mobilenet_v2.0014 (63 ms)
+[ RUN      ] teflon/mobilenet_v2.0015
+[       OK ] teflon/mobilenet_v2.0015 (36 ms)
+[ RUN      ] teflon/mobilenet_v2.0016
+[       OK ] teflon/mobilenet_v2.0016 (29 ms)
+[ RUN      ] teflon/mobilenet_v2.0017
+[       OK ] teflon/mobilenet_v2.0017 (39 ms)
+[ RUN      ] teflon/mobilenet_v2.0018
+[       OK ] teflon/mobilenet_v2.0018 (63 ms)
+[ RUN      ] teflon/mobilenet_v2.0019
+[       OK ] teflon/mobilenet_v2.0019 (40 ms)
+[ RUN      ] teflon/mobilenet_v2.0020
+[       OK ] teflon/mobilenet_v2.0020 (28 ms)
+[ RUN      ] teflon/mobilenet_v2.0021
+[       OK ] teflon/mobilenet_v2.0021 (38 ms)
+[ RUN      ] teflon/mobilenet_v2.0022
+[       OK ] teflon/mobilenet_v2.0022 (52 ms)
+[ RUN      ] teflon/mobilenet_v2.0023
+[       OK ] teflon/mobilenet_v2.0023 (30 ms)
+[ RUN      ] teflon/mobilenet_v2.0024
+[       OK ] teflon/mobilenet_v2.0024 (34 ms)
+[ RUN      ] teflon/mobilenet_v2.0025
+[       OK ] teflon/mobilenet_v2.0025 (97 ms)
+[ RUN      ] teflon/mobilenet_v2.0026
+[       OK ] teflon/mobilenet_v2.0026 (34 ms)
+[ RUN      ] teflon/mobilenet_v2.0027
+[       OK ] teflon/mobilenet_v2.0027 (31 ms)
+[ RUN      ] teflon/mobilenet_v2.0028
+[       OK ] teflon/mobilenet_v2.0028 (35 ms)
+[ RUN      ] teflon/mobilenet_v2.0029
+[       OK ] teflon/mobilenet_v2.0029 (96 ms)
+[ RUN      ] teflon/mobilenet_v2.0030
+[       OK ] teflon/mobilenet_v2.0030 (32 ms)
+[ RUN      ] teflon/mobilenet_v2.0031
+[       OK ] teflon/mobilenet_v2.0031 (27 ms)
+[ RUN      ] teflon/mobilenet_v2.0032
+[       OK ] teflon/mobilenet_v2.0032 (33 ms)
+[ RUN      ] teflon/mobilenet_v2.0033
+[       OK ] teflon/mobilenet_v2.0033 (94 ms)
+[ RUN      ] teflon/mobilenet_v2.0034
+[       OK ] teflon/mobilenet_v2.0034 (34 ms)
+[ RUN      ] teflon/mobilenet_v2.0035
+[       OK ] teflon/mobilenet_v2.0035 (27 ms)
+[ RUN      ] teflon/mobilenet_v2.0036
+[       OK ] teflon/mobilenet_v2.0036 (36 ms)
+[ RUN      ] teflon/mobilenet_v2.0037
+[       OK ] teflon/mobilenet_v2.0037 (94 ms)
+[ RUN      ] teflon/mobilenet_v2.0038
+[       OK ] teflon/mobilenet_v2.0038 (35 ms)
+[ RUN      ] teflon/mobilenet_v2.0039
+[       OK ] teflon/mobilenet_v2.0039 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0040
+[       OK ] teflon/mobilenet_v2.0040 (178 ms)
+[ RUN      ] teflon/mobilenet_v2.0041
+[       OK ] teflon/mobilenet_v2.0041 (37 ms)
+[ RUN      ] teflon/mobilenet_v2.0042
+[       OK ] teflon/mobilenet_v2.0042 (29 ms)
+[ RUN      ] teflon/mobilenet_v2.0043
+[       OK ] teflon/mobilenet_v2.0043 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0044
+[       OK ] teflon/mobilenet_v2.0044 (175 ms)
+[ RUN      ] teflon/mobilenet_v2.0045
+[       OK ] teflon/mobilenet_v2.0045 (49 ms)
+[ RUN      ] teflon/mobilenet_v2.0046
+[       OK ] teflon/mobilenet_v2.0046 (28 ms)
+[ RUN      ] teflon/mobilenet_v2.0047
+[       OK ] teflon/mobilenet_v2.0047 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0048
+[       OK ] teflon/mobilenet_v2.0048 (169 ms)
+[ RUN      ] teflon/mobilenet_v2.0049
+[       OK ] teflon/mobilenet_v2.0049 (34 ms)
+[ RUN      ] teflon/mobilenet_v2.0050
+[       OK ] teflon/mobilenet_v2.0050 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0051
+[       OK ] teflon/mobilenet_v2.0051 (400 ms)
+[ RUN      ] teflon/mobilenet_v2.0052
+[       OK ] teflon/mobilenet_v2.0052 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0053
+[       OK ] teflon/mobilenet_v2.0053 (27 ms)
+[ RUN      ] teflon/mobilenet_v2.0054
+[       OK ] teflon/mobilenet_v2.0054 (43 ms)
+[ RUN      ] teflon/mobilenet_v2.0055
+[       OK ] teflon/mobilenet_v2.0055 (412 ms)
+[ RUN      ] teflon/mobilenet_v2.0056
+[       OK ] teflon/mobilenet_v2.0056 (41 ms)
+[ RUN      ] teflon/mobilenet_v2.0057
+[       OK ] teflon/mobilenet_v2.0057 (28 ms)
+[ RUN      ] teflon/mobilenet_v2.0058
+[       OK ] teflon/mobilenet_v2.0058 (42 ms)
+[ RUN      ] teflon/mobilenet_v2.0059
+[       OK ] teflon/mobilenet_v2.0059 (403 ms)
+[ RUN      ] teflon/mobilenet_v2.0060
+[       OK ] teflon/mobilenet_v2.0060 (61 ms)
+[ RUN      ] teflon/mobilenet_v2.0061
+[       OK ] teflon/mobilenet_v2.0061 (67 ms)
+[ RUN      ] teflon/mobilenet_v2.0062
+[       OK ] teflon/mobilenet_v2.0062 (27 ms)
+[ RUN      ] teflon/mobilenet_v2.0063
+[       OK ] teflon/mobilenet_v2.0063 (116 ms)
+[ RUN      ] teflon/mobilenet_v2.0064
+[       OK ] teflon/mobilenet_v2.0064 (28 ms)
+[ RUN      ] teflon/mobilenet_v2.whole
+[       OK ] teflon/mobilenet_v2.whole (2724 ms)
+[----------] 66 tests from teflon/mobilenet_v2 (7567 ms total)
+
+[----------] Global test environment tear-down
+[==========] 66 tests from 1 test suite ran. (7568 ms total)
+[  PASSED  ] 66 tests.

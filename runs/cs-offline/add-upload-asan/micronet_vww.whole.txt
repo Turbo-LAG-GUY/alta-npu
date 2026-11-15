@@ -1,0 +1,23 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Note: Google Test filter = teflon/micronet_vww.whole
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/micronet_vww
+[ RUN      ] teflon/micronet_vww.whole
+CPU: 09 c2 
+NPU: d6 f8 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (d6) doesn't match that from the CPU (09).
+[  FAILED  ] teflon/micronet_vww.whole (190 ms)
+[----------] 1 test from teflon/micronet_vww (190 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (191 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/micronet_vww.whole
+
+ 1 FAILED TEST

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# devcd-watch - copy every etnaviv hang dump (devcoredump) to the kit the moment it appears. NEEDS ROOT; read-only
+# toward the kernel (it only reads /sys/class/devcoredump/devcd*/data, which is root-readable and is deleted by the
+# kernel about 5 minutes after a hang). Runs nothing on the NPU. Written 2026-11-15 after the dump of the
+# TFS-ds_cnn hang was lost (nobody with root was awake).
+# Start (until the next reboot):
+#   sudo systemd-run --unit=alta-devcd-watch /home/jordan/alta-npu/scripts/devcd-watch
+# Stop:   sudo systemctl stop alta-devcd-watch        Status: systemctl status alta-devcd-watch
+# Result: ~/alta-npu/incidents/devcoredumps/<boot id, 8 chars>-up<uptime s>-devcdN.bin, owned by jordan.
+set -u
+OUT=/home/jordan/alta-npu/incidents/devcoredumps
+OWNER=jordan
+mkdir -p "$OUT"; chown "$OWNER": "$OUT"
+boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id)
+declare -A seen
+while :; do
+   for d in /sys/class/devcoredump/devcd*; do
+      [ -e "$d/data" ] || continue
+      n=$(basename "$d")
+      [ -n "${seen[$n]:-}" ] && continue
+      up=$(cut -d. -f1 /proc/uptime)
+      f=$OUT/$boot-up$up-$n.bin
+      if cp "$d/data" "$f"; then
+         chown "$OWNER": "$f"; seen[$n]=1
+         echo "copied $d/data -> $f ($(stat -c %s "$f") bytes)"
+      fi
+   done
+   sleep 1
+done

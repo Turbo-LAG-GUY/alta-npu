@@ -1,0 +1,101 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Note: Google Test filter = teflon/ds_cnn.0014
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/ds_cnn
+[ RUN      ] teflon/ds_cnn.0014
+Adding transpose.
+operation 9 input tensor 4 layouts 1 2.
+Copying layout to output tensor 3.
+type 9 i 0 tensor 3 layout 1 == 2
+created resource 0xaaab0fd6c230 for tensor 0 with size 276
+created resource 0xaaab0fd6c340 for tensor 4 with size 276
+Ensuring all output tensors have their memory backing.
+created resource 0xaaab0fd6c450 for tensor 3 with size 12
+
+dumping intermediate graph: 2 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   4
+  1 NN     4   3 in2:   0
+
+write_core_sequential core 0 zrl_bits 5 superblocks 1
+write_core_sequential core 1 zrl_bits 5 superblocks 1
+write_core_sequential core 2 zrl_bits 5 superblocks 1
+write_core_sequential core 3 zrl_bits 5 superblocks 1
+write_core_sequential core 4 zrl_bits 5 superblocks 1
+write_core_sequential core 5 zrl_bits 5 superblocks 1
+write_core_sequential core 6 zrl_bits 5 superblocks 1
+write_core_sequential core 7 zrl_bits 5 superblocks 1
+write_core_sequential core 0 zrl_bits 4 superblocks 1
+write_core_sequential core 1 zrl_bits 4 superblocks 1
+write_core_sequential core 2 zrl_bits 4 superblocks 1
+write_core_sequential core 3 zrl_bits 4 superblocks 1
+write_core_sequential core 4 zrl_bits 4 superblocks 1
+write_core_sequential core 5 zrl_bits 4 superblocks 1
+write_core_sequential core 6 zrl_bits 4 superblocks 1
+write_core_sequential core 7 zrl_bits 4 superblocks 1
+write_core_sequential core 0 zrl_bits 3 superblocks 1
+write_core_sequential core 1 zrl_bits 3 superblocks 1
+write_core_sequential core 2 zrl_bits 3 superblocks 1
+write_core_sequential core 3 zrl_bits 3 superblocks 1
+write_core_sequential core 4 zrl_bits 3 superblocks 1
+write_core_sequential core 5 zrl_bits 3 superblocks 1
+write_core_sequential core 6 zrl_bits 3 superblocks 1
+write_core_sequential core 7 zrl_bits 3 superblocks 1
+write_core_sequential core 0 zrl_bits 2 superblocks 1
+write_core_sequential core 1 zrl_bits 2 superblocks 1
+write_core_sequential core 2 zrl_bits 2 superblocks 1
+write_core_sequential core 3 zrl_bits 2 superblocks 1
+write_core_sequential core 4 zrl_bits 2 superblocks 1
+write_core_sequential core 5 zrl_bits 2 superblocks 1
+write_core_sequential core 6 zrl_bits 2 superblocks 1
+write_core_sequential core 7 zrl_bits 2 superblocks 1
+write_core_sequential core 0 zrl_bits 1 superblocks 1
+write_core_sequential core 1 zrl_bits 1 superblocks 1
+write_core_sequential core 2 zrl_bits 1 superblocks 1
+write_core_sequential core 3 zrl_bits 1 superblocks 1
+write_core_sequential core 4 zrl_bits 1 superblocks 1
+write_core_sequential core 5 zrl_bits 1 superblocks 1
+write_core_sequential core 6 zrl_bits 1 superblocks 1
+write_core_sequential core 7 zrl_bits 1 superblocks 1
+write_core_sequential core 0 zrl_bits 0 superblocks 1
+write_core_sequential core 1 zrl_bits 0 superblocks 1
+write_core_sequential core 2 zrl_bits 0 superblocks 1
+write_core_sequential core 3 zrl_bits 0 superblocks 1
+write_core_sequential core 4 zrl_bits 0 superblocks 1
+write_core_sequential core 5 zrl_bits 0 superblocks 1
+write_core_sequential core 6 zrl_bits 0 superblocks 1
+write_core_sequential core 7 zrl_bits 0 superblocks 1
+write_core_sequential core 0 zrl_bits 1 superblocks 1
+write_core_sequential core 1 zrl_bits 1 superblocks 1
+write_core_sequential core 2 zrl_bits 1 superblocks 1
+write_core_sequential core 3 zrl_bits 1 superblocks 1
+write_core_sequential core 4 zrl_bits 1 superblocks 1
+write_core_sequential core 5 zrl_bits 1 superblocks 1
+write_core_sequential core 6 zrl_bits 1 superblocks 1
+write_core_sequential core 7 zrl_bits 1 superblocks 1
+coefficients_size 0x1400 (5120) image_size 0x0 (0)
+Dumping buffer from 0xffff9c5ad000 at offset 0 with size 4096 to mesa-input-000-000.bin
+Dumping buffer from 0xffff9c5aa000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff9c5ac000 at offset 0 with size 4096 to mesa-input-001-000.bin
+Dumping buffer from 0xffff9c5a9000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffff9c1ee000 at offset 0 with size 8192 to mesa-compressed-001-000.bin
+Running the NN job took 0 ms.
+CPU: 80 1b 80 b9 80 a1 92 80 80 80 80 b0 
+NPU: 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (80) doesn't match that from the CPU (1b).
+[  FAILED  ] teflon/ds_cnn.0014 (13 ms)
+[----------] 1 test from teflon/ds_cnn (13 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (13 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/ds_cnn.0014
+
+ 1 FAILED TEST

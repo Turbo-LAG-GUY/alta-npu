@@ -1,0 +1,14 @@
+label: TFS-ds_cnn
+cmd: /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/ds_cnn.* --gtest_brief=0
+cwd: /home/jordan/alta-npu
+start: 2026-11-15T07:44:07-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2071
+deadline_s: 900
+journal_cursor: s=cb626ca7a5a54e8aa6b29b4699f37942;i=103dbc;b=64cd6b6879214a89842e036c28c22ec4;m=190bd86202;t=660500019b949;x=a95bb8158966c216
+TEFLON_TEST_DELEGATE=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so
+TEFLON_TEST_DATA=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/tests
+stopped at the first kernel error (uptime 107646.48 s): Nov 15 07:44:09 jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+end: 2026-11-15T07:44:14-05:00  rc: 143  wall_s: 7
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)

@@ -1,0 +1,118 @@
+<title>Etnaviv Series Rewrite List</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; each place to edit is a section, paths in mono, a checkbox per item. */
+:root {
+  --bg: #f7f8fa; --surface: #ffffff; --fg: #1b2330; --muted: #5a6577;
+  --line: #d9dee6; --accent: #1f6f8b; --code-bg: #eef1f5; --warn: #9a5b00; --warn-bg: #fdf3df;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161c; --surface: #1a2029; --fg: #e4e8ee; --muted: #9aa5b5;
+  --line: #2e3744; --accent: #6cc0dc; --code-bg: #232b36; --warn: #f0c070; --warn-bg: #33290f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161c; --surface: #1a2029; --fg: #e4e8ee; --muted: #9aa5b5;
+  --line: #2e3744; --accent: #6cc0dc; --code-bg: #232b36; --warn: #f0c070; --warn-bg: #33290f; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+main { max-width: 760px; margin: 0 auto; padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 28px; }
+h1 { font-family: var(--display); font-size: 1.9rem; line-height: 1.2; margin: 0 0 8px; text-wrap: balance; }
+h2 { font-family: var(--display); font-size: 1.2rem; margin: 0 0 4px; text-wrap: balance; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 65ch; }
+section { display: flex; flex-direction: column; gap: 12px; }
+.where { color: var(--muted); font-size: 0.92rem; }
+code, pre { font-family: var(--mono); font-size: 0.86rem; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 6px; margin: 0; overflow-x: auto; }
+ul.checks { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+ul.checks li { border-top: 1px solid var(--line); }
+ul.checks li:first-child { border-top: 0; }
+ul.checks label { display: flex; gap: 12px; padding: 11px 14px; cursor: pointer; align-items: flex-start; }
+ul.checks input { margin: 4px 0 0; width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+ul.checks input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+ul.checks span { min-width: 0; }
+ul.checks small { display: block; color: var(--muted); font-size: 0.88rem; }
+input:checked + span { color: var(--muted); text-decoration: line-through; }
+.note { background: var(--warn-bg); color: var(--warn); border-radius: 6px; padding: 10px 14px; font-size: 0.93rem; }
+.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
+</style>
+
+<main>
+  <header>
+    <h1>What to rewrite before sending the etnaviv series</h1>
+    <p class="lede">Mesa requires commit messages, code comments and GitLab text to be in the contributor's own words. These are the places where the current text was written by an LLM. Ticks are saved in this browser only.</p>
+  </header>
+
+  <section>
+    <h2>1. Code comments</h2>
+    <p class="where">Folder: <code>~/Documents/AI_Projects/mesa-upstream-fixes/src/gallium/drivers/etnaviv/</code></p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="c1"><span><code>etnaviv_ml.c</code><small>Above the helper that checks whether NCHW and NHWC order the bytes differently (patch 1)</small></span></label></li>
+      <li><label><input type="checkbox" id="c2"><span><code>etnaviv_ml.c</code><small>Above the helper that checks for an operand in NCHW order (patch 7)</small></span></label></li>
+      <li><label><input type="checkbox" id="c3"><span><code>etnaviv_ml.c</code><small>Inside <code>lower_operations</code>, near line 371 (patch 7)</small></span></label></li>
+      <li><label><input type="checkbox" id="c8"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_operation_supported</code>, in the ADD / SUBTRACT case (patch 8)</small></span></label></li>
+      <li><label><input type="checkbox" id="c4"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_calculate_tiling_v7</code>, near line 87 (patch 2)</small></span></label></li>
+      <li><label><input type="checkbox" id="c5"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>calculate_bias_correction</code>, near line 124 (patch 6)</small></span></label></li>
+      <li><label><input type="checkbox" id="c6"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_create_coeffs_v7</code>, near line 538 (patch 3)</small></span></label></li>
+      <li><label><input type="checkbox" id="c7"><span><code>etnaviv_ml_tp.c</code><small>In <code>create_detranspose_config</code>, near line 300 (patch 1)</small></span></label></li>
+    </ul>
+    <p class="where">The fourth file in the series, <code>etnaviv_ml_nn.c</code>, has no new comment.</p>
+  </section>
+
+  <section>
+    <h2>2. Commit messages</h2>
+    <p class="where">These live in the branch <code>alta-etnaviv-ml-fixes</code> of the same worktree, not in a file.</p>
+    <pre>cd ~/Documents/AI_Projects/mesa-upstream-fixes
+git rebase -i 8a9009e0482</pre>
+    <p>Mark a commit <code>reword</code> to change its message, or <code>edit</code> to also change that commit's comments in the same pass. Keep the <code>Generated-by: LLM</code> line at the end of each.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="m1"><span>1. Detranspose outputs with a single row or column</span></label></li>
+      <li><label><input type="checkbox" id="m2"><span>2. Don't use a tile wider than the image on V7</span></label></li>
+      <li><label><input type="checkbox" id="m3"><span>3. Pad the kernels of the last NN core on V7</span></label></li>
+      <li><label><input type="checkbox" id="m4"><span>4. Shift signed weights in the V7 coefficient stream</span></label></li>
+      <li><label><input type="checkbox" id="m5"><span>5. Use the shifted zero points for the bias of V7 additions</span></label></li>
+      <li><label><input type="checkbox" id="m6"><span>6. Don't read past the weights of an addition on V7</span></label></li>
+      <li><label><input type="checkbox" id="m7"><span>7. Bring the operands of an addition to the same layout</span></label></li>
+      <li><label><input type="checkbox" id="m8"><span>8. Don't accept subtractions on V7</span></label></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. Merge request text</h2>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="d1"><span><code>~/alta-npu/upstream/etnaviv-ml-fixes/MR-DESCRIPTION.md</code><small>This is what gets pasted into GitLab.</small></span></label></li>
+    </ul>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>Do not edit by hand</h2>
+    <ul class="plain">
+      <li><strong>Patch files <code>0001</code> to <code>0008</code></strong> in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code>: exports of the branch. Mesa takes the pushed branch, so they only need regenerating if the folder should match.</li>
+      <li><strong><code>make_series.py</code></strong> in the same folder still holds the old wording, and only the first seven patches.</li>
+      <li><strong>The second package</strong> in <code>~/Documents/AI_Projects/upstream/etnaviv-ml-fixes/</code>: out of date, not what gets sent.</li>
+    </ul>
+    <p class="note">Do not rerun <code>make_series.py</code> after the rebase. It resets the branch and overwrites the reworded commits.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var KEY = "etnaviv-rewrite-ticks", saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  document.querySelectorAll('input[type="checkbox"]').forEach(function (b) {
+    if (saved[b.id]) b.checked = true;
+    b.addEventListener("change", function () {
+      saved[b.id] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    });
+  });
+})();
+</script>
