@@ -3,189 +3,189 @@ Note: Google Test filter = teflon/efficientdet_lite0.*-teflon/ds_cnn.0014:teflon
 [----------] Global test environment set-up.
 [----------] 267 tests from teflon/efficientdet_lite0
 [ RUN      ] teflon/efficientdet_lite0.0000
-[       OK ] teflon/efficientdet_lite0.0000 (76 ms)
+[       OK ] teflon/efficientdet_lite0.0000 (43 ms)
 [ RUN      ] teflon/efficientdet_lite0.0001
-[       OK ] teflon/efficientdet_lite0.0001 (290 ms)
+[       OK ] teflon/efficientdet_lite0.0001 (287 ms)
 [ RUN      ] teflon/efficientdet_lite0.0002
-[       OK ] teflon/efficientdet_lite0.0002 (186 ms)
+[       OK ] teflon/efficientdet_lite0.0002 (184 ms)
 [ RUN      ] teflon/efficientdet_lite0.0003
-[       OK ] teflon/efficientdet_lite0.0003 (102 ms)
+[       OK ] teflon/efficientdet_lite0.0003 (100 ms)
 [ RUN      ] teflon/efficientdet_lite0.0004
-[       OK ] teflon/efficientdet_lite0.0004 (286 ms)
+[       OK ] teflon/efficientdet_lite0.0004 (284 ms)
 [ RUN      ] teflon/efficientdet_lite0.0005
-[       OK ] teflon/efficientdet_lite0.0005 (196 ms)
+[       OK ] teflon/efficientdet_lite0.0005 (194 ms)
 [ RUN      ] teflon/efficientdet_lite0.0006
-[       OK ] teflon/efficientdet_lite0.0006 (79 ms)
+[       OK ] teflon/efficientdet_lite0.0006 (78 ms)
 [ RUN      ] teflon/efficientdet_lite0.0007
-[       OK ] teflon/efficientdet_lite0.0007 (156 ms)
+[       OK ] teflon/efficientdet_lite0.0007 (160 ms)
 [ RUN      ] teflon/efficientdet_lite0.0008
-[       OK ] teflon/efficientdet_lite0.0008 (202 ms)
+[       OK ] teflon/efficientdet_lite0.0008 (198 ms)
 [ RUN      ] teflon/efficientdet_lite0.0009
-[       OK ] teflon/efficientdet_lite0.0009 (89 ms)
+[       OK ] teflon/efficientdet_lite0.0009 (92 ms)
 [ RUN      ] teflon/efficientdet_lite0.0010
-[       OK ] teflon/efficientdet_lite0.0010 (56 ms)
+[       OK ] teflon/efficientdet_lite0.0010 (45 ms)
 [ RUN      ] teflon/efficientdet_lite0.0011
 [       OK ] teflon/efficientdet_lite0.0011 (157 ms)
 [ RUN      ] teflon/efficientdet_lite0.0012
-[       OK ] teflon/efficientdet_lite0.0012 (128 ms)
+[       OK ] teflon/efficientdet_lite0.0012 (125 ms)
 [ RUN      ] teflon/efficientdet_lite0.0013
-[       OK ] teflon/efficientdet_lite0.0013 (51 ms)
+[       OK ] teflon/efficientdet_lite0.0013 (49 ms)
 [ RUN      ] teflon/efficientdet_lite0.0014
-[       OK ] teflon/efficientdet_lite0.0014 (91 ms)
+[       OK ] teflon/efficientdet_lite0.0014 (84 ms)
 [ RUN      ] teflon/efficientdet_lite0.0015
-[       OK ] teflon/efficientdet_lite0.0015 (158 ms)
+[       OK ] teflon/efficientdet_lite0.0015 (161 ms)
 [ RUN      ] teflon/efficientdet_lite0.0016
-[       OK ] teflon/efficientdet_lite0.0016 (63 ms)
+[       OK ] teflon/efficientdet_lite0.0016 (64 ms)
 [ RUN      ] teflon/efficientdet_lite0.0017
-[       OK ] teflon/efficientdet_lite0.0017 (38 ms)
+[       OK ] teflon/efficientdet_lite0.0017 (35 ms)
 [ RUN      ] teflon/efficientdet_lite0.0018
-[       OK ] teflon/efficientdet_lite0.0018 (86 ms)
+[       OK ] teflon/efficientdet_lite0.0018 (89 ms)
 [ RUN      ] teflon/efficientdet_lite0.0019
-[       OK ] teflon/efficientdet_lite0.0019 (56 ms)
+[       OK ] teflon/efficientdet_lite0.0019 (51 ms)
 [ RUN      ] teflon/efficientdet_lite0.0020
-[       OK ] teflon/efficientdet_lite0.0020 (39 ms)
+[       OK ] teflon/efficientdet_lite0.0020 (40 ms)
 [ RUN      ] teflon/efficientdet_lite0.0021
-[       OK ] teflon/efficientdet_lite0.0021 (62 ms)
+[       OK ] teflon/efficientdet_lite0.0021 (59 ms)
 [ RUN      ] teflon/efficientdet_lite0.0022
-[       OK ] teflon/efficientdet_lite0.0022 (62 ms)
+[       OK ] teflon/efficientdet_lite0.0022 (61 ms)
 [ RUN      ] teflon/efficientdet_lite0.0023
-[       OK ] teflon/efficientdet_lite0.0023 (52 ms)
+[       OK ] teflon/efficientdet_lite0.0023 (56 ms)
 [ RUN      ] teflon/efficientdet_lite0.0024
-[       OK ] teflon/efficientdet_lite0.0024 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0024 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0025
-[       OK ] teflon/efficientdet_lite0.0025 (61 ms)
+[       OK ] teflon/efficientdet_lite0.0025 (62 ms)
 [ RUN      ] teflon/efficientdet_lite0.0026
 [       OK ] teflon/efficientdet_lite0.0026 (61 ms)
 [ RUN      ] teflon/efficientdet_lite0.0027
-[       OK ] teflon/efficientdet_lite0.0027 (53 ms)
+[       OK ] teflon/efficientdet_lite0.0027 (52 ms)
 [ RUN      ] teflon/efficientdet_lite0.0028
-[       OK ] teflon/efficientdet_lite0.0028 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0028 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0029
-[       OK ] teflon/efficientdet_lite0.0029 (56 ms)
+[       OK ] teflon/efficientdet_lite0.0029 (60 ms)
 [ RUN      ] teflon/efficientdet_lite0.0030
-[       OK ] teflon/efficientdet_lite0.0030 (89 ms)
+[       OK ] teflon/efficientdet_lite0.0030 (95 ms)
 [ RUN      ] teflon/efficientdet_lite0.0031
-[       OK ] teflon/efficientdet_lite0.0031 (61 ms)
+[       OK ] teflon/efficientdet_lite0.0031 (67 ms)
 [ RUN      ] teflon/efficientdet_lite0.0032
 [       OK ] teflon/efficientdet_lite0.0032 (86 ms)
 [ RUN      ] teflon/efficientdet_lite0.0033
-[       OK ] teflon/efficientdet_lite0.0033 (125 ms)
+[       OK ] teflon/efficientdet_lite0.0033 (119 ms)
 [ RUN      ] teflon/efficientdet_lite0.0034
-[       OK ] teflon/efficientdet_lite0.0034 (75 ms)
+[       OK ] teflon/efficientdet_lite0.0034 (72 ms)
 [ RUN      ] teflon/efficientdet_lite0.0035
-[       OK ] teflon/efficientdet_lite0.0035 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0035 (34 ms)
 [ RUN      ] teflon/efficientdet_lite0.0036
-[       OK ] teflon/efficientdet_lite0.0036 (87 ms)
+[       OK ] teflon/efficientdet_lite0.0036 (84 ms)
 [ RUN      ] teflon/efficientdet_lite0.0037
 [       OK ] teflon/efficientdet_lite0.0037 (123 ms)
 [ RUN      ] teflon/efficientdet_lite0.0038
-[       OK ] teflon/efficientdet_lite0.0038 (75 ms)
+[       OK ] teflon/efficientdet_lite0.0038 (74 ms)
 [ RUN      ] teflon/efficientdet_lite0.0039
-[       OK ] teflon/efficientdet_lite0.0039 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0039 (37 ms)
 [ RUN      ] teflon/efficientdet_lite0.0040
 [       OK ] teflon/efficientdet_lite0.0040 (84 ms)
 [ RUN      ] teflon/efficientdet_lite0.0041
-[       OK ] teflon/efficientdet_lite0.0041 (55 ms)
+[       OK ] teflon/efficientdet_lite0.0041 (56 ms)
 [ RUN      ] teflon/efficientdet_lite0.0042
 [       OK ] teflon/efficientdet_lite0.0042 (51 ms)
 [ RUN      ] teflon/efficientdet_lite0.0043
-[       OK ] teflon/efficientdet_lite0.0043 (64 ms)
+[       OK ] teflon/efficientdet_lite0.0043 (71 ms)
 [ RUN      ] teflon/efficientdet_lite0.0044
-[       OK ] teflon/efficientdet_lite0.0044 (59 ms)
+[       OK ] teflon/efficientdet_lite0.0044 (63 ms)
 [ RUN      ] teflon/efficientdet_lite0.0045
 [       OK ] teflon/efficientdet_lite0.0045 (63 ms)
 [ RUN      ] teflon/efficientdet_lite0.0046
-[       OK ] teflon/efficientdet_lite0.0046 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0046 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0047
 [       OK ] teflon/efficientdet_lite0.0047 (70 ms)
 [ RUN      ] teflon/efficientdet_lite0.0048
-[       OK ] teflon/efficientdet_lite0.0048 (63 ms)
+[       OK ] teflon/efficientdet_lite0.0048 (66 ms)
 [ RUN      ] teflon/efficientdet_lite0.0049
-[       OK ] teflon/efficientdet_lite0.0049 (65 ms)
+[       OK ] teflon/efficientdet_lite0.0049 (66 ms)
 [ RUN      ] teflon/efficientdet_lite0.0050
-[       OK ] teflon/efficientdet_lite0.0050 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0050 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0051
-[       OK ] teflon/efficientdet_lite0.0051 (69 ms)
+[       OK ] teflon/efficientdet_lite0.0051 (70 ms)
 [ RUN      ] teflon/efficientdet_lite0.0052
-[       OK ] teflon/efficientdet_lite0.0052 (62 ms)
+[       OK ] teflon/efficientdet_lite0.0052 (63 ms)
 [ RUN      ] teflon/efficientdet_lite0.0053
 [       OK ] teflon/efficientdet_lite0.0053 (65 ms)
 [ RUN      ] teflon/efficientdet_lite0.0054
-[       OK ] teflon/efficientdet_lite0.0054 (34 ms)
+[       OK ] teflon/efficientdet_lite0.0054 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0055
 [       OK ] teflon/efficientdet_lite0.0055 (73 ms)
 [ RUN      ] teflon/efficientdet_lite0.0056
 [       OK ] teflon/efficientdet_lite0.0056 (46 ms)
 [ RUN      ] teflon/efficientdet_lite0.0057
-[       OK ] teflon/efficientdet_lite0.0057 (88 ms)
+[       OK ] teflon/efficientdet_lite0.0057 (93 ms)
 [ RUN      ] teflon/efficientdet_lite0.0058
-[       OK ] teflon/efficientdet_lite0.0058 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0058 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0059
-[       OK ] teflon/efficientdet_lite0.0059 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0059 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0060
 [       OK ] teflon/efficientdet_lite0.0060 (32 ms)
 [ RUN      ] teflon/efficientdet_lite0.0061
 [       OK ] teflon/efficientdet_lite0.0061 (32 ms)
 [ RUN      ] teflon/efficientdet_lite0.0062
-[       OK ] teflon/efficientdet_lite0.0062 (42 ms)
+[       OK ] teflon/efficientdet_lite0.0062 (43 ms)
 [ RUN      ] teflon/efficientdet_lite0.0063
-[       OK ] teflon/efficientdet_lite0.0063 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0063 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0064
-[       OK ] teflon/efficientdet_lite0.0064 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0064 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0065
-[       OK ] teflon/efficientdet_lite0.0065 (23 ms)
+[       OK ] teflon/efficientdet_lite0.0065 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0066
-[       OK ] teflon/efficientdet_lite0.0066 (24 ms)
+[       OK ] teflon/efficientdet_lite0.0066 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0067
-[       OK ] teflon/efficientdet_lite0.0067 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0067 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0068
-[       OK ] teflon/efficientdet_lite0.0068 (22 ms)
+[       OK ] teflon/efficientdet_lite0.0068 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0069
-[       OK ] teflon/efficientdet_lite0.0069 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0069 (23 ms)
 [ RUN      ] teflon/efficientdet_lite0.0070
-[       OK ] teflon/efficientdet_lite0.0070 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0070 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0071
-[       OK ] teflon/efficientdet_lite0.0071 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0071 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0072
-[       OK ] teflon/efficientdet_lite0.0072 (24 ms)
+[       OK ] teflon/efficientdet_lite0.0072 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0073
 [       OK ] teflon/efficientdet_lite0.0073 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0074
-[       OK ] teflon/efficientdet_lite0.0074 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0074 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0075
-[       OK ] teflon/efficientdet_lite0.0075 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0075 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0076
-[       OK ] teflon/efficientdet_lite0.0076 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0076 (37 ms)
 [ RUN      ] teflon/efficientdet_lite0.0077
-[       OK ] teflon/efficientdet_lite0.0077 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0077 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0078
-[       OK ] teflon/efficientdet_lite0.0078 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0078 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0079
-[       OK ] teflon/efficientdet_lite0.0079 (39 ms)
+[       OK ] teflon/efficientdet_lite0.0079 (38 ms)
 [ RUN      ] teflon/efficientdet_lite0.0080
 [       OK ] teflon/efficientdet_lite0.0080 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0081
-[       OK ] teflon/efficientdet_lite0.0081 (48 ms)
+[       OK ] teflon/efficientdet_lite0.0081 (43 ms)
 [ RUN      ] teflon/efficientdet_lite0.0082
-[       OK ] teflon/efficientdet_lite0.0082 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0082 (31 ms)
 [ RUN      ] teflon/efficientdet_lite0.0083
-[       OK ] teflon/efficientdet_lite0.0083 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0083 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0084
-[       OK ] teflon/efficientdet_lite0.0084 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0084 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0085
-[       OK ] teflon/efficientdet_lite0.0085 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0085 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0086
-[       OK ] teflon/efficientdet_lite0.0086 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0086 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0087
 [       OK ] teflon/efficientdet_lite0.0087 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0088
 [       OK ] teflon/efficientdet_lite0.0088 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0089
-[       OK ] teflon/efficientdet_lite0.0089 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0089 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0090
 [       OK ] teflon/efficientdet_lite0.0090 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0091
-[       OK ] teflon/efficientdet_lite0.0091 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0091 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0092
 [       OK ] teflon/efficientdet_lite0.0092 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0093
@@ -193,33 +193,33 @@ Note: Google Test filter = teflon/efficientdet_lite0.*-teflon/ds_cnn.0014:teflon
 [ RUN      ] teflon/efficientdet_lite0.0094
 [       OK ] teflon/efficientdet_lite0.0094 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0095
-[       OK ] teflon/efficientdet_lite0.0095 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0095 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0096
-[       OK ] teflon/efficientdet_lite0.0096 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0096 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0097
-[       OK ] teflon/efficientdet_lite0.0097 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0097 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0098
-[       OK ] teflon/efficientdet_lite0.0098 (22 ms)
+[       OK ] teflon/efficientdet_lite0.0098 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0099
-[       OK ] teflon/efficientdet_lite0.0099 (23 ms)
+[       OK ] teflon/efficientdet_lite0.0099 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0100
 [       OK ] teflon/efficientdet_lite0.0100 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0101
-[       OK ] teflon/efficientdet_lite0.0101 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0101 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0102
-[       OK ] teflon/efficientdet_lite0.0102 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0102 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0103
-[       OK ] teflon/efficientdet_lite0.0103 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0103 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0104
-[       OK ] teflon/efficientdet_lite0.0104 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0104 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0105
-[       OK ] teflon/efficientdet_lite0.0105 (22 ms)
+[       OK ] teflon/efficientdet_lite0.0105 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0106
-[       OK ] teflon/efficientdet_lite0.0106 (23 ms)
+[       OK ] teflon/efficientdet_lite0.0106 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0107
 [       OK ] teflon/efficientdet_lite0.0107 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0108
-[       OK ] teflon/efficientdet_lite0.0108 (24 ms)
+[       OK ] teflon/efficientdet_lite0.0108 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0109
 [       OK ] teflon/efficientdet_lite0.0109 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0110
@@ -227,109 +227,109 @@ Note: Google Test filter = teflon/efficientdet_lite0.*-teflon/ds_cnn.0014:teflon
 [ RUN      ] teflon/efficientdet_lite0.0111
 [       OK ] teflon/efficientdet_lite0.0111 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0112
-[       OK ] teflon/efficientdet_lite0.0112 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0112 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0113
 [       OK ] teflon/efficientdet_lite0.0113 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0114
 [       OK ] teflon/efficientdet_lite0.0114 (37 ms)
 [ RUN      ] teflon/efficientdet_lite0.0115
-[       OK ] teflon/efficientdet_lite0.0115 (45 ms)
+[       OK ] teflon/efficientdet_lite0.0115 (46 ms)
 [ RUN      ] teflon/efficientdet_lite0.0116
-[       OK ] teflon/efficientdet_lite0.0116 (43 ms)
+[       OK ] teflon/efficientdet_lite0.0116 (45 ms)
 [ RUN      ] teflon/efficientdet_lite0.0117
-[       OK ] teflon/efficientdet_lite0.0117 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0117 (33 ms)
 [ RUN      ] teflon/efficientdet_lite0.0118
-[       OK ] teflon/efficientdet_lite0.0118 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0118 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0119
-[       OK ] teflon/efficientdet_lite0.0119 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0119 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0120
-[       OK ] teflon/efficientdet_lite0.0120 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0120 (32 ms)
 [ RUN      ] teflon/efficientdet_lite0.0121
-[       OK ] teflon/efficientdet_lite0.0121 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0121 (32 ms)
 [ RUN      ] teflon/efficientdet_lite0.0122
-[       OK ] teflon/efficientdet_lite0.0122 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0122 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0123
-[       OK ] teflon/efficientdet_lite0.0123 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0123 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0124
-[       OK ] teflon/efficientdet_lite0.0124 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0124 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0125
-[       OK ] teflon/efficientdet_lite0.0125 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0125 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0126
 [       OK ] teflon/efficientdet_lite0.0126 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0127
-[       OK ] teflon/efficientdet_lite0.0127 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0127 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0128
-[       OK ] teflon/efficientdet_lite0.0128 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0128 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0129
-[       OK ] teflon/efficientdet_lite0.0129 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0129 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0130
-[       OK ] teflon/efficientdet_lite0.0130 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0130 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0131
-[       OK ] teflon/efficientdet_lite0.0131 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0131 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0132
-[       OK ] teflon/efficientdet_lite0.0132 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0132 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0133
-[       OK ] teflon/efficientdet_lite0.0133 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0133 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0134
-[       OK ] teflon/efficientdet_lite0.0134 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0134 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0135
-[       OK ] teflon/efficientdet_lite0.0135 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0135 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0136
-[       OK ] teflon/efficientdet_lite0.0136 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0136 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0137
-[       OK ] teflon/efficientdet_lite0.0137 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0137 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0138
 [       OK ] teflon/efficientdet_lite0.0138 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0139
 [       OK ] teflon/efficientdet_lite0.0139 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0140
-[       OK ] teflon/efficientdet_lite0.0140 (23 ms)
+[       OK ] teflon/efficientdet_lite0.0140 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0141
-[       OK ] teflon/efficientdet_lite0.0141 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0141 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0142
-[       OK ] teflon/efficientdet_lite0.0142 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0142 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0143
-[       OK ] teflon/efficientdet_lite0.0143 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0143 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0144
 [       OK ] teflon/efficientdet_lite0.0144 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0145
 [       OK ] teflon/efficientdet_lite0.0145 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0146
-[       OK ] teflon/efficientdet_lite0.0146 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0146 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0147
-[       OK ] teflon/efficientdet_lite0.0147 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0147 (35 ms)
 [ RUN      ] teflon/efficientdet_lite0.0148
-[       OK ] teflon/efficientdet_lite0.0148 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0148 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0149
 [       OK ] teflon/efficientdet_lite0.0149 (39 ms)
 [ RUN      ] teflon/efficientdet_lite0.0150
-[       OK ] teflon/efficientdet_lite0.0150 (45 ms)
+[       OK ] teflon/efficientdet_lite0.0150 (43 ms)
 [ RUN      ] teflon/efficientdet_lite0.0151
-[       OK ] teflon/efficientdet_lite0.0151 (46 ms)
+[       OK ] teflon/efficientdet_lite0.0151 (42 ms)
 [ RUN      ] teflon/efficientdet_lite0.0152
-[       OK ] teflon/efficientdet_lite0.0152 (47 ms)
+[       OK ] teflon/efficientdet_lite0.0152 (46 ms)
 [ RUN      ] teflon/efficientdet_lite0.0153
-[       OK ] teflon/efficientdet_lite0.0153 (43 ms)
+[       OK ] teflon/efficientdet_lite0.0153 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0154
-[       OK ] teflon/efficientdet_lite0.0154 (46 ms)
+[       OK ] teflon/efficientdet_lite0.0154 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0155
-[       OK ] teflon/efficientdet_lite0.0155 (43 ms)
+[       OK ] teflon/efficientdet_lite0.0155 (45 ms)
 [ RUN      ] teflon/efficientdet_lite0.0156
 [       OK ] teflon/efficientdet_lite0.0156 (46 ms)
 [ RUN      ] teflon/efficientdet_lite0.0157
-[       OK ] teflon/efficientdet_lite0.0157 (48 ms)
+[       OK ] teflon/efficientdet_lite0.0157 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0158
-[       OK ] teflon/efficientdet_lite0.0158 (48 ms)
+[       OK ] teflon/efficientdet_lite0.0158 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0159
-[       OK ] teflon/efficientdet_lite0.0159 (36 ms)
+[       OK ] teflon/efficientdet_lite0.0159 (37 ms)
 [ RUN      ] teflon/efficientdet_lite0.0160
 [       OK ] teflon/efficientdet_lite0.0160 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0161
-[       OK ] teflon/efficientdet_lite0.0161 (45 ms)
+[       OK ] teflon/efficientdet_lite0.0161 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0162
-[       OK ] teflon/efficientdet_lite0.0162 (45 ms)
+[       OK ] teflon/efficientdet_lite0.0162 (42 ms)
 [ RUN      ] teflon/efficientdet_lite0.0163
-[       OK ] teflon/efficientdet_lite0.0163 (43 ms)
+[       OK ] teflon/efficientdet_lite0.0163 (41 ms)
 [ RUN      ] teflon/efficientdet_lite0.0164
 [       OK ] teflon/efficientdet_lite0.0164 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0165
@@ -337,41 +337,41 @@ Note: Google Test filter = teflon/efficientdet_lite0.*-teflon/ds_cnn.0014:teflon
 [ RUN      ] teflon/efficientdet_lite0.0166
 [       OK ] teflon/efficientdet_lite0.0166 (44 ms)
 [ RUN      ] teflon/efficientdet_lite0.0167
-[       OK ] teflon/efficientdet_lite0.0167 (229 ms)
+[       OK ] teflon/efficientdet_lite0.0167 (227 ms)
 [ RUN      ] teflon/efficientdet_lite0.0168
-[       OK ] teflon/efficientdet_lite0.0168 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0168 (34 ms)
 [ RUN      ] teflon/efficientdet_lite0.0169
-[       OK ] teflon/efficientdet_lite0.0169 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0169 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0170
-[       OK ] teflon/efficientdet_lite0.0170 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0170 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0171
-[       OK ] teflon/efficientdet_lite0.0171 (33 ms)
+[       OK ] teflon/efficientdet_lite0.0171 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0172
-[       OK ] teflon/efficientdet_lite0.0172 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0172 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0173
-[       OK ] teflon/efficientdet_lite0.0173 (38 ms)
+[       OK ] teflon/efficientdet_lite0.0173 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0174
-[       OK ] teflon/efficientdet_lite0.0174 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0174 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0175
-[       OK ] teflon/efficientdet_lite0.0175 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0175 (32 ms)
 [ RUN      ] teflon/efficientdet_lite0.0176
-[       OK ] teflon/efficientdet_lite0.0176 (36 ms)
+[       OK ] teflon/efficientdet_lite0.0176 (33 ms)
 [ RUN      ] teflon/efficientdet_lite0.0177
-[       OK ] teflon/efficientdet_lite0.0177 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0177 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0178
-[       OK ] teflon/efficientdet_lite0.0178 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0178 (31 ms)
 [ RUN      ] teflon/efficientdet_lite0.0179
-[       OK ] teflon/efficientdet_lite0.0179 (32 ms)
+[       OK ] teflon/efficientdet_lite0.0179 (31 ms)
 [ RUN      ] teflon/efficientdet_lite0.0180
 [       OK ] teflon/efficientdet_lite0.0180 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0181
-[       OK ] teflon/efficientdet_lite0.0181 (33 ms)
+[       OK ] teflon/efficientdet_lite0.0181 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0182
-[       OK ] teflon/efficientdet_lite0.0182 (36 ms)
+[       OK ] teflon/efficientdet_lite0.0182 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0183
-[       OK ] teflon/efficientdet_lite0.0183 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0183 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0184
-[       OK ] teflon/efficientdet_lite0.0184 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0184 (31 ms)
 [ RUN      ] teflon/efficientdet_lite0.0185
 [       OK ] teflon/efficientdet_lite0.0185 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0186
@@ -379,175 +379,175 @@ Note: Google Test filter = teflon/efficientdet_lite0.*-teflon/ds_cnn.0014:teflon
 [ RUN      ] teflon/efficientdet_lite0.0187
 [       OK ] teflon/efficientdet_lite0.0187 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0188
-[       OK ] teflon/efficientdet_lite0.0188 (80 ms)
+[       OK ] teflon/efficientdet_lite0.0188 (79 ms)
 [ RUN      ] teflon/efficientdet_lite0.0189
-[       OK ] teflon/efficientdet_lite0.0189 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0189 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0190
-[       OK ] teflon/efficientdet_lite0.0190 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0190 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0191
 [       OK ] teflon/efficientdet_lite0.0191 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0192
-[       OK ] teflon/efficientdet_lite0.0192 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0192 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0193
-[       OK ] teflon/efficientdet_lite0.0193 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0193 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0194
-[       OK ] teflon/efficientdet_lite0.0194 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0194 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0195
-[       OK ] teflon/efficientdet_lite0.0195 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0195 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0196
 [       OK ] teflon/efficientdet_lite0.0196 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0197
-[       OK ] teflon/efficientdet_lite0.0197 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0197 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0198
-[       OK ] teflon/efficientdet_lite0.0198 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0198 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0199
-[       OK ] teflon/efficientdet_lite0.0199 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0199 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0200
-[       OK ] teflon/efficientdet_lite0.0200 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0200 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0201
-[       OK ] teflon/efficientdet_lite0.0201 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0201 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0202
-[       OK ] teflon/efficientdet_lite0.0202 (23 ms)
+[       OK ] teflon/efficientdet_lite0.0202 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0203
-[       OK ] teflon/efficientdet_lite0.0203 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0203 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0204
-[       OK ] teflon/efficientdet_lite0.0204 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0204 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0205
-[       OK ] teflon/efficientdet_lite0.0205 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0205 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.0206
-[       OK ] teflon/efficientdet_lite0.0206 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0206 (23 ms)
 [ RUN      ] teflon/efficientdet_lite0.0207
-[       OK ] teflon/efficientdet_lite0.0207 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0207 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0208
 [       OK ] teflon/efficientdet_lite0.0208 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0209
-[       OK ] teflon/efficientdet_lite0.0209 (39 ms)
+[       OK ] teflon/efficientdet_lite0.0209 (38 ms)
 [ RUN      ] teflon/efficientdet_lite0.0210
 [       OK ] teflon/efficientdet_lite0.0210 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0211
-[       OK ] teflon/efficientdet_lite0.0211 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0211 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0212
-[       OK ] teflon/efficientdet_lite0.0212 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0212 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0213
-[       OK ] teflon/efficientdet_lite0.0213 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0213 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0214
-[       OK ] teflon/efficientdet_lite0.0214 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0214 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0215
-[       OK ] teflon/efficientdet_lite0.0215 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0215 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0216
-[       OK ] teflon/efficientdet_lite0.0216 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0216 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0217
-[       OK ] teflon/efficientdet_lite0.0217 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0217 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0218
-[       OK ] teflon/efficientdet_lite0.0218 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0218 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0219
 [       OK ] teflon/efficientdet_lite0.0219 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0220
-[       OK ] teflon/efficientdet_lite0.0220 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0220 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0221
 [       OK ] teflon/efficientdet_lite0.0221 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0222
-[       OK ] teflon/efficientdet_lite0.0222 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0222 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0223
 [       OK ] teflon/efficientdet_lite0.0223 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0224
-[       OK ] teflon/efficientdet_lite0.0224 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0224 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0225
-[       OK ] teflon/efficientdet_lite0.0225 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0225 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0226
-[       OK ] teflon/efficientdet_lite0.0226 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0226 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0227
-[       OK ] teflon/efficientdet_lite0.0227 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0227 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0228
 [       OK ] teflon/efficientdet_lite0.0228 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0229
-[       OK ] teflon/efficientdet_lite0.0229 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0229 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0230
-[       OK ] teflon/efficientdet_lite0.0230 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0230 (30 ms)
 [ RUN      ] teflon/efficientdet_lite0.0231
 [       OK ] teflon/efficientdet_lite0.0231 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0232
-[       OK ] teflon/efficientdet_lite0.0232 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0232 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0233
-[       OK ] teflon/efficientdet_lite0.0233 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0233 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0234
-[       OK ] teflon/efficientdet_lite0.0234 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0234 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0235
 [       OK ] teflon/efficientdet_lite0.0235 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0236
 [       OK ] teflon/efficientdet_lite0.0236 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0237
-[       OK ] teflon/efficientdet_lite0.0237 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0237 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0238
-[       OK ] teflon/efficientdet_lite0.0238 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0238 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0239
-[       OK ] teflon/efficientdet_lite0.0239 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0239 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0240
-[       OK ] teflon/efficientdet_lite0.0240 (31 ms)
+[       OK ] teflon/efficientdet_lite0.0240 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0241
-[       OK ] teflon/efficientdet_lite0.0241 (29 ms)
+[       OK ] teflon/efficientdet_lite0.0241 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0242
-[       OK ] teflon/efficientdet_lite0.0242 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0242 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0243
-[       OK ] teflon/efficientdet_lite0.0243 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0243 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0244
 [       OK ] teflon/efficientdet_lite0.0244 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0245
-[       OK ] teflon/efficientdet_lite0.0245 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0245 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0246
-[       OK ] teflon/efficientdet_lite0.0246 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0246 (23 ms)
 [ RUN      ] teflon/efficientdet_lite0.0247
-[       OK ] teflon/efficientdet_lite0.0247 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0247 (23 ms)
 [ RUN      ] teflon/efficientdet_lite0.0248
-[       OK ] teflon/efficientdet_lite0.0248 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0248 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0249
-[       OK ] teflon/efficientdet_lite0.0249 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0249 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0250
 [       OK ] teflon/efficientdet_lite0.0250 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0251
-[       OK ] teflon/efficientdet_lite0.0251 (120 ms)
+[       OK ] teflon/efficientdet_lite0.0251 (118 ms)
 [ RUN      ] teflon/efficientdet_lite0.0252
-[       OK ] teflon/efficientdet_lite0.0252 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0252 (33 ms)
 [ RUN      ] teflon/efficientdet_lite0.0253
-[       OK ] teflon/efficientdet_lite0.0253 (51 ms)
+[       OK ] teflon/efficientdet_lite0.0253 (48 ms)
 [ RUN      ] teflon/efficientdet_lite0.0254
-[       OK ] teflon/efficientdet_lite0.0254 (30 ms)
+[       OK ] teflon/efficientdet_lite0.0254 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0255
 [       OK ] teflon/efficientdet_lite0.0255 (31 ms)
 [ RUN      ] teflon/efficientdet_lite0.0256
-[       OK ] teflon/efficientdet_lite0.0256 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0256 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0257
-[       OK ] teflon/efficientdet_lite0.0257 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0257 (27 ms)
 [ RUN      ] teflon/efficientdet_lite0.0258
-[       OK ] teflon/efficientdet_lite0.0258 (24 ms)
+[       OK ] teflon/efficientdet_lite0.0258 (26 ms)
 [ RUN      ] teflon/efficientdet_lite0.0259
-[       OK ] teflon/efficientdet_lite0.0259 (27 ms)
+[       OK ] teflon/efficientdet_lite0.0259 (25 ms)
 [ RUN      ] teflon/efficientdet_lite0.0260
-[       OK ] teflon/efficientdet_lite0.0260 (99 ms)
+[       OK ] teflon/efficientdet_lite0.0260 (100 ms)
 [ RUN      ] teflon/efficientdet_lite0.0261
-[       OK ] teflon/efficientdet_lite0.0261 (163 ms)
+[       OK ] teflon/efficientdet_lite0.0261 (161 ms)
 [ RUN      ] teflon/efficientdet_lite0.0262
-[       OK ] teflon/efficientdet_lite0.0262 (132 ms)
+[       OK ] teflon/efficientdet_lite0.0262 (126 ms)
 [ RUN      ] teflon/efficientdet_lite0.0263
-[       OK ] teflon/efficientdet_lite0.0263 (28 ms)
+[       OK ] teflon/efficientdet_lite0.0263 (24 ms)
 [ RUN      ] teflon/efficientdet_lite0.0264
-[       OK ] teflon/efficientdet_lite0.0264 (26 ms)
+[       OK ] teflon/efficientdet_lite0.0264 (28 ms)
 [ RUN      ] teflon/efficientdet_lite0.0265
-[       OK ] teflon/efficientdet_lite0.0265 (25 ms)
+[       OK ] teflon/efficientdet_lite0.0265 (29 ms)
 [ RUN      ] teflon/efficientdet_lite0.whole
 CPU: 0.00411004 0.892037 0.0228279 0.929473 0.0326881 0.00426467 0.119443 0.0207353 0.00498537 0.187724 0.0309771 0.214683 0.00490643 0.192043 0.0239694 0.225591 0.00426467 0.857705 0.0207353 0.906053 0.00223391 0.910608 0.024704 0.953151 
-NPU: -0.00211761 0.325679 0.0353395 0.340431 -7.52807e-05 0.901774 0.0360378 0.917076 0.00263987 0.913337 0.0301118 0.927552 0.00620344 0.925427 0.0379809 0.937942 0.0635538 0.00156504 0.188577 0.0118075 0.00591047 0.343268 0.0382739 0.359138 
+NPU: 0.0532017 0.378026 0.0760599 0.398912 0.0179411 0.00839785 0.982059 0.95506 0.0271979 0.00329571 0.117181 0.0197664 0.0684073 0.373025 0.095351 0.398099 0.0112234 0.000699133 0.0486591 0.022363 0.00427948 0.194875 0.0226584 0.226635 
 ../src/gallium/targets/teflon/test_teflon.cpp:81: Failure
 Failed
-Output at 1 from the NPU (0.32567864656448364) doesn't match that from the CPU (0.89203715324401855).
-[  FAILED  ] teflon/efficientdet_lite0.whole (3852 ms)
-[----------] 267 tests from teflon/efficientdet_lite0 (15715 ms total)
+Output at 1 from the NPU (0.37802571058273315) doesn't match that from the CPU (0.89203715324401855).
+[  FAILED  ] teflon/efficientdet_lite0.whole (3837 ms)
+[----------] 267 tests from teflon/efficientdet_lite0 (15573 ms total)
 
 [----------] Global test environment tear-down
-[==========] 267 tests from 1 test suite ran. (15715 ms total)
+[==========] 267 tests from 1 test suite ran. (15573 ms total)
 [  PASSED  ] 266 tests.
 [  FAILED  ] 1 test, listed below:
 [  FAILED  ] teflon/efficientdet_lite0.whole
 
  1 FAILED TEST
-npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-143247-TFS-efficientdet_lite0
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-145847-TFS-efficientdet_lite0

@@ -3,38 +3,38 @@ Note: Google Test filter = teflon/micronet_ad_large.*-teflon/ds_cnn.0014:teflon/
 [----------] Global test environment set-up.
 [----------] 15 tests from teflon/micronet_ad_large
 [ RUN      ] teflon/micronet_ad_large.0000
-[       OK ] teflon/micronet_ad_large.0000 (169 ms)
+[       OK ] teflon/micronet_ad_large.0000 (94 ms)
 [ RUN      ] teflon/micronet_ad_large.0001
-[       OK ] teflon/micronet_ad_large.0001 (52 ms)
+[       OK ] teflon/micronet_ad_large.0001 (47 ms)
 [ RUN      ] teflon/micronet_ad_large.0002
-[       OK ] teflon/micronet_ad_large.0002 (56 ms)
+[       OK ] teflon/micronet_ad_large.0002 (55 ms)
 [ RUN      ] teflon/micronet_ad_large.0003
-[       OK ] teflon/micronet_ad_large.0003 (35 ms)
+[       OK ] teflon/micronet_ad_large.0003 (37 ms)
 [ RUN      ] teflon/micronet_ad_large.0004
 [       OK ] teflon/micronet_ad_large.0004 (58 ms)
 [ RUN      ] teflon/micronet_ad_large.0005
-[       OK ] teflon/micronet_ad_large.0005 (42 ms)
+[       OK ] teflon/micronet_ad_large.0005 (39 ms)
 [ RUN      ] teflon/micronet_ad_large.0006
-[       OK ] teflon/micronet_ad_large.0006 (57 ms)
+[       OK ] teflon/micronet_ad_large.0006 (63 ms)
 [ RUN      ] teflon/micronet_ad_large.0007
-[       OK ] teflon/micronet_ad_large.0007 (28 ms)
+[       OK ] teflon/micronet_ad_large.0007 (30 ms)
 [ RUN      ] teflon/micronet_ad_large.0008
-[       OK ] teflon/micronet_ad_large.0008 (32 ms)
+[       OK ] teflon/micronet_ad_large.0008 (40 ms)
 [ RUN      ] teflon/micronet_ad_large.0009
-[       OK ] teflon/micronet_ad_large.0009 (26 ms)
+[       OK ] teflon/micronet_ad_large.0009 (57 ms)
 [ RUN      ] teflon/micronet_ad_large.0010
-[       OK ] teflon/micronet_ad_large.0010 (27 ms)
+[       OK ] teflon/micronet_ad_large.0010 (29 ms)
 [ RUN      ] teflon/micronet_ad_large.0011
-[       OK ] teflon/micronet_ad_large.0011 (29 ms)
+[       OK ] teflon/micronet_ad_large.0011 (25 ms)
 [ RUN      ] teflon/micronet_ad_large.0012
-[       OK ] teflon/micronet_ad_large.0012 (25 ms)
+[       OK ] teflon/micronet_ad_large.0012 (24 ms)
 [ RUN      ] teflon/micronet_ad_large.0013
-[       OK ] teflon/micronet_ad_large.0013 (29 ms)
+[       OK ] teflon/micronet_ad_large.0013 (24 ms)
 [ RUN      ] teflon/micronet_ad_large.whole
-[       OK ] teflon/micronet_ad_large.whole (220 ms)
-[----------] 15 tests from teflon/micronet_ad_large (893 ms total)
+[       OK ] teflon/micronet_ad_large.whole (227 ms)
+[----------] 15 tests from teflon/micronet_ad_large (856 ms total)
 
 [----------] Global test environment tear-down
-[==========] 15 tests from 1 test suite ran. (893 ms total)
+[==========] 15 tests from 1 test suite ran. (856 ms total)
 [  PASSED  ] 15 tests.
-npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261115-142942-TFS-micronet_ad_large
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261115-145543-TFS-micronet_ad_large

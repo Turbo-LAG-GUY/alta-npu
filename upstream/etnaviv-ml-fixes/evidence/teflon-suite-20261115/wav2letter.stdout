@@ -3,56 +3,56 @@ Note: Google Test filter = teflon/wav2letter.*-teflon/ds_cnn.0014:teflon/ds_cnn.
 [----------] Global test environment set-up.
 [----------] 24 tests from teflon/wav2letter
 [ RUN      ] teflon/wav2letter.0000
-[       OK ] teflon/wav2letter.0000 (32 ms)
+[       OK ] teflon/wav2letter.0000 (51 ms)
 [ RUN      ] teflon/wav2letter.0001
-[       OK ] teflon/wav2letter.0001 (212 ms)
+[       OK ] teflon/wav2letter.0001 (238 ms)
 [ RUN      ] teflon/wav2letter.0002
 [       OK ] teflon/wav2letter.0002 (29 ms)
 [ RUN      ] teflon/wav2letter.0003
-[       OK ] teflon/wav2letter.0003 (146 ms)
+[       OK ] teflon/wav2letter.0003 (142 ms)
 [ RUN      ] teflon/wav2letter.0004
 [       OK ] teflon/wav2letter.0004 (31 ms)
 [ RUN      ] teflon/wav2letter.0005
-[       OK ] teflon/wav2letter.0005 (142 ms)
+[       OK ] teflon/wav2letter.0005 (139 ms)
 [ RUN      ] teflon/wav2letter.0006
-[       OK ] teflon/wav2letter.0006 (28 ms)
+[       OK ] teflon/wav2letter.0006 (30 ms)
 [ RUN      ] teflon/wav2letter.0007
-[       OK ] teflon/wav2letter.0007 (140 ms)
+[       OK ] teflon/wav2letter.0007 (143 ms)
 [ RUN      ] teflon/wav2letter.0008
 [       OK ] teflon/wav2letter.0008 (29 ms)
 [ RUN      ] teflon/wav2letter.0009
-[       OK ] teflon/wav2letter.0009 (136 ms)
+[       OK ] teflon/wav2letter.0009 (153 ms)
 [ RUN      ] teflon/wav2letter.0010
 [       OK ] teflon/wav2letter.0010 (32 ms)
 [ RUN      ] teflon/wav2letter.0011
-[       OK ] teflon/wav2letter.0011 (135 ms)
+[       OK ] teflon/wav2letter.0011 (148 ms)
 [ RUN      ] teflon/wav2letter.0012
-[       OK ] teflon/wav2letter.0012 (26 ms)
+[       OK ] teflon/wav2letter.0012 (32 ms)
 [ RUN      ] teflon/wav2letter.0013
-[       OK ] teflon/wav2letter.0013 (135 ms)
+[       OK ] teflon/wav2letter.0013 (145 ms)
 [ RUN      ] teflon/wav2letter.0014
-[       OK ] teflon/wav2letter.0014 (24 ms)
+[       OK ] teflon/wav2letter.0014 (33 ms)
 [ RUN      ] teflon/wav2letter.0015
 [       OK ] teflon/wav2letter.0015 (143 ms)
 [ RUN      ] teflon/wav2letter.0016
-[       OK ] teflon/wav2letter.0016 (25 ms)
+[       OK ] teflon/wav2letter.0016 (32 ms)
 [ RUN      ] teflon/wav2letter.0017
-[       OK ] teflon/wav2letter.0017 (4073 ms)
+[       OK ] teflon/wav2letter.0017 (4169 ms)
 [ RUN      ] teflon/wav2letter.0018
-[       OK ] teflon/wav2letter.0018 (54 ms)
+[       OK ] teflon/wav2letter.0018 (48 ms)
 [ RUN      ] teflon/wav2letter.0019
-[       OK ] teflon/wav2letter.0019 (913 ms)
+[       OK ] teflon/wav2letter.0019 (971 ms)
 [ RUN      ] teflon/wav2letter.0020
-[       OK ] teflon/wav2letter.0020 (48 ms)
+[       OK ] teflon/wav2letter.0020 (49 ms)
 [ RUN      ] teflon/wav2letter.0021
-[       OK ] teflon/wav2letter.0021 (44 ms)
+[       OK ] teflon/wav2letter.0021 (45 ms)
 [ RUN      ] teflon/wav2letter.0022
-[       OK ] teflon/wav2letter.0022 (28 ms)
+[       OK ] teflon/wav2letter.0022 (26 ms)
 [ RUN      ] teflon/wav2letter.whole
-[       OK ] teflon/wav2letter.whole (5926 ms)
-[----------] 24 tests from teflon/wav2letter (12548 ms total)
+[       OK ] teflon/wav2letter.whole (6076 ms)
+[----------] 24 tests from teflon/wav2letter (12948 ms total)
 
 [----------] Global test environment tear-down
-[==========] 24 tests from 1 test suite ran. (12548 ms total)
+[==========] 24 tests from 1 test suite ran. (12948 ms total)
 [  PASSED  ] 24 tests.
-npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261115-143020-TFS-wav2letter
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261115-145621-TFS-wav2letter
