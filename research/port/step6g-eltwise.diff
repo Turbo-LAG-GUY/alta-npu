@@ -1,0 +1,1401 @@
+# step 6g: 8-bit elementwise ops on the shader core through lookup tables (ETNA_ML_SHADER=eltwise: MUL, SQUARED_DIFFERENCE,
+# RSQRT, ADD/SUB with a constant or of two int8 tensors) + Teflon/gallium mapping + cs_run --kernel eltwise; against
+# research/port/base-step6f (= base-step6e + step6f-detranspose.diff)
+--- base/mesa-compute/src/gallium/include/pipe/p_state.h
++++ mesa-compute/src/gallium/include/pipe/p_state.h
+@@ -1067,6 +1067,9 @@
+    PIPE_ML_OPERATION_TYPE_RESIZE,
+    PIPE_ML_OPERATION_TYPE_SOFTMAX,
+    PIPE_ML_OPERATION_TYPE_MEAN,
++   PIPE_ML_OPERATION_TYPE_MULTIPLY,
++   PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE,
++   PIPE_ML_OPERATION_TYPE_RSQRT,
+ };
+ 
+ enum pipe_ml_pooling_type {
+@@ -1241,10 +1244,24 @@
+           * Whether a ReLU activation should be applied to the output.
+           */
+          bool relu;
++
++         /**
++          * Whether the frontend's operation has any fused activation (ADD and
++          * SUBTRACT); a driver that doesn't apply it must refuse the operation.
++          */
++         bool fused_activation;
+       } add;
+ 
+       struct {
+          /**
++          * Whether the frontend's operation has a fused activation; a driver
++          * that doesn't apply it must refuse the operation.
++          */
++         bool fused_activation;
++      } mul;
++
++      struct {
++         /**
+           * Dimension along which the tensors are concatenated.
+           */
+          int axis;
+--- base/mesa-compute/src/gallium/frontends/teflon/tfl_device.c
++++ mesa-compute/src/gallium/frontends/teflon/tfl_device.c
+@@ -189,6 +189,7 @@
+       operation->type = PIPE_ML_OPERATION_TYPE_ADD;
+       operation->add.relu = params->activation == kTfLiteActRelu ||
+                             params->activation == kTfLiteActRelu6;
++      operation->add.fused_activation = params->activation != kTfLiteActNone;
+       break;
+    }
+    case kTfLiteBuiltinConcatenation: {
+@@ -253,8 +254,25 @@
+    case kTfLiteBuiltinLogistic:
+       operation->type = PIPE_ML_OPERATION_TYPE_LOGISTIC;
+       break;
+-   case kTfLiteBuiltinSub:
++   case kTfLiteBuiltinSub: {
++      const TfLiteSubParams *params = node->builtin_data;
++
+       operation->type = PIPE_ML_OPERATION_TYPE_SUBTRACT;
++      operation->add.fused_activation = params && params->activation != kTfLiteActNone;
++      break;
++   }
++   case kTfLiteBuiltinMul: {
++      const TfLiteMulParams *params = node->builtin_data;
++
++      operation->type = PIPE_ML_OPERATION_TYPE_MULTIPLY;
++      operation->mul.fused_activation = params && params->activation != kTfLiteActNone;
++      break;
++   }
++   case kTfLiteBuiltinSquaredDifference:
++      operation->type = PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE;
++      break;
++   case kTfLiteBuiltinRsqrt:
++      operation->type = PIPE_ML_OPERATION_TYPE_RSQRT;
+       break;
+    case kTfLiteBuiltinTranspose: {
+       int32_t *perm = tf_context->tensors[node->inputs->data[1]].data.data;
+@@ -542,6 +560,15 @@
+       case PIPE_ML_OPERATION_TYPE_MEAN:
+          teflon_debug("%-15s ", "MEAN");
+          break;
++      case PIPE_ML_OPERATION_TYPE_MULTIPLY:
++         teflon_debug("%-15s ", "MUL");
++         break;
++      case PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE:
++         teflon_debug("%-15s ", "SQDIFF");
++         break;
++      case PIPE_ML_OPERATION_TYPE_RSQRT:
++         teflon_debug("%-15s ", "RSQRT");
++         break;
+       }
+ 
+       char *input_buf = ralloc_strdup(NULL, "");
+@@ -773,6 +800,10 @@
+       return "SUB";
+    case kTfLiteBuiltinTranspose:
+       return "TRANSPOSE";
++   case kTfLiteBuiltinSquaredDifference:
++      return "SQDIFF";
++   case kTfLiteBuiltinRsqrt:
++      return "RSQRT";
+    default:
+       return "unknown";
+    }
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -44,6 +44,23 @@
+    ETNA_ML_SHADER_SOFTMAX,
+    ETNA_ML_SHADER_AVGPOOL, /* global average pool: input_width x input_height x input_channels -> 1x1 */
+    ETNA_ML_SHADER_MEAN,    /* TFLite MEAN over the channels or the spatial dimensions, with XNNPACK's requantization */
++   ETNA_ML_SHADER_ELTWISE, /* 8-bit elementwise op through a lookup table built on the CPU (etnaviv_ml_shader.c) */
++};
++
++/* ETNA_ML_SHADER_ELTWISE: the operation and how each operand maps onto the output [1,H,W,C] (channel planes) */
++enum etna_ml_eltwise_op {
++   ETNA_ML_ELTWISE_MUL,
++   ETNA_ML_ELTWISE_SQDIFF,
++   ETNA_ML_ELTWISE_RSQRT,
++   ETNA_ML_ELTWISE_ADD,
++   ETNA_ML_ELTWISE_SUB,
++};
++
++enum etna_ml_eltwise_mode {
++   ETNA_ML_ELTWISE_FULL,   /* same shape as the output */
++   ETNA_ML_ELTWISE_POS,    /* [1,H,W,1]: one value per position */
++   ETNA_ML_ELTWISE_CHAN,   /* [1,1,1,C]: one value per channel */
++   ETNA_ML_ELTWISE_SCALAR, /* one value */
+ };
+ 
+ enum etna_ml_tp_type {
+@@ -102,7 +119,10 @@
+     * owned_shader, freed with the subgraph. */
+    struct etna_shader_variant *shader;
+    struct etna_shader *owned_shader;
+-   struct pipe_resource *table; /* ETNA_ML_SHADER_MEAN: the requantization thresholds, a third buffer of the grid */
++   struct pipe_resource *table; /* ETNA_ML_SHADER_MEAN: the requantization thresholds, a third buffer of the grid;
++                                 * ELTWISE: the lookup table (+ constant operands) */
++   struct pipe_resource *input2; /* ETNA_ML_SHADER_ELTWISE: the second tensor operand, a fourth buffer */
++   unsigned input2_offset;
+    uint32_t shader_args[8];
+    unsigned work_dim;
+    unsigned grid[3];
+@@ -129,6 +149,23 @@
+    int mean_in_zp, mean_out_zp;
+    bool mean_signed;
+ 
++   /* ETNA_ML_SHADER_ELTWISE: op, operands a (0) and b (1, unless unary), each a tensor (eltwise_tensor[i] = its slot
++    * in input_tensors) or a constant (eltwise_tensor[i] = -1, its stored-form bytes in eltwise_const[i], freed with
++    * the operation; a scalar constant is folded into the table (eltwise_fold), leaving a unary table over the other
++    * operand);
++    * quantization in the model's domain: [0] a, [1] b, [2] output; output positions (H*W) and channels */
++   enum etna_ml_eltwise_op eltwise_op;
++   unsigned eltwise_operands;           /* operands the kernel reads: 1 or 2 */
++   enum etna_ml_eltwise_mode eltwise_mode[2];
++   int eltwise_tensor[2];
++   uint8_t *eltwise_const[2];
++   unsigned eltwise_const_size[2];
++   int eltwise_fold;                    /* -1, or the operand (a scalar constant) folded into a unary table */
++   float eltwise_scale[3];
++   int eltwise_zp[3];
++   bool eltwise_signed;
++   unsigned eltwise_positions, eltwise_channels;
++
+    bool addition;
+    bool depthwise;
+    bool pointwise;
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -322,6 +322,20 @@
+           tensor->dims[1] * tensor->dims[2] > 1;
+ }
+ 
++/* A shader-core elementwise op: its output is written as channel planes (layouts_differ() says whether that differs
++ * from what the CPU expects, which adds the detranspose if it is a partition output). */
++static void
++lower_eltwise(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++              const unsigned *input_tensors, struct etna_operation *operation, struct list_head *etna_operations)
++{
++   etna_ml_lower_eltwise(subgraph, poperation, input_tensors, operation);
++   list_addtail(&operation->link, etna_operations);
++
++   struct etna_ml_tensor *tensor = etna_ml_get_tensor(subgraph, poperation->output_tensors[0]->index);
++   tensor->exp_layout = ETNA_ML_LAYOUT_NHWC;
++   tensor->act_layout = ETNA_ML_LAYOUT_NCHW;
++}
++
+ /** Tensor layout inference:
+   * - Graph inputs are in NHWC order.
+   * - Graph outputs are expected in NHWC order.
+@@ -355,6 +369,11 @@
+              poperation->type == PIPE_ML_OPERATION_TYPE_MEAN)
+             operation_layout = ETNA_ML_LAYOUT_NCHW;
+ 
++         /* the shader-core elementwise ops read full-size operands as channel planes; per-position, per-channel
++          * and scalar operands have the same bytes in both layouts, so they are used as they are */
++         if (etna_ml_shader_eltwise_takes(poperation) && layouts_differ(poperation->input_tensors[i]))
++            operation_layout = ETNA_ML_LAYOUT_NCHW;
++
+          if (!etna_ml_find_producer(poperations, count, poperation->input_tensors[i]->index)) {
+             /* In TensorFlow Lite, graph inputs are in channel-last */
+             tensor->act_layout = ETNA_ML_LAYOUT_NHWC;
+@@ -410,7 +429,16 @@
+ 
+             break;
+          }
++         case PIPE_ML_OPERATION_TYPE_MULTIPLY:
++         case PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE:
++         case PIPE_ML_OPERATION_TYPE_RSQRT:
++            lower_eltwise(subgraph, poperation, input_tensors, operation, etna_operations);
++            break;
+          case PIPE_ML_OPERATION_TYPE_ADD: {
++            if (etna_ml_shader_eltwise_takes(poperation)) {
++               lower_eltwise(subgraph, poperation, input_tensors, operation, etna_operations);
++               break;
++            }
+             etna_ml_lower_add(subgraph, poperation, operation);
+             operation->input_tensors[0] = input_tensors[0];
+             operation->input_tensors[1] = input_tensors[1];
+@@ -527,6 +555,10 @@
+             break;
+          }
+          case PIPE_ML_OPERATION_TYPE_SUBTRACT: {
++            if (etna_ml_shader_eltwise_takes(poperation)) {
++               lower_eltwise(subgraph, poperation, input_tensors, operation, etna_operations);
++               break;
++            }
+             struct etna_operation *operation = calloc(1, sizeof(*operation));
+             etna_ml_lower_add(subgraph, poperation, operation);
+             operation->input_tensors[0] = input_tensors[0];
+@@ -671,6 +703,9 @@
+       case PIPE_ML_OPERATION_TYPE_SOFTMAX:
+       case PIPE_ML_OPERATION_TYPE_POOLING:
+       case PIPE_ML_OPERATION_TYPE_MEAN:
++      case PIPE_ML_OPERATION_TYPE_MULTIPLY:
++      case PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE:
++      case PIPE_ML_OPERATION_TYPE_RSQRT:
+          break;
+       default:
+          UNREACHABLE("Unsupported ML operation type");
+@@ -716,10 +751,19 @@
+       }
+       case PIPE_ML_OPERATION_TYPE_SUBTRACT:
+       case PIPE_ML_OPERATION_TYPE_ADD: {
+-         supported = operation->input_tensors[0]->data == NULL &&
+-                     operation->input_tensors[1]->data == NULL;
++         /* with a constant operand, or int8 with ETNA_ML_SHADER=eltwise: the shader core's lookup tables */
++         if (etna_ml_shader_eltwise_takes(operation))
++            supported = etna_ml_shader_eltwise_supported(etna_ml_device_screen(pdevice), operation);
++         else
++            supported = operation->input_tensors[0]->data == NULL &&
++                        operation->input_tensors[1]->data == NULL;
+          break;
+       }
++      case PIPE_ML_OPERATION_TYPE_MULTIPLY:
++      case PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE:
++      case PIPE_ML_OPERATION_TYPE_RSQRT:
++         supported = etna_ml_shader_eltwise_supported(etna_ml_device_screen(pdevice), operation);
++         break;
+       case PIPE_ML_OPERATION_TYPE_CONCATENATION: {
+          supported = true;
+ 
+@@ -1249,6 +1293,8 @@
+    list_for_each_entry_safe(struct etna_operation, operation, &operations, link) {
+       free(operation->weight_tensor);
+       free(operation->bias_tensor);
++      free(operation->eltwise_const[0]);
++      free(operation->eltwise_const[1]);
+       free(operation);
+    }
+ 
+@@ -1395,7 +1441,10 @@
+                dump_bo(operation->coefficients, "compressed", i, 0, 0, 0);
+                break;
+             case ETNA_JOB_TYPE_SHADER:
+-               break; /* the shader and command stream are dumped by the compute code */
++               /* the shader and command stream are dumped by the compute code; tables here */
++               if (operation->table)
++                  dump_bo(etna_buffer_resource(operation->table)->bo, "table", i, 0, 0, 0);
++               break;
+             default:
+                UNREACHABLE("Unsupported ML operation type");
+          }
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.h
+@@ -52,6 +52,18 @@
+ etna_ml_lower_mean(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
+                    struct etna_operation *operation);
+ 
++/* 8-bit elementwise ops on the shader core (ETNA_ML_SHADER=eltwise): MUL, SQUARED_DIFFERENCE, RSQRT, ADD/SUB with a
++ * constant operand. _takes: whether lower_operations sends this operation (of a supported graph) to the shader. */
++bool
++etna_ml_shader_eltwise_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation);
++
++bool
++etna_ml_shader_eltwise_takes(const struct pipe_ml_operation *poperation);
++
++void
++etna_ml_lower_eltwise(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                      const unsigned *input_tensors, struct etna_operation *operation);
++
+ void
+ etna_ml_shader_instruction_fini(struct etna_vip_instruction *instruction);
+ 
+@@ -69,6 +81,11 @@
+  * (grid size channels / 4), out[c] = (sum of plane c + hw / 2) / hw. NULL if hw is outside 1..ETNA_ML_AVGPOOL_MAX_HW. */
+ #define ETNA_ML_AVGPOOL_MAX_HW 256
+ 
++/* elementwise lookup kernel: operands 1 or 2, modes of the operands the kernel reads (see etnaviv_ml_shader.c) */
++struct nir_shader *
++etna_ml_shader_build_eltwise(const struct nir_shader_compiler_options *opts, unsigned operands,
++                             const enum etna_ml_eltwise_mode *modes);
++
+ struct nir_shader *
+ etna_ml_shader_build_avgpool(const struct nir_shader_compiler_options *opts, unsigned hw, unsigned channels);
+ 
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_shader.c
+@@ -21,6 +21,9 @@
+  * Global average pool (ETNA_ML_SHADER=avgpool): TFLite AVERAGE_POOL_2D over the whole input (MobileNet's 7x7x1024 ->
+  * 1x1x1024), one thread per 4 channel planes (etna_ml_shader_build_avgpool), no barriers. Without it Teflon splits
+  * such a graph into two NPU submits with the pool on the CPU between them.
++ *
++ * MEAN (ETNA_ML_SHADER=mean) and 8-bit elementwise ops through lookup tables (ETNA_ML_SHADER=eltwise: MUL,
++ * SQUARED_DIFFERENCE, RSQRT, ADD/SUB with a constant): the pieces of a decomposed layer normalization.
+  */
+ 
+ #include <math.h>
+@@ -1115,6 +1118,806 @@
+    return true;
+ }
+ 
++/*
++ * 8-bit elementwise operations (ETNA_ML_SHADER=eltwise, step 6g): MUL, SQUARED_DIFFERENCE, RSQRT, and ADD/SUB with a
++ * constant operand (ADD/SUB of two tensors stay on the NN). Every output byte is a function of at most two input
++ * bytes, so the driver evaluates the CPU's own arithmetic for every possible input and the kernel only looks the
++ * result up: exact by construction, no float on the shader core. The arithmetic is what TFLite runs beside Teflon,
++ * fitted exhaustively against the interpreter (npu-shader/models/eltwise_fit.py, delegate_path_check.py, 2026-11-14):
++ *   MUL                XNNPACK, fp32 requantization, while (sa*sb)/so < 2^8 (above that the builtin kernel runs,
++ *                      with arithmetic not reproduced here: refused)
++ *   SQUARED_DIFFERENCE the builtin integer kernel (left shift 7; XNNPACK doesn't take it)
++ *   RSQRT              the builtin integer kernel (gemmlowp fixed-point Newton-Raphson inverse square root, then
++ *                      two integer requantizations; npu-shader/models/rsqrt_int.py: exact on 7505 entries over 61
++ *                      quantizations, where a float formula missed 3); inputs below the zero point make the CPU fail,
++ *                      so those entries don't matter
++ *   ADD / SUB          XNNPACK qs8 vadd while sa/so and sb/so are in [2^-10, 2^8); ADD below that: the builtin
++ *                      integer kernel (left shift 20); SUB below and anything above: refused
++ * Within a quarter octave of a threshold the op is refused unless both candidate formulas give the same table.
++ * Output: channel planes (NCHW) of P = H*W positions, P % 4 == 0; thread (x, c) writes positions 4x..4x+3 of channel
++ * c. Operands: FULL (same shape, channel planes), POS ([1,H,W,1]), CHAN ([1,1,1,C]) or SCALAR. Table: one word per
++ * entry, index a (one operand) or a*256 + b (two) over the stored bytes (int8 is stored +128); unfolded constant
++ * operands follow the table in the same buffer.
++ */
++#define ELTWISE_ARGS 7 /* out, operand 0, operand 1, table, plane bytes, last x group, last channel */
++
++enum eltwise_formula {
++   ELTWISE_XNNPACK,
++   ELTWISE_BUILTIN,
++};
++
++static bool
++eltwise_enabled(const struct etna_screen *screen)
++{
++   return shader_option("eltwise") && screen->base.caps.compute && !DBG_ENABLED(ETNA_DBG_NPU_PARALLEL);
++}
++
++static int32_t
++eltwise_clamp(int64_t v, bool is_signed)
++{
++   const int64_t lo = is_signed ? -128 : 0, hi = is_signed ? 127 : 255;
++   return (int32_t)(v < lo ? lo : v > hi ? hi : v);
++}
++
++/* TFLite QuantizeMultiplier: real = m * 2^shift, m a Q31 in [0.5, 1) (std::round, as TfLiteRound) */
++static void
++tfl_quantize_multiplier(double real, int32_t *m, int *shift)
++{
++   if (real == 0.0) {
++      *m = 0;
++      *shift = 0;
++      return;
++   }
++   int e;
++   const double q = frexp(real, &e);
++   int64_t qf = (int64_t)round(q * (double)(1ll << 31));
++   if (qf == (1ll << 31)) {
++      qf /= 2;
++      e++;
++   }
++   if (e < -31) {
++      e = 0;
++      qf = 0;
++   }
++   *m = (int32_t)qf;
++   *shift = e;
++}
++
++/* gemmlowp SaturatingRoundingDoublingHighMul and RoundingDivideByPOT; TFLite MultiplyByQuantizedMultiplier */
++static int32_t
++tfl_srdhm(int32_t a, int32_t b)
++{
++   if (a == INT32_MIN && b == INT32_MIN)
++      return INT32_MAX;
++   const int64_t ab = (int64_t)a * b;
++   const int64_t nudge = ab >= 0 ? (1ll << 30) : (1 - (1ll << 30));
++   return (int32_t)((ab + nudge) / (1ll << 31));
++}
++
++static int32_t
++tfl_rdbpot(int32_t x, int e)
++{
++   const int32_t mask = (int32_t)((1ll << e) - 1);
++   const int32_t rem = x & mask;
++   const int32_t thr = (mask >> 1) + (x < 0 ? 1 : 0);
++   return (x >> e) + (rem > thr ? 1 : 0);
++}
++
++static int32_t
++tfl_mbqm(int32_t x, int32_t m, int shift)
++{
++   const int left = shift > 0 ? shift : 0, right = shift > 0 ? 0 : -shift;
++   return tfl_rdbpot(tfl_srdhm((int32_t)((int64_t)x * (1ll << left)), m), right);
++}
++
++/* gemmlowp SaturatingRoundingMultiplyByPOT<e> for e > 0 */
++static int32_t
++tfl_sat_shl(int32_t x, int e)
++{
++   const int32_t thr = (int32_t)((1u << (31 - e)) - 1);
++   if (x > thr)
++      return INT32_MAX;
++   if (x < -thr)
++      return INT32_MIN;
++   return (int32_t)((uint32_t)x << e);
++}
++
++/* TFLite GetInvSqrtQuantizedMultiplierExp (1 / sqrt(input) as a multiplier and shift, 5 Newton-Raphson steps in
++ * gemmlowp FixedPoint<int32_t, 3>) */
++static void
++tfl_inv_sqrt_multiplier(int32_t input, int reverse_shift, int32_t *out_m, int *out_shift)
++{
++   if (input <= 1) {
++      *out_m = INT32_MAX;
++      *out_shift = 0;
++      return;
++   }
++   int shift = 11;
++   while (input >= (1 << 29)) {
++      input /= 4;
++      ++shift;
++   }
++   const unsigned max_left_shift_bits = __builtin_clz((uint32_t)input) - 1;
++   const unsigned left_shift_bit_pairs = max_left_shift_bits / 2 - 1;
++   shift -= left_shift_bit_pairs;
++   input <<= 2 * left_shift_bit_pairs;
++   const int32_t half_input = tfl_rdbpot(input >> 1, 1);
++   const int32_t half_three = (1 << 28) + (1 << 27);
++   int32_t x = 1 << 28;
++   for (int i = 0; i < 5; i++) {
++      const int32_t x3 = tfl_sat_shl(tfl_srdhm(tfl_srdhm(x, x), x), 6);
++      x = tfl_sat_shl((int32_t)((uint32_t)tfl_srdhm(half_three, x) - (uint32_t)tfl_srdhm(half_input, x3)), 3);
++   }
++   x = tfl_srdhm(x, 1518500250); /* sqrt(2) / 2 */
++   if (shift < 0) {
++      x = (int32_t)((uint32_t)x << -shift);
++      shift = 0;
++   }
++   *out_m = x;
++   *out_shift = shift * reverse_shift;
++}
++
++/* The arithmetic of one op, prepared once per table (model domain) */
++struct eltwise_params {
++   enum etna_ml_eltwise_op op;
++   enum eltwise_formula f;
++   bool is_signed;
++   int za, zb, zo;
++   float sa, so;
++   float mul_scale;             /* MUL, XNNPACK */
++   int32_t m1, m2, mo;          /* integer formulas: input and output multipliers */
++   int s1, s2, so_shift;
++   int32_t xa, xb, xbias;       /* ADD/SUB, XNNPACK */
++   int xshift;
++};
++
++static void
++eltwise_prepare(const struct etna_operation *op, enum eltwise_formula f, struct eltwise_params *p)
++{
++   const float *s = op->eltwise_scale;
++   const int *z = op->eltwise_zp;
++
++   memset(p, 0, sizeof(*p));
++   p->op = op->eltwise_op;
++   p->f = f;
++   p->is_signed = op->eltwise_signed;
++   p->za = z[0];
++   p->zb = z[1];
++   p->zo = z[2];
++   p->sa = s[0];
++   p->so = s[2];
++
++   switch (op->eltwise_op) {
++   case ETNA_ML_ELTWISE_MUL:
++      if (f == ELTWISE_XNNPACK) {
++         /* XNNPACK qs8 vmul fp32: product scale and output ratio in float */
++         const float ps = s[0] * s[1];
++         p->mul_scale = ps / s[2];
++      } else {
++         tfl_quantize_multiplier((double)s[0] * (double)s[1] / (double)s[2], &p->mo, &p->so_shift);
++      }
++      break;
++   case ETNA_ML_ELTWISE_SQDIFF: {
++      /* TFLite squared_difference.cc, 8-bit: left shift 7 */
++      const double twice_max = 2.0 * (double)MAX2(s[0], s[1]);
++      tfl_quantize_multiplier((double)s[0] / twice_max, &p->m1, &p->s1);
++      tfl_quantize_multiplier((double)s[1] / twice_max, &p->m2, &p->s2);
++      tfl_quantize_multiplier(twice_max * twice_max / ((double)(1 << 14) * (double)s[2]), &p->mo, &p->so_shift);
++      break;
++   }
++   case ETNA_ML_ELTWISE_RSQRT:
++      /* 1 / (sqrt(input scale) * output scale) as a multiplier; ELTWISE_BUILTIN: sqrt and product in float (TFLite's
++       * std::sqrt of a float), ELTWISE_XNNPACK here: the same in double (the other reading; both were exact) */
++      if (f == ELTWISE_BUILTIN) {
++         const float d = sqrtf(s[0]) * s[2];
++         tfl_quantize_multiplier(1.0 / (double)d, &p->mo, &p->so_shift);
++      } else {
++         tfl_quantize_multiplier(1.0 / (sqrt((double)s[0]) * (double)s[2]), &p->mo, &p->so_shift);
++      }
++      break;
++   case ETNA_ML_ELTWISE_ADD:
++   case ETNA_ML_ELTWISE_SUB:
++      if (f == ELTWISE_XNNPACK) {
++         /* XNNPACK xnn_init_qs8_add_minmax_scalar_params (subtract: b's multiplier negated) */
++         const float fa = s[0] / s[2], fb = s[1] / s[2];
++         const float mx = MAX2(fabsf(fa), fabsf(fb));
++         uint32_t bits;
++         memcpy(&bits, &mx, sizeof(bits));
++         p->xshift = 20 - ((int)(bits >> 23) - 127);
++         p->xa = (int32_t)lrintf(ldexpf(fa, p->xshift));
++         p->xb = (int32_t)lrintf(ldexpf(fb, p->xshift));
++         if (op->eltwise_op == ETNA_ML_ELTWISE_SUB)
++            p->xb = -p->xb;
++         p->xbias = (int32_t)(1u << (p->xshift - 1)) - p->xa * z[0] - p->xb * z[1];
++      } else {
++         /* TFLite add.cc, 8-bit: inputs rescaled to twice the larger input scale with left shift 20 */
++         const double twice_max = 2.0 * (double)MAX2(s[0], s[1]);
++         tfl_quantize_multiplier((double)s[0] / twice_max, &p->m1, &p->s1);
++         tfl_quantize_multiplier((double)s[1] / twice_max, &p->m2, &p->s2);
++         tfl_quantize_multiplier(twice_max / ((double)(1 << 20) * (double)s[2]), &p->mo, &p->so_shift);
++      }
++      break;
++   }
++}
++
++/* One output (model domain) from the operand values va, vb (model domain) */
++static int32_t
++eltwise_eval(const struct eltwise_params *p, int32_t va, int32_t vb)
++{
++   switch (p->op) {
++   case ETNA_ML_ELTWISE_MUL: {
++      const int32_t acc = (va - p->za) * (vb - p->zb);
++      if (p->f == ELTWISE_XNNPACK) {
++         const float v = (float)acc * p->mul_scale;
++         return eltwise_clamp((int64_t)lrintf(v) + p->zo, p->is_signed);
++      }
++      return eltwise_clamp((int64_t)tfl_mbqm(acc, p->mo, p->so_shift) + p->zo, p->is_signed);
++   }
++   case ETNA_ML_ELTWISE_SQDIFF: {
++      const int32_t x1 = tfl_mbqm((va - p->za) * (1 << 7), p->m1, p->s1);
++      const int32_t x2 = tfl_mbqm((vb - p->zb) * (1 << 7), p->m2, p->s2);
++      const int32_t d = x1 - x2;
++      return eltwise_clamp((int64_t)tfl_mbqm(d * d, p->mo, p->so_shift) + p->zo, p->is_signed);
++   }
++   case ETNA_ML_ELTWISE_RSQRT: {
++      /* TFLite elementwise.cc RsqrtEvalQuantized (kShift 20, kReverseShift -1) */
++      const int32_t value = va - p->za;
++      if (value == 0)
++         return p->is_signed ? 127 : 255;
++      int32_t im;
++      int ish;
++      tfl_inv_sqrt_multiplier(value, -1, &im, &ish);
++      const int32_t data = tfl_mbqm(1, im, ish + 20);
++      return eltwise_clamp((int64_t)tfl_mbqm(data, p->mo, p->so_shift - 20) + p->zo, p->is_signed);
++   }
++   case ETNA_ML_ELTWISE_ADD:
++   case ETNA_ML_ELTWISE_SUB: {
++      if (p->f == ELTWISE_XNNPACK) {
++         const int32_t acc = p->xbias + va * p->xa + vb * p->xb;
++         return eltwise_clamp((int64_t)(acc >> p->xshift) + p->zo, p->is_signed);
++      }
++      const int32_t x1 = tfl_mbqm((va - p->za) * (1 << 20), p->m1, p->s1);
++      const int32_t x2 = tfl_mbqm((vb - p->zb) * (1 << 20), p->m2, p->s2);
++      const int32_t sum = p->op == ETNA_ML_ELTWISE_SUB ? x1 - x2 : x1 + x2;
++      return eltwise_clamp((int64_t)tfl_mbqm(sum, p->mo, p->so_shift) + p->zo, p->is_signed);
++   }
++   }
++   return 0;
++}
++
++/* The table of stored output bytes, one word each: one operand: entry x = f(x[, the folded constant]); two: entry
++ * a * 256 + b. fold: -1, or the operand (0/1) that is the scalar constant c (model domain). */
++static void
++eltwise_fill(const struct etna_operation *op, enum eltwise_formula f, int fold, int32_t c, uint32_t *table)
++{
++   const int off = op->eltwise_signed ? 128 : 0;
++   const bool unary = op->eltwise_op == ETNA_ML_ELTWISE_RSQRT;
++   struct eltwise_params p;
++
++   eltwise_prepare(op, f, &p);
++   if (unary || fold >= 0) {
++      for (int x = 0; x < 256; x++) {
++         const int32_t v = x - off;
++         const int32_t va = fold == 0 ? c : v, vb = fold == 1 ? c : v;
++         table[x] = (uint32_t)(eltwise_eval(&p, va, unary ? 0 : vb) + off);
++      }
++      return;
++   }
++   for (int a = 0; a < 256; a++)
++      for (int b = 0; b < 256; b++)
++         table[a * 256 + b] = (uint32_t)(eltwise_eval(&p, a - off, b - off) + off);
++}
++
++/* Which arithmetic the CPU uses for this op, or false if it can't be reproduced exactly (stays on the CPU) */
++static bool
++eltwise_choose(const struct etna_operation *op, enum eltwise_formula *f, bool *check_both)
++{
++   const float *s = op->eltwise_scale;
++   const float lo_t = ldexpf(1.0f, -10), hi_t = ldexpf(1.0f, 8);
++   const float q = 1.189207115f; /* 2^0.25 */
++
++   *f = ELTWISE_XNNPACK;
++   *check_both = false;
++   switch (op->eltwise_op) {
++   case ETNA_ML_ELTWISE_SQDIFF:
++      *f = ELTWISE_BUILTIN;
++      return true;
++   case ETNA_ML_ELTWISE_RSQRT: {
++      struct eltwise_params a, b;
++      eltwise_prepare(op, ELTWISE_BUILTIN, &a);
++      eltwise_prepare(op, ELTWISE_XNNPACK, &b);
++      *f = ELTWISE_BUILTIN;
++      *check_both = a.mo != b.mo || a.so_shift != b.so_shift;
++      return true;
++   }
++   case ETNA_ML_ELTWISE_MUL: {
++      const float ps = s[0] * s[1];
++      const float r = ps / s[2];
++      if (!(r < hi_t / q))
++         return false;
++      if (r < ldexpf(1.0f, -16) * q)
++         *check_both = true;
++      return true;
++   }
++   case ETNA_ML_ELTWISE_ADD:
++   case ETNA_ML_ELTWISE_SUB: {
++      const float ra = fabsf(s[0] / s[2]), rb = fabsf(s[1] / s[2]);
++      const float mn = MIN2(ra, rb), mx = MAX2(ra, rb);
++      if (!(mx < hi_t / q))
++         return false;
++      if (mn >= lo_t * q)
++         return true;
++      if (op->eltwise_op == ETNA_ML_ELTWISE_SUB)
++         return false;
++      *f = ELTWISE_BUILTIN;
++      if (mn >= lo_t / q)
++         *check_both = true;
++      return true;
++   }
++   }
++   return false;
++}
++
++/* The table for this op (malloc'd, *words entries), or NULL if the CPU's arithmetic can't be reproduced exactly */
++static uint32_t *
++eltwise_table_words(const struct etna_operation *op, unsigned *words)
++{
++   enum eltwise_formula f;
++   bool check_both;
++
++   if (!eltwise_choose(op, &f, &check_both))
++      return NULL;
++
++   const int off = op->eltwise_signed ? 128 : 0;
++   const int fold = op->eltwise_fold;
++   const int32_t c = fold >= 0 ? (int32_t)op->eltwise_const[fold][0] - off : 0;
++   const unsigned n = op->eltwise_operands == 1 ? 256 : 65536;
++   uint32_t *t = malloc(n * sizeof(uint32_t));
++   if (!t)
++      return NULL;
++   eltwise_fill(op, f, fold, c, t);
++   if (check_both) {
++      uint32_t *t2 = malloc(n * sizeof(uint32_t));
++      bool same = t2 != NULL;
++      if (same) {
++         eltwise_fill(op, f == ELTWISE_XNNPACK ? ELTWISE_BUILTIN : ELTWISE_XNNPACK, fold, c, t2);
++         same = !memcmp(t, t2, n * sizeof(uint32_t));
++      }
++      free(t2);
++      if (!same) {
++         ML_DBG("eltwise: scales %g %g -> %g are too close to where TFLite switches arithmetic: left to the CPU\n",
++                op->eltwise_scale[0], op->eltwise_scale[1], op->eltwise_scale[2]);
++         free(t);
++         return NULL;
++      }
++   }
++   *words = n;
++   return t;
++}
++
++/* The table + the unfolded constant operands after it (each 16-byte aligned) in a new buffer, or NULL.
++ * const_off[i]: byte offset of constant operand i in it (0: not a stored constant). */
++static struct pipe_resource *
++eltwise_table(struct etna_screen *screen, const struct etna_operation *op, unsigned *table_words, unsigned *const_off)
++{
++   unsigned n;
++   uint32_t *t = eltwise_table_words(op, &n);
++   if (!t)
++      return NULL;
++
++   unsigned size = n * 4;
++   for (unsigned i = 0; i < 2; i++) {
++      const_off[i] = 0;
++      if (op->eltwise_const[i] && (int)i != op->eltwise_fold) {
++         const_off[i] = size;
++         size += (op->eltwise_const_size[i] + 15) & ~15u;
++      }
++   }
++
++   struct pipe_resource *res = etna_ml_create_resource(&screen->base, size);
++   if (!res) {
++      free(t);
++      return NULL;
++   }
++   struct etna_bo *bo = etna_buffer_resource(res)->bo;
++   etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
++   uint8_t *map = etna_bo_map(bo);
++   memset(map, 0, size);
++   memcpy(map, t, n * 4);
++   for (unsigned i = 0; i < 2; i++)
++      if (const_off[i])
++         memcpy(map + const_off[i], op->eltwise_const[i], op->eltwise_const_size[i]);
++   etna_bo_cpu_fini(bo);
++   free(t);
++   *table_words = n;
++   return res;
++}
++
++/* The 4 bytes of one kernel operand for positions 4x..4x+3 of channel c (NIR values 0..255) */
++static void
++eltwise_operand_bytes(nir_builder *b, enum etna_ml_eltwise_mode mode, nir_def *base, nir_def *plane, nir_def *pos,
++                      nir_def *c, nir_def **out)
++{
++   nir_def *w;
++
++   switch (mode) {
++   case ETNA_ML_ELTWISE_FULL:
++   case ETNA_ML_ELTWISE_POS:
++      w = nir_load_global(b, 1, 32, nir_iadd(b, base, mode == ETNA_ML_ELTWISE_FULL ? nir_iadd(b, plane, pos) : pos),
++                          .align_mul = 4);
++      for (unsigned i = 0; i < 4; i++)
++         out[i] = nir_iand_imm(b, i ? nir_ushr_imm(b, w, 8 * i) : w, 0xff);
++      return;
++   case ETNA_ML_ELTWISE_CHAN: {
++      /* byte c of the operand: the word holding it, then the byte picked by c % 4 (constant shifts only) */
++      w = nir_load_global(b, 1, 32, nir_iadd(b, base, nir_iand_imm(b, c, ~3u)), .align_mul = 4);
++      nir_def *sel = nir_iand_imm(b, c, 3);
++      nir_def *v = nir_ushr_imm(b, w, 24);
++      for (int i = 2; i >= 0; i--)
++         v = nir_bcsel(b, nir_ieq_imm(b, sel, i), nir_iand_imm(b, i ? nir_ushr_imm(b, w, 8 * i) : w, 0xff), v);
++      for (unsigned i = 0; i < 4; i++)
++         out[i] = v;
++      return;
++   }
++   case ETNA_ML_ELTWISE_SCALAR:
++      w = nir_load_global(b, 1, 32, base, .align_mul = 4);
++      for (unsigned i = 0; i < 4; i++)
++         out[i] = nir_iand_imm(b, w, 0xff);
++      return;
++   }
++}
++
++nir_shader *
++etna_ml_shader_build_eltwise(const nir_shader_compiler_options *opts, unsigned operands,
++                             const enum etna_ml_eltwise_mode *modes)
++{
++   nir_builder b = nir_builder_init_simple_shader(MESA_SHADER_KERNEL, opts, "etna_ml_eltwise");
++   b.shader->info.workgroup_size_variable = true;
++
++   nir_def *arg[ELTWISE_ARGS];
++   for (unsigned i = 0; i < ELTWISE_ARGS; i++)
++      arg[i] = nir_load_kernel_input(&b, 1, 32, nir_imm_int(&b, i * 4), .base = 0, .range = ELTWISE_ARGS * 4);
++
++   /* IDs clamped to the grid, so a wrong ID can only give wrong values, never a stray address */
++   nir_def *gid = nir_load_global_invocation_id(&b, 32);
++   nir_def *x = nir_umin(&b, nir_channel(&b, gid, 0), arg[5]);
++   nir_def *c = nir_umin(&b, nir_channel(&b, gid, 1), arg[6]);
++   nir_def *pos = nir_ishl_imm(&b, x, 2);
++   nir_def *plane = nir_imul(&b, c, arg[4]);
++
++   nir_def *k[2][4];
++   for (unsigned o = 0; o < operands; o++)
++      eltwise_operand_bytes(&b, modes[o], arg[1 + o], plane, pos, c, k[o]);
++
++   nir_def *out_word = NULL;
++   for (unsigned i = 0; i < 4; i++) {
++      nir_def *idx = operands == 2 ? nir_iadd(&b, nir_ishl_imm(&b, k[0][i], 8), k[1][i]) : k[0][i];
++      nir_def *v = nir_load_global(&b, 1, 32, nir_iadd(&b, arg[3], nir_ishl_imm(&b, idx, 2)), .align_mul = 4);
++      if (i)
++         v = nir_ishl_imm(&b, v, 8 * i);
++      out_word = out_word ? nir_ior(&b, out_word, v) : v;
++   }
++   nir_store_global(&b, out_word, nir_iadd(&b, arg[0], nir_iadd(&b, plane, pos)), .write_mask = 0x1, .align_mul = 4);
++
++   return b.shader;
++}
++
++static enum etna_ml_eltwise_op
++eltwise_op_of(const struct pipe_ml_operation *poperation, bool *ok)
++{
++   *ok = true;
++   switch (poperation->type) {
++   case PIPE_ML_OPERATION_TYPE_MULTIPLY:
++      *ok = !poperation->mul.fused_activation;
++      return ETNA_ML_ELTWISE_MUL;
++   case PIPE_ML_OPERATION_TYPE_SQUARED_DIFFERENCE:
++      return ETNA_ML_ELTWISE_SQDIFF;
++   case PIPE_ML_OPERATION_TYPE_RSQRT:
++      return ETNA_ML_ELTWISE_RSQRT;
++   case PIPE_ML_OPERATION_TYPE_ADD:
++   case PIPE_ML_OPERATION_TYPE_SUBTRACT:
++      /* with a constant operand (the NN refuses those), or two int8 tensors while the switch is on: the NN's int8
++       * ADD outputs all -128 on this board (S6G-LN64-OFF, 2026-11-14; its int8 conv all 127), uint8 stays there */
++      *ok = !poperation->add.fused_activation && poperation->input_count == 2 &&
++            (poperation->input_tensors[0]->data || poperation->input_tensors[1]->data ||
++             (shader_option("eltwise") && poperation->input_tensors[0]->is_signed &&
++              poperation->input_tensors[1]->is_signed && poperation->output_tensors[0]->is_signed));
++      return poperation->type == PIPE_ML_OPERATION_TYPE_ADD ? ETNA_ML_ELTWISE_ADD : ETNA_ML_ELTWISE_SUB;
++   default:
++      *ok = false;
++      return ETNA_ML_ELTWISE_MUL;
++   }
++}
++
++static bool eltwise_setup(const struct pipe_ml_operation *poperation, const unsigned *input_tensors,
++                          struct etna_operation *operation);
++static bool eltwise_choose(const struct etna_operation *op, enum eltwise_formula *f, bool *check_both);
++
++bool
++etna_ml_shader_eltwise_takes(const struct pipe_ml_operation *poperation)
++{
++   bool ok;
++   eltwise_op_of(poperation, &ok);
++   if (!ok)
++      return false;
++
++   /* ADD/SUB of two tensors: only if the shader can take it exactly, else it stays on the NN as before */
++   if ((poperation->type == PIPE_ML_OPERATION_TYPE_ADD || poperation->type == PIPE_ML_OPERATION_TYPE_SUBTRACT) &&
++       !poperation->input_tensors[0]->data && !poperation->input_tensors[1]->data) {
++      struct etna_operation op = {0};
++      enum eltwise_formula f;
++      bool check_both = false;
++      ok = eltwise_setup(poperation, NULL, &op) && eltwise_choose(&op, &f, &check_both) && !check_both;
++      free(op.eltwise_const[0]);
++      free(op.eltwise_const[1]);
++   }
++   return ok;
++}
++
++static bool
++eltwise_tensor_ok(const struct pipe_tensor *t, bool is_signed)
++{
++   return t->type_size == 1 && t->is_signed == is_signed && !t->scales && !t->zero_points && t->scale > 0.0f &&
++          t->dims[0] == 1;
++}
++
++/* Fills the eltwise fields of operation from poperation (constants copied in their stored form into eltwise_const,
++ * which the caller frees). False if the shapes, types or quantization aren't handled. input_tensors: the tensor ids
++ * lower_operations resolved (after its transposes), or NULL for a support check. */
++static bool
++eltwise_setup(const struct pipe_ml_operation *poperation, const unsigned *input_tensors,
++              struct etna_operation *operation)
++{
++   bool ok;
++   const enum etna_ml_eltwise_op op = eltwise_op_of(poperation, &ok);
++   const unsigned n_in = op == ETNA_ML_ELTWISE_RSQRT ? 1 : 2;
++   const struct pipe_tensor *out = poperation->output_tensors[0];
++
++   operation->eltwise_const[0] = operation->eltwise_const[1] = NULL;
++   if (!ok || poperation->input_count < n_in || poperation->output_count != 1)
++      return false;
++   const bool is_signed = out->is_signed;
++   if (!eltwise_tensor_ok(out, is_signed))
++      return false;
++
++   const unsigned P = out->dims[1] * out->dims[2], C = out->dims[3];
++   if (!P || P % 4 || !C || C > 65535 || (P / 4) / block_width(P / 4) > 65535)
++      return false;
++
++   operation->eltwise_op = op;
++   operation->eltwise_signed = is_signed;
++   operation->eltwise_positions = P;
++   operation->eltwise_channels = C;
++   operation->eltwise_scale[2] = out->scale;
++   operation->eltwise_zp[2] = out->zero_point;
++   operation->eltwise_fold = -1;
++
++   unsigned tensors = 0, constants = 0;
++   for (unsigned i = 0; i < n_in; i++) {
++      const struct pipe_tensor *t = poperation->input_tensors[i];
++      if (!eltwise_tensor_ok(t, is_signed))
++         return false;
++      const unsigned tp = t->dims[1] * t->dims[2], tc = t->dims[3];
++      enum etna_ml_eltwise_mode mode;
++      if (tp * tc == 1)
++         mode = ETNA_ML_ELTWISE_SCALAR;
++      else if (tp == P && tc == C)
++         mode = ETNA_ML_ELTWISE_FULL;
++      else if (tp == P && tc == 1 && t->dims[1] == out->dims[1])
++         mode = ETNA_ML_ELTWISE_POS;
++      else if (tp == 1 && tc == C)
++         mode = ETNA_ML_ELTWISE_CHAN;
++      else
++         return false;
++      operation->eltwise_mode[i] = mode;
++      operation->eltwise_scale[i] = t->scale;
++      operation->eltwise_zp[i] = t->zero_point;
++      if (t->data) {
++         const unsigned size = tp * tc;
++         constants++;
++         operation->eltwise_tensor[i] = -1;
++         operation->eltwise_const_size[i] = size;
++         /* stored form (int8 + 128); a full-size constant goes into channel planes like the tensors */
++         uint8_t *bytes = malloc(size);
++         if (!bytes)
++            return false;
++         const uint8_t *src = t->data;
++         for (unsigned k = 0; k < size; k++) {
++            const unsigned from = (mode == ETNA_ML_ELTWISE_FULL && C > 1 && P > 1) ? (k % P) * C + k / P : k;
++            bytes[k] = src[from] + (is_signed ? 128 : 0);
++         }
++         operation->eltwise_const[i] = bytes;
++         if (mode == ETNA_ML_ELTWISE_SCALAR && n_in == 2)
++            operation->eltwise_fold = i;
++      } else {
++         operation->eltwise_tensor[i] = tensors;
++         if (input_tensors)
++            operation->input_tensors[tensors] = input_tensors[i];
++         operation->input_tensor_sizes[tensors] = tp * tc;
++         tensors++;
++      }
++   }
++   if (!tensors || constants > 1)
++      return false;
++   if (n_in == 1) {
++      operation->eltwise_mode[1] = ETNA_ML_ELTWISE_SCALAR;
++      operation->eltwise_tensor[1] = -1;
++      operation->eltwise_scale[1] = 0.0f;
++      operation->eltwise_zp[1] = 0;
++   }
++   operation->eltwise_operands = (n_in == 1 || operation->eltwise_fold >= 0) ? 1 : 2;
++   operation->input_count = tensors;
++   return true;
++}
++
++static struct etna_shader *
++eltwise_kernel(struct etna_screen *screen, const struct etna_operation *op, struct etna_shader_variant **variant)
++{
++   enum etna_ml_eltwise_mode modes[2];
++   unsigned k = 0;
++   for (unsigned i = 0; i < 2 && k < op->eltwise_operands; i++)
++      if ((int)i != op->eltwise_fold)
++         modes[k++] = op->eltwise_mode[i];
++
++   const nir_shader_compiler_options *opts = etna_compiler_get_options(screen->compiler);
++   nir_shader *nir = etna_ml_shader_build_eltwise(opts, op->eltwise_operands, modes);
++   if (!nir)
++      return NULL;
++   struct etna_shader *shader = etna_compute_shader_create(screen, nir, NULL);
++   struct etna_shader_variant *v = shader ? etna_compute_shader_get_variant(shader, NULL) : NULL;
++   if (!v) {
++      ML_DBG("eltwise kernel did not compile: left to the CPU\n");
++      if (shader)
++         etna_compute_shader_destroy(shader);
++      return NULL;
++   }
++   *variant = v;
++   return shader;
++}
++
++bool
++etna_ml_shader_eltwise_supported(struct etna_screen *screen, const struct pipe_ml_operation *poperation)
++{
++   struct etna_operation op = {0};
++   bool ok = false;
++
++   if (!eltwise_enabled(screen))
++      return false;
++   if (eltwise_setup(poperation, NULL, &op)) {
++      /* build the table and compile now: if either fails, the operation stays on the CPU instead of failing later */
++      unsigned words;
++      uint32_t *t = eltwise_table_words(&op, &words);
++      if (!t) {
++         ML_DBG("eltwise: no exact arithmetic for op %d, scales %g %g -> %g: left to the CPU\n", op.eltwise_op,
++                op.eltwise_scale[0], op.eltwise_scale[1], op.eltwise_scale[2]);
++      } else {
++         free(t);
++         struct etna_shader_variant *v;
++         struct etna_shader *shader = eltwise_kernel(screen, &op, &v);
++         if (shader) {
++            etna_compute_shader_destroy(shader);
++            ok = true;
++         }
++      }
++   }
++   free(op.eltwise_const[0]);
++   free(op.eltwise_const[1]);
++   return ok;
++}
++
++void
++etna_ml_lower_eltwise(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperation,
++                      const unsigned *input_tensors, struct etna_operation *operation)
++{
++   const struct pipe_tensor *out = poperation->output_tensors[0];
++   ASSERTED bool ok = eltwise_setup(poperation, input_tensors, operation);
++   assert(ok);
++
++   operation->type = ETNA_JOB_TYPE_SHADER;
++   operation->shader_op = ETNA_ML_SHADER_ELTWISE;
++   operation->output_count = 1;
++   operation->output_tensors[0] = out->index;
++   operation->output_tensor_sizes[0] = operation->eltwise_positions * operation->eltwise_channels;
++   operation->output_width = out->dims[1];
++   operation->output_height = out->dims[2];
++   operation->output_channels = out->dims[3];
++   operation->input_width = out->dims[1];
++   operation->input_height = out->dims[2];
++   operation->input_channels = out->dims[3];
++}
++
++static const char *
++eltwise_mode_name(enum etna_ml_eltwise_mode m)
++{
++   return m == ETNA_ML_ELTWISE_FULL ? "full" : m == ETNA_ML_ELTWISE_POS ? "pos" : m == ETNA_ML_ELTWISE_CHAN ? "chan"
++                                                                                                         : "scalar";
++}
++
++static bool
++compile_eltwise(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
++                struct etna_vip_instruction *instruction)
++{
++   struct pipe_resource *output = etna_ml_get_resource(subgraph, operation->output_tensors[0]);
++   const unsigned out_offset = etna_ml_get_offset(subgraph, operation->output_tensors[0]);
++   const unsigned P = operation->eltwise_positions, C = operation->eltwise_channels;
++   struct pipe_resource *in_res[2] = {NULL, NULL};
++   unsigned in_off[2] = {0, 0};
++
++   if (!output || out_offset % 4 || output == subgraph->axi_sram ||
++       etna_bo_size(etna_buffer_resource(output)->bo) < out_offset + P * C)
++      return false;
++   for (unsigned i = 0; i < operation->input_count; i++) {
++      in_res[i] = etna_ml_get_resource(subgraph, operation->input_tensors[i]);
++      in_off[i] = etna_ml_get_offset(subgraph, operation->input_tensors[i]);
++      if (!in_res[i] || in_off[i] % 4 || in_res[i] == subgraph->axi_sram ||
++          etna_bo_size(etna_buffer_resource(in_res[i])->bo) < in_off[i] + ((operation->input_tensor_sizes[i] + 3) & ~3u))
++         return false;
++   }
++
++   unsigned words, const_off[2];
++   struct pipe_resource *table = eltwise_table(subgraph->screen, operation, &words, const_off);
++   if (!table)
++      return false;
++   struct etna_shader_variant *v;
++   struct etna_shader *shader = eltwise_kernel(subgraph->screen, operation, &v);
++   if (!shader) {
++      pipe_resource_reference(&table, NULL);
++      return false;
++   }
++
++   const uint32_t table_va = etna_bo_gpu_va(etna_buffer_resource(table)->bo);
++   uint32_t operand_va[2] = {0, 0};
++   unsigned k = 0;
++   for (unsigned i = 0; i < 2 && k < operation->eltwise_operands; i++) {
++      if ((int)i == operation->eltwise_fold)
++         continue;
++      const int t = operation->eltwise_tensor[i];
++      operand_va[k++] = t >= 0 ? etna_bo_gpu_va(etna_buffer_resource(in_res[t])->bo) + in_off[t]
++                               : table_va + const_off[i];
++   }
++
++   memset(instruction, 0, sizeof(*instruction));
++   instruction->type = ETNA_JOB_TYPE_SHADER;
++   instruction->owned_shader = shader;
++   instruction->shader = v;
++   instruction->table = table; /* the reference from etna_ml_create_resource */
++   pipe_resource_reference(&instruction->input, in_res[0]);
++   pipe_resource_reference(&instruction->input2, in_res[1]);
++   pipe_resource_reference(&instruction->output, output);
++   instruction->input_offset = in_off[0];
++   instruction->input2_offset = in_off[1];
++   instruction->output_offset = out_offset;
++   const unsigned gx = P / 4;
++   instruction->shader_args[0] = etna_bo_gpu_va(etna_buffer_resource(output)->bo) + out_offset;
++   instruction->shader_args[1] = operand_va[0];
++   instruction->shader_args[2] = operand_va[1];
++   instruction->shader_args[3] = table_va;
++   instruction->shader_args[4] = P;
++   instruction->shader_args[5] = gx - 1;
++   instruction->shader_args[6] = C - 1;
++   instruction->work_dim = 2;
++   instruction->block[0] = block_width(gx);
++   instruction->block[1] = instruction->block[2] = 1;
++   instruction->grid[0] = gx / instruction->block[0];
++   instruction->grid[1] = C;
++   instruction->grid[2] = 1;
++
++   static const char *names[] = {"mul", "sqdiff", "rsqrt", "add", "sub"};
++   enum eltwise_formula f;
++   bool check_both;
++   eltwise_choose(operation, &f, &check_both);
++   ML_DBG("shader eltwise %s: %u positions x %u channels, a %s%s b %s%s, fold %d, %s%s, table %u words, scales "
++          "%g/%d %g/%d -> %g/%d, grid %ux%u of %ux1, %u instructions, %u temps\n",
++          names[operation->eltwise_op], P, C, eltwise_mode_name(operation->eltwise_mode[0]),
++          operation->eltwise_tensor[0] < 0 ? "(const)" : "", eltwise_mode_name(operation->eltwise_mode[1]),
++          operation->eltwise_tensor[1] < 0 ? "(const)" : "", operation->eltwise_fold,
++          f == ELTWISE_XNNPACK ? "xnnpack" : "builtin", check_both ? " (= other formula)" : "", words,
++          operation->eltwise_scale[0], operation->eltwise_zp[0], operation->eltwise_scale[1], operation->eltwise_zp[1],
++          operation->eltwise_scale[2], operation->eltwise_zp[2], instruction->grid[0], instruction->grid[1],
++          instruction->block[0], v->code_size / 4, v->num_temps + 1);
++   return true;
++}
++
+ bool
+ etna_ml_compile_operation_shader(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation,
+                                  struct etna_vip_instruction *instruction)
+@@ -1128,6 +1931,8 @@
+       return compile_avgpool(subgraph, operation, instruction);
+    case ETNA_ML_SHADER_MEAN:
+       return compile_mean(subgraph, operation, instruction);
++   case ETNA_ML_SHADER_ELTWISE:
++      return compile_eltwise(subgraph, operation, instruction);
+    }
+    return false;
+ }
+@@ -1140,6 +1945,7 @@
+       instruction->owned_shader = NULL;
+    }
+    pipe_resource_reference(&instruction->table, NULL);
++   pipe_resource_reference(&instruction->input2, NULL);
+ }
+ 
+ /* Caches the NN and TP units write through, flushed before a grid reads their output and after it, so the next
+@@ -1165,11 +1971,16 @@
+       .block = { operation->block[0], operation->block[1], operation->block[2] },
+       .grid = { operation->grid[0], operation->grid[1], operation->grid[2] },
+    };
+-   struct pipe_resource *buffers[3] = { operation->input, operation->output, operation->table };
++   struct pipe_resource *buffers[4] = { operation->input, operation->output };
++   unsigned num_buffers = 2;
++   if (operation->table)
++      buffers[num_buffers++] = operation->table;
++   if (operation->input2)
++      buffers[num_buffers++] = operation->input2;
+ 
+    flush_and_stall(ctx->stream);
+    if (!etna_compute_emit_grid(ctx, operation->shader, &info, operation->shader_args,
+-                               sizeof(operation->shader_args), buffers, operation->table ? 3 : 2, false))
++                               sizeof(operation->shader_args), buffers, num_buffers, false))
+       BUG("ML shader operation %u could not be emitted", idx);
+    flush_and_stall(ctx->stream);
+ }
+--- base/npu-shader/cs_run.c
++++ npu-shader/cs_run.c
+@@ -12,6 +12,7 @@
+  *   --fma ITERS     float4 kernel with ITERS unrolled multiply-adds per thread (8 flops each); timed over R launches
+  *   --compile-only  open the device, compile the kernel, launch nothing
+  *   --out DIR       work in DIR: ETNA_MESA_DEBUG=dump_shaders writes the shader and command-stream dumps there
++ *   --kernel eltwise --hwc H W C --modes M[,M]   the driver's elementwise lookup kernel (step 6g), synthetic table
+  * Without --offline it opens the NPU: only through ~/alta-npu/scripts/npu-attempt, with Jordan's OK.
+  */
+ #include <dlfcn.h>
+@@ -98,6 +99,189 @@
+    return -1;
+ }
+ 
++/*
++ * --kernel eltwise (step 6g): the driver's elementwise lookup kernel (etna_ml_shader_build_eltwise) on output channel
++ * planes of P = H*W positions x C channels, with a synthetic table (a pseudo-random byte function, so every operand
++ * byte and every index bit matters) instead of a TFLite formula: this tests the kernel's addressing (operand modes,
++ * byte packing, the 2D grid), the tables themselves are checked against TFLite offline
++ * (research/port/tools/eltwise_table_check.py). --modes M[,M]: one or two of full, pos, chan, scalar. The output
++ * buffer has 4 KiB of 0xdeadbeef after the P*C bytes: any write there is a stray write.
++ */
++static uint32_t
++elt_table_fn(uint32_t idx)
++{
++   uint32_t x = idx * 2654435761u + 0x9e3779b9u;
++   x ^= x >> 15;
++   x *= 0x85ebca6bu;
++   x ^= x >> 13;
++   return x & 0xff;
++}
++
++static int
++run_eltwise(bool offline, unsigned H, unsigned W, unsigned C, const char *modes_arg, unsigned repeat)
++{
++   const unsigned P = H * W;
++   enum etna_ml_eltwise_mode modes[2];
++   unsigned operands = 0;
++   char buf[64];
++   snprintf(buf, sizeof(buf), "%s", modes_arg ? modes_arg : "full,full");
++   for (char *t = strtok(buf, ","); t && operands < 2; t = strtok(NULL, ",")) {
++      if (!strcmp(t, "full"))
++         modes[operands++] = ETNA_ML_ELTWISE_FULL;
++      else if (!strcmp(t, "pos"))
++         modes[operands++] = ETNA_ML_ELTWISE_POS;
++      else if (!strcmp(t, "chan"))
++         modes[operands++] = ETNA_ML_ELTWISE_CHAN;
++      else if (!strcmp(t, "scalar"))
++         modes[operands++] = ETNA_ML_ELTWISE_SCALAR;
++      else {
++         fprintf(stderr, "eltwise: --modes full|pos|chan|scalar[,...]\n");
++         return 2;
++      }
++   }
++   if (!P || P % 4 || !C || !operands) {
++      fprintf(stderr, "eltwise: --hwc H W C with H*W %% 4 == 0, --modes M[,M]\n");
++      return 2;
++   }
++   const unsigned gx = P / 4;
++   unsigned bw = 64;
++   while (bw > 1 && gx % bw)
++      bw /= 2;
++
++   step("open: begin");
++   int fd = open_etnaviv(offline);
++   if (fd < 0) {
++      fprintf(stderr, "no etnaviv render node\n");
++      return 2;
++   }
++   struct pipe_screen *ps = etna_drm_screen_create(fd);
++   struct pipe_context *pc = ps ? ps->context_create(ps, NULL, PIPE_CONTEXT_COMPUTE_ONLY) : NULL;
++   if (!pc || !pc->launch_grid) {
++      fprintf(stderr, "no compute context\n");
++      return 2;
++   }
++   step("context: done");
++   nir_shader *nir = etna_ml_shader_build_eltwise(ps->nir_options[MESA_SHADER_COMPUTE], operands, modes);
++   nir_print_shader(nir, stdout);
++   struct pipe_compute_state cs = { .ir_type = PIPE_SHADER_IR_NIR, .prog = nir };
++   void *cso = pc->create_compute_state(pc, &cs);
++   if (!cso) {
++      fprintf(stderr, "create_compute_state failed\n");
++      return 2;
++   }
++   pc->bind_compute_state(pc, cso);
++   step("compute state: created");
++
++   /* operand sizes by mode; buffers padded to whole words + 4 KiB */
++   size_t osz[2];
++   for (unsigned o = 0; o < operands; o++)
++      osz[o] = modes[o] == ETNA_ML_ELTWISE_FULL ? (size_t)P * C : modes[o] == ETNA_ML_ELTWISE_POS ? P
++             : modes[o] == ETNA_ML_ELTWISE_CHAN ? C : 1;
++   const size_t out_bytes = (size_t)P * C, out_buf = out_bytes + 4096;
++   const unsigned twords = operands == 2 ? 65536 : 256;
++   uint8_t *opd[2] = { NULL, NULL };
++   uint32_t x = 0x2545f491u;
++   for (unsigned o = 0; o < operands; o++) {
++      opd[o] = calloc(1, (osz[o] + 3) / 4 * 4 + 4096);
++      for (size_t i = 0; i < osz[o]; i++) {
++         x ^= x << 13;
++         x ^= x >> 17;
++         x ^= x << 5;
++         opd[o][i] = (uint8_t)(x >> 24);
++      }
++   }
++   uint32_t *table = malloc(twords * 4), *outw = malloc(out_buf);
++   for (unsigned i = 0; i < twords; i++)
++      table[i] = elt_table_fn(i);
++   for (size_t i = 0; i < out_buf / 4; i++)
++      outw[i] = 0xdeadbeef;
++
++   struct pipe_resource *res[4] = { NULL, NULL, NULL, NULL };
++   res[0] = pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, out_buf);
++   res[1] = pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, twords * 4);
++   pipe_buffer_write(pc, res[0], 0, out_buf, outw);
++   pipe_buffer_write(pc, res[1], 0, twords * 4, table);
++   for (unsigned o = 0; o < operands; o++) {
++      const size_t sz = (osz[o] + 3) / 4 * 4 + 4096;
++      res[2 + o] = pipe_buffer_create(ps, PIPE_BIND_GLOBAL, PIPE_USAGE_DEFAULT, sz);
++      pipe_buffer_write(pc, res[2 + o], 0, sz, opd[o]);
++   }
++   uint32_t addr[4] = { 0, 0, 0, 0 };
++   uint32_t *handles[4] = { &addr[0], &addr[1], &addr[2], &addr[3] };
++   pc->set_global_binding(pc, 0, 2 + operands, res, handles);
++   printf("GPU addresses: out 0x%x table 0x%x operands 0x%x 0x%x\n", addr[0], addr[1], addr[2], addr[3]);
++
++   uint32_t args[8] = { addr[0], addr[2], operands == 2 ? addr[3] : 0, addr[1], P, gx - 1, C - 1, 0 };
++   pc->set_constant_buffer(pc, MESA_SHADER_COMPUTE, 0,
++                           &(struct pipe_constant_buffer){ .user_buffer = args, .buffer_size = sizeof(args) });
++   struct pipe_grid_info g = { .work_dim = 2, .block = { bw, 1, 1 }, .grid = { gx / bw, C, 1 } };
++   printf("grid: %u x %u workgroups of %u x 1 threads, %u operand(s)\n", g.grid[0], g.grid[1], bw, operands);
++   double *times = calloc(repeat, sizeof(double)), first_ms = 0;
++   for (unsigned r = 0; r < repeat; r++) {
++      step(r == 0 ? "launch 1: begin" : "launch: begin");
++      struct timespec t0, t1;
++      clock_gettime(CLOCK_MONOTONIC, &t0);
++      pc->launch_grid(pc, &g);
++      struct pipe_fence_handle *fence = NULL;
++      pc->flush(pc, &fence, 0);
++      bool done = fence && ps->fence_finish(ps, NULL, fence, 3000000000ull);
++      ps->fence_reference(ps, &fence, NULL);
++      clock_gettime(CLOCK_MONOTONIC, &t1);
++      times[r] = (t1.tv_sec - t0.tv_sec) * 1e3 + (t1.tv_nsec - t0.tv_nsec) / 1e6;
++      if (!r)
++         first_ms = times[r];
++      if (!done) {
++         step("launch: fence wait FAILED");
++         printf("{\"result\": \"TIMEOUT\", \"launch\": %u}\n", r + 1);
++         return 4;
++      }
++   }
++   step("launches: done");
++   unsigned m = repeat > 1 ? repeat - 1 : 1;
++   double *t = repeat > 1 ? times + 1 : times;
++   for (unsigned i = 0; i < m; i++)
++      for (unsigned j = i + 1; j < m; j++)
++         if (t[j] < t[i]) {
++            double v = t[i];
++            t[i] = t[j];
++            t[j] = v;
++         }
++   pipe_buffer_read(pc, res[0], 0, out_buf, outw);
++   const uint8_t *out8 = (const uint8_t *)outw;
++   unsigned wrong = 0, stray = 0;
++   for (unsigned c = 0; c < C; c++)
++      for (unsigned p = 0; p < P; p++) {
++         unsigned k[2] = { 0, 0 };
++         for (unsigned o = 0; o < operands; o++)
++            k[o] = opd[o][modes[o] == ETNA_ML_ELTWISE_FULL ? (size_t)c * P + p : modes[o] == ETNA_ML_ELTWISE_POS ? p
++                          : modes[o] == ETNA_ML_ELTWISE_CHAN ? c : 0];
++         const uint32_t want = elt_table_fn(operands == 2 ? k[0] * 256 + k[1] : k[0]);
++         const uint8_t got = out8[(size_t)c * P + p];
++         if (got != want) {
++            if (wrong < 8)
++               printf("c %u p %u: got %u want %u (operands %u %u)\n", c, p, got, want, k[0], k[1]);
++            wrong++;
++         }
++      }
++   const uint32_t fill = 0xdeadbeef;
++   for (size_t i = out_bytes; i < out_buf; i++)
++      stray += out8[i] != ((const uint8_t *)&fill)[i % 4];
++   const char *res_s = offline ? "OFFLINE" : (wrong || stray ? "MISMATCH" : "PASS");
++   printf("eltwise %s%s%s: %u positions x %u channels: %zu outputs, %u wrong, %u stray bytes\n",
++          modes_arg ? modes_arg : "full,full", "", "", P, C, out_bytes, wrong, stray);
++   printf("{\"result\": \"%s\", \"kernel\": \"eltwise\", \"modes\": \"%s\", \"positions\": %u, \"channels\": %u, "
++          "\"wrong\": %u, \"stray\": %u, \"first_launch_ms\": %.3f, \"median_ms\": %.3f, \"launches\": %u}\n",
++          res_s, modes_arg ? modes_arg : "full,full", P, C, wrong, stray, first_ms, t[m / 2], repeat);
++   step("finished");
++   pc->set_global_binding(pc, 0, 2 + operands, NULL, NULL);
++   for (unsigned r = 0; r < 4; r++)
++      pipe_resource_reference(&res[r], NULL);
++   pc->delete_compute_state(pc, cso);
++   pc->destroy(pc);
++   ps->destroy(ps);
++   return offline ? 0 : (wrong || stray ? 3 : 0);
++}
++
+ int
+ main(int argc, char **argv)
+ {
+@@ -105,7 +289,7 @@
+    float factor = 0.16609922f * 1.4426950409f; /* MobileNet's softmax: beta 1, input scale 0.16609922 */
+    bool compile_only = false, offline = false, self = false, dir_out = false, mean_ch = true, mean_int8 = false;
+    float mq[4] = { 0.05f, 120, 0.03f, 128 }; /* MEAN: in scale, in zero point, out scale, out zero point */
+-   const char *kernel = NULL;
++   const char *kernel = NULL, *modes_arg = NULL;
+    for (int i = 1; i < argc; i++) {
+       if (!strcmp(argv[i], "-n") && i + 1 < argc)
+          n = strtoul(argv[++i], NULL, 0);
+@@ -143,6 +327,8 @@
+          mean_ch = !strcmp(argv[++i], "ch");
+       else if (!strcmp(argv[i], "--int8"))
+          mean_int8 = true;
++      else if (!strcmp(argv[i], "--modes") && i + 1 < argc)
++         modes_arg = argv[++i];
+       else if (!strcmp(argv[i], "--q") && i + 4 < argc)
+          for (unsigned k = 0; k < 4; k++)
+             mq[k] = strtof(argv[++i], NULL);
+@@ -167,6 +353,12 @@
+    }
+    if (!kernel)
+       kernel = fma_iters ? "fma" : "copy";
++   if (!strcmp(kernel, "eltwise")) {
++      const char *sf = getenv("NPU_STEPS_FILE");
++      if (sf)
++         steps_fd = open(sf, O_WRONLY | O_CREAT | O_APPEND, 0644);
++      return run_eltwise(offline, H, W, C, modes_arg, repeat);
++   }
+    enum { K_COPY, K_FMA, K_IDS, K_REVERSE, K_REVERSE_NB, K_REDUCE, K_IDS2D, K_T4X4, K_TGATHER, K_T4X4B, K_T4X4COPY, K_FOPS, K_SOFTMAX, K_IDS_GL, K_REGP, K_AVGPOOL, K_LOOPSUM, K_MEAN } kid;
+    unsigned k4 = 0;
+    if (!strcmp(kernel, "copy"))

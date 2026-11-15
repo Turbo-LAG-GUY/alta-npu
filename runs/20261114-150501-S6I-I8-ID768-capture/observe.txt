@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-14T15:05:01-05:00 duration=300s interval=1s
+15:05:01 up=47698.41 npu=active active_ms=47686760 npu_irqs=386 cma_free_kb=636 memavail_mb=2142 temps_c=cpu:34,ddr:38
+15:05:02 up=47699.52 npu=active active_ms=47687865 npu_irqs=386 cma_free_kb=636 memavail_mb=2139 temps_c=cpu:33,ddr:35
+15:05:03 up=47700.67 npu=active active_ms=47689015 npu_irqs=386 cma_free_kb=636 memavail_mb=2138 temps_c=cpu:32,ddr:36
+15:05:04 up=47701.76 npu=active active_ms=47690104 npu_irqs=386 cma_free_kb=328 memavail_mb=2137 temps_c=cpu:32,ddr:36
+15:05:05 up=47702.85 npu=active active_ms=47691199 npu_irqs=386 cma_free_kb=328 memavail_mb=2137 temps_c=cpu:33,ddr:37
+15:05:06 up=47703.96 npu=active active_ms=47692311 npu_irqs=386 cma_free_kb=336 memavail_mb=2131 temps_c=cpu:37,ddr:38
+15:05:07 up=47705.05 npu=active active_ms=47693399 npu_irqs=391 cma_free_kb=336 memavail_mb=2108 temps_c=cpu:36,ddr:39
+15:05:08 up=47706.23 npu=active active_ms=47694578 npu_irqs=397 cma_free_kb=336 memavail_mb=2127 temps_c=cpu:35,ddr:36
+15:05:10 up=47707.35 npu=active active_ms=47695699 npu_irqs=397 cma_free_kb=336 memavail_mb=2132 temps_c=cpu:34,ddr:36
+15:05:11 up=47708.48 npu=active active_ms=47696821 npu_irqs=397 cma_free_kb=336 memavail_mb=2130 temps_c=cpu:33,ddr:36
+15:05:12 up=47709.58 npu=active active_ms=47697924 npu_irqs=397 cma_free_kb=336 memavail_mb=2128 temps_c=cpu:33,ddr:36
+15:05:13 up=47710.68 npu=active active_ms=47699031 npu_irqs=397 cma_free_kb=336 memavail_mb=2126 temps_c=cpu:34,ddr:37
+15:05:14 up=47711.77 npu=active active_ms=47700115 npu_irqs=397 cma_free_kb=336 memavail_mb=2122 temps_c=cpu:36,ddr:37
+15:05:15 up=47712.88 npu=active active_ms=47701232 npu_irqs=397 cma_free_kb=336 memavail_mb=2122 temps_c=cpu:33,ddr:36
+15:05:16 up=47714.01 npu=active active_ms=47702359 npu_irqs=397 cma_free_kb=336 memavail_mb=2120 temps_c=cpu:33,ddr:36
+15:05:17 up=47715.12 npu=active active_ms=47703462 npu_irqs=397 cma_free_kb=336 memavail_mb=2121 temps_c=cpu:34,ddr:36
+15:05:18 up=47716.22 npu=active active_ms=47704565 npu_irqs=397 cma_free_kb=348 memavail_mb=2126 temps_c=cpu:33,ddr:36

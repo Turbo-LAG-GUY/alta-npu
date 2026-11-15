@@ -1,0 +1,15 @@
+[  545.401168] pid=8800 open: begin
+[  545.411325] pid=8800 context: done
+[  545.415013] pid=8800 compute state: created
+[  545.420482] pid=8800 launch 1: begin
+[  545.424050] pid=8800 launch: begin
+[  545.427488] pid=8800 launch: begin
+[  545.432905] pid=8800 launch: begin
+[  545.437406] pid=8800 launch: begin
+[  545.452606] pid=8800 launch: begin
+[  545.467691] pid=8800 launch: begin
+[  545.479741] pid=8800 launch: begin
+[  545.488084] pid=8800 launch: begin
+[  545.494957] pid=8800 launch: begin
+[  545.505019] pid=8800 launches: done
+[  545.512800] pid=8800 finished

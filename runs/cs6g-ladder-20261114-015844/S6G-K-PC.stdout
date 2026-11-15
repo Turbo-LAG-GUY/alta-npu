@@ -1,0 +1,126 @@
+DRM etnaviv 1.4
+/dev/dri/renderD129: etnaviv
+shader: MESA_SHADER_KERNEL
+name: etna_ml_eltwise
+internal: true
+workgroup_size: 1, 1, 1 (variable)
+max_subgroup_size: 128
+min_subgroup_size: 1
+decl_function main () (entrypoint)
+
+impl main {
+    block b0:    // preds:
+    32      %0 = load_const (0x00000000)
+    32      %1 = @load_kernel_input (%0 (0x0)) (base=0, range=28, align_mul=4, align_offset=0)
+    32      %2 = load_const (0x00000004)
+    32      %3 = @load_kernel_input (%2 (0x4)) (base=0, range=28, align_mul=4, align_offset=0)
+    32      %4 = load_const (0x00000008)
+    32      %5 = @load_kernel_input (%4 (0x8)) (base=0, range=28, align_mul=4, align_offset=0)
+    32      %6 = load_const (0x0000000c = 12)
+    32      %7 = @load_kernel_input (%6 (0xc)) (base=0, range=28, align_mul=4, align_offset=0)
+    32      %8 = load_const (0x00000010 = 16)
+    32      %9 = @load_kernel_input (%8 (0x10)) (base=0, range=28, align_mul=4, align_offset=0)
+    32     %10 = load_const (0x00000014 = 20)
+    32     %11 = @load_kernel_input (%10 (0x14)) (base=0, range=28, align_mul=4, align_offset=0)
+    32     %12 = load_const (0x00000018 = 24)
+    32     %13 = @load_kernel_input (%12 (0x18)) (base=0, range=28, align_mul=4, align_offset=0)
+    32x3   %14 = @load_global_invocation_id
+    32     %15 = mov %14.x
+    32     %16 = umin %15, %11
+    32     %17 = mov %14.y
+    32     %18 = umin %17, %13
+    32     %19 = load_const (0x00000002)
+    32     %20 = ishl %16, %19 (0x2)
+    32     %21 = imul %18, %9
+    32     %22 = iadd %3, %20
+    32     %23 = @load_global (%22) (access=none, align_mul=4, align_offset=0)
+    32     %24 = load_const (0x000000ff = 255)
+    32     %25 = iand %23, %24 (0xff)
+    32     %26 = load_const (0x00000008)
+    32     %27 = ushr %23, %26 (0x8)
+    32     %28 = load_const (0x000000ff = 255)
+    32     %29 = iand %27, %28 (0xff)
+    32     %30 = load_const (0x00000010 = 16)
+    32     %31 = ushr %23, %30 (0x10)
+    32     %32 = load_const (0x000000ff = 255)
+    32     %33 = iand %31, %32 (0xff)
+    32     %34 = load_const (0x00000018 = 24)
+    32     %35 = ushr %23, %34 (0x18)
+    32     %36 = load_const (0x000000ff = 255)
+    32     %37 = iand %35, %36 (0xff)
+    32     %38 = load_const (0xfffffffc = -4 = 4294967292)
+    32     %39 = iand %18, %38 (0xfffffffc)
+    32     %40 = iadd %5, %39
+    32     %41 = @load_global (%40) (access=none, align_mul=4, align_offset=0)
+    32     %42 = load_const (0x00000003)
+    32     %43 = iand %18, %42 (0x3)
+    32     %44 = load_const (0x00000018 = 24)
+    32     %45 = ushr %41, %44 (0x18)
+    32     %46 = load_const (0x00000002)
+    1      %47 = ieq %43, %46 (0x2)
+    32     %48 = load_const (0x00000010 = 16)
+    32     %49 = ushr %41, %48 (0x10)
+    32     %50 = load_const (0x000000ff = 255)
+    32     %51 = iand %49, %50 (0xff)
+    32     %52 = bcsel %47, %51, %45
+    32     %53 = load_const (0x00000001)
+    1      %54 = ieq %43, %53 (0x1)
+    32     %55 = load_const (0x00000008)
+    32     %56 = ushr %41, %55 (0x8)
+    32     %57 = load_const (0x000000ff = 255)
+    32     %58 = iand %56, %57 (0xff)
+    32     %59 = bcsel %54, %58, %52
+    32     %60 = load_const (0x00000000)
+    1      %61 = ieq %43, %60 (0x0)
+    32     %62 = load_const (0x000000ff = 255)
+    32     %63 = iand %41, %62 (0xff)
+    32     %64 = bcsel %61, %63, %59
+    32     %65 = load_const (0x00000008)
+    32     %66 = ishl %25, %65 (0x8)
+    32     %67 = iadd %66, %64
+    32     %68 = load_const (0x00000002)
+    32     %69 = ishl %67, %68 (0x2)
+    32     %70 = iadd %7, %69
+    32     %71 = @load_global (%70) (access=none, align_mul=4, align_offset=0)
+    32     %72 = load_const (0x00000008)
+    32     %73 = ishl %29, %72 (0x8)
+    32     %74 = iadd %73, %64
+    32     %75 = load_const (0x00000002)
+    32     %76 = ishl %74, %75 (0x2)
+    32     %77 = iadd %7, %76
+    32     %78 = @load_global (%77) (access=none, align_mul=4, align_offset=0)
+    32     %79 = load_const (0x00000008)
+    32     %80 = ishl %78, %79 (0x8)
+    32     %81 = ior %71, %80
+    32     %82 = load_const (0x00000008)
+    32     %83 = ishl %33, %82 (0x8)
+    32     %84 = iadd %83, %64
+    32     %85 = load_const (0x00000002)
+    32     %86 = ishl %84, %85 (0x2)
+    32     %87 = iadd %7, %86
+    32     %88 = @load_global (%87) (access=none, align_mul=4, align_offset=0)
+    32     %89 = load_const (0x00000010 = 16)
+    32     %90 = ishl %88, %89 (0x10)
+    32     %91 = ior %81, %90
+    32     %92 = load_const (0x00000008)
+    32     %93 = ishl %37, %92 (0x8)
+    32     %94 = iadd %93, %64
+    32     %95 = load_const (0x00000002)
+    32     %96 = ishl %94, %95 (0x2)
+    32     %97 = iadd %7, %96
+    32     %98 = @load_global (%97) (access=none, align_mul=4, align_offset=0)
+    32     %99 = load_const (0x00000018 = 24)
+    32    %100 = ishl %98, %99 (0x18)
+    32    %101 = ior %91, %100
+    32    %102 = iadd %21, %20
+    32    %103 = iadd %1, %102
+                 @store_global (%101, %103) (wrmask=x, access=none, align_mul=4, align_offset=0)
+                 // succs: b1
+    block b1:
+}
+
+GPU addresses: out 0xffff4000 table 0xfffb4000 operands 0xfffb2000 0xfffb0000
+grid: 1 x 384 workgroups of 16 x 1 threads, 2 operand(s)
+eltwise pos,chan: 64 positions x 384 channels: 24576 outputs, 0 wrong, 0 stray bytes
+{"result": "PASS", "kernel": "eltwise", "modes": "pos,chan", "positions": 64, "channels": 384, "wrong": 0, "stray": 0, "first_launch_ms": 0.647, "median_ms": 0.504, "launches": 10}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261114-015925-S6G-K-PC

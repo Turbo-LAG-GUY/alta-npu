@@ -1,0 +1,15 @@
+[  580.765356] pid=9555 open: begin
+[  580.781707] pid=9555 context: done
+[  580.785276] pid=9555 compute state: created
+[  580.794666] pid=9555 launch 1: begin
+[  580.800573] pid=9555 launch: begin
+[  580.802757] pid=9555 launch: begin
+[  580.806143] pid=9555 launch: begin
+[  580.811184] pid=9555 launch: begin
+[  580.816161] pid=9555 launch: begin
+[  580.826092] pid=9555 launch: begin
+[  580.835544] pid=9555 launch: begin
+[  580.841335] pid=9555 launch: begin
+[  580.843572] pid=9555 launch: begin
+[  580.851911] pid=9555 launches: done
+[  580.854551] pid=9555 finished

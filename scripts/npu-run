@@ -75,17 +75,31 @@ CURSOR="$(klog -n 1 --show-cursor | sed -n 's/^-- cursor: //p')"   # kernel-log 
 } > "$RUN/meta.txt"
 
 # 5. Run with our own deadline (survives a child stuck in D state, unlike plain `timeout`).
+#    Since 2026-11-14 also stopped at the first etnaviv hang / reset failure / MMU fault in the kernel log (checked about
+#    once a second): a job whose submits each get recovered (S6F-C64x1-OFF hung 10 times, once per invoke) ends after
+#    the first. The verdict below is unchanged (any kernel message -> STOP latch, rc 90).
+stop_job() {
+  pkill -TERM -P "$PID" 2>/dev/null; kill -TERM "$PID" 2>/dev/null; sleep "$1"
+  pkill -KILL -P "$PID" 2>/dev/null; kill -KILL "$PID" 2>/dev/null; sleep 2
+  if kill -0 "$PID" 2>/dev/null; then
+    echo "pid $PID unkillable (state $(awk '{print $3}' "/proc/$PID/stat" 2>/dev/null)) - NPU likely wedged" >> "$RUN/meta.txt"
+  fi
+}
 "$@" > "$RUN/stdout.txt" 2> "$RUN/stderr.txt" &
 PID=$!
 RC=""
+TICK=0
 while kill -0 "$PID" 2>/dev/null; do
   if [ $(( $(up_s) - START )) -ge "$TIMEOUT" ]; then
-    pkill -TERM -P "$PID" 2>/dev/null; kill -TERM "$PID" 2>/dev/null; sleep 5
-    pkill -KILL -P "$PID" 2>/dev/null; kill -KILL "$PID" 2>/dev/null; sleep 2
-    if kill -0 "$PID" 2>/dev/null; then
-      echo "pid $PID unkillable (state $(awk '{print $3}' "/proc/$PID/stat" 2>/dev/null)) - NPU likely wedged" >> "$RUN/meta.txt"
-    fi
+    stop_job 5
     RC=124
+    break
+  fi
+  TICK=$((TICK + 1))
+  if [ -n "$CURSOR" ] && [ $((TICK % 2)) -eq 0 ] &&
+     klog --after-cursor "$CURSOR" | grep -qiE 'recover hung gpu|failed to reset|mmu fault'; then
+    echo "stopped at the first kernel error (uptime $(cut -d' ' -f1 /proc/uptime) s): $(klog --after-cursor "$CURSOR" | grep -iE 'recover hung gpu|failed to reset|mmu fault' | head -1)" >> "$RUN/meta.txt"
+    stop_job 2
     break
   fi
   sleep 0.5
@@ -106,6 +120,11 @@ if grep -iE 'etnaviv|ff100000\.npu' "$RUN/kernel.txt" | grep -viE 'alta: SH_EU' 
   printf '%s %s (kernel messages)\n' "$(date -Is)" "$RUN" > "$ROOT/STOP"
   echo "npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: $RUN/kernel.txt" >&2
   head -20 "$RUN/kernel.txt" >&2
+  # the hung job's devcoredump lives ~5 minutes and is root-only: say so loudly (2026-11-14)
+  for d in /sys/class/devcoredump/devcd*; do
+    [ -e "$d" ] || continue
+    echo "devcoredump present: $d (expires ~5 min after the hang; root: cp $d/data <incident dir>/devcoredump.bin)" | tee -a "$RUN/meta.txt" >&2
+  done
   exit 90
 fi
 if [ "$RC" -eq 124 ]; then

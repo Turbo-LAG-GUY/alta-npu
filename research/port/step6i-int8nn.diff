@@ -1,0 +1,111 @@
+# step 6i: etnaviv int8 NN path on v7 (signed weights in the v7 stream, int8 ADD zero points, ADD bias-correction OOB read)
+# + NN ADD operand layouts (etnaviv_ml.c), against research/port/base-step6i (= the port tree after step 6g/6h)
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -345,6 +345,22 @@
+   * - Explicit transposes and detransposes are ignored.
+   */
+ 
++/* alta: whether an operand of an NN addition is already in channel planes (graph inputs are NHWC, and the producers
++ * of the other operands were lowered before, so their layouts are known) */
++static bool
++nn_eltwise_any_planar(struct etna_ml_subgraph *subgraph, const struct pipe_ml_operation *poperations, unsigned count,
++                      const struct pipe_ml_operation *poperation)
++{
++   for (unsigned j = 0; j < poperation->input_count; j++) {
++      struct pipe_tensor *ptensor = poperation->input_tensors[j];
++      if (ptensor->data != NULL || !etna_ml_find_producer(poperations, count, ptensor->index))
++         continue;
++      if (etna_ml_get_tensor(subgraph, ptensor->index)->act_layout == ETNA_ML_LAYOUT_NCHW)
++         return true;
++   }
++   return false;
++}
++
+ static void
+ lower_operations(struct etna_ml_subgraph *subgraph,
+                  const struct pipe_ml_operation *poperations,
+@@ -374,6 +390,18 @@
+          if (etna_ml_shader_eltwise_takes(poperation) && layouts_differ(poperation->input_tensors[i]))
+             operation_layout = ETNA_ML_LAYOUT_NCHW;
+ 
++         /*
++          * alta: the NN addition is elementwise only when both operands have the same byte order. A graph input
++          * (NHWC) added to a convolution's output (NCHW) was added byte by byte across the two layouts, and the
++          * output took the first operand's NHWC label, so it wasn't detransposed either. When any operand is in
++          * channel planes, use channel planes for all of them (as the shader-core elementwise ops do).
++          */
++         if ((poperation->type == PIPE_ML_OPERATION_TYPE_ADD ||
++              poperation->type == PIPE_ML_OPERATION_TYPE_SUBTRACT) &&
++             !etna_ml_shader_eltwise_takes(poperation) && layouts_differ(poperation->input_tensors[i]) &&
++             nn_eltwise_any_planar(subgraph, poperations, count, poperation))
++            operation_layout = ETNA_ML_LAYOUT_NCHW;
++
+          if (!etna_ml_find_producer(poperations, count, poperation->input_tensors[i]->index)) {
+             /* In TensorFlow Lite, graph inputs are in channel-last */
+             tensor->act_layout = ETNA_ML_LAYOUT_NHWC;
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -755,8 +755,14 @@
+    operation->bias_tensor = calloc(1, 4);
+    operation->bias_tensor_size = 4;
+    int32_t *bias_map = (int32_t *)operation->bias_tensor;
++   /*
++    * alta: the zero points of the stored (shifted) tensors, as for every other
++    * NN operand. With int8 inputs the raw ones are -128..127, which wrapped in
++    * the uint8_t parameters and were 128 off in the offset term.
++    */
+    bias_map[0] = compute_bias_add(poperation->input_tensors[1]->scale, poperation->input_tensors[0]->scale,
+-                                  poperation->input_tensors[1]->zero_point, poperation->input_tensors[0]->zero_point,
++                                  etna_tensor_zero_point(poperation->input_tensors[1]),
++                                  etna_tensor_zero_point(poperation->input_tensors[0]),
+                                   operation->weight_scale);
+ }
+ 
+--- base/mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ mesa-compute/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -123,8 +123,16 @@
+ calculate_bias_correction(uint8_t *weights, const struct etna_operation *operation)
+ {
+    int32_t correction = 0;
++   /*
++    * alta: an addition's weight tensor is one 2x2 kernel (8 bytes, only [0] is
++    * set), and the writers treat it as one input channel. Looping over all
++    * input channels read past the tensor, so the ADD bias depended on whatever
++    * was in memory after it (it changed from run to run). The intended
++    * correction is weight[0] * input_zero_point.
++    */
++   unsigned input_channels = operation->addition ? 1 : operation->input_channels;
+ 
+-   for (unsigned i = 0; i < operation->weight_width * operation->weight_height * operation->input_channels; i++) {
++   for (unsigned i = 0; i < operation->weight_width * operation->weight_height * input_channels; i++) {
+       correction += (weights[i] - operation->weight_zero_point) * operation->input_zero_point;
+    }
+ 
+@@ -544,12 +552,25 @@
+     * were read out of bounds. Give these unused kernels zero weights and biases,
+     * so the result doesn't depend on whatever is in memory after the tensors.
+     */
+-   if (total_kernels > output_channels) {
++   /*
++    * alta: signed (int8) weights are kept as int8 bytes up to here, but
++    * weight_zero_point is already in the shifted 0..255 form (see
++    * etna_tensor_zero_point()), and the writers below compare the bytes with it,
++    * compute the bias correction from them and put them in the stream as they
++    * are. Shift them by +128 first, as the v8 encoder does, so a weight of 0
++    * with zero point 0 isn't encoded as 0 - 128 = -128.
++    */
++   if (total_kernels > output_channels || operation->weight_signed) {
+       size_t kernel_size = operation->weight_width * operation->weight_height * input_channels;
+ 
+       memcpy(&padded, operation, sizeof(padded));
+       padded.weight_tensor = malloc(total_kernels * kernel_size);
+       memcpy(padded.weight_tensor, operation->weight_tensor, output_channels * kernel_size);
++      if (operation->weight_signed) {
++         for (size_t i = 0; i < output_channels * kernel_size; i++)
++            padded.weight_tensor[i] ^= 0x80;
++         padded.weight_signed = false;
++      }
+       memset(padded.weight_tensor + output_channels * kernel_size, operation->weight_zero_point,
+              (total_kernels - output_channels) * kernel_size);
+       padded.weight_tensor_size = total_kernels * kernel_size;

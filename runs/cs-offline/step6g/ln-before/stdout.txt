@@ -1,0 +1,150 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 MEAN            v2  supported   in: 0(i8) 1(i32) out: 2(i8)
+  1 unknown         v2  unsupported in: 0(i8) 2(i8) out: 3(i8)
+  2 MEAN            v2  supported   in: 3(i8) 1(i32) out: 4(i8)
+  3 ADD             v2  unsupported in: 4(i8) 14(i8) out: 5(i8)
+  4 unknown         v2  unsupported in: 5(i8) out: 6(i8)
+  5 MUL             v2  unsupported in: 6(i8) 12(i8) out: 7(i8)
+  6 MUL             v2  unsupported in: 0(i8) 7(i8) out: 8(i8)
+  7 MUL             v2  unsupported in: 2(i8) 7(i8) out: 9(i8)
+  8 SUB             v2  unsupported in: 13(i8) 9(i8) out: 10(i8)
+  9 ADD             v2  supported   in: 8(i8) 10(i8) out: 11(i8)
+
+teflon: compiling graph: 15 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.264866   3 no       1x1x64x384
+  1 0.000000   0 yes      1x1x1x1
+  2 0.001851 fffffff3 no       1x1x64x1
+  3 4.744665 ffffff80 no       1x1x64x384
+  4 0.019578 ffffff80 no       1x1x64x1
+  5 0.019582 ffffff80 no       1x1x64x1
+  6 0.003444 ffffff80 no       1x1x64x1
+  7 0.005166 ffffff80 no       1x1x64x384
+  8 0.161191   0 no       1x1x64x384
+  9 0.001880 fffffff9 no       1x1x64x384
+ 10 0.005491   1 no       1x1x64x384
+ 11 0.160819 ffffffff no       1x1x64x384
+ 12 0.005882 ffffff80 yes      1x1x1x384
+ 13 0.003894   0 yes      1x1x1x384
+ 14 0.000004 ffffff80 yes      1x1x1x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 MEAN            0,1                  2                   
+
+Adding transpose.
+operation 16 input tensor 3 layouts 1 2.
+Copying layout to output tensor 2.
+type 16 i 0 tensor 2 layout 1 == 2
+created resource 0x28b9a1d0 for tensor 0 with size 24576
+created resource 0x2896f070 for tensor 3 with size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x2896f120 for tensor 2 with size 64
+
+dumping intermediate graph: 2 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   3
+  1 SH     3   2
+
+shader mean channels: 1x64 channels 384, n 384, estimate (S*12209-610381090)>>15, grid 1 of 16, 89 instructions, 6 temps
+teflon: compiled graph, took 10 ms
+
+teflon: compiling graph: 15 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.264866   3 no       1x1x64x384
+  1 0.000000   0 yes      1x1x1x1
+  2 0.001851 fffffff3 no       1x1x64x1
+  3 4.744665 ffffff80 no       1x1x64x384
+  4 0.019578 ffffff80 no       1x1x64x1
+  5 0.019582 ffffff80 no       1x1x64x1
+  6 0.003444 ffffff80 no       1x1x64x1
+  7 0.005166 ffffff80 no       1x1x64x384
+  8 0.161191   0 no       1x1x64x384
+  9 0.001880 fffffff9 no       1x1x64x384
+ 10 0.005491   1 no       1x1x64x384
+ 11 0.160819 ffffffff no       1x1x64x384
+ 12 0.005882 ffffff80 yes      1x1x1x384
+ 13 0.003894   0 yes      1x1x1x384
+ 14 0.000004 ffffff80 yes      1x1x1x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 MEAN            3,1                  4                   
+
+Adding transpose.
+operation 16 input tensor 5 layouts 1 2.
+Copying layout to output tensor 4.
+type 16 i 0 tensor 4 layout 1 == 2
+created resource 0x28b99360 for tensor 3 with size 24576
+created resource 0x28b99fd0 for tensor 5 with size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x28aef860 for tensor 4 with size 64
+
+dumping intermediate graph: 2 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     3   5
+  1 SH     5   4
+
+shader mean channels: 1x64 channels 384, n 384, estimate (S*20680+16384)>>15, grid 1 of 16, 89 instructions, 6 temps
+teflon: compiled graph, took 9 ms
+
+teflon: compiling graph: 15 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.264866   3 no       1x1x64x384
+  1 0.000000   0 yes      1x1x1x1
+  2 0.001851 fffffff3 no       1x1x64x1
+  3 4.744665 ffffff80 no       1x1x64x384
+  4 0.019578 ffffff80 no       1x1x64x1
+  5 0.019582 ffffff80 no       1x1x64x1
+  6 0.003444 ffffff80 no       1x1x64x1
+  7 0.005166 ffffff80 no       1x1x64x384
+  8 0.161191   0 no       1x1x64x384
+  9 0.001880 fffffff9 no       1x1x64x384
+ 10 0.005491   1 no       1x1x64x384
+ 11 0.160819 ffffffff no       1x1x64x384
+ 12 0.005882 ffffff80 yes      1x1x1x384
+ 13 0.003894   0 yes      1x1x1x384
+ 14 0.000004 ffffff80 yes      1x1x1x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 ADD             8,10                 11                  
+
+operation 0 input tensor 8 layouts 1 1.
+operation 0 input tensor 10 layouts 1 1.
+Copying layout to output tensor 11.
+type 0 i 0 tensor 11 layout 1 == 1
+created resource 0x28b18e60 for tensor 8 with size 49152
+src_tensor 8 (fffd1000) dst_tensor 10 offset 24576 size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x28b18f60 for tensor 11 with size 24576
+
+dumping intermediate graph: 1 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 NN     8  11 in2:  10
+
+addition input width 1 channels 384
+write_core_sequential core 0 zrl_bits 0 superblocks 1
+addition input width 1 channels 384
+addition input width 1 channels 384
+coefficients_size 0x40 (64) image_size 0x0 (0)
+teflon: compiled graph, took 8 ms
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Traceback (most recent call last):
+  File "/home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py", line 61, in <module>
+    interp.set_tensor(inp["index"], x[None, ..., None] if x.ndim == 2 else x[None])
+  File "/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/interpreter.py", line 774, in set_tensor
+    self._interpreter.SetTensor(tensor_index, value)
+ValueError: Cannot set tensor: Dimension mismatch. Got 4 but expected 3 for input 0.

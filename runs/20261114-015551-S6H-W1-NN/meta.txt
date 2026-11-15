@@ -1,0 +1,11 @@
+label: S6H-W1-NN
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 1 --compare /home/jordan/alta-npu/runs/cs6h-ladder-20261114-015507/c64x1_off.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-14T01:55:51-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2140
+deadline_s: 120
+journal_cursor: s=cb626ca7a5a54e8aa6b29b4699f37942;i=fe82c;b=64cd6b6879214a89842e036c28c22ec4;m=14a87e7e;t=6603708e9d5c5;x=34221e315062a087
+ETNA_ML_SHADER=transpose
+end: 2026-11-14T01:55:53-05:00  rc: 0  wall_s: 2

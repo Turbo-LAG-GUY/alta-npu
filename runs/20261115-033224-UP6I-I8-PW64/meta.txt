@@ -1,0 +1,10 @@
+label: UP6I-I8-PW64
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so -n 10 --save /home/jordan/alta-npu/runs/cs6i-upstream-ladder-20261115-033157/pw64_i8.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-15T03:32:24-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2049
+deadline_s: 120
+journal_cursor: s=cb626ca7a5a54e8aa6b29b4699f37942;i=102563;b=64cd6b6879214a89842e036c28c22ec4;m=158aed9ce5;t=6604c7f2ef42a;x=deec201bc6a13b83
+end: 2026-11-15T03:32:26-05:00  rc: 0  wall_s: 2

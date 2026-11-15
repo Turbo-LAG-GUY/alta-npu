@@ -1,0 +1,67 @@
+From 2279c4a35f27acc497beec67ffed3e901c638192 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:18 -0500
+Subject: [PATCH 3/7] etnaviv/ml: Pad the kernels of the last NN core on V7
+
+The V7 coefficient writers emit DIV_ROUND_UP(output_channels, cores) *
+cores kernels. When the output channels don't divide evenly between the
+NN cores, the kernels and biases of the last core are read from past the
+end of the weight and bias tensors: an out-of-bounds heap read, whose
+contents end up in the coefficient buffer.
+
+Pad the tensors with zero-valued kernels and biases for those unused
+slots. Buffers of operations whose kernels divide evenly are unchanged.
+
+Generated-by: LLM
+---
+ .../drivers/etnaviv/etnaviv_ml_nn_v7.c        | 28 +++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index e7e849efad6..f0f43ca151a 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -533,6 +533,29 @@ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_op
+    unsigned zrl_bits;
+    unsigned max_core_size = 0;
+    unsigned bo_size;
++   unsigned total_kernels = DIV_ROUND_UP(output_channels, cores_used) * cores_used;
++   struct etna_operation padded;
++
++   /* When the kernels don't divide evenly between the cores, the writers
++    * below read kernels and biases past the end of the tensors for the last
++    * core. Give those unused kernels zero weights and biases.
++    */
++   if (total_kernels > output_channels) {
++      size_t kernel_size = operation->weight_width * operation->weight_height * input_channels;
++
++      memcpy(&padded, operation, sizeof(padded));
++      padded.weight_tensor = malloc(total_kernels * kernel_size);
++      memcpy(padded.weight_tensor, operation->weight_tensor, output_channels * kernel_size);
++      memset(padded.weight_tensor + output_channels * kernel_size, operation->weight_zero_point,
++             (total_kernels - output_channels) * kernel_size);
++      padded.weight_tensor_size = total_kernels * kernel_size;
++
++      padded.bias_tensor = calloc(total_kernels, sizeof(uint32_t));
++      memcpy(padded.bias_tensor, operation->bias_tensor, output_channels * sizeof(uint32_t));
++      padded.bias_tensor_size = total_kernels * sizeof(uint32_t);
++
++      operation = &padded;
++   }
+ 
+    bo_size = calculate_weight_bo_size(subgraph, operation);
+    zrl_bits = calculate_zrl_bits(subgraph, operation);
+@@ -568,5 +591,10 @@ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_op
+ 
+    *cache_size = max_core_size * cores_used;
+ 
++   if (operation == &padded) {
++      free(padded.weight_tensor);
++      free(padded.bias_tensor);
++   }
++
+    return compressed;
+ }
+-- 
+2.43.0
+

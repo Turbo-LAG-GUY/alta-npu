@@ -1,0 +1,8 @@
+== UPL-C8x8 rc=0
+== UPL-C1x64 rc=0
+== UPL-C1x50 rc=0
+== UPL-C64x1 rc=0
+== UPL-C64x8 rc=0
+== UPL-C64x1-10 rc=0
+== UPL-C64x8-10 rc=0
+ALL PASSED: /home/jordan/alta-npu/runs/cs-layout-upstream-ladder-20261115-033648

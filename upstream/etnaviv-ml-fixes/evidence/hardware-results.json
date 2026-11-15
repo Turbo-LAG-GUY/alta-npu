@@ -1,0 +1,435 @@
+{
+  "run": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119",
+  "library_sha256": "2e21b93afae1901b0ce73f84e2d9787e4a027cce27ca74e75dcf36c8bcaa64ae",
+  "scope": "Local Mesa 26.1 compute port, shader switch unset; not the upstream build",
+  "results": [
+    {
+      "rung": "S6I-I8-ADD",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-ADD.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 5.7,
+        "invoke_ms": [
+          0.87,
+          0.57,
+          0.56,
+          0.51,
+          0.58,
+          0.65,
+          0.49,
+          0.51,
+          1.16,
+          0.93
+        ],
+        "invoke_ms_median": 0.57,
+        "invoke_ms_median_after_first": 0.57,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.07,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-C3",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-C3.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 5.6,
+        "invoke_ms": [
+          0.65,
+          0.53,
+          0.55,
+          0.98,
+          0.53,
+          0.55,
+          0.58,
+          0.56,
+          0.67,
+          0.58
+        ],
+        "invoke_ms_median": 0.57,
+        "invoke_ms_median_after_first": 0.56,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-C3S2",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-C3S2.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 8.8,
+        "invoke_ms": [
+          0.55,
+          0.35,
+          0.57,
+          0.72,
+          0.39,
+          0.39,
+          0.32,
+          0.32,
+          0.32,
+          0.3
+        ],
+        "invoke_ms_median": 0.37,
+        "invoke_ms_median_after_first": 0.35,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 0,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-DW3",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-DW3.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 9.8,
+        "invoke_ms": [
+          0.88,
+          0.7,
+          0.55,
+          0.64,
+          0.57,
+          0.61,
+          0.67,
+          0.55,
+          0.55,
+          0.66
+        ],
+        "invoke_ms_median": 0.62,
+        "invoke_ms_median_after_first": 0.61,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-ID768",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-ID768.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x32x768_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 40.7,
+        "invoke_ms": [
+          6.67,
+          8.01,
+          6.52,
+          8.84,
+          6.68,
+          7.9,
+          7.17,
+          6.51,
+          6.6,
+          6.74
+        ],
+        "invoke_ms_median": 6.71,
+        "invoke_ms_median_after_first": 6.74,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 0,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-PW64",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-PW64.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 5.8,
+        "invoke_ms": [
+          0.82,
+          0.56,
+          0.51,
+          0.48,
+          1.02,
+          1.0,
+          0.98,
+          1.02,
+          0.61,
+          0.58
+        ],
+        "invoke_ms_median": 0.72,
+        "invoke_ms_median_after_first": 0.61,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-I8-PW64R",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-I8-PW64R.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 7.4,
+        "invoke_ms": [
+          0.68,
+          0.57,
+          0.51,
+          0.43,
+          0.45,
+          0.51,
+          0.57,
+          0.56,
+          0.54,
+          0.63
+        ],
+        "invoke_ms_median": 0.55,
+        "invoke_ms_median_after_first": 0.54,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-LN64-OFF",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-LN64-OFF.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layernorm/ln_64x384_i8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 8.2,
+        "invoke_ms": [
+          2.11,
+          1.95,
+          2.16,
+          2.01,
+          2.25,
+          2.69,
+          2.45,
+          1.89,
+          1.96,
+          5.32
+        ],
+        "invoke_ms_median": 2.14,
+        "invoke_ms_median_after_first": 2.16,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.053,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-ADD",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-ADD.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 12.2,
+        "invoke_ms": [
+          0.6
+        ],
+        "invoke_ms_median": 0.6,
+        "invoke_ms_median_after_first": null,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.07,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-C3",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-C3.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 8.2,
+        "invoke_ms": [
+          0.36
+        ],
+        "invoke_ms_median": 0.36,
+        "invoke_ms_median_after_first": null,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-C3S2",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-C3S2.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 6.3,
+        "invoke_ms": [
+          0.36
+        ],
+        "invoke_ms_median": 0.36,
+        "invoke_ms_median_after_first": null,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 0,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-DW3",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-DW3.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 8.9,
+        "invoke_ms": [
+          0.51
+        ],
+        "invoke_ms_median": 0.51,
+        "invoke_ms_median_after_first": null,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.002,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-PW64",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-PW64.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 7.8,
+        "invoke_ms": [
+          0.49,
+          0.41,
+          0.32,
+          0.33,
+          0.33,
+          0.32,
+          0.34,
+          0.33,
+          0.3,
+          0.39
+        ],
+        "invoke_ms_median": 0.33,
+        "invoke_ms_median_after_first": 0.33,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    },
+    {
+      "rung": "S6I-U8-PW64R",
+      "source": "/home/jordan/alta-npu/runs/cs6i-ladder-20261114-150119/S6I-U8-PW64R.stdout",
+      "result": {
+        "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+        "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_u8.tflite",
+        "etna_ml_shader": null,
+        "setup_ms": 5.3,
+        "invoke_ms": [
+          0.45,
+          0.33,
+          0.31,
+          0.37,
+          0.44,
+          0.47,
+          0.4,
+          0.44,
+          0.45,
+          0.45
+        ],
+        "invoke_ms_median": 0.44,
+        "invoke_ms_median_after_first": 0.44,
+        "all_invokes_identical": true,
+        "max_diff_vs_first": 0,
+        "diff_vs_cpu_max": 1,
+        "diff_vs_cpu_mean_worst": 0.0,
+        "bytes_differing_from_saved": null,
+        "tolerance": 0,
+        "cpu_mean_limit": 2.0,
+        "bytes_beyond_tolerance": null,
+        "match": true
+      }
+    }
+  ],
+  "earlier_layout_run": "/home/jordan/alta-npu/runs/cs6f-ladder-20261114-012542",
+  "earlier_tiling_run": "/home/jordan/alta-npu/runs/cs6h-ladder-20261114-015507"
+}

@@ -58,7 +58,11 @@ interp.allocate_tensors()
 setup_ms = (time.monotonic() - t0) * 1000.0
 step("allocate_tensors: done (%.1f ms)" % setup_ms)
 inp, out = interp.get_input_details()[0], interp.get_output_details()[0]
-interp.set_tensor(inp["index"], x[None, ..., None] if x.ndim == 2 else x[None])
+# the reference input has no batch dimension; give it the model's own input shape (2026-11-14: [T, C] inputs of
+# rank-3 models used to get a channel axis added like an image)
+shape = tuple(int(d) for d in inp["shape"])
+interp.set_tensor(inp["index"], x.reshape(shape) if x.size == int(np.prod(shape)) else
+                  (x[None, ..., None] if x.ndim == 2 else x[None]))
 saved = np.load(a.compare) if a.compare else None
 
 times, max_vs_first, max_vs_cpu, mean_vs_cpu, vs_saved, vs_saved_tol = [], [], [], [], [], []

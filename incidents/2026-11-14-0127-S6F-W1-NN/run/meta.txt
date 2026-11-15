@@ -1,0 +1,13 @@
+label: S6F-W1-NN
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 1
+cwd: /home/jordan/alta-npu
+start: 2026-11-14T01:27:56-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2405
+deadline_s: 120
+journal_cursor: s=06da0da336d2478c88fe3f44cab1b0eb;i=fcf38;b=273eb301d9bd4b03a2703099762f366e;m=34537705;t=6603698ad2ccc;x=feb0125ba3d8a41d
+ETNA_ML_SHADER=transpose
+stopped at the first kernel error (uptime 1089.51 s): Nov 14 01:27:57 jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+end: 2026-11-14T01:28:03-05:00  rc: 3  wall_s: 7
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)

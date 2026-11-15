@@ -1,0 +1,7 @@
+[47668.117499] pid=60609 start: delegate=/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_u8.tflite ETNA_ML_SHADER=None
+[47668.128566] pid=60609 load_delegate: begin
+[47668.167045] pid=60609 load_delegate: done
+[47668.181675] pid=60609 allocate_tensors: done (12.2 ms)
+[47668.191253] pid=60609 invoke 1/1: begin
+[47668.199875] pid=60609 invoke 1/1: done (0.60 ms)
+[47668.205791] pid=60609 finished

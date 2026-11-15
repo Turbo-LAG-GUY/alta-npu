@@ -1,0 +1,110 @@
+[
+  {
+    "model": "models/int8nn/add_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/add_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/add_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/add_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/c3_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/c3_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/c3_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/c3_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/c3s2_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/c3s2_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/c3s2_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/c3s2_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/dw3_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/dw3_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/dw3_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/dw3_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/pw64_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/pw64_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/pw64_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/pw64_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/pw64r_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/pw64r_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/int8nn/pw64r_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/int8nn/pw64r_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_1x32x768_i8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_1x32x768_i8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_1x50x96_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_1x50x96_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_1x64x384_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_1x64x384_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_64x1x384_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_64x1x384_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_64x8x64_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_64x8x64_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  },
+  {
+    "model": "models/layout/conv_8x8x64_u8.tflite",
+    "passed": true,
+    "stdout": "{\n  \"model\": \"/home/jordan/Documents/AI_Projects/upstream/etnaviv-ml-fixes/models/layout/conv_8x8x64_u8.tflite\",\n  \"delegate\": \"cpu\",\n  \"iterations\": 2,\n  \"all_invokes_identical\": true,\n  \"errors\": [\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    },\n    {\n      \"max\": 0,\n      \"mean\": 0.0\n    }\n  ],\n  \"passed\": true\n}\n",
+    "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n"
+  }
+]

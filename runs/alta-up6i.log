@@ -1,0 +1,15 @@
+== UP6I-U8-PW64 rc=0
+== UP6I-I8-PW64 rc=0
+== UP6I-U8-PW64R rc=0
+== UP6I-I8-PW64R rc=0
+== UP6I-U8-C3 rc=0
+== UP6I-I8-C3 rc=0
+== UP6I-U8-C3S2 rc=0
+== UP6I-I8-C3S2 rc=0
+== UP6I-U8-DW3 rc=0
+== UP6I-I8-DW3 rc=0
+== UP6I-U8-ADD rc=0
+== UP6I-I8-ADD rc=0
+== UP6I-I8-ID768 rc=0
+== UP6I-LN64-OFF rc=0
+ALL PASSED: /home/jordan/alta-npu/runs/cs6i-upstream-ladder-20261115-033157

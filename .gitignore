@@ -31,3 +31,9 @@
 __pycache__/
 *.pyc
 .claude/settings.local.json
+
+# Large fake-NPU dumps (weights and command streams of every model, 100-300 MB each); regenerate with
+# research/port/tools/teflon_offline.sh. The results are in PROGRESS.md.
+/runs/cs-offline/step6h-tiling/
+/runs/cs-offline/step6i-int8nn/
+/runs/cs-offline/step6i-upstream/

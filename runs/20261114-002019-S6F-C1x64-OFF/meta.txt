@@ -1,0 +1,10 @@
+label: S6F-C1x64-OFF
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x64x384_u8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x64x384_u8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 10 --save /home/jordan/alta-npu/runs/cs6f-ladder-20261114-001951/c1x64_off.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-14T00:20:19-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2002
+deadline_s: 120
+journal_cursor: s=1d8b8f57a9024a748629c8be76a45f72;i=fbfa0;b=8f7f01abe08248ae908ecbfc43c3e05b;m=2097e565c;t=66035b3129d23;x=137a4e55b42f43ad
+end: 2026-11-14T00:20:21-05:00  rc: 0  wall_s: 2

@@ -1,0 +1,447 @@
+{
+  "upstream_commit": "5384f808e0b53cc4ac05a6e3cf339a8099e999bc",
+  "upstream_library_sha256": "549408ab313ed410deff945aea3c0fdbd024e2c83e0732c108631fc7f7edca8f",
+  "port_library_sha256": "2e21b93afae1901b0ce73f84e2d9787e4a027cce27ca74e75dcf36c8bcaa64ae",
+  "environment": "Bubblewrap empty /dev, LD_PRELOAD fake NPU; no strace (ptrace prohibited)",
+  "results": [
+    {
+      "name": "conv1x1",
+      "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv1x1.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv1x1",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv1x4",
+      "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv1x4.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv1x4",
+      "counts": {
+        "nn": 4,
+        "tp": 2,
+        "weights": 4,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv3x1",
+      "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv3x1",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv3x1.planar",
+      "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.planar.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv3x1.planar",
+      "counts": {
+        "nn": 1,
+        "tp": 0,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_1x32x768_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x32x768_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_1x32x768_i8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_1x50x96_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x50x96_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_1x50x96_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_1x64x384_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x64x384_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_1x64x384_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_64x1x384_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_64x1x384_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_64x8x64_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x8x64_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_64x8x64_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_8x8x64_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_8x8x64_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/conv_8x8x64_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "detail_n8_960x540",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/detail_n8_960x540.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/detail_n8_960x540",
+      "counts": {
+        "nn": 3,
+        "tp": 2,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "hist2_n16_960x28",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_960x28.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/hist2_n16_960x28",
+      "counts": {
+        "nn": 3,
+        "tp": 2,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "hist2_n16_960x540",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_960x540.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/hist2_n16_960x540",
+      "counts": {
+        "nn": 3,
+        "tp": 2,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "hist2_n16_planar_960x540",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/hist2_n16_planar_960x540",
+      "counts": {
+        "nn": 3,
+        "tp": 0,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "hist2_n8_64x64",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_64x64.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/hist2_n8_64x64",
+      "counts": {
+        "nn": 3,
+        "tp": 2,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "hist2_n8_960x48",
+      "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_960x48.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/hist2_n8_960x48",
+      "counts": {
+        "nn": 3,
+        "tp": 2,
+        "weights": 3,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "mean_sp7x7_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/mean/mean_sp7x7_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/mean_sp7x7_u8",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "mobilenet_v1_mesa",
+      "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/regress2/mobilenet_v1_mesa",
+      "counts": {
+        "nn": 28,
+        "tp": 4,
+        "weights": 28,
+        "streams": 3
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "pw64_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/pw64-u8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "pw64_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/pw64-i8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "pw64r_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/pw64r-u8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "pw64r_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/pw64r-i8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "c3_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/c3-u8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "c3_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/c3-i8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "c3s2_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/c3s2-u8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 6,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "c3s2_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/c3s2-i8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 6,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "dw3_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/dw3-u8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "dw3_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/dw3-i8-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "add_u8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_u8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/add-u8-lay2",
+      "counts": {
+        "nn": 2,
+        "tp": 3,
+        "weights": 2,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "add_i8",
+      "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_i8.tflite",
+      "baseline": "/home/jordan/alta-npu/runs/cs-offline/step6i-int8nn/add-i8-lay2",
+      "counts": {
+        "nn": 2,
+        "tp": 3,
+        "weights": 2,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "pw64_i8-fresh-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "add_i8-fresh-port",
+      "counts": {
+        "nn": 2,
+        "tp": 3,
+        "weights": 2,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "conv_64x1x384_u8-fresh-port",
+      "counts": {
+        "nn": 1,
+        "tp": 2,
+        "weights": 1,
+        "streams": 2
+      },
+      "differences": [],
+      "passed": true
+    },
+    {
+      "name": "mobilenet_v1_mesa-fresh-port",
+      "counts": {
+        "nn": 28,
+        "tp": 4,
+        "weights": 28,
+        "streams": 3
+      },
+      "differences": [],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "validated_commit_before_message_corrections": "7c0f1c98e8f356602489a197c6ceea826ee247a8",
+  "validated_tree": "7799e141d51aa08a9f868b76c51002ec996ba2a5",
+  "patch_application_matches_validated_tree": true,
+  "all_commit_messages_include_generated_by_trailer": true
+}

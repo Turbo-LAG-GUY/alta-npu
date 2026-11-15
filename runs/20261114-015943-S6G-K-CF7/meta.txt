@@ -1,0 +1,10 @@
+label: S6G-K-CF7
+cmd: /home/jordan/Documents/AI_Projects/npu-shader/cs_run --kernel eltwise --hwc 1 64 7 --modes chan,full --repeat 10 --out /home/jordan/alta-npu/runs/cs6g-ladder-20261114-015844/K-CF7
+cwd: /home/jordan/alta-npu
+start: 2026-11-14T01:59:43-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2180
+deadline_s: 120
+journal_cursor: s=cb626ca7a5a54e8aa6b29b4699f37942;i=fe849;b=64cd6b6879214a89842e036c28c22ec4;m=1795f446;t=660370bd74b8c;x=4368248089af21c3
+end: 2026-11-14T01:59:44-05:00  rc: 0  wall_s: 2

@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-14T02:05:09-05:00 duration=300s interval=1s
+02:05:09 up=907.31 npu=active active_ms=895651 npu_irqs=121 cma_free_kb=2616 memavail_mb=2155 temps_c=cpu:34,ddr:36
+02:05:11 up=908.39 npu=active active_ms=896741 npu_irqs=121 cma_free_kb=2640 memavail_mb=2156 temps_c=cpu:31,ddr:33
+02:05:12 up=909.50 npu=active active_ms=897840 npu_irqs=121 cma_free_kb=2640 memavail_mb=2155 temps_c=cpu:34,ddr:35
+02:05:13 up=910.60 npu=active active_ms=898949 npu_irqs=121 cma_free_kb=2684 memavail_mb=2162 temps_c=cpu:31,ddr:33
+02:05:14 up=911.73 npu=active active_ms=900075 npu_irqs=121 cma_free_kb=2684 memavail_mb=2162 temps_c=cpu:31,ddr:33
+02:05:15 up=912.86 npu=active active_ms=901209 npu_irqs=121 cma_free_kb=1196 memavail_mb=2162 temps_c=cpu:33,ddr:35
+02:05:16 up=913.97 npu=active active_ms=902317 npu_irqs=131 cma_free_kb=1204 memavail_mb=2150 temps_c=cpu:35,ddr:37
+02:05:17 up=915.08 npu=active active_ms=903430 npu_irqs=132 cma_free_kb=1320 memavail_mb=2167 temps_c=cpu:32,ddr:34
+02:05:18 up=916.17 npu=active active_ms=904515 npu_irqs=132 cma_free_kb=1320 memavail_mb=2163 temps_c=cpu:34,ddr:35
+02:05:19 up=917.27 npu=active active_ms=905620 npu_irqs=132 cma_free_kb=1320 memavail_mb=2163 temps_c=cpu:32,ddr:35
+02:05:21 up=918.38 npu=active active_ms=906723 npu_irqs=132 cma_free_kb=1320 memavail_mb=2165 temps_c=cpu:31,ddr:33
+02:05:22 up=919.50 npu=active active_ms=907849 npu_irqs=132 cma_free_kb=1320 memavail_mb=2165 temps_c=cpu:31,ddr:33
+02:05:23 up=920.61 npu=active active_ms=908953 npu_irqs=132 cma_free_kb=1320 memavail_mb=2165 temps_c=cpu:31,ddr:33
+02:05:24 up=921.72 npu=active active_ms=910064 npu_irqs=132 cma_free_kb=1332 memavail_mb=2169 temps_c=cpu:31,ddr:34
+02:05:25 up=922.84 npu=active active_ms=911185 npu_irqs=132 cma_free_kb=1332 memavail_mb=2168 temps_c=cpu:31,ddr:33
+02:05:26 up=923.94 npu=active active_ms=912290 npu_irqs=132 cma_free_kb=1336 memavail_mb=2170 temps_c=cpu:31,ddr:33
+02:05:27 up=925.04 npu=active active_ms=913384 npu_irqs=132 cma_free_kb=1336 memavail_mb=2169 temps_c=cpu:31,ddr:32

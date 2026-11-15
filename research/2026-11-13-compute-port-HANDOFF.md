@@ -5,7 +5,126 @@ Read first: `research/2026-11-13-etnaviv-compute-port-survey.md` (what to port a
 explicit OK for that step and only via `scripts/npu-attempt`, builds at -j2, never rebuild the kit library
 (`mesa-axi-sram/build`, sha 41b08ede).
 
-## START HERE (updated at the end of the second session, 2026-11-14 ~00:00, boot 8f7f01ab)
+## START HERE (fourth session, started 2026-11-14 02:12, boot 64cd6b68; keep this block current)
+
+Jordan chose **(b) the int8 NN path**. Audit 02:12 clean (audit-20261114-021254). **Step 6i CPU part DONE ~02:45**:
+three NN bugs, all also in the kit library and upstream main (local copy 2026-04-10): (1) etnaviv_ml_nn_v7.c wrote
+int8 weights into the v7 stream and bias correction unshifted next to the +128 zero point (weight 0 -> -128 = the
+6e/6f "int8 conv all 127"); fixed by shifting them (^0x80) in etna_ml_create_coeffs_v7, as v8 does. (2)
+etna_ml_lower_add_v7 passed raw int8 zero points to compute_bias_add (now etna_tensor_zero_point). (3) v7
+calculate_bias_correction summed 2*2*input_channels bytes of the 8-byte ADD weight tensor: OOB heap read, the ADD
+bias changed run to run even for uint8 (3 runs, 3 values); now 1 channel for additions (= w0*z0, matches the algebra
+exactly). Patch research/port/step6i-int8nn.diff (base research/port/base-step6i), port lib ef649abe. Offline
+(runs/cs-offline/step6i-int8nn, new tools/twin_compare.py; models npu-shader/models/int8nn_models.py = int8 models +
+uint8 twins with every byte/zp +128): 6 int8 models (1x1, 1x1+RELU, 3x3, 3x3 s2, dw 3x3, ADD) = their twins' configs,
+weights and streams exactly; 18 proven models (regress/) unchanged word for word. Per-channel int8 convs (TFLite's
+default int8 scheme) are refused by etna_ml_operation_supported (per-axis), stay on the CPU: a follow-up (the
+requantize code exists, lossy). **Ladder run 1 02:27 (Jordan's OK, lib ef649abe, runs/cs6i-ladder-20261114-022710):
+rungs 1-10 PASS = the int8 conv fix is PROVEN on the NPU** (1x1, +RELU, 3x3, 3x3 s2, dw: max 1 vs the CPU; NPU u8-128
+== i8 byte for byte; tools/step6i_pairs.py RUNDIR). Stopped at S6I-U8-ADD rc 3 (no hang, max 154): a 4th bug, layout
+(fit: out = 0.069 x in HWC + 1.039 conv-out in CHW - 12.1 = the CPU's coefficients; lower_operations treated the NN ADD
+as layout-agnostic, graph input NHWC + conv output NCHW, output never detransposed). Fixed in etnaviv_ml.c
+(nn_eltwise_any_planar: transpose every operand to planes when any is planar); port lib 2e21b93a; patch regenerated
+(3 files); ADD-free models unchanged, layernorm ON streams byte-identical to 97cacd63. **Ladder run 2 2026-11-14 15:01 (Jordan's OK, same boot 64cd6b68, runs/cs6i-ladder-20261114-150119): ALL 14
+RUNGS PASS, 0 kernel lines = STEP 6i DONE, the int8 NN path works on the NPU**: int8 convs max 1 vs the CPU, NN ADD
+uint8 + int8 max 1 / mean 0.07 (was max 154), every NPU u8-128 == i8 byte for byte, conv_1x32x768_i8 (6e's "all 127")
+EXACT, ln_64x384_i8 switch OFF (int8 NN ADD) max 1 / mean 0.05 at 2.14 ms (ON, exact: 5.4 ms). **2026-11-15: upstream build (lib 549408ab) PROVEN ON THE NPU: runs/cs6i-upstream-ladder-20261115-033157 (14 rungs) + runs/cs-layout-upstream-ladder-20261115-033648 (7 rungs), outputs byte-identical to the port's. Packages merged into upstream/etnaviv-ml-fixes. Open: Teflon gtest suite (deps missing), patch 3 ASan check, Jordan rewords messages + sends.** **2026-11-15: series regenerated (tip f3ac5799d2d, same code) with Mesa's `Generated-by: LLM` trailer; Mesa requires commit messages + MR text in Jordan's own words (see upstream/etnaviv-ml-fixes/README.md); a second package from another session is in AI_Projects/upstream/etnaviv-ml-fixes (same code, extra reproducers).** **Upstream report DRAFTED 2026-11-14 ~15:40, NOT sent
+(Jordan reviews and sends)**: upstream/etnaviv-ml-fixes/ = 7 patches against mesa main 8a9009e0482 (fetched
+2026-11-14; every bug still there) + README.md + MR-DESCRIPTION.md + make_series.py; branch alta-etnaviv-ml-fixes in
+the worktree ~/Documents/AI_Projects/mesa-upstream-fixes (a worktree of AI_Projects/mesa; its build/ = upstream +
+series, lib 549408ab, -j2). Offline (runs/cs-offline/step6i-upstream): that build = port lib 2e21b93a's configs,
+weights and streams exactly on 20 models. Not run on the NPU. **Open, Jordan to choose: the 6i ladder with the
+upstream build (needs OK), per-channel int8 convs (refused today; needed for real TFLite int8 models), (a) transpose
+tuning, (d) faster table ops.**
+
+## Third session's START HERE (started 2026-11-14 00:03, boot 8f7f01ab)
+
+Jordan's order for the third session: **(1) the detranspose fix (finding 1), (2) SQUARED_DIFFERENCE, RSQRT, MUL on
+the shader core + a whole layernorm test model (each formula fitted against the CPU first, as MEAN), (3) transpose
+tuning (16x4 workgroups, the channel crossover vs the TP).** Audit 2026-11-14 00:03 clean (audit-20261114-000345).
+- **Step 6f detranspose fix, CPU part DONE 00:18** (patch research/port/step6f-detranspose.diff against
+  research/port/base-step6e = mesa-compute + npu-shader at step 6e; etnaviv_ml_tp.c's base = mesa-axi-sram's, the
+  earlier steps never touched it). etnaviv_ml.c: `layouts_differ()` (C > 1 && H*W > 1) replaces `is_3d()` for the
+  partition-output detranspose. `is_3d` came with upstream c728e73d650 (2025-04, layout tracking); before it a
+  detranspose was added whenever C > 1 (so the TP ran x-size-1 detransposes for MobileNet's [1,1,1,1001] then).
+  Upstream main (local copy 2026-04-10) still has is_3d. etnaviv_ml_tp.c create_detranspose_config: for H = 1 the
+  [1,T,1,C] form (x = T, y = C), the same permutation, because the TP's y size (16 bits) would be T*C (overflows from
+  128 x 768); stderr warning if y still exceeds 16 bits (3D W*C > 65535, an old latent limit). Port lib 5a70661e.
+  Offline (runs/cs-offline/step6f-detranspose; new tools research/port/tools/teflon_offline.sh = the shim Teflon run
+  as a script, tp_decode.py = TP config fields from mesa-tp-*.bin dumps): MobileNet (3 submits), conv3x1 and a 3D
+  conv = kit library byte for byte; [1,1,T,C] / [1,T,1,C] models gain one TP detranspose, H = 1 and W = 1 configs
+  identical word for word, 3D config = kit's; a linear-walk model of the TP reproduces the proven 3D config and the
+  new ones; 6e MEAN ON streams unchanged; with `transpose` the new shapes get shader grids (16- and 8-thread
+  workgroups), T % 4 != 0 stays on the TP. Test models npu-shader/models/layout/ (layout_models.py, copy in tools).
+  **Ladder run 1 2026-11-14 00:19 (Jordan's OK; runs/cs6f-ladder-20261114-001951): S6F-C8x8-OFF PASS, S6F-C1x64-OFF
+  PASS = the fix works on the NPU ([1,1,64,384]: max 1 / mean 0.20 vs the CPU, was ~100 misread), then S6F-C64x1-OFF
+  ([1,64,1,384], W = 1) HUNG THE NPU on all 10 invokes** (incident incidents/2026-11-14-0020-S6F-C64x1-OFF, STOP set,
+  board up, no MMU fault, devcoredump expired before it was copied). Its detranspose config = the passing H = 1 one
+  word for word; its TP transpose + NN configs = what the kit library builds (finding 3: W = 1 is broken in etnaviv's
+  existing path; suspect: etnaviv_ml_nn.c swaps image width/height but the v7 tiling uses unswapped dims, so the NN
+  tile is 64 x 1 on a 1 x 64 image). W = 1 rungs dropped from the ladder; transformers are H = 1, unaffected.
+  **Needs: reboot (npu-run refuses this boot), Jordan clears runs/STOP; Jordan's call on W = 1 (guard [1,H,1,C] off
+  the NPU / canonicalize pointwise ops to the proven H = 1 form / localize first). Then ladder run 2 (6 rungs:
+  C8x8, C1x64, C1x50, T384, C1x64-TR, C1x32I8 doc), then step 6g (layernorm ops).** Lesson: after a hang copy
+  /sys/class/devcoredump/devcd*/data FIRST (~5 min lifetime, root; Jordan OK'd sudo for that in the third session
+  only). Jordan's answers 00:3x: **W = 1: "Localize first"; reboot later (CPU work on item 2 first); npu-run change
+  yes.** DONE: scripts/npu-run stops the job at the first hang/reset/MMU-fault line (~1/s via the journal cursor) and
+  prints any devcoredump path (backup npu-run.pre-20261114; tested on a fake kernel log). Ladder run 2 = 8 rungs:
+  C8x8, C1x64, C1x50, T384, C1x64-TR (proves the 16-thread shader transposes), C1x32I8 doc, then the probes
+  S6F-W1-TP (layout/mean_64x1x384_in_u8 + mean: the hung model's TP transpose, word for word, + shader MEAN, no NN)
+  and S6F-W1-NN (conv_64x1x384_u8 + transpose: only the hung model's NN job left), -n 1 each. During the run keep a
+  devcoredump watcher ready (sudo cp within 5 min, Jordan's OK for the third session only).
+
+- **Step 6g DONE 2026-11-14 02:05 (boot 64cd6b68): a whole int8 layernorm runs on the NPU, EXACT vs the CPU**
+  (runs/cs6g-ladder-20261114-020451: ln_64x384_i8 10/10 + 50/50, ln_32x768_i8 10/10, max diff 0, 0 kernel lines;
+  kernel rungs of run 1 runs/cs6g-ladder-20261114-015844 all exact in every operand mode). Port lib 97cacd63, patch
+  research/port/step6g-eltwise.diff (base-step6f). Found on the way: **etnaviv's int8 NN path is broken on this
+  board** (int8 two-tensor NN ADD -> all -128, int8 1x1 conv -> all 127; every proven NN model is uint8), so with
+  ETNA_ML_SHADER=eltwise int8 two-tensor ADD/SUB go to the shader too. Speed: NPU 5.4 / 5.8 ms vs CPU 0.89 / 0.95 ms
+  for the layernorm alone (14 jobs incl. 4 TP transposes and 256 KiB tables per binary op): correctness milestone,
+  not a speedup; the value is staying on the NPU inside a bigger graph. **Open, Jordan to choose:** (a) item 3
+  transpose tuning (also try ETNA_ML_SHADER=transpose,mean,eltwise on the layernorm), (b) the int8 NN path (conv and
+  ADD), (c) upstream reports for the 6f detranspose and 6h tiling fixes (kit library bugs), (d) speed of the table ops.
+- **6f ladder run 2 DONE 2026-11-14 01:25-01:28 (boot 273eb301, Jordan's OK; runs/cs6f-ladder-20261114-012542):
+  the detranspose fix is proven** (C1x64, C1x50 max 1; T384-OFF now EXACT vs the CPU, was 6.8 off; shader-transpose
+  version byte-identical). **W = 1 localized: the TP transpose passes (S6F-W1-TP exact), the NN conv alone hangs
+  (S6F-W1-NN, incident incidents/2026-11-14-0127-S6F-W1-NN, devcoredump.bin saved, root-owned until chown'd).** Kit
+  library has the same NN config, so [1,H,1,C] convs hang there too. Int8 doc rung: the NN's int8 1x1 conv outputs all
+  127 (finding 2 confirmed directly). **Needs: reboot + STOP clear; then Jordan's call on W = 1 (guard / fix the v7
+  tiling / remap to H = 1) and decode the devcoredump; then the 6g ladder.**
+- **Step 6h v7 NN tiling fix (Jordan: option 2), CPU part DONE 2026-11-14 ~01:55**: devcoredump of incident 0127
+  decoded (tools/devcoredump_decode.py): FE past the NN kick, core busy = the W = 1 NN job never finishes. Fix in
+  etnaviv_ml_nn_v7.c: tile from the configured image only where the old tile was wider than it; patch
+  research/port/step6h-tiling.diff (base-step6h); port lib 599bed8f. Offline: all proven NN configs + weights = kit
+  library's (tools/nn_config_compare.sh, 16 models); only W = 1 / H > W tilings change. **6h ladder ALL PASS
+  2026-11-14 01:55 (boot 64cd6b68, runs/cs6h-ladder-20261114-015507): [1,64,1,384] and [1,64,8,64] convs run (max 1
+  vs the CPU, 10/10 identical), also with shader transposes; 0 kernel lines. The W = 1 hang is FIXED** (a kit-library
+  bug too: worth an upstream report with the is_3d detranspose fix). NEXT: the 6g ladder research/port/step6g-ladder.sh
+  (11 rungs; patch research/port/step6g-eltwise.diff against base-step6f; kernel rungs shim-clean), needs Jordan's OK.
+- **Step 6g layernorm ops, CPU part mostly DONE 2026-11-14 ~01:40 (no NPU job yet; npu-run still refuses this boot)**:
+  - Fits (npu-shader/models/eltwise_fit.py, delegate_path_check.py, rsqrt_int.py; copies in research/port/tools):
+    MUL beside Teflon = XNNPACK fp32 (shim: 1941/1941 discriminating pairs); SQUARED_DIFFERENCE = builtin int (left
+    shift 7); RSQRT = TFLite's INTEGER kernel (gemmlowp Newton-Raphson; a float LUT formula matched 10240 random
+    entries but missed 3 of 7505 later); ADD/SUB = XNNPACK vadd inside [2^-10, 2^8) scale ratios, ADD below = builtin
+    (left shift 20); MUL >= 2^8 and ADD/SUB >= 2^8 run builtin with unmatched arithmetic -> refused.
+  - Code (port lib d469a9d2 + count_tensors fix, rebuilt; kit 41b08ede untouched): p_state.h PIPE_ML_OPERATION_TYPE_
+    MULTIPLY/SQUARED_DIFFERENCE/RSQRT, add.fused_activation, mul.fused_activation; tfl_device.c maps MUL/SQDIFF/RSQRT
+    (+ debug names); etnaviv ETNA_ML_SHADER=eltwise: the driver builds a 256- or 65536-word table with the CPU's own
+    arithmetic, the kernel looks bytes up (operand modes full/pos/chan/scalar, channel planes, P % 4 == 0, constants
+    stored after the table, scalar constants folded); ADD/SUB go to it only with a constant operand.
+  - Offline: switch off = kit / 6f streams byte for byte; layernorm models npu-shader/models/layernorm/
+    (layernorm_model.py) with `mean,eltwise` = ONE graph, one submit: 3 TP transposes of x, 9 SH jobs, NN ADD, TP
+    detranspose; every table EXACT vs the interpreter (research/port/tools/eltwise_table_check.py on a
+    TEFLON_OFFLINE_DEBUG=ml_msgs,dump_shaders run of teflon_offline.sh). cs_run --kernel eltwise --hwc H W C --modes
+    M[,M] (synthetic table, checks the kernel's addressing) builds and runs on the shim.
+  - NOT DONE: (1) patch file research/port/step6g-eltwise.diff against base-step6e + base-step6f state (base-step6e has
+    all touched files except npu-shader models; diff etnaviv_ml.c/.h, etnaviv_ml_shader.c/.h, p_state.h, tfl_device.c,
+    cs_run.c); (2) ladder script step6g-ladder.sh: cs_run eltwise kernel rungs (full,full / full,pos / pos,chan /
+    chan,full / full unary / C=1), then ln_64x384_i8 + ln_32x768_i8 OFF vs ON (`mean,eltwise`, ON must equal the CPU;
+    the NN ADD on [1,1,T,C] is new on hardware, expect +-1 there), after the 6f run-2 ladder; (3) side findings:
+    etna_ml_lower_add_v7 asserts on SUB of two tensors (assert build); npu-run now stops at the first hang.
+
+## Second session's START HERE (updated at its end, 2026-11-14 ~00:00, boot 8f7f01ab)
 
 Second session in one line: **6d global AVGPOOL on the shader core** (MobileNet in one NPU submit, 6.77 vs 7.54 ms,
 byte-identical), **6e loops/branches work** (S6E-LOOP*), **6e MEAN on the shader core** (channel + spatial, exact to the

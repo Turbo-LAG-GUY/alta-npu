@@ -1,0 +1,15 @@
+[  563.052122] pid=9177 open: begin
+[  563.068134] pid=9177 context: done
+[  563.071672] pid=9177 compute state: created
+[  563.076144] pid=9177 launch 1: begin
+[  563.082545] pid=9177 launch: begin
+[  563.089959] pid=9177 launch: begin
+[  563.094726] pid=9177 launch: begin
+[  563.098311] pid=9177 launch: begin
+[  563.103659] pid=9177 launch: begin
+[  563.110642] pid=9177 launch: begin
+[  563.115530] pid=9177 launch: begin
+[  563.122795] pid=9177 launch: begin
+[  563.127255] pid=9177 launch: begin
+[  563.130374] pid=9177 launches: done
+[  563.134121] pid=9177 finished

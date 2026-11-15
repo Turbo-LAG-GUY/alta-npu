@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-14T01:27:13-05:00 duration=300s interval=1s
+01:27:13 up=1045.38 npu=active active_ms=1033319 npu_irqs=55 cma_free_kb=1300 memavail_mb=2399 temps_c=cpu:32,ddr:34
+01:27:14 up=1046.54 npu=active active_ms=1034478 npu_irqs=55 cma_free_kb=1308 memavail_mb=2402 temps_c=cpu:30,ddr:32
+01:27:16 up=1047.69 npu=active active_ms=1035629 npu_irqs=55 cma_free_kb=1308 memavail_mb=2401 temps_c=cpu:30,ddr:32
+01:27:17 up=1048.83 npu=active active_ms=1036764 npu_irqs=55 cma_free_kb=1312 memavail_mb=2401 temps_c=cpu:30,ddr:32
+01:27:18 up=1049.97 npu=active active_ms=1037903 npu_irqs=55 cma_free_kb=1312 memavail_mb=2400 temps_c=cpu:31,ddr:33
+01:27:19 up=1051.05 npu=active active_ms=1038984 npu_irqs=55 cma_free_kb=1328 memavail_mb=2400 temps_c=cpu:34,ddr:35
+01:27:20 up=1052.16 npu=active active_ms=1040095 npu_irqs=66 cma_free_kb=1348 memavail_mb=2387 temps_c=cpu:34,ddr:36
+01:27:21 up=1053.34 npu=active active_ms=1041279 npu_irqs=66 cma_free_kb=1352 memavail_mb=2388 temps_c=cpu:32,ddr:34
+01:27:22 up=1054.46 npu=active active_ms=1042400 npu_irqs=66 cma_free_kb=1352 memavail_mb=2391 temps_c=cpu:31,ddr:32
+01:27:23 up=1055.55 npu=active active_ms=1043488 npu_irqs=66 cma_free_kb=1368 memavail_mb=2392 temps_c=cpu:31,ddr:33
+01:27:25 up=1056.66 npu=active active_ms=1044596 npu_irqs=66 cma_free_kb=1368 memavail_mb=2392 temps_c=cpu:31,ddr:32
+01:27:26 up=1057.75 npu=active active_ms=1045690 npu_irqs=66 cma_free_kb=1088 memavail_mb=2397 temps_c=cpu:30,ddr:33
+01:27:27 up=1058.89 npu=active active_ms=1046829 npu_irqs=66 cma_free_kb=1056 memavail_mb=2403 temps_c=cpu:31,ddr:33
+01:27:28 up=1060.04 npu=active active_ms=1047979 npu_irqs=66 cma_free_kb=1136 memavail_mb=2405 temps_c=cpu:31,ddr:33
+01:27:29 up=1061.18 npu=active active_ms=1049123 npu_irqs=66 cma_free_kb=1136 memavail_mb=2404 temps_c=cpu:30,ddr:33
+01:27:30 up=1062.30 npu=active active_ms=1050241 npu_irqs=66 cma_free_kb=1312 memavail_mb=2409 temps_c=cpu:31,ddr:33
+/home/jordan/alta-npu/scripts/npu-observe: line 14: echo: write error: Broken pipe

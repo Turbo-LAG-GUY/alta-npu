@@ -1,0 +1,151 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 MEAN            v2  supported   in: 0(i8) 1(i32) out: 2(i8)
+  1 SQDIFF          v2  supported   in: 0(i8) 2(i8) out: 3(i8)
+  2 MEAN            v2  supported   in: 3(i8) 1(i32) out: 4(i8)
+  3 ADD             v2  supported   in: 4(i8) 14(i8) out: 5(i8)
+  4 RSQRT           v2  supported   in: 5(i8) out: 6(i8)
+  5 MUL             v2  supported   in: 6(i8) 12(i8) out: 7(i8)
+  6 MUL             v2  supported   in: 0(i8) 7(i8) out: 8(i8)
+  7 MUL             v2  supported   in: 2(i8) 7(i8) out: 9(i8)
+  8 SUB             v2  supported   in: 13(i8) 9(i8) out: 10(i8)
+  9 ADD             v2  supported   in: 8(i8) 10(i8) out: 11(i8)
+
+teflon: compiling graph: 15 tensors 10 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.264866   3 no       1x1x64x384
+  1 0.000000   0 yes      1x1x1x1
+  2 0.001851 fffffff3 no       1x1x64x1
+  3 4.744665 ffffff80 no       1x1x64x384
+  4 0.019578 ffffff80 no       1x1x64x1
+  5 0.019582 ffffff80 no       1x1x64x1
+  6 0.003444 ffffff80 no       1x1x64x1
+  7 0.005166 ffffff80 no       1x1x64x384
+  8 0.161191   0 no       1x1x64x384
+  9 0.001880 fffffff9 no       1x1x64x384
+ 10 0.005491   1 no       1x1x64x384
+ 11 0.160819 ffffffff no       1x1x64x384
+ 12 0.005882 ffffff80 yes      1x1x1x384
+ 13 0.003894   0 yes      1x1x1x384
+ 14 0.000004 ffffff80 yes      1x1x1x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 MEAN            0,1                  2                   
+  1 SQDIFF          0,2                  3                   
+  2 MEAN            3,1                  4                   
+  3 ADD             4,14                 5                   
+  4 RSQRT           5                    6                   
+  5 MUL             6,12                 7                   
+  6 MUL             0,7                  8                   
+  7 MUL             2,7                  9                   
+  8 SUB             13,9                 10                  
+  9 ADD             8,10                 11                  
+
+Adding transpose.
+operation 16 input tensor 15 layouts 1 2.
+Copying layout to output tensor 2.
+type 16 i 0 tensor 2 layout 1 == 2
+Adding transpose.
+operation 18 input tensor 16 layouts 1 2.
+operation 18 input tensor 2 layouts 1 2.
+type 18 i 0 tensor 3 layout 1 == 2
+operation 16 input tensor 3 layouts 1 2.
+Copying layout to output tensor 4.
+type 16 i 0 tensor 4 layout 1 == 2
+operation 0 input tensor 4 layouts 1 2.
+type 0 i 0 tensor 5 layout 1 == 2
+operation 19 input tensor 5 layouts 1 2.
+type 19 i 0 tensor 6 layout 1 == 2
+operation 17 input tensor 6 layouts 1 2.
+type 17 i 0 tensor 7 layout 1 == 2
+Adding transpose.
+operation 17 input tensor 17 layouts 1 2.
+operation 17 input tensor 7 layouts 1 2.
+type 17 i 0 tensor 8 layout 1 == 2
+operation 17 input tensor 2 layouts 1 2.
+operation 17 input tensor 7 layouts 1 2.
+type 17 i 0 tensor 9 layout 1 == 2
+operation 11 input tensor 9 layouts 1 2.
+type 11 i 0 tensor 10 layout 1 == 2
+operation 0 input tensor 8 layouts 1 2.
+operation 0 input tensor 10 layouts 1 2.
+Copying layout to output tensor 11.
+type 0 i 0 tensor 11 layout 1 == 2
+Adding detranspose.
+created resource 0x400afff0 for tensor 0 with size 24576
+created resource 0x400b00f0 for tensor 15 with size 24576
+created resource 0x400cb160 for tensor 16 with size 24576
+created resource 0x400cb660 for tensor 2 with size 64
+created resource 0x4004ada0 for tensor 3 with size 24576
+created resource 0x3fa0cc70 for tensor 4 with size 64
+created resource 0x3f94e780 for tensor 5 with size 64
+created resource 0x3f9e69d0 for tensor 6 with size 64
+created resource 0x400cb2f0 for tensor 17 with size 24576
+created resource 0x400ce410 for tensor 7 with size 24576
+created resource 0x400d35d0 for tensor 9 with size 24576
+created resource 0x400d3680 for tensor 8 with size 49152
+src_tensor 8 (fffc1000) dst_tensor 10 offset 24576 size 24576
+created resource 0x400d3780 for tensor 18 with size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x400d3880 for tensor 11 with size 24576
+
+dumping intermediate graph: 14 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0  15
+  1 SH    15   2
+  2 TP     0  16
+  3 SH    16   3
+  4 SH     3   4
+  5 SH     4   5
+  6 SH     5   6
+  7 SH     6   7
+  8 TP     0  17
+  9 SH    17   8
+ 10 SH     2   9
+ 11 SH     9  10
+ 12 NN     8  18 in2:  10
+ 13 TP    18  11
+
+shader mean channels: 1x64 channels 384, n 384, estimate (S*12209-610381090)>>15, grid 1 of 16, 89 instructions, 6 temps
+shader eltwise sqdiff: 64 positions x 384 channels, a full b pos, fold -1, builtin, table 65536 words, scales 0.264866/3 0.00185124/-13 -> 4.74466/-128, grid 1x384 of 16x1, 43 instructions, 5 temps
+shader mean channels: 1x64 channels 384, n 384, estimate (S*20680+16384)>>15, grid 1 of 16, 89 instructions, 6 temps
+shader eltwise add: 64 positions x 1 channels, a full b scalar(const), fold 1, builtin, table 256 words, scales 0.0195782/-128 3.92157e-06/-128 -> 0.0195822/-128, grid 1x1 of 16x1, 31 instructions, 4 temps
+shader eltwise rsqrt: 64 positions x 1 channels, a full b scalar(const), fold -1, builtin, table 256 words, scales 0.0195822/-128 0/0 -> 0.00344432/-128, grid 1x1 of 16x1, 31 instructions, 4 temps
+shader eltwise mul: 64 positions x 384 channels, a pos b chan(const), fold -1, xnnpack, table 65536 words, scales 0.00344432/-128 0.00588179/-128 -> 0.00516599/-128, grid 1x384 of 16x1, 48 instructions, 6 temps
+shader eltwise mul: 64 positions x 384 channels, a full b full, fold -1, xnnpack, table 65536 words, scales 0.264866/3 0.00516599/-128 -> 0.161191/0, grid 1x384 of 16x1, 43 instructions, 5 temps
+shader eltwise mul: 64 positions x 384 channels, a pos b full, fold -1, xnnpack, table 65536 words, scales 0.00185124/-13 0.00516599/-128 -> 0.00187959/-7, grid 1x384 of 16x1, 43 instructions, 5 temps
+shader eltwise sub: 64 positions x 384 channels, a chan(const) b full, fold -1, xnnpack, table 65536 words, scales 0.00389439/0 0.00187959/-7 -> 0.00549133/1, grid 1x384 of 16x1, 45 instructions, 4 temps
+addition input width 1 channels 384
+write_core_sequential core 0 zrl_bits 0 superblocks 1
+addition input width 1 channels 384
+addition input width 1 channels 384
+coefficients_size 0x40 (64) image_size 0x0 (0)
+teflon: compiled graph, took 44 ms
+Running the NN job took 1 ms.
+teflon: invoked graph, took 3 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layernorm/ln_64x384_i8.tflite",
+ "etna_ml_shader": "mean,eltwise",
+ "setup_ms": 109.6,
+ "invoke_ms": [
+  3.92
+ ],
+ "invoke_ms_median": 3.92,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 229,
+ "diff_vs_cpu_mean_worst": 127.081,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}

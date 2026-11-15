@@ -1,0 +1,7 @@
+[ 1088.236902] pid=10407 start: delegate=/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite ETNA_ML_SHADER=transpose
+[ 1088.249728] pid=10407 load_delegate: begin
+[ 1088.290810] pid=10407 load_delegate: done
+[ 1088.305171] pid=10407 allocate_tensors: done (9.9 ms)
+[ 1088.325748] pid=10407 invoke 1/1: begin
+[ 1089.403627] pid=10407 invoke 1/1: done (1069.53 ms)
+[ 1089.432299] pid=10407 finished

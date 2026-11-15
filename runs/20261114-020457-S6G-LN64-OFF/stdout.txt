@@ -1,0 +1,29 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layernorm/ln_64x384_i8.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 5.5,
+ "invoke_ms": [
+  2.08,
+  2.08,
+  1.96,
+  2.1,
+  2.1,
+  2.02,
+  2.2,
+  2.02,
+  2.51,
+  2.28
+ ],
+ "invoke_ms_median": 2.09,
+ "invoke_ms_median_after_first": 2.1,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 229,
+ "diff_vs_cpu_mean_worst": 127.081,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}

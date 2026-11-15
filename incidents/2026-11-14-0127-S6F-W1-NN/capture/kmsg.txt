@@ -1,0 +1,5 @@
+# kmsg-catch start 2026-11-14T01:27:50-0500 uptime=1082.01
+[ 1089.362949] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+[ 1089.363178] <3> etnaviv-gpu ff100000.npu: offending task: python (/home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite -r /home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so -n 1)
+[ 1101.518143] <6> Purging 532480 bytes
+# kmsg-catch end uptime=1104.74

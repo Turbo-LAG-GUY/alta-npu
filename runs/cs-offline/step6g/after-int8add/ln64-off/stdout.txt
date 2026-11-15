@@ -1,0 +1,82 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 MEAN            v2  unsupported in: 0(i8) 1(i32) out: 2(i8)
+  1 SQDIFF          v2  unsupported in: 0(i8) 2(i8) out: 3(i8)
+  2 MEAN            v2  unsupported in: 3(i8) 1(i32) out: 4(i8)
+  3 ADD             v2  unsupported in: 4(i8) 14(i8) out: 5(i8)
+  4 RSQRT           v2  unsupported in: 5(i8) out: 6(i8)
+  5 MUL             v2  unsupported in: 6(i8) 12(i8) out: 7(i8)
+  6 MUL             v2  unsupported in: 0(i8) 7(i8) out: 8(i8)
+  7 MUL             v2  unsupported in: 2(i8) 7(i8) out: 9(i8)
+  8 SUB             v2  unsupported in: 13(i8) 9(i8) out: 10(i8)
+  9 ADD             v2  supported   in: 8(i8) 10(i8) out: 11(i8)
+
+teflon: compiling graph: 15 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.264866   3 no       1x1x64x384
+  1 0.000000   0 yes      1x1x1x1
+  2 0.001851 fffffff3 no       1x1x64x1
+  3 4.744665 ffffff80 no       1x1x64x384
+  4 0.019578 ffffff80 no       1x1x64x1
+  5 0.019582 ffffff80 no       1x1x64x1
+  6 0.003444 ffffff80 no       1x1x64x1
+  7 0.005166 ffffff80 no       1x1x64x384
+  8 0.161191   0 no       1x1x64x384
+  9 0.001880 fffffff9 no       1x1x64x384
+ 10 0.005491   1 no       1x1x64x384
+ 11 0.160819 ffffffff no       1x1x64x384
+ 12 0.005882 ffffff80 yes      1x1x1x384
+ 13 0.003894   0 yes      1x1x1x384
+ 14 0.000004 ffffff80 yes      1x1x1x1
+
+idx type            inputs               outputs             
+==========================================================================
+  0 ADD             8,10                 11                  
+
+operation 0 input tensor 8 layouts 1 1.
+operation 0 input tensor 10 layouts 1 1.
+Copying layout to output tensor 11.
+type 0 i 0 tensor 11 layout 1 == 1
+created resource 0x3d0c7280 for tensor 8 with size 49152
+src_tensor 8 (fffef000) dst_tensor 10 offset 24576 size 24576
+Ensuring all output tensors have their memory backing.
+created resource 0x3d0c7380 for tensor 11 with size 24576
+
+dumping intermediate graph: 1 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 NN     8  11 in2:  10
+
+addition input width 1 channels 384
+write_core_sequential core 0 zrl_bits 0 superblocks 1
+addition input width 1 channels 384
+addition input width 1 channels 384
+coefficients_size 0x40 (64) image_size 0x0 (0)
+teflon: compiled graph, took 7 ms
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Running the NN job took 1 ms.
+teflon: invoked graph, took 2 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/layernorm/ln_64x384_i8.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 40.1,
+ "invoke_ms": [
+  10.33
+ ],
+ "invoke_ms_median": 10.33,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 229,
+ "diff_vs_cpu_mean_worst": 127.081,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}

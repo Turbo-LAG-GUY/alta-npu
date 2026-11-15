@@ -1,0 +1,182 @@
+[
+  {
+    "path": "models/int8nn/add_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_i8.tflite",
+    "sha256": "023c19a0cf30d3b8982c47ef3a729a7a7f9780c984fbc6c9888424457db687d2"
+  },
+  {
+    "path": "models/int8nn/add_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_i8_reference.npz",
+    "sha256": "1c82e3c073e8d5e1ac463468d94bd6f6f576786922004f9758fe431c12494054"
+  },
+  {
+    "path": "models/int8nn/add_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_u8.tflite",
+    "sha256": "c52a610cc643a5852b1d40e05aeb999df0ba05f19c06568933fb8cc63ef4221b"
+  },
+  {
+    "path": "models/int8nn/add_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_u8_reference.npz",
+    "sha256": "d4286de73914fb95bd67528055f479327dea5cc999847869c857388afe248f9a"
+  },
+  {
+    "path": "models/int8nn/c3_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_i8.tflite",
+    "sha256": "a80dde1dd472ab5447ce7e57943df39927444a6383b060c889ddea11ff80ff4f"
+  },
+  {
+    "path": "models/int8nn/c3_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_i8_reference.npz",
+    "sha256": "8ab9e867807bf3469b4783379bf4691c72bebd2cb8fd33903b5387e949700b33"
+  },
+  {
+    "path": "models/int8nn/c3_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_u8.tflite",
+    "sha256": "e24dfd03b19f747159a93a45452b2839814ae4ac9eda3aaa496fa062b58bd03b"
+  },
+  {
+    "path": "models/int8nn/c3_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3_u8_reference.npz",
+    "sha256": "432d8be0f67bf3e2c0af6737b262c3effe11f640616d1c8602fd2dd6c8f1b0ca"
+  },
+  {
+    "path": "models/int8nn/c3s2_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_i8.tflite",
+    "sha256": "0bb1dcd59fda2323332ddbc456cab809c7a7a29b7b73883482fd119b62dd07e5"
+  },
+  {
+    "path": "models/int8nn/c3s2_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_i8_reference.npz",
+    "sha256": "916c5a284e44df7a00e592d10daf62cd5ab420b056bb1975194f084b5380651d"
+  },
+  {
+    "path": "models/int8nn/c3s2_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_u8.tflite",
+    "sha256": "d421d2370d0d261865d02970897d0a0f521a524b4f3af6602c521763efca8b45"
+  },
+  {
+    "path": "models/int8nn/c3s2_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_u8_reference.npz",
+    "sha256": "55696b4e66f801981076e3a3df662931de67ee5c94c4ef42743473121fa44290"
+  },
+  {
+    "path": "models/int8nn/dw3_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_i8.tflite",
+    "sha256": "3550fc98f165de3e7bb5184f99b9af346154c0c4c5cce146f2d73d2b486c0ace"
+  },
+  {
+    "path": "models/int8nn/dw3_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_i8_reference.npz",
+    "sha256": "233ee410601115ca06876fb371fa66d00ad13f62f1bf0e0582a9b46a1cddc4dc"
+  },
+  {
+    "path": "models/int8nn/dw3_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_u8.tflite",
+    "sha256": "e108a743e393c1a33ad07ae1d05f6ab7da3c6ec7212a3f398b0016c28287ab4f"
+  },
+  {
+    "path": "models/int8nn/dw3_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_u8_reference.npz",
+    "sha256": "703027a49c57b5fad1446345adb0c386f73f74d9745017f3a317e18f07ff9cb6"
+  },
+  {
+    "path": "models/int8nn/pw64_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8.tflite",
+    "sha256": "84d01ee9d28c1a4277018b330e710ca0cec2494c498128562ca8b0b850adcf70"
+  },
+  {
+    "path": "models/int8nn/pw64_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_i8_reference.npz",
+    "sha256": "94bf5537f8f30d8395b73ac47b9efd64f2a7fae9941114f2dd4ff046bfa786be"
+  },
+  {
+    "path": "models/int8nn/pw64_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_u8.tflite",
+    "sha256": "ef9af4a7b65bb82ba76f7e707cf40a1b218ea4ea76c32482f25701895147a5d1"
+  },
+  {
+    "path": "models/int8nn/pw64_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64_u8_reference.npz",
+    "sha256": "d4e4e1c9eb22ab36be6cd2d197c0f4d44ea26d1256bd3ed7304b70cee3c27261"
+  },
+  {
+    "path": "models/int8nn/pw64r_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_i8.tflite",
+    "sha256": "839a9414ec1001d49ea09dff9b55f8abb83fbf45a51adcc7d37a6565e93507a2"
+  },
+  {
+    "path": "models/int8nn/pw64r_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_i8_reference.npz",
+    "sha256": "e4cb49d3009c0661fdaa06d107862e8a4ffc7af63aab5254d7729922ecde4b76"
+  },
+  {
+    "path": "models/int8nn/pw64r_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_u8.tflite",
+    "sha256": "bc7ac2550269084bc4a31c15dd3a435edd70af08b878dc86d17ba1bd0295cbe0"
+  },
+  {
+    "path": "models/int8nn/pw64r_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_u8_reference.npz",
+    "sha256": "b967aa08cffde2cb10827c5097df45fd0c629ba4cb029860c37c7498fe29ff9f"
+  },
+  {
+    "path": "models/layout/conv_1x32x768_i8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x32x768_i8.tflite",
+    "sha256": "567bb4c6b54c629aa1fc7c668409fec9f522479792abf5c9ead24da16e9f3b47"
+  },
+  {
+    "path": "models/layout/conv_1x32x768_i8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x32x768_i8_reference.npz",
+    "sha256": "1e2c51b7c15026aa9b7728a67ea86f2bc6f923bed7043055674c1480b55ee857"
+  },
+  {
+    "path": "models/layout/conv_1x50x96_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x50x96_u8.tflite",
+    "sha256": "6ea78c8cf8e303bb884338d0c9d4353d86b8f728d02e1e5f19476dcc6ebb3bd0"
+  },
+  {
+    "path": "models/layout/conv_1x50x96_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x50x96_u8_reference.npz",
+    "sha256": "4d80d5c0f513b8899f91989f57f5eedefd3a172d91fc3be6d1cbefeedd188457"
+  },
+  {
+    "path": "models/layout/conv_1x64x384_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x64x384_u8.tflite",
+    "sha256": "1e845d47aa67a01399384114a73e21b062364a54837d7eaca017166ea27678e8"
+  },
+  {
+    "path": "models/layout/conv_1x64x384_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_1x64x384_u8_reference.npz",
+    "sha256": "b38d609bcc8f556202fc1bce97819061521dae74c76645de5ad7ab93a79cddd4"
+  },
+  {
+    "path": "models/layout/conv_64x1x384_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8.tflite",
+    "sha256": "6456f709a98d9ea6f079862621446ae2840906dab65d0791cabb0be6af264196"
+  },
+  {
+    "path": "models/layout/conv_64x1x384_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x1x384_u8_reference.npz",
+    "sha256": "a4f9f51fda3114f6f204e8e49270a48e284234151b39487c7a7ac58877cc314a"
+  },
+  {
+    "path": "models/layout/conv_64x8x64_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x8x64_u8.tflite",
+    "sha256": "54eb89f1fb1f48f8c99d6eac287d4701cc9f7dd671830558b951bb72bb9ac3d1"
+  },
+  {
+    "path": "models/layout/conv_64x8x64_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_64x8x64_u8_reference.npz",
+    "sha256": "c58d9319af1759f561e10ea07f2711e3cdffd14c022db653386f5f24fa52132a"
+  },
+  {
+    "path": "models/layout/conv_8x8x64_u8.tflite",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_8x8x64_u8.tflite",
+    "sha256": "90e648dcde87f35dd1046ff61d454a376c84116b4ded81b18c226e656c613c51"
+  },
+  {
+    "path": "models/layout/conv_8x8x64_u8_reference.npz",
+    "source": "/home/jordan/Documents/AI_Projects/npu-shader/models/layout/conv_8x8x64_u8_reference.npz",
+    "sha256": "815f7680f508f876b22d4c8cf35b3f7b7cdf323a769b63e779169f68f2e7dace"
+  }
+]

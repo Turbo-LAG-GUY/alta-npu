@@ -1,0 +1,15 @@
+[  598.410149] pid=9934 open: begin
+[  598.425602] pid=9934 context: done
+[  598.437231] pid=9934 compute state: created
+[  598.456759] pid=9934 launch 1: begin
+[  598.463131] pid=9934 launch: begin
+[  598.468234] pid=9934 launch: begin
+[  598.474917] pid=9934 launch: begin
+[  598.480607] pid=9934 launch: begin
+[  598.489192] pid=9934 launch: begin
+[  598.503505] pid=9934 launch: begin
+[  598.514203] pid=9934 launch: begin
+[  598.516166] pid=9934 launch: begin
+[  598.518502] pid=9934 launch: begin
+[  598.524726] pid=9934 launches: done
+[  598.531973] pid=9934 finished
