@@ -1,0 +1,159 @@
+Note: Google Test filter = teflon/micronet_vww.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 75 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 75 tests from teflon/micronet_vww
+[ RUN      ] teflon/micronet_vww.0000
+[       OK ] teflon/micronet_vww.0000 (36 ms)
+[ RUN      ] teflon/micronet_vww.0001
+[       OK ] teflon/micronet_vww.0001 (25 ms)
+[ RUN      ] teflon/micronet_vww.0002
+[       OK ] teflon/micronet_vww.0002 (24 ms)
+[ RUN      ] teflon/micronet_vww.0003
+[       OK ] teflon/micronet_vww.0003 (23 ms)
+[ RUN      ] teflon/micronet_vww.0004
+[       OK ] teflon/micronet_vww.0004 (25 ms)
+[ RUN      ] teflon/micronet_vww.0005
+[       OK ] teflon/micronet_vww.0005 (24 ms)
+[ RUN      ] teflon/micronet_vww.0006
+[       OK ] teflon/micronet_vww.0006 (25 ms)
+[ RUN      ] teflon/micronet_vww.0007
+[       OK ] teflon/micronet_vww.0007 (24 ms)
+[ RUN      ] teflon/micronet_vww.0008
+[       OK ] teflon/micronet_vww.0008 (24 ms)
+[ RUN      ] teflon/micronet_vww.0009
+[       OK ] teflon/micronet_vww.0009 (25 ms)
+[ RUN      ] teflon/micronet_vww.0010
+[       OK ] teflon/micronet_vww.0010 (22 ms)
+[ RUN      ] teflon/micronet_vww.0011
+[       OK ] teflon/micronet_vww.0011 (24 ms)
+[ RUN      ] teflon/micronet_vww.0012
+[       OK ] teflon/micronet_vww.0012 (25 ms)
+[ RUN      ] teflon/micronet_vww.0013
+[       OK ] teflon/micronet_vww.0013 (24 ms)
+[ RUN      ] teflon/micronet_vww.0014
+[       OK ] teflon/micronet_vww.0014 (23 ms)
+[ RUN      ] teflon/micronet_vww.0015
+[       OK ] teflon/micronet_vww.0015 (25 ms)
+[ RUN      ] teflon/micronet_vww.0016
+[       OK ] teflon/micronet_vww.0016 (27 ms)
+[ RUN      ] teflon/micronet_vww.0017
+[       OK ] teflon/micronet_vww.0017 (24 ms)
+[ RUN      ] teflon/micronet_vww.0018
+[       OK ] teflon/micronet_vww.0018 (22 ms)
+[ RUN      ] teflon/micronet_vww.0019
+[       OK ] teflon/micronet_vww.0019 (23 ms)
+[ RUN      ] teflon/micronet_vww.0020
+[       OK ] teflon/micronet_vww.0020 (26 ms)
+[ RUN      ] teflon/micronet_vww.0021
+[       OK ] teflon/micronet_vww.0021 (26 ms)
+[ RUN      ] teflon/micronet_vww.0022
+[       OK ] teflon/micronet_vww.0022 (24 ms)
+[ RUN      ] teflon/micronet_vww.0023
+[       OK ] teflon/micronet_vww.0023 (22 ms)
+[ RUN      ] teflon/micronet_vww.0024
+[       OK ] teflon/micronet_vww.0024 (23 ms)
+[ RUN      ] teflon/micronet_vww.0025
+[       OK ] teflon/micronet_vww.0025 (26 ms)
+[ RUN      ] teflon/micronet_vww.0026
+[       OK ] teflon/micronet_vww.0026 (24 ms)
+[ RUN      ] teflon/micronet_vww.0027
+[       OK ] teflon/micronet_vww.0027 (23 ms)
+[ RUN      ] teflon/micronet_vww.0028
+[       OK ] teflon/micronet_vww.0028 (26 ms)
+[ RUN      ] teflon/micronet_vww.0029
+[       OK ] teflon/micronet_vww.0029 (26 ms)
+[ RUN      ] teflon/micronet_vww.0030
+[       OK ] teflon/micronet_vww.0030 (23 ms)
+[ RUN      ] teflon/micronet_vww.0031
+[       OK ] teflon/micronet_vww.0031 (21 ms)
+[ RUN      ] teflon/micronet_vww.0032
+[       OK ] teflon/micronet_vww.0032 (23 ms)
+[ RUN      ] teflon/micronet_vww.0033
+[       OK ] teflon/micronet_vww.0033 (24 ms)
+[ RUN      ] teflon/micronet_vww.0034
+[       OK ] teflon/micronet_vww.0034 (25 ms)
+[ RUN      ] teflon/micronet_vww.0035
+[       OK ] teflon/micronet_vww.0035 (23 ms)
+[ RUN      ] teflon/micronet_vww.0036
+[       OK ] teflon/micronet_vww.0036 (22 ms)
+[ RUN      ] teflon/micronet_vww.0037
+[       OK ] teflon/micronet_vww.0037 (22 ms)
+[ RUN      ] teflon/micronet_vww.0038
+[       OK ] teflon/micronet_vww.0038 (24 ms)
+[ RUN      ] teflon/micronet_vww.0039
+[       OK ] teflon/micronet_vww.0039 (25 ms)
+[ RUN      ] teflon/micronet_vww.0040
+[       OK ] teflon/micronet_vww.0040 (24 ms)
+[ RUN      ] teflon/micronet_vww.0041
+[       OK ] teflon/micronet_vww.0041 (22 ms)
+[ RUN      ] teflon/micronet_vww.0042
+[       OK ] teflon/micronet_vww.0042 (24 ms)
+[ RUN      ] teflon/micronet_vww.0043
+[       OK ] teflon/micronet_vww.0043 (23 ms)
+[ RUN      ] teflon/micronet_vww.0044
+[       OK ] teflon/micronet_vww.0044 (24 ms)
+[ RUN      ] teflon/micronet_vww.0045
+[       OK ] teflon/micronet_vww.0045 (24 ms)
+[ RUN      ] teflon/micronet_vww.0046
+[       OK ] teflon/micronet_vww.0046 (23 ms)
+[ RUN      ] teflon/micronet_vww.0047
+[       OK ] teflon/micronet_vww.0047 (24 ms)
+[ RUN      ] teflon/micronet_vww.0048
+[       OK ] teflon/micronet_vww.0048 (24 ms)
+[ RUN      ] teflon/micronet_vww.0049
+[       OK ] teflon/micronet_vww.0049 (24 ms)
+[ RUN      ] teflon/micronet_vww.0050
+[       OK ] teflon/micronet_vww.0050 (25 ms)
+[ RUN      ] teflon/micronet_vww.0051
+[       OK ] teflon/micronet_vww.0051 (23 ms)
+[ RUN      ] teflon/micronet_vww.0052
+[       OK ] teflon/micronet_vww.0052 (23 ms)
+[ RUN      ] teflon/micronet_vww.0053
+[       OK ] teflon/micronet_vww.0053 (23 ms)
+[ RUN      ] teflon/micronet_vww.0054
+[       OK ] teflon/micronet_vww.0054 (26 ms)
+[ RUN      ] teflon/micronet_vww.0055
+[       OK ] teflon/micronet_vww.0055 (27 ms)
+[ RUN      ] teflon/micronet_vww.0056
+[       OK ] teflon/micronet_vww.0056 (25 ms)
+[ RUN      ] teflon/micronet_vww.0057
+[       OK ] teflon/micronet_vww.0057 (22 ms)
+[ RUN      ] teflon/micronet_vww.0058
+[       OK ] teflon/micronet_vww.0058 (22 ms)
+[ RUN      ] teflon/micronet_vww.0059
+[       OK ] teflon/micronet_vww.0059 (22 ms)
+[ RUN      ] teflon/micronet_vww.0060
+[       OK ] teflon/micronet_vww.0060 (21 ms)
+[ RUN      ] teflon/micronet_vww.0061
+[       OK ] teflon/micronet_vww.0061 (22 ms)
+[ RUN      ] teflon/micronet_vww.0062
+[       OK ] teflon/micronet_vww.0062 (23 ms)
+[ RUN      ] teflon/micronet_vww.0063
+[       OK ] teflon/micronet_vww.0063 (23 ms)
+[ RUN      ] teflon/micronet_vww.0064
+[       OK ] teflon/micronet_vww.0064 (22 ms)
+[ RUN      ] teflon/micronet_vww.0065
+[       OK ] teflon/micronet_vww.0065 (21 ms)
+[ RUN      ] teflon/micronet_vww.0066
+[       OK ] teflon/micronet_vww.0066 (22 ms)
+[ RUN      ] teflon/micronet_vww.0067
+[       OK ] teflon/micronet_vww.0067 (22 ms)
+[ RUN      ] teflon/micronet_vww.0068
+[       OK ] teflon/micronet_vww.0068 (24 ms)
+[ RUN      ] teflon/micronet_vww.0069
+[       OK ] teflon/micronet_vww.0069 (26 ms)
+[ RUN      ] teflon/micronet_vww.0070
+[       OK ] teflon/micronet_vww.0070 (23 ms)
+[ RUN      ] teflon/micronet_vww.0071
+[       OK ] teflon/micronet_vww.0071 (24 ms)
+[ RUN      ] teflon/micronet_vww.0072
+[       OK ] teflon/micronet_vww.0072 (22 ms)
+[ RUN      ] teflon/micronet_vww.0073
+[       OK ] teflon/micronet_vww.0073 (24 ms)
+[ RUN      ] teflon/micronet_vww.whole
+[       OK ] teflon/micronet_vww.whole (125 ms)
+[----------] 75 tests from teflon/micronet_vww (1933 ms total)
+
+[----------] Global test environment tear-down
+[==========] 75 tests from 1 test suite ran. (1933 ms total)
+[  PASSED  ] 75 tests.

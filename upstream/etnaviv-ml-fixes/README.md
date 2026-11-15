@@ -44,8 +44,16 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
   `test_teflon` (`micronet_vww.whole`: heap-buffer-overflow READ in `etna_ml_subgraph_invoke`); with the patch the
   sanitizer is silent and the test passes on the NPU (it failed with 8 patches and hung the NPU with unpatched
   main). `validate_offline.py` passes with the 9-patch library.
+  Sanitizer pass over all 1568 `test_teflon` cases with the 9-patch tree under the fake NPU
+  (`runs/cs-offline/teflon-suite-asan-9patches`, 2026-11-15): no report in the driver and no abort; the 40
+  remaining reports are all in the test program (`test_teflon.cpp`, 32-bit inputs). Command streams are identical
+  to the 7-patch run except for the 12 movenet cases with a SUBTRACT (patch 8). The same change also stops the
+  output read-back from copying both operands' size when that tensor is a graph output (by reading the code;
+  no test hits it).
 - **Mesa's own Teflon test suite (`test_teflon`) on the NPU, 2026-11-15, main 8a9009e0482 + 9 patches:**
-  1503 tests passed, 34 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). Left out:
+  1503 tests passed, 34 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). A second full run
+  in another boot (b43143e4, 18:02, `runs/teflon-suite-20261115-180223`) gave the same 1503 / 34 with the same
+  failed tests and no kernel message. Left out:
   Mesa's skip list for this NPU (32 tests) and the two ds_cnn tests with an int8 FULLY_CONNECTED, which hung the
   NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`). Unpatched main hangs on `ds_cnn.0014` as well
   (`incidents/2026-11-15-1502-FCB-ds_cnn-0014`, with the hang dump), so that hang is not from the series: a

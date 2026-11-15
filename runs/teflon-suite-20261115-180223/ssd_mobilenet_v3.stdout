@@ -1,0 +1,369 @@
+Note: Google Test filter = teflon/ssd_mobilenet_v3.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 175 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 175 tests from teflon/ssd_mobilenet_v3
+[ RUN      ] teflon/ssd_mobilenet_v3.0000
+[       OK ] teflon/ssd_mobilenet_v3.0000 (163 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0001
+[       OK ] teflon/ssd_mobilenet_v3.0001 (60 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0002
+[       OK ] teflon/ssd_mobilenet_v3.0002 (52 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0003
+[       OK ] teflon/ssd_mobilenet_v3.0003 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0004
+[       OK ] teflon/ssd_mobilenet_v3.0004 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0005
+[       OK ] teflon/ssd_mobilenet_v3.0005 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0006
+[       OK ] teflon/ssd_mobilenet_v3.0006 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0007
+[       OK ] teflon/ssd_mobilenet_v3.0007 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0008
+[       OK ] teflon/ssd_mobilenet_v3.0008 (34 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0009
+[       OK ] teflon/ssd_mobilenet_v3.0009 (35 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0010
+[       OK ] teflon/ssd_mobilenet_v3.0010 (72 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0011
+[       OK ] teflon/ssd_mobilenet_v3.0011 (53 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0012
+[       OK ] teflon/ssd_mobilenet_v3.0012 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0013
+[       OK ] teflon/ssd_mobilenet_v3.0013 (42 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0014
+[       OK ] teflon/ssd_mobilenet_v3.0014 (47 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0015
+[       OK ] teflon/ssd_mobilenet_v3.0015 (34 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0016
+[       OK ] teflon/ssd_mobilenet_v3.0016 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0017
+[       OK ] teflon/ssd_mobilenet_v3.0017 (44 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0018
+[       OK ] teflon/ssd_mobilenet_v3.0018 (35 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0019
+[       OK ] teflon/ssd_mobilenet_v3.0019 (37 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0020
+[       OK ] teflon/ssd_mobilenet_v3.0020 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0021
+[       OK ] teflon/ssd_mobilenet_v3.0021 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0022
+[       OK ] teflon/ssd_mobilenet_v3.0022 (21 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0023
+[       OK ] teflon/ssd_mobilenet_v3.0023 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0024
+[       OK ] teflon/ssd_mobilenet_v3.0024 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0025
+[       OK ] teflon/ssd_mobilenet_v3.0025 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0026
+[       OK ] teflon/ssd_mobilenet_v3.0026 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0027
+[       OK ] teflon/ssd_mobilenet_v3.0027 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0028
+[       OK ] teflon/ssd_mobilenet_v3.0028 (37 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0029
+[       OK ] teflon/ssd_mobilenet_v3.0029 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0030
+[       OK ] teflon/ssd_mobilenet_v3.0030 (61 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0031
+[       OK ] teflon/ssd_mobilenet_v3.0031 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0032
+[       OK ] teflon/ssd_mobilenet_v3.0032 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0033
+[       OK ] teflon/ssd_mobilenet_v3.0033 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0034
+[       OK ] teflon/ssd_mobilenet_v3.0034 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0035
+[       OK ] teflon/ssd_mobilenet_v3.0035 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0036
+[       OK ] teflon/ssd_mobilenet_v3.0036 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0037
+[       OK ] teflon/ssd_mobilenet_v3.0037 (31 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0038
+[       OK ] teflon/ssd_mobilenet_v3.0038 (34 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0039
+[       OK ] teflon/ssd_mobilenet_v3.0039 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0040
+[       OK ] teflon/ssd_mobilenet_v3.0040 (37 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0041
+[       OK ] teflon/ssd_mobilenet_v3.0041 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0042
+[       OK ] teflon/ssd_mobilenet_v3.0042 (56 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0043
+[       OK ] teflon/ssd_mobilenet_v3.0043 (30 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0044
+[       OK ] teflon/ssd_mobilenet_v3.0044 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0045
+[       OK ] teflon/ssd_mobilenet_v3.0045 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0046
+[       OK ] teflon/ssd_mobilenet_v3.0046 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0047
+[       OK ] teflon/ssd_mobilenet_v3.0047 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0048
+[       OK ] teflon/ssd_mobilenet_v3.0048 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0049
+[       OK ] teflon/ssd_mobilenet_v3.0049 (30 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0050
+[       OK ] teflon/ssd_mobilenet_v3.0050 (30 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0051
+[       OK ] teflon/ssd_mobilenet_v3.0051 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0052
+[       OK ] teflon/ssd_mobilenet_v3.0052 (29 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0053
+[       OK ] teflon/ssd_mobilenet_v3.0053 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0054
+[       OK ] teflon/ssd_mobilenet_v3.0054 (39 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0055
+[       OK ] teflon/ssd_mobilenet_v3.0055 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0056
+[       OK ] teflon/ssd_mobilenet_v3.0056 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0057
+[       OK ] teflon/ssd_mobilenet_v3.0057 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0058
+[       OK ] teflon/ssd_mobilenet_v3.0058 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0059
+[       OK ] teflon/ssd_mobilenet_v3.0059 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0060
+[       OK ] teflon/ssd_mobilenet_v3.0060 (21 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0061
+[       OK ] teflon/ssd_mobilenet_v3.0061 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0062
+[       OK ] teflon/ssd_mobilenet_v3.0062 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0063
+[       OK ] teflon/ssd_mobilenet_v3.0063 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0064
+[       OK ] teflon/ssd_mobilenet_v3.0064 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0065
+[       OK ] teflon/ssd_mobilenet_v3.0065 (41 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0066
+[       OK ] teflon/ssd_mobilenet_v3.0066 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0067
+[       OK ] teflon/ssd_mobilenet_v3.0067 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0068
+[       OK ] teflon/ssd_mobilenet_v3.0068 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0069
+[       OK ] teflon/ssd_mobilenet_v3.0069 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0070
+[       OK ] teflon/ssd_mobilenet_v3.0070 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0071
+[       OK ] teflon/ssd_mobilenet_v3.0071 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0072
+[       OK ] teflon/ssd_mobilenet_v3.0072 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0073
+[       OK ] teflon/ssd_mobilenet_v3.0073 (31 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0074
+[       OK ] teflon/ssd_mobilenet_v3.0074 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0075
+[       OK ] teflon/ssd_mobilenet_v3.0075 (39 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0076
+[       OK ] teflon/ssd_mobilenet_v3.0076 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0077
+[       OK ] teflon/ssd_mobilenet_v3.0077 (44 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0078
+[       OK ] teflon/ssd_mobilenet_v3.0078 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0079
+[       OK ] teflon/ssd_mobilenet_v3.0079 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0080
+[       OK ] teflon/ssd_mobilenet_v3.0080 (43 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0081
+[       OK ] teflon/ssd_mobilenet_v3.0081 (70 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0082
+[       OK ] teflon/ssd_mobilenet_v3.0082 (30 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0083
+[       OK ] teflon/ssd_mobilenet_v3.0083 (36 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0084
+[       OK ] teflon/ssd_mobilenet_v3.0084 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0085
+[       OK ] teflon/ssd_mobilenet_v3.0085 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0086
+[       OK ] teflon/ssd_mobilenet_v3.0086 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0087
+[       OK ] teflon/ssd_mobilenet_v3.0087 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0088
+[       OK ] teflon/ssd_mobilenet_v3.0088 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0089
+[       OK ] teflon/ssd_mobilenet_v3.0089 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0090
+[       OK ] teflon/ssd_mobilenet_v3.0090 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0091
+[       OK ] teflon/ssd_mobilenet_v3.0091 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0092
+[       OK ] teflon/ssd_mobilenet_v3.0092 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0093
+[       OK ] teflon/ssd_mobilenet_v3.0093 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0094
+[       OK ] teflon/ssd_mobilenet_v3.0094 (30 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0095
+[       OK ] teflon/ssd_mobilenet_v3.0095 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0096
+[       OK ] teflon/ssd_mobilenet_v3.0096 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0097
+[       OK ] teflon/ssd_mobilenet_v3.0097 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0098
+[       OK ] teflon/ssd_mobilenet_v3.0098 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0099
+[       OK ] teflon/ssd_mobilenet_v3.0099 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0100
+[       OK ] teflon/ssd_mobilenet_v3.0100 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0101
+[       OK ] teflon/ssd_mobilenet_v3.0101 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0102
+[       OK ] teflon/ssd_mobilenet_v3.0102 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0103
+[       OK ] teflon/ssd_mobilenet_v3.0103 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0104
+[       OK ] teflon/ssd_mobilenet_v3.0104 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0105
+[       OK ] teflon/ssd_mobilenet_v3.0105 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0106
+[       OK ] teflon/ssd_mobilenet_v3.0106 (31 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0107
+[       OK ] teflon/ssd_mobilenet_v3.0107 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0108
+[       OK ] teflon/ssd_mobilenet_v3.0108 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0109
+[       OK ] teflon/ssd_mobilenet_v3.0109 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0110
+[       OK ] teflon/ssd_mobilenet_v3.0110 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0111
+[       OK ] teflon/ssd_mobilenet_v3.0111 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0112
+[       OK ] teflon/ssd_mobilenet_v3.0112 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0113
+[       OK ] teflon/ssd_mobilenet_v3.0113 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0114
+[       OK ] teflon/ssd_mobilenet_v3.0114 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0115
+[       OK ] teflon/ssd_mobilenet_v3.0115 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0116
+[       OK ] teflon/ssd_mobilenet_v3.0116 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0117
+[       OK ] teflon/ssd_mobilenet_v3.0117 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0118
+[       OK ] teflon/ssd_mobilenet_v3.0118 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0119
+[       OK ] teflon/ssd_mobilenet_v3.0119 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0120
+[       OK ] teflon/ssd_mobilenet_v3.0120 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0121
+[       OK ] teflon/ssd_mobilenet_v3.0121 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0122
+[       OK ] teflon/ssd_mobilenet_v3.0122 (45 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0123
+[       OK ] teflon/ssd_mobilenet_v3.0123 (26 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0124
+[       OK ] teflon/ssd_mobilenet_v3.0124 (33 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0125
+[       OK ] teflon/ssd_mobilenet_v3.0125 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0126
+[       OK ] teflon/ssd_mobilenet_v3.0126 (27 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0127
+[       OK ] teflon/ssd_mobilenet_v3.0127 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0128
+[       OK ] teflon/ssd_mobilenet_v3.0128 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0129
+[       OK ] teflon/ssd_mobilenet_v3.0129 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0130
+[       OK ] teflon/ssd_mobilenet_v3.0130 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0131
+[       OK ] teflon/ssd_mobilenet_v3.0131 (32 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0132
+[       OK ] teflon/ssd_mobilenet_v3.0132 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0133
+[       OK ] teflon/ssd_mobilenet_v3.0133 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0134
+[       OK ] teflon/ssd_mobilenet_v3.0134 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0135
+[       OK ] teflon/ssd_mobilenet_v3.0135 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0136
+[       OK ] teflon/ssd_mobilenet_v3.0136 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0137
+[       OK ] teflon/ssd_mobilenet_v3.0137 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0138
+[       OK ] teflon/ssd_mobilenet_v3.0138 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0139
+[       OK ] teflon/ssd_mobilenet_v3.0139 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0140
+[       OK ] teflon/ssd_mobilenet_v3.0140 (24 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0141
+[       OK ] teflon/ssd_mobilenet_v3.0141 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0142
+[       OK ] teflon/ssd_mobilenet_v3.0142 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0143
+[       OK ] teflon/ssd_mobilenet_v3.0143 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0144
+[       OK ] teflon/ssd_mobilenet_v3.0144 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0145
+[       OK ] teflon/ssd_mobilenet_v3.0145 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0146
+[       OK ] teflon/ssd_mobilenet_v3.0146 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0147
+[       OK ] teflon/ssd_mobilenet_v3.0147 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0148
+[       OK ] teflon/ssd_mobilenet_v3.0148 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0149
+[       OK ] teflon/ssd_mobilenet_v3.0149 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0150
+[       OK ] teflon/ssd_mobilenet_v3.0150 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0151
+[       OK ] teflon/ssd_mobilenet_v3.0151 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0152
+[       OK ] teflon/ssd_mobilenet_v3.0152 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0153
+[       OK ] teflon/ssd_mobilenet_v3.0153 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0154
+[       OK ] teflon/ssd_mobilenet_v3.0154 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0155
+[       OK ] teflon/ssd_mobilenet_v3.0155 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0156
+[       OK ] teflon/ssd_mobilenet_v3.0156 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0157
+[       OK ] teflon/ssd_mobilenet_v3.0157 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0158
+[       OK ] teflon/ssd_mobilenet_v3.0158 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0159
+[       OK ] teflon/ssd_mobilenet_v3.0159 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0160
+[       OK ] teflon/ssd_mobilenet_v3.0160 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0161
+[       OK ] teflon/ssd_mobilenet_v3.0161 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0162
+[       OK ] teflon/ssd_mobilenet_v3.0162 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0163
+[       OK ] teflon/ssd_mobilenet_v3.0163 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0164
+[       OK ] teflon/ssd_mobilenet_v3.0164 (21 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0165
+[       OK ] teflon/ssd_mobilenet_v3.0165 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0166
+[       OK ] teflon/ssd_mobilenet_v3.0166 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0167
+[       OK ] teflon/ssd_mobilenet_v3.0167 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0168
+[       OK ] teflon/ssd_mobilenet_v3.0168 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0169
+[       OK ] teflon/ssd_mobilenet_v3.0169 (22 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0170
+[       OK ] teflon/ssd_mobilenet_v3.0170 (23 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0171
+[       OK ] teflon/ssd_mobilenet_v3.0171 (25 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0172
+[       OK ] teflon/ssd_mobilenet_v3.0172 (28 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.0173
+[       OK ] teflon/ssd_mobilenet_v3.0173 (36 ms)
+[ RUN      ] teflon/ssd_mobilenet_v3.whole
+CPU: 81 94 8b 99 89 86 87 88 8e 87 88 85 81 85 85 86 90 85 85 85 86 86 83 82 
+NPU: 81 8c 89 98 87 87 87 87 8d 88 86 83 81 85 83 85 8f 84 84 84 85 86 83 82 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (8c) doesn't match that from the CPU (94).
+[  FAILED  ] teflon/ssd_mobilenet_v3.whole (823 ms)
+[----------] 175 tests from teflon/ssd_mobilenet_v3 (5866 ms total)
+
+[----------] Global test environment tear-down
+[==========] 175 tests from 1 test suite ran. (5866 ms total)
+[  PASSED  ] 174 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/ssd_mobilenet_v3.whole
+
+ 1 FAILED TEST
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-180658-TFS-ssd_mobilenet_v3

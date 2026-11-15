@@ -1,0 +1,1 @@
+[10669.595971] jordan-aml-a311d-cc kernel: hrtimer: interrupt took 22382646 ns

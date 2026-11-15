@@ -1,0 +1,23 @@
+# npu-observe start 2026-11-15T18:03:11-05:00 duration=1080s interval=1s
+18:03:11 up=10521.61 npu=active active_ms=10509616 npu_irqs=97 cma_free_kb=1740 memavail_mb=2166 temps_c=cpu:30,ddr:33
+18:03:12 up=10522.73 npu=active active_ms=10510749 npu_irqs=97 cma_free_kb=1748 memavail_mb=2166 temps_c=cpu:29,ddr:31
+18:03:13 up=10523.84 npu=active active_ms=10511852 npu_irqs=97 cma_free_kb=1772 memavail_mb=2171 temps_c=cpu:29,ddr:31
+18:03:14 up=10524.97 npu=active active_ms=10512996 npu_irqs=97 cma_free_kb=1772 memavail_mb=2173 temps_c=cpu:32,ddr:33
+18:03:16 up=10526.06 npu=active active_ms=10514069 npu_irqs=97 cma_free_kb=1856 memavail_mb=2175 temps_c=cpu:29,ddr:31
+18:03:17 up=10527.16 npu=active active_ms=10515176 npu_irqs=97 cma_free_kb=1952 memavail_mb=2173 temps_c=cpu:34,ddr:34
+18:03:18 up=10528.26 npu=active active_ms=10516276 npu_irqs=101 cma_free_kb=2944 memavail_mb=2167 temps_c=cpu:33,ddr:35
+18:03:19 up=10529.37 npu=active active_ms=10517375 npu_irqs=108 cma_free_kb=2972 memavail_mb=2162 temps_c=cpu:34,ddr:36
+18:03:20 up=10530.46 npu=active active_ms=10518467 npu_irqs=118 cma_free_kb=2972 memavail_mb=2159 temps_c=cpu:36,ddr:36
+18:03:21 up=10531.54 npu=active active_ms=10519556 npu_irqs=130 cma_free_kb=2972 memavail_mb=2156 temps_c=cpu:37,ddr:37
+18:03:22 up=10532.66 npu=active active_ms=10520669 npu_irqs=130 cma_free_kb=2972 memavail_mb=2156 temps_c=cpu:38,ddr:37
+18:03:23 up=10533.78 npu=active active_ms=10521788 npu_irqs=131 cma_free_kb=2972 memavail_mb=2162 temps_c=cpu:35,ddr:37
+18:03:24 up=10534.90 npu=active active_ms=10522910 npu_irqs=131 cma_free_kb=3076 memavail_mb=2161 temps_c=cpu:32,ddr:35
+18:03:25 up=10536.03 npu=active active_ms=10524044 npu_irqs=131 cma_free_kb=3140 memavail_mb=2162 temps_c=cpu:31,ddr:33
+18:03:27 up=10537.14 npu=active active_ms=10525149 npu_irqs=131 cma_free_kb=3196 memavail_mb=2163 temps_c=cpu:30,ddr:33
+18:03:28 up=10538.26 npu=active active_ms=10526272 npu_irqs=131 cma_free_kb=3196 memavail_mb=2164 temps_c=cpu:30,ddr:32
+18:03:29 up=10539.37 npu=active active_ms=10527387 npu_irqs=131 cma_free_kb=3260 memavail_mb=2167 temps_c=cpu:30,ddr:32
+18:03:30 up=10540.47 npu=active active_ms=10528484 npu_irqs=131 cma_free_kb=3264 memavail_mb=2168 temps_c=cpu:30,ddr:31
+18:03:31 up=10541.58 npu=active active_ms=10529589 npu_irqs=131 cma_free_kb=3268 memavail_mb=2169 temps_c=cpu:29,ddr:31
+18:03:32 up=10542.67 npu=active active_ms=10530684 npu_irqs=131 cma_free_kb=3284 memavail_mb=2171 temps_c=cpu:29,ddr:31
+18:03:33 up=10543.79 npu=active active_ms=10531807 npu_irqs=131 cma_free_kb=1404 memavail_mb=2174 temps_c=cpu:29,ddr:31
+awk: close failed on file "/dev/stdout" (Broken pipe)

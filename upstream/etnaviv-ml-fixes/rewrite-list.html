@@ -92,6 +92,46 @@ git rebase -i 8a9009e0482</pre>
     </ul>
   </section>
 
+  <section>
+    <h2>4. Before sending</h2>
+    <p class="where">After the rewriting above is finished.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="b1"><span>Read all nine patches until you can explain each change<small>Mesa expects the contributor to answer the review questions. The README in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code> has the evidence for each patch.</small></span></label></li>
+      <li><label><input type="checkbox" id="b2"><span>Keep message lines to about 75 characters<small>Three current messages have longer lines: patch 1 (91), patch 4 (108) and patch 7 (109). They go away when you rewrite them.</small></span></label></li>
+      <li><label><input type="checkbox" id="b3"><span>Check the author line<small>The commits carry your git name and email address. Change them if you want to send under another identity. <code>Signed-off-by</code> is optional in Mesa.</small></span></label></li>
+      <li><label><input type="checkbox" id="b4"><span>Keep <code>Generated-by: LLM</code> as the only tool trailer<small>No <code>Co-authored-by</code> for a tool and no model name.</small></span></label></li>
+      <li><label><input type="checkbox" id="b5"><span>Rebase onto current Mesa <code>main</code> and rebuild once<small>The base is commit 8a9009e0482. Commands are below.</small></span></label></li>
+      <li><label><input type="checkbox" id="b6"><span>Decide whether to rerun the NPU tests after the rebase<small>All hardware results are for the current base. If the rebase changes the etnaviv files, a rerun of the test suite is worth it.</small></span></label></li>
+    </ul>
+    <pre>cd ~/Documents/AI_Projects/mesa-upstream-fixes
+git fetch upstream main
+git rebase upstream/main
+nice ninja -C build -j2</pre>
+  </section>
+
+  <section>
+    <h2>5. Sending</h2>
+    <p class="where">Mesa takes merge requests on its GitLab, not patches by email. Only you can do these steps.</p>
+    <ul class="checks">
+      <li><label><input type="checkbox" id="s1"><span>Get an account on gitlab.freedesktop.org and fork <code>mesa/mesa</code><small>New accounts may have to ask for fork permission first; the site explains how.</small></span></label></li>
+      <li><label><input type="checkbox" id="s2"><span>Push the branch to your fork<small>Commands are below; put your GitLab user name in.</small></span></label></li>
+      <li><label><input type="checkbox" id="s3"><span>Open a merge request against <code>mesa/mesa</code> <code>main</code><small>Paste your rewritten <code>MR-DESCRIPTION.md</code> as the text.</small></span></label></li>
+      <li><label><input type="checkbox" id="s4"><span>Answer the review yourself<small>Review comments and replies upstream have to be yours as well.</small></span></label></li>
+    </ul>
+    <pre>cd ~/Documents/AI_Projects/mesa-upstream-fixes
+git remote add mine git@gitlab.freedesktop.org:YOUR-USER/mesa.git
+git push mine alta-etnaviv-ml-fixes</pre>
+  </section>
+
+  <section>
+    <h2>Worth mentioning in the merge request</h2>
+    <ul class="plain">
+      <li><strong>Test suite result:</strong> 1503 passed and 34 failed on the VIPNano-QI.7120 with all nine patches, in two runs. 8 of the failures are on Mesa's expected-failure list; the other 26 also fail without the series.</li>
+      <li><strong>Left out of the run:</strong> Mesa's skip list for this NPU and the two <code>ds_cnn</code> tests with a fully-connected layer.</li>
+      <li><strong>Hangs in unpatched main:</strong> <code>teflon/ds_cnn.0014</code> (fully-connected, also hangs with the series) and <code>teflon/micronet_vww.whole</code> (passes with the series).</li>
+    </ul>
+  </section>
+
   <hr>
 
   <section>
