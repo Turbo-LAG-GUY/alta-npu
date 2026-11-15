@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # build-tflite.sh - build TensorFlow Lite 2.13 as a shared C/C++ library for Mesa's Teflon tests. NO ROOT, no NPU.
-# Written 2026-11-15, NOT yet run (cmake was not installed). Run root-steps/190-teflon-test-deps.sh first.
+# Written and run 2026-11-15 (build about 50 min at -j2). Needs root-steps/190-teflon-test-deps.sh first.
 #
 # Why: Mesa's test_teflon loads "libtensorflow-lite.so" and calls TensorFlow Lite's C API to run each model on
 # the CPU and on the NPU. The board only has the Python package (ai_edge_litert), whose libraries do not export
@@ -16,7 +16,7 @@
 #   4. checks that the library exports what test_teflon needs: the C API functions, and the C++ kernel
 #      registration functions (tflite::ops::builtin::Register_*). test_teflon creates its interpreter with only
 #      the kernels it finds through those, so a library without them cannot run any model. Stops if either is
-#      missing (whether 2.13's cmake build puts the C API into this library is not verified yet)
+#      missing (2.13's cmake build does put the C API into this library: verified 2026-11-15)
 #   5. leaves the result at ~/Documents/AI_Projects/tflite-2.13/lib/libtensorflow-lite.so
 # Use afterwards: LD_LIBRARY_PATH=~/Documents/AI_Projects/tflite-2.13/lib for test_teflon.
 # Remove: rm -rf ~/Documents/AI_Projects/tflite-2.13
@@ -38,7 +38,8 @@ mkdir -p "$TOP" "$OUT"
 
 missing() { # LIB -> prints the needed C functions the library does not export
    local syms; syms=$(nm -D --defined-only "$1" | awk '{print $3}')
-   for s in $NEED; do echo "$syms" | grep -qx "$s" || echo "$s"; done
+   # here-string, not a pipe: with pipefail, "echo | grep -q" fails when grep stops reading early
+   for s in $NEED; do grep -qx "$s" <<< "$syms" || echo "$s"; done
 }
 
 if [ ! -d "$SRC/.git" ]; then
