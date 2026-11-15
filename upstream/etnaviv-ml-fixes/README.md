@@ -47,7 +47,9 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
 - **Mesa's own Teflon test suite (`test_teflon`) on the NPU, 2026-11-15, main 8a9009e0482 + 9 patches:**
   1503 tests passed, 34 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). Left out:
   Mesa's skip list for this NPU (32 tests) and the two ds_cnn tests with an int8 FULLY_CONNECTED, which hung the
-  NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`).
+  NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`). Unpatched main hangs on `ds_cnn.0014` as well
+  (`incidents/2026-11-15-1502-FCB-ds_cnn-0014`, with the hang dump), so that hang is not from the series: a
+  FULLY_CONNECTED hangs this NPU in upstream. Not fixed here.
   - 8 of the 34 failures are in Mesa's expected-failure list (`src/etnaviv/ci/etnaviv-vipnano-fails.txt`).
   - The other 26 were rerun with unpatched main (lib 385f828f): all 26 fail there too (the two movenet whole
     models abort there). None of the failures comes from the series.

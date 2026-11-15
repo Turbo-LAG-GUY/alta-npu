@@ -1,0 +1,20 @@
+Note: Google Test filter = teflon/ds_cnn.0014
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/ds_cnn
+[ RUN      ] teflon/ds_cnn.0014
+CPU: 80 1b 80 b9 80 a1 92 80 80 80 80 b0 
+NPU: 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (80) doesn't match that from the CPU (1b).
+[  FAILED  ] teflon/ds_cnn.0014 (1083 ms)
+[----------] 1 test from teflon/ds_cnn (1083 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1084 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/ds_cnn.0014
+
+ 1 FAILED TEST

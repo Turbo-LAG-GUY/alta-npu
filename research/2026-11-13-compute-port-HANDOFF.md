@@ -44,6 +44,14 @@ Baseline ladder (research/port/teflon-baseline-ladder.sh) got through 6 of 27: a
 STOP is set: REBOOT, review, clear runs/STOP. Then open: rest of the baseline ladder (21 tests; leave out
 micronet_vww.whole), the FC test with the baseline (last in a boot, watcher running), candidate fix for the ADD
 input-upload overread (in the mesa-upstream-asan worktree only, uncommitted, sanitizer-clean, not on the NPU).**
+**2026-11-15 15:05 (boot e67a48e7), supersedes the paragraph before: series = 9 patches (0009 keeps the size
+of an addition's first operand; tip a08a8763308, lib b6c2a28d). Suite with 9 patches: 1503 passed, 34 failed, no hang
+(evidence/teflon-suite-20261115). Baseline rerun complete: all 26 unexpected failures fail with unpatched main too;
+unpatched main hangs in micronet_vww.whole AND in the FC test ds_cnn.0014 (15:02, on purpose, incident
+2026-11-15-1502-FCB-ds_cnn-0014) = no failure or hang comes from the series. Hang dumps are now saved by the boot
+service alta-devcd-watch (root step 200; incidents/devcoredumps, newest 20). STOP is set: REBOOT + clear runs/STOP.
+Open: Jordan rewrites messages/comments/MR text and sends; possible follow-ups (not in the series): FC hang on V7,
+stride-2 depthwise on odd sizes, deeplabv3 1x1 convs with 960 channels (wrong from row 12), per-channel int8.**
 **Older open list, Jordan to choose: the 6i ladder with the
 upstream build (done 2026-11-15), per-channel int8 convs (refused today; needed for real TFLite int8 models), (a) transpose
 tuning, (d) faster table ops.**
