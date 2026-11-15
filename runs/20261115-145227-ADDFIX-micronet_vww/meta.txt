@@ -1,0 +1,12 @@
+label: ADDFIX-micronet_vww
+cmd: /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/micronet_vww.* --gtest_brief=0
+cwd: /home/jordan/alta-npu
+start: 2026-11-15T14:52:27-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2231
+deadline_s: 300
+journal_cursor: s=e1d6040f6453470a8f987eab7cc8d61b;i=105ee5;b=e67a48e7d99c4782993ea9ec357eebb3;m=22a4ddbd;t=66055fea0af39;x=a1bd86c1366d7f0b
+TEFLON_TEST_DELEGATE=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so.addfix-0ac37bd5
+TEFLON_TEST_DATA=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/tests
+end: 2026-11-15T14:52:31-05:00  rc: 0  wall_s: 4

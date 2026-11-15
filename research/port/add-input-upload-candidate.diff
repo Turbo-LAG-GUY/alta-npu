@@ -1,0 +1,21 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 19860905f9f..713ffab2315 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -240,7 +240,6 @@ recreate_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned size)
+       for (int i = 0; i < num_tensors; i++) {
+          if (etna_ml_get_resource(subgraph, i) == old_res) {
+             pipe_resource_reference(&tensors[i]->resource, new_res);
+-            tensors[i]->size = size;
+          }
+       }
+    }
+@@ -593,6 +592,8 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+       } else if (operation->type == ETNA_JOB_TYPE_NN && operation->input_count > 1) { /* Add or Subtraction */
+          recreate_tensor(subgraph, operation->input_tensors[0], operation->input_tensor_sizes[0] +
+                                                                         operation->input_tensor_sizes[1]);
++         /* The buffer holds both operands, the tensor is only the first one */
++         etna_ml_get_tensor(subgraph, operation->input_tensors[0])->size = operation->input_tensor_sizes[0];
+          reference_tensor_with_offset(subgraph,
+                                       operation->input_tensors[0],
+                                       operation->input_tensors[1],

@@ -1,0 +1,77 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 0(u8) 1(u8) 2(i32) out: 3(u8) ReLU
+
+teflon: compiling graph: 4 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.050000  85 no       1x8x8x64
+  1 0.010000  80 yes      64x1x1x64
+  2 0.000500   0 yes      1x1x1x64
+  3 0.309345   0 no       1x8x8x64
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,1,2                3                   
+
+Adding transpose.
+operation 1 input tensor 4 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+Adding detranspose.
+created resource 0x222e74d0 for tensor 0 with size 4096
+created resource 0x222e75e0 for tensor 4 with size 4096
+created resource 0x222e76f0 for tensor 5 with size 4096
+Ensuring all output tensors have their memory backing.
+created resource 0x222e7800 for tensor 3 with size 4096
+
+dumping intermediate graph: 3 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   4
+  1 NN     4   5 in2:   0
+  2 TP     5   3
+
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x1400 (5120) image_size 0x0 (0)
+teflon: compiled graph, took 0 ms
+Dumping buffer from 0xffffbeeaa000 at offset 0 with size 4096 to mesa-input-000-000.bin
+Dumping buffer from 0xffffbeaed000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffffbeea9000 at offset 0 with size 4096 to mesa-input-001-000.bin
+Dumping buffer from 0xffffbeaea000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffffbeaeb000 at offset 0 with size 8192 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffffbeaef000 at offset 0 with size 4096 to mesa-input-002-000.bin
+Dumping buffer from 0xffffbeae9000 at offset 0 with size 4096 to mesa-tp-002-000.bin
+Running the NN job took 0 ms.
+teflon: invoked graph, took 1 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/pw64r_u8.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 1.6,
+ "invoke_ms": [
+  1.21
+ ],
+ "invoke_ms_median": 1.21,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": true
+}

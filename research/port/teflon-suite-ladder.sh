@@ -27,7 +27,8 @@ EXCL=${TFS_EXCLUDE-teflon/ds_cnn.0014:teflon/ds_cnn.whole:$(grep '^teflon/' "$SK
 mkdir -p "$RD"; cd "$K" || exit 1
 if [ -e runs/STOP ]; then echo "runs/STOP is set: clear it (after review) first"; exit 1; fi
 if [ "$(pgrep -c -i steam)" != 0 ]; then echo "Steam is running: close it first"; exit 1; fi
-[ "$(sha256sum "$LIB" | cut -c1-8)" = a05298e9 ] || { echo "upstream lib is not a05298e9"; exit 1; }
+WANT=${TFS_LIB_SHA:-b6c2a28d}   # a05298e9 = 8 patches, b6c2a28d = 9 patches (2026-11-15)
+[ "$(sha256sum "$LIB" | cut -c1-8)" = "$WANT" ] || { echo "upstream lib is not $WANT"; exit 1; }
 scripts/progress upstream-teflon-suite STARTING "research/port/teflon-suite-ladder.sh: $RD; families: $FAMS; excluded: ${EXCL:-none}"
 for fam in $FAMS; do
    label=TFS-$fam

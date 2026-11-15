@@ -1,7 +1,7 @@
 From 348aef38fbd55ad8772d5d427e4e1ee060fe3d43 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 2/8] etnaviv/ml: Don't use a tile wider than the image on V7
+Subject: [PATCH 2/9] etnaviv/ml: Don't use a tile wider than the image on V7
 
 etna_ml_calculate_tiling_v7() computes the tile from the operation's
 width and height, but the NN configuration swaps the two when it fills

@@ -1,7 +1,7 @@
 From 1cf13ef75f467ab16fa6e1f0422711afe4b5adba Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:19 -0500
-Subject: [PATCH 6/8] etnaviv/ml: Don't read past the weights of an addition on
+Subject: [PATCH 6/9] etnaviv/ml: Don't read past the weights of an addition on
  V7
 
 The weight tensor of an addition is 8 bytes: a 2x2 kernel in which only

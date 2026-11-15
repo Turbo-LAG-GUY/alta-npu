@@ -1,0 +1,6 @@
+# kmsg-catch start 2026-11-15T14:51:27-0500 uptime=548.25
+[  562.702638] <6> Purging 528384 bytes
+[  563.162296] <6> Purging 528384 bytes
+[  563.194232] <6> Purging 528384 bytes
+[  563.194979] <6> Purging 2543616 bytes
+# kmsg-catch end uptime=567.76

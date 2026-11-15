@@ -1,7 +1,7 @@
 # Sending the etnaviv ML (Teflon) fixes to Mesa
 
-Eight patches against Mesa `main` (commit 8a9009e0482, 2026-11-14) for the etnaviv NPU driver, found while
-porting compute to the NPU's shader core on the Alta (Amlogic A311D, VIPNano-QI.7120). All eight bugs are in
+Nine patches against Mesa `main` (commit 8a9009e0482, 2026-11-14) for the etnaviv NPU driver, found while
+porting compute to the NPU's shader core on the Alta (Amlogic A311D, VIPNano-QI.7120). All nine bugs are in
 upstream `main` today. **Nothing has been sent.** You review, decide and send.
 
 | Patch | What it fixes | Seen on the board as |
@@ -14,6 +14,7 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
 | 0006 | V7 addition bias correction summed 256 bytes of an 8-byte weight tensor | ADD bias changed from run to run, uint8 too |
 | 0007 | Addition of an NHWC operand and an NCHW operand, output not converted back | uint8 ADD up to 154 levels off |
 | 0008 | V7 accepted SUBTRACT but can only lower ADD | assertion (abort) in `etna_ml_lower_add_v7`; found by Mesa's own `test_teflon` (6 tests) |
+| 0009 | The tensor of an addition's first operand got the size of both operands | input upload reads past the caller's buffer and can overwrite the second operand: `micronet_vww.whole` wrong (found by AddressSanitizer in `test_teflon`) |
 
 ## What was tested, and what was not
 - **On the NPU:** the same code changes in the port tree (`mesa-compute`, based on Mesa main of 2026-04-10).
@@ -39,23 +40,25 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
   `test_teflon` cases that aborted (movenet `0095`, `0136`, `whole`) no longer abort, and 19 of the proven models
   compile to byte-identical streams as with the seven-patch library 549408ab (kept beside the new one as
   `libteflon.so.549408ab-7patches`). The two ladders above ran with the seven-patch library.
-- **Mesa's own Teflon test suite (`test_teflon`) on the NPU, 2026-11-15, main 8a9009e0482 + 8 patches:**
-  1502 tests passed, 35 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). Left out:
+- **Patch 9 (added 2026-11-15):** branch tip a08a8763308, library b6c2a28d. Found by the sanitizer in
+  `test_teflon` (`micronet_vww.whole`: heap-buffer-overflow READ in `etna_ml_subgraph_invoke`); with the patch the
+  sanitizer is silent and the test passes on the NPU (it failed with 8 patches and hung the NPU with unpatched
+  main). `validate_offline.py` passes with the 9-patch library.
+- **Mesa's own Teflon test suite (`test_teflon`) on the NPU, 2026-11-15, main 8a9009e0482 + 9 patches:**
+  1503 tests passed, 34 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). Left out:
   Mesa's skip list for this NPU (32 tests) and the two ds_cnn tests with an int8 FULLY_CONNECTED, which hung the
-  NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`; not known whether unpatched main hangs too).
-  - 8 of the 35 failures are in Mesa's expected-failure list (`src/etnaviv/ci/etnaviv-vipnano-fails.txt`).
-  - Baseline rerun with unpatched main (lib 385f828f) of the other 27: the first 6 (deeplabv3 `0009` `0052`
-    `0056` `0060`, efficientdet_lite0 `whole`, inception_v1 `whole`) fail there too. Then unpatched main HUNG the
-    NPU in `micronet_vww.whole`, which the series runs without a hang (wrong output). 21 tests were not rerun
-    (`incidents/2026-11-15-1438-TFB-micronet_vww`).
+  NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`).
+  - 8 of the 34 failures are in Mesa's expected-failure list (`src/etnaviv/ci/etnaviv-vipnano-fails.txt`).
+  - The other 26 were rerun with unpatched main (lib 385f828f): all 26 fail there too (the two movenet whole
+    models abort there). None of the failures comes from the series.
+  - Unpatched main HUNG the NPU in `micronet_vww.whole` (`incidents/2026-11-15-1438-TFB-micronet_vww`, with the
+    kernel's hang dump); the series does not.
   - Seen in the failures, not fixed by this series: stride-2 depthwise convolutions on odd input sizes
     (ssd_mobilenet_v2 `0011` `0052`, same kind as Mesa's expected posenet failures); 1x1 convolutions with 960
-    input channels on 33x33 (deeplabv3: wrong from row 12 on); an addition whose first operand is a graph input
-    uploads both operands' size from the caller's buffer (`etna_ml_subgraph_invoke`; sanitizer report, a candidate
-    fix exists but is untested on the NPU).
+    input channels on 33x33 (deeplabv3 `0052` `0056` `0060`: wrong from row 12 on).
 
 ## Before you send
-1. **Read all eight patches.** Each message says what was wrong, why, and what was tested. You will be the one
+1. **Read all nine patches.** Each message says what was wrong, why, and what was tested. You will be the one
    answering review questions.
 2. **Mesa's rules on AI** (`docs/submittingpatches.rst` and `AGENTS.md` at 8a9009e0482, read 2026-11-15):
    - Commits must carry `Generated-by: LLM`; no `Co-authored-by` for tools, no model name. The commits now
@@ -84,9 +87,9 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
    reviewers.
 
 ## Files
-- `0001` to `0008`: the patches (`git am` applies them to main 8a9009e0482).
+- `0001` to `0009`: the patches (`git am` applies them to main 8a9009e0482).
 - `MR-DESCRIPTION.md`: text for the merge request.
-- `make_series.py`: how the first seven commits were made (patch 8 was committed by hand on top; do not rerun it) (edits plus messages), for regenerating on a newer `main`.
+- `make_series.py`: how the first seven commits were made (patches 8 and 9 were committed by hand on top; do not rerun it) (edits plus messages), for regenerating on a newer `main`.
 - `models/` (18 small models with CPU references, `manifest.json` has the hashes), `reproduce.py` (checks a model
   against its reference on the CPU, or on hardware with `--delegate`; on this board only through
   `scripts/npu-attempt` with an OK) and `validate_offline.py`: merged 2026-11-15 from the second package that

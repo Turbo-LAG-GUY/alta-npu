@@ -1,18 +1,36 @@
 #!/usr/bin/env bash
-# devcd-watch - copy every etnaviv hang dump (devcoredump) to the kit the moment it appears. NEEDS ROOT; read-only
-# toward the kernel (it only reads /sys/class/devcoredump/devcd*/data, which is root-readable and is deleted by the
-# kernel about 5 minutes after a hang). Runs nothing on the NPU. Written 2026-11-15 after the dump of the
-# TFS-ds_cnn hang was lost (nobody with root was awake).
-# Start (until the next reboot):
-#   sudo systemd-run --unit=alta-devcd-watch /home/jordan/alta-npu/scripts/devcd-watch
-# Stop:   sudo systemctl stop alta-devcd-watch        Status: systemctl status alta-devcd-watch
-# Result: ~/alta-npu/incidents/devcoredumps/<boot id, 8 chars>-up<uptime s>-devcdN.bin, owned by jordan.
+# devcd-watch - copy every etnaviv hang dump (devcoredump) to the kit the moment it appears, and keep only the
+# newest KEEP dumps. NEEDS ROOT; toward the kernel it only READS /sys/class/devcoredump/devcd*/data (root-readable,
+# deleted by the kernel about 5 minutes after a hang). Runs nothing on the NPU.
+# Written 2026-11-15 after the dump of the TFS-ds_cnn hang was lost (nobody with root was awake).
+# Normal use: installed once as a boot service by root-steps/200-devcd-watch-service.sh (no password afterwards).
+#   Status: systemctl status alta-devcd-watch      Log: journalctl -u alta-devcd-watch
+# By hand, until the next reboot: sudo systemd-run --unit=alta-devcd-watch-once ~/alta-npu/scripts/devcd-watch
+# Result: OUT/<boot id, 8 chars>-up<uptime s>-devcdN.bin owned by OWNER, plus one line per dump in OUT/index.log.
+# Settings (environment): DEVCD_OUT (default /home/jordan/alta-npu/incidents/devcoredumps), DEVCD_OWNER (jordan),
+# DEVCD_KEEP (20: older dumps and index lines are deleted; only files matching *-devcd*.bin in OUT are touched).
 set -u
-OUT=/home/jordan/alta-npu/incidents/devcoredumps
-OWNER=jordan
+OUT=${DEVCD_OUT:-/home/jordan/alta-npu/incidents/devcoredumps}
+OWNER=${DEVCD_OWNER:-jordan}
+KEEP=${DEVCD_KEEP:-20}
+case $KEEP in ''|*[!0-9]*|0) echo "DEVCD_KEEP must be a number above 0"; exit 1;; esac
 mkdir -p "$OUT"; chown "$OWNER": "$OUT"
 boot=$(cut -c1-8 /proc/sys/kernel/random/boot_id)
+echo "devcd-watch: boot $boot, copying to $OUT, keeping the newest $KEEP"
+
+prune() {  # delete all but the newest KEEP dumps, and trim the index to KEEP lines
+   local f
+   ls -1t "$OUT"/*-devcd*.bin 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r f; do
+      rm -f -- "$f" && echo "deleted old dump $f"
+   done
+   if [ -f "$OUT/index.log" ] && [ "$(wc -l < "$OUT/index.log")" -gt "$KEEP" ]; then
+      tail -n "$KEEP" "$OUT/index.log" > "$OUT/index.log.tmp" && mv "$OUT/index.log.tmp" "$OUT/index.log"
+      chown "$OWNER": "$OUT/index.log"
+   fi
+}
+
 declare -A seen
+prune
 while :; do
    for d in /sys/class/devcoredump/devcd*; do
       [ -e "$d/data" ] || continue
@@ -23,7 +41,12 @@ while :; do
       if cp "$d/data" "$f"; then
          chown "$OWNER": "$f"; seen[$n]=1
          echo "copied $d/data -> $f ($(stat -c %s "$f") bytes)"
+         printf '%s boot=%s up=%ss %s %s bytes\n' "$(date -Is)" "$boot" "$up" "$(basename "$f")" "$(stat -c %s "$f")" >> "$OUT/index.log"
+         chown "$OWNER": "$OUT/index.log"
+         prune
       fi
    done
+   # a devcdN name can come back after the kernel deleted the old one
+   for n in "${!seen[@]}"; do [ -e "/sys/class/devcoredump/$n" ] || unset "seen[$n]"; done
    sleep 1
 done

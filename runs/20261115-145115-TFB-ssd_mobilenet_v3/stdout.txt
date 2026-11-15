@@ -1,0 +1,20 @@
+Note: Google Test filter = teflon/ssd_mobilenet_v3.whole
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/ssd_mobilenet_v3
+[ RUN      ] teflon/ssd_mobilenet_v3.whole
+CPU: 81 94 8b 99 89 86 87 88 8e 87 88 85 81 85 85 86 90 85 85 85 86 86 83 82 
+NPU: 80 82 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 81 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (82) doesn't match that from the CPU (94).
+[  FAILED  ] teflon/ssd_mobilenet_v3.whole (938 ms)
+[----------] 1 test from teflon/ssd_mobilenet_v3 (938 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (938 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/ssd_mobilenet_v3.whole
+
+ 1 FAILED TEST

@@ -1,0 +1,1 @@
+test_teflon: ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:697: etna_ml_lower_add_v7: Assertion `poperation->type == PIPE_ML_OPERATION_TYPE_ADD' failed.

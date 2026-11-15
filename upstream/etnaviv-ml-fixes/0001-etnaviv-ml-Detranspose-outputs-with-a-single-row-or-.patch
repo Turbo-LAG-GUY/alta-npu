@@ -1,7 +1,7 @@
 From 5fa7d69b5d368ac6bc26482d08412940ac69dad7 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 1/8] etnaviv/ml: Detranspose outputs with a single row or
+Subject: [PATCH 1/9] etnaviv/ml: Detranspose outputs with a single row or
  column
 
 A graph output is only brought back from NCHW to NHWC when is_3d() holds,

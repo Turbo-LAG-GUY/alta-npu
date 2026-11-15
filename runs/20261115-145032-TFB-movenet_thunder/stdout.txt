@@ -1,0 +1,26 @@
+Note: Google Test filter = teflon/movenet_thunder.0115:teflon/movenet_thunder.0118:teflon/movenet_thunder.0151:teflon/movenet_thunder.whole
+[==========] Running 4 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 4 tests from teflon/movenet_thunder
+[ RUN      ] teflon/movenet_thunder.0115
+CPU: 1b 43 e3 80 d5 80 db f3 7f 3d 7f 80 b3 7f 80 7f 7f 
+NPU: 7f 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (7f) doesn't match that from the CPU (1b).
+[  FAILED  ] teflon/movenet_thunder.0115 (35 ms)
+[ RUN      ] teflon/movenet_thunder.0118
+CPU: 31 5e f2 80 e3 80 e9 04 7f 58 7f 80 bc 7f 80 7f 7f 
+NPU: 7f 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (7f) doesn't match that from the CPU (31).
+[  FAILED  ] teflon/movenet_thunder.0118 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0151
+CPU: 1e4233dd 1b9919f3 72407924 00000000 ae6b0cba 15e96d76 37609c65 00000001 fa62be45 3d0ea460 cb5b50d8 00000002 8ee7f46a 2700276d aad66b34 00000003 e9bfbfd8 0000aaaa 00000061 00000004 00000000 b5fb0b00 0000ffff 00000005 
+NPU: 79991edd 9ce9aeba 500efa45 6b008e6a 1bf333d8 15760c40 3d60be60 276df45b 1942bfd6 6d6b7224 a4623765 27e7cbd8 80bfaa34 80808080 80808080 80808080 80808080 0000aaaa 00000061 00000004 00000000 b5fb0b00 0000ffff 00000005 
+../src/gallium/targets/teflon/test_teflon.cpp:166: Failure
+Failed
+Output at 0 from the NPU (79991edd) doesn't match that from the CPU (1e4233dd).
+[  FAILED  ] teflon/movenet_thunder.0151 (24 ms)
+[ RUN      ] teflon/movenet_thunder.whole

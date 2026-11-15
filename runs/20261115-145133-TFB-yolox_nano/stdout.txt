@@ -1,0 +1,76 @@
+Note: Google Test filter = teflon/yolox_nano.0001:teflon/yolox_nano.0104:teflon/yolox_nano.0114:teflon/yolox_nano.0124:teflon/yolox_nano.0127:teflon/yolox_nano.0130:teflon/yolox_nano.0133:teflon/yolox_nano.whole
+[==========] Running 8 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 8 tests from teflon/yolox_nano
+[ RUN      ] teflon/yolox_nano.0001
+CPU: b5 bb ae b0 12 b2 c6 76 ba 18 c9 c2 ba b6 a8 b6 15 ac ca 77 c0 17 cd bc 
+NPU: 96 be 98 92 e4 80 af 3f 8f ff 80 86 aa db c9 8c fa ab bc 5c 87 21 80 b0 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (96) doesn't match that from the CPU (b5).
+[  FAILED  ] teflon/yolox_nano.0001 (147 ms)
+[ RUN      ] teflon/yolox_nano.0104
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0104 (29 ms)
+[ RUN      ] teflon/yolox_nano.0114
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0114 (31 ms)
+[ RUN      ] teflon/yolox_nano.0124
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0124 (44 ms)
+[ RUN      ] teflon/yolox_nano.0127
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0127 (29 ms)
+[ RUN      ] teflon/yolox_nano.0130
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0130 (26 ms)
+[ RUN      ] teflon/yolox_nano.0133
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0133 (40 ms)
+[ RUN      ] teflon/yolox_nano.whole
+CPU: f8 07 ed fd c1 ca c1 c2 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 
+NPU: 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (80) doesn't match that from the CPU (f8).
+[  FAILED  ] teflon/yolox_nano.whole (2207 ms)
+[----------] 8 tests from teflon/yolox_nano (2557 ms total)
+
+[----------] Global test environment tear-down
+[==========] 8 tests from 1 test suite ran. (2557 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 8 tests, listed below:
+[  FAILED  ] teflon/yolox_nano.0001
+[  FAILED  ] teflon/yolox_nano.0104
+[  FAILED  ] teflon/yolox_nano.0114
+[  FAILED  ] teflon/yolox_nano.0124
+[  FAILED  ] teflon/yolox_nano.0127
+[  FAILED  ] teflon/yolox_nano.0130
+[  FAILED  ] teflon/yolox_nano.0133
+[  FAILED  ] teflon/yolox_nano.whole
+
+ 8 FAILED TESTS

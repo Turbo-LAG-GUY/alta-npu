@@ -1,0 +1,99 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v3  supported   in: 0(i8) 1(i8) 2(i32) out: 3(i8)
+  1 ADD             v2  supported   in: 0(i8) 3(i8) out: 4(i8)
+
+teflon: compiling graph: 5 tensors 2 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.050000   5 no       1x8x8x64
+  1 0.010000   0 yes      64x1x1x64
+  2 0.000500   0 yes      1x1x1x64
+  3 0.739037 fffffffe no       1x8x8x64
+  4 0.710998   0 no       1x8x8x64
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,1,2                3                   
+  1 ADD             0,3                  4                   
+
+Adding transpose.
+operation 1 input tensor 5 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+Adding transpose.
+operation 0 input tensor 6 layouts 1 2.
+operation 0 input tensor 3 layouts 1 2.
+Copying layout to output tensor 4.
+type 0 i 0 tensor 4 layout 1 == 2
+Adding detranspose.
+created resource 0xc287df0 for tensor 0 with size 4096
+created resource 0xc287f00 for tensor 5 with size 4096
+created resource 0xc288010 for tensor 6 with size 8192
+src_tensor 6 (ffff7000) dst_tensor 3 offset 4096 size 4096
+created resource 0xc288120 for tensor 7 with size 4096
+Ensuring all output tensors have their memory backing.
+created resource 0xc288230 for tensor 4 with size 4096
+
+dumping intermediate graph: 5 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   5
+  1 NN     5   3 in2:   0
+  2 TP     0   6
+  3 NN     6   7 in2:   3
+  4 TP     7   4
+
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x1400 (5120) image_size 0x0 (0)
+addition input width 8 channels 64
+write_core_sequential core 0 zrl_bits 0 superblocks 1
+addition input width 8 channels 64
+addition input width 8 channels 64
+coefficients_size 0x40 (64) image_size 0x0 (0)
+teflon: compiled graph, took 1 ms
+Dumping buffer from 0xffffbc29f000 at offset 0 with size 4096 to mesa-input-000-000.bin
+Dumping buffer from 0xffffbc299000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffffbc29e000 at offset 0 with size 4096 to mesa-input-001-000.bin
+Dumping buffer from 0xffffbbedd000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffffbbede000 at offset 0 with size 8192 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffffbc29f000 at offset 0 with size 4096 to mesa-input-002-000.bin
+Dumping buffer from 0xffffbbedc000 at offset 0 with size 4096 to mesa-tp-002-000.bin
+Dumping buffer from 0xffffbc29c000 at offset 0 with size 8192 to mesa-input-003-000.bin
+Dumping buffer from 0xffffbbeda000 at offset 0 with size 4096 to mesa-nn-003-000.bin
+Dumping buffer from 0xffffbbedb000 at offset 0 with size 4096 to mesa-compressed-003-000.bin
+Dumping buffer from 0xffffbc29b000 at offset 0 with size 4096 to mesa-input-004-000.bin
+Dumping buffer from 0xffffbbed9000 at offset 0 with size 4096 to mesa-tp-004-000.bin
+Running the NN job took 0 ms.
+teflon: invoked graph, took 1 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/add_i8.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 1.9,
+ "invoke_ms": [
+  1.41
+ ],
+ "invoke_ms_median": 1.41,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 128,
+ "diff_vs_cpu_mean_worst": 128.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}

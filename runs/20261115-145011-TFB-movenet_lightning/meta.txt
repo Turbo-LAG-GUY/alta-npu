@@ -1,0 +1,12 @@
+label: TFB-movenet_lightning
+cmd: /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/movenet_lightning.0115:teflon/movenet_lightning.0118:teflon/movenet_lightning.0151:teflon/movenet_lightning.whole --gtest_brief=0
+cwd: /home/jordan/alta-npu
+start: 2026-11-15T14:50:11-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2141
+deadline_s: 900
+journal_cursor: s=e1d6040f6453470a8f987eab7cc8d61b;i=105ec2;b=e67a48e7d99c4782993ea9ec357eebb3;m=1c2107b7;t=66055f81cd934;x=c278621fda41e3f
+TEFLON_TEST_DELEGATE=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so.base-8a9009e0
+TEFLON_TEST_DATA=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/tests
+end: 2026-11-15T14:50:16-05:00  rc: 134  wall_s: 4

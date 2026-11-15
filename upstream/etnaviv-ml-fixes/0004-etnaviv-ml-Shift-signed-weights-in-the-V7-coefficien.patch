@@ -1,7 +1,7 @@
 From 275a3267f7d4c0ad24077c96c2f1b4ca62325838 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 4/8] etnaviv/ml: Shift signed weights in the V7 coefficient
+Subject: [PATCH 4/9] etnaviv/ml: Shift signed weights in the V7 coefficient
  stream
 
 Signed tensors are stored shifted by 128 (see etna_tensor_zero_point()),

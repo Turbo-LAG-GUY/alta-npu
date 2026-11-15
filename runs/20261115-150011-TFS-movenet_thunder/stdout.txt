@@ -1,0 +1,352 @@
+Note: Google Test filter = teflon/movenet_thunder.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 155 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 155 tests from teflon/movenet_thunder
+[ RUN      ] teflon/movenet_thunder.0000
+[       OK ] teflon/movenet_thunder.0000 (48 ms)
+[ RUN      ] teflon/movenet_thunder.0001
+[       OK ] teflon/movenet_thunder.0001 (36 ms)
+[ RUN      ] teflon/movenet_thunder.0002
+[       OK ] teflon/movenet_thunder.0002 (43 ms)
+[ RUN      ] teflon/movenet_thunder.0003
+[       OK ] teflon/movenet_thunder.0003 (43 ms)
+[ RUN      ] teflon/movenet_thunder.0004
+[       OK ] teflon/movenet_thunder.0004 (45 ms)
+[ RUN      ] teflon/movenet_thunder.0005
+[       OK ] teflon/movenet_thunder.0005 (316 ms)
+[ RUN      ] teflon/movenet_thunder.0006
+[       OK ] teflon/movenet_thunder.0006 (205 ms)
+[ RUN      ] teflon/movenet_thunder.0007
+[       OK ] teflon/movenet_thunder.0007 (147 ms)
+[ RUN      ] teflon/movenet_thunder.0008
+[       OK ] teflon/movenet_thunder.0008 (404 ms)
+[ RUN      ] teflon/movenet_thunder.0009
+[       OK ] teflon/movenet_thunder.0009 (256 ms)
+[ RUN      ] teflon/movenet_thunder.0010
+[       OK ] teflon/movenet_thunder.0010 (102 ms)
+[ RUN      ] teflon/movenet_thunder.0011
+[       OK ] teflon/movenet_thunder.0011 (184 ms)
+[ RUN      ] teflon/movenet_thunder.0012
+[       OK ] teflon/movenet_thunder.0012 (214 ms)
+[ RUN      ] teflon/movenet_thunder.0013
+[       OK ] teflon/movenet_thunder.0013 (114 ms)
+[ RUN      ] teflon/movenet_thunder.0014
+[       OK ] teflon/movenet_thunder.0014 (48 ms)
+[ RUN      ] teflon/movenet_thunder.0015
+[       OK ] teflon/movenet_thunder.0015 (47 ms)
+[ RUN      ] teflon/movenet_thunder.0016
+[       OK ] teflon/movenet_thunder.0016 (184 ms)
+[ RUN      ] teflon/movenet_thunder.0017
+[       OK ] teflon/movenet_thunder.0017 (94 ms)
+[ RUN      ] teflon/movenet_thunder.0018
+[       OK ] teflon/movenet_thunder.0018 (54 ms)
+[ RUN      ] teflon/movenet_thunder.0019
+[       OK ] teflon/movenet_thunder.0019 (86 ms)
+[ RUN      ] teflon/movenet_thunder.0020
+[       OK ] teflon/movenet_thunder.0020 (91 ms)
+[ RUN      ] teflon/movenet_thunder.0021
+[       OK ] teflon/movenet_thunder.0021 (63 ms)
+[ RUN      ] teflon/movenet_thunder.0022
+[       OK ] teflon/movenet_thunder.0022 (33 ms)
+[ RUN      ] teflon/movenet_thunder.0023
+[       OK ] teflon/movenet_thunder.0023 (86 ms)
+[ RUN      ] teflon/movenet_thunder.0024
+[       OK ] teflon/movenet_thunder.0024 (91 ms)
+[ RUN      ] teflon/movenet_thunder.0025
+[       OK ] teflon/movenet_thunder.0025 (58 ms)
+[ RUN      ] teflon/movenet_thunder.0026
+[       OK ] teflon/movenet_thunder.0026 (32 ms)
+[ RUN      ] teflon/movenet_thunder.0027
+[       OK ] teflon/movenet_thunder.0027 (34 ms)
+[ RUN      ] teflon/movenet_thunder.0028
+[       OK ] teflon/movenet_thunder.0028 (88 ms)
+[ RUN      ] teflon/movenet_thunder.0029
+[       OK ] teflon/movenet_thunder.0029 (51 ms)
+[ RUN      ] teflon/movenet_thunder.0030
+[       OK ] teflon/movenet_thunder.0030 (41 ms)
+[ RUN      ] teflon/movenet_thunder.0031
+[       OK ] teflon/movenet_thunder.0031 (65 ms)
+[ RUN      ] teflon/movenet_thunder.0032
+[       OK ] teflon/movenet_thunder.0032 (63 ms)
+[ RUN      ] teflon/movenet_thunder.0033
+[       OK ] teflon/movenet_thunder.0033 (61 ms)
+[ RUN      ] teflon/movenet_thunder.0034
+[       OK ] teflon/movenet_thunder.0034 (32 ms)
+[ RUN      ] teflon/movenet_thunder.0035
+[       OK ] teflon/movenet_thunder.0035 (65 ms)
+[ RUN      ] teflon/movenet_thunder.0036
+[       OK ] teflon/movenet_thunder.0036 (58 ms)
+[ RUN      ] teflon/movenet_thunder.0037
+[       OK ] teflon/movenet_thunder.0037 (58 ms)
+[ RUN      ] teflon/movenet_thunder.0038
+[       OK ] teflon/movenet_thunder.0038 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0039
+[       OK ] teflon/movenet_thunder.0039 (65 ms)
+[ RUN      ] teflon/movenet_thunder.0040
+[       OK ] teflon/movenet_thunder.0040 (58 ms)
+[ RUN      ] teflon/movenet_thunder.0041
+[       OK ] teflon/movenet_thunder.0041 (57 ms)
+[ RUN      ] teflon/movenet_thunder.0042
+[       OK ] teflon/movenet_thunder.0042 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0043
+[       OK ] teflon/movenet_thunder.0043 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0044
+[       OK ] teflon/movenet_thunder.0044 (66 ms)
+[ RUN      ] teflon/movenet_thunder.0045
+[       OK ] teflon/movenet_thunder.0045 (59 ms)
+[ RUN      ] teflon/movenet_thunder.0046
+[       OK ] teflon/movenet_thunder.0046 (66 ms)
+[ RUN      ] teflon/movenet_thunder.0047
+[       OK ] teflon/movenet_thunder.0047 (114 ms)
+[ RUN      ] teflon/movenet_thunder.0048
+[       OK ] teflon/movenet_thunder.0048 (79 ms)
+[ RUN      ] teflon/movenet_thunder.0049
+[       OK ] teflon/movenet_thunder.0049 (97 ms)
+[ RUN      ] teflon/movenet_thunder.0050
+[       OK ] teflon/movenet_thunder.0050 (34 ms)
+[ RUN      ] teflon/movenet_thunder.0051
+[       OK ] teflon/movenet_thunder.0051 (110 ms)
+[ RUN      ] teflon/movenet_thunder.0052
+[       OK ] teflon/movenet_thunder.0052 (71 ms)
+[ RUN      ] teflon/movenet_thunder.0053
+[       OK ] teflon/movenet_thunder.0053 (96 ms)
+[ RUN      ] teflon/movenet_thunder.0054
+[       OK ] teflon/movenet_thunder.0054 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0055
+[       OK ] teflon/movenet_thunder.0055 (110 ms)
+[ RUN      ] teflon/movenet_thunder.0056
+[       OK ] teflon/movenet_thunder.0056 (50 ms)
+[ RUN      ] teflon/movenet_thunder.0057
+[       OK ] teflon/movenet_thunder.0057 (61 ms)
+[ RUN      ] teflon/movenet_thunder.0058
+[       OK ] teflon/movenet_thunder.0058 (94 ms)
+[ RUN      ] teflon/movenet_thunder.0059
+[       OK ] teflon/movenet_thunder.0059 (46 ms)
+[ RUN      ] teflon/movenet_thunder.0060
+[       OK ] teflon/movenet_thunder.0060 (74 ms)
+[ RUN      ] teflon/movenet_thunder.0061
+[       OK ] teflon/movenet_thunder.0061 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0062
+[       OK ] teflon/movenet_thunder.0062 (85 ms)
+[ RUN      ] teflon/movenet_thunder.0063
+[       OK ] teflon/movenet_thunder.0063 (47 ms)
+[ RUN      ] teflon/movenet_thunder.0064
+[       OK ] teflon/movenet_thunder.0064 (82 ms)
+[ RUN      ] teflon/movenet_thunder.0065
+[       OK ] teflon/movenet_thunder.0065 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0066
+[       OK ] teflon/movenet_thunder.0066 (87 ms)
+[ RUN      ] teflon/movenet_thunder.0067
+[       OK ] teflon/movenet_thunder.0067 (47 ms)
+[ RUN      ] teflon/movenet_thunder.0068
+[       OK ] teflon/movenet_thunder.0068 (128 ms)
+[ RUN      ] teflon/movenet_thunder.0069
+[       OK ] teflon/movenet_thunder.0069 (111 ms)
+[ RUN      ] teflon/movenet_thunder.0070
+[       OK ] teflon/movenet_thunder.0070 (35 ms)
+[ RUN      ] teflon/movenet_thunder.0071
+[       OK ] teflon/movenet_thunder.0071 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0072
+[       OK ] teflon/movenet_thunder.0072 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0073
+[       OK ] teflon/movenet_thunder.0073 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0074
+[       OK ] teflon/movenet_thunder.0074 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0075
+[       OK ] teflon/movenet_thunder.0075 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0076
+[       OK ] teflon/movenet_thunder.0076 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0077
+[       OK ] teflon/movenet_thunder.0077 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0078
+[       OK ] teflon/movenet_thunder.0078 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0079
+[       OK ] teflon/movenet_thunder.0079 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0080
+[       OK ] teflon/movenet_thunder.0080 (40 ms)
+[ RUN      ] teflon/movenet_thunder.0081
+[       OK ] teflon/movenet_thunder.0081 (43 ms)
+[ RUN      ] teflon/movenet_thunder.0082
+[       OK ] teflon/movenet_thunder.0082 (40 ms)
+[ RUN      ] teflon/movenet_thunder.0083
+[       OK ] teflon/movenet_thunder.0083 (41 ms)
+[ RUN      ] teflon/movenet_thunder.0084
+[       OK ] teflon/movenet_thunder.0084 (84 ms)
+[ RUN      ] teflon/movenet_thunder.0085
+[       OK ] teflon/movenet_thunder.0085 (45 ms)
+[ RUN      ] teflon/movenet_thunder.0086
+[       OK ] teflon/movenet_thunder.0086 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0087
+[       OK ] teflon/movenet_thunder.0087 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0088
+[       OK ] teflon/movenet_thunder.0088 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0089
+[       OK ] teflon/movenet_thunder.0089 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0090
+[       OK ] teflon/movenet_thunder.0090 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0091
+[       OK ] teflon/movenet_thunder.0091 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0092
+[       OK ] teflon/movenet_thunder.0092 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0093
+[       OK ] teflon/movenet_thunder.0093 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0094
+[       OK ] teflon/movenet_thunder.0094 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0095
+[       OK ] teflon/movenet_thunder.0095 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0096
+[       OK ] teflon/movenet_thunder.0096 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0097
+[       OK ] teflon/movenet_thunder.0097 (24 ms)
+[ RUN      ] teflon/movenet_thunder.0098
+[       OK ] teflon/movenet_thunder.0098 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0099
+[       OK ] teflon/movenet_thunder.0099 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0100
+[       OK ] teflon/movenet_thunder.0100 (44 ms)
+[ RUN      ] teflon/movenet_thunder.0101
+[       OK ] teflon/movenet_thunder.0101 (82 ms)
+[ RUN      ] teflon/movenet_thunder.0102
+[       OK ] teflon/movenet_thunder.0102 (54 ms)
+[ RUN      ] teflon/movenet_thunder.0103
+[       OK ] teflon/movenet_thunder.0103 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0104
+[       OK ] teflon/movenet_thunder.0104 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0105
+[       OK ] teflon/movenet_thunder.0105 (29 ms)
+[ RUN      ] teflon/movenet_thunder.0106
+[       OK ] teflon/movenet_thunder.0106 (48 ms)
+[ RUN      ] teflon/movenet_thunder.0107
+[       OK ] teflon/movenet_thunder.0107 (84 ms)
+[ RUN      ] teflon/movenet_thunder.0108
+[       OK ] teflon/movenet_thunder.0108 (66 ms)
+[ RUN      ] teflon/movenet_thunder.0109
+[       OK ] teflon/movenet_thunder.0109 (45 ms)
+[ RUN      ] teflon/movenet_thunder.0110
+[       OK ] teflon/movenet_thunder.0110 (81 ms)
+[ RUN      ] teflon/movenet_thunder.0111
+[       OK ] teflon/movenet_thunder.0111 (71 ms)
+[ RUN      ] teflon/movenet_thunder.0113
+[       OK ] teflon/movenet_thunder.0113 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0114
+[       OK ] teflon/movenet_thunder.0114 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0115
+CPU: 1b 43 e3 80 d5 80 db f3 7f 3d 7f 80 b3 7f 80 7f 7f 
+NPU: 1b 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (80) doesn't match that from the CPU (43).
+[  FAILED  ] teflon/movenet_thunder.0115 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0116
+[       OK ] teflon/movenet_thunder.0116 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0117
+[       OK ] teflon/movenet_thunder.0117 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0118
+CPU: 31 5e f2 80 e3 80 e9 04 7f 58 7f 80 bc 7f 80 7f 7f 
+NPU: 31 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 80 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (80) doesn't match that from the CPU (5e).
+[  FAILED  ] teflon/movenet_thunder.0118 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0119
+[       OK ] teflon/movenet_thunder.0119 (31 ms)
+[ RUN      ] teflon/movenet_thunder.0120
+[       OK ] teflon/movenet_thunder.0120 (32 ms)
+[ RUN      ] teflon/movenet_thunder.0121
+[       OK ] teflon/movenet_thunder.0121 (34 ms)
+[ RUN      ] teflon/movenet_thunder.0122
+[       OK ] teflon/movenet_thunder.0122 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0123
+[       OK ] teflon/movenet_thunder.0123 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0124
+[       OK ] teflon/movenet_thunder.0124 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0125
+[       OK ] teflon/movenet_thunder.0125 (39 ms)
+[ RUN      ] teflon/movenet_thunder.0126
+[       OK ] teflon/movenet_thunder.0126 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0127
+[       OK ] teflon/movenet_thunder.0127 (33 ms)
+[ RUN      ] teflon/movenet_thunder.0128
+[       OK ] teflon/movenet_thunder.0128 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0129
+[       OK ] teflon/movenet_thunder.0129 (30 ms)
+[ RUN      ] teflon/movenet_thunder.0130
+[       OK ] teflon/movenet_thunder.0130 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0131
+[       OK ] teflon/movenet_thunder.0131 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0132
+[       OK ] teflon/movenet_thunder.0132 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0133
+[       OK ] teflon/movenet_thunder.0133 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0134
+[       OK ] teflon/movenet_thunder.0134 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0135
+[       OK ] teflon/movenet_thunder.0135 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0136
+[       OK ] teflon/movenet_thunder.0136 (27 ms)
+[ RUN      ] teflon/movenet_thunder.0137
+[       OK ] teflon/movenet_thunder.0137 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0138
+[       OK ] teflon/movenet_thunder.0138 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0139
+[       OK ] teflon/movenet_thunder.0139 (24 ms)
+[ RUN      ] teflon/movenet_thunder.0140
+[       OK ] teflon/movenet_thunder.0140 (28 ms)
+[ RUN      ] teflon/movenet_thunder.0142
+[       OK ] teflon/movenet_thunder.0142 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0143
+[       OK ] teflon/movenet_thunder.0143 (24 ms)
+[ RUN      ] teflon/movenet_thunder.0144
+[       OK ] teflon/movenet_thunder.0144 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0145
+[       OK ] teflon/movenet_thunder.0145 (24 ms)
+[ RUN      ] teflon/movenet_thunder.0146
+[       OK ] teflon/movenet_thunder.0146 (24 ms)
+[ RUN      ] teflon/movenet_thunder.0147
+[       OK ] teflon/movenet_thunder.0147 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0148
+[       OK ] teflon/movenet_thunder.0148 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0149
+[       OK ] teflon/movenet_thunder.0149 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0150
+[       OK ] teflon/movenet_thunder.0150 (26 ms)
+[ RUN      ] teflon/movenet_thunder.0151
+CPU: 1e4233dd 1b9919f3 72407924 00000000 ae6b0cba 15e96d76 37609c65 00000001 fa62be45 3d0ea460 cb5b50d8 00000002 8ee7f46a 2700276d aad66b34 00000003 eabfbfd8 0000aaaa 00000061 00000004 00000000 9485d660 0000ffff 00000005 
+NPU: 804233dd 8019f31e 80241b99 80724079 806b0cba 806d76ae 806515e9 8037609c 8062be45 80a460fa 80d83d0e 80cb5b50 80e7f46a 80276d8e 80342700 80aad66b 80bfbfd8 0000aaaa 00000061 00000004 00000000 9485d660 0000ffff 00000005 
+../src/gallium/targets/teflon/test_teflon.cpp:166: Failure
+Failed
+Output at 0 from the NPU (804233dd) doesn't match that from the CPU (1e4233dd).
+[  FAILED  ] teflon/movenet_thunder.0151 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0153
+[       OK ] teflon/movenet_thunder.0153 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0154
+[       OK ] teflon/movenet_thunder.0154 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0155
+[       OK ] teflon/movenet_thunder.0155 (25 ms)
+[ RUN      ] teflon/movenet_thunder.0156
+[       OK ] teflon/movenet_thunder.0156 (25 ms)
+[ RUN      ] teflon/movenet_thunder.whole
+../src/gallium/targets/teflon/test_executor.cpp:191: Failure
+Expected equality of these values:
+  TfLiteInterpreterInvoke(interpreter)
+    Which is: 1
+  kTfLiteOk
+    Which is: 0
+CPU: 0.172609 0.35726 0.0160566 0.124439 0.429515 0.0280991 0.124439 0.381345 0.0160566 0.108382 0.493741 0.0120425 0.0923256 0.345217 0.0280991 0.16458 0.313104 0.0722548 0.188665 0.325147 0.0481699 0.549939 0.401416 0.0722548 
+NPU: 0.0117188 0.0078125 0.0117188 0.0117188 0.015625 0.015625 0.0742188 0.0273438 0.0742188 0.0273438 0.0742188 0.015625 0.0117188 0.046875 0.046875 0.046875 0.0273438 0.0117188 0.00390625 0.0078125 0.0078125 0.00390625 0.015625 0.015625 
+../src/gallium/targets/teflon/test_teflon.cpp:81: Failure
+Failed
+Output at 1 from the NPU (0.0078125) doesn't match that from the CPU (0.35725995898246765).
+[  FAILED  ] teflon/movenet_thunder.whole (3959 ms)
+[----------] 155 tests from teflon/movenet_thunder (12713 ms total)
+
+[----------] Global test environment tear-down
+[==========] 155 tests from 1 test suite ran. (12713 ms total)
+[  PASSED  ] 151 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] teflon/movenet_thunder.0115
+[  FAILED  ] teflon/movenet_thunder.0118
+[  FAILED  ] teflon/movenet_thunder.0151
+[  FAILED  ] teflon/movenet_thunder.whole
+
+ 4 FAILED TESTS

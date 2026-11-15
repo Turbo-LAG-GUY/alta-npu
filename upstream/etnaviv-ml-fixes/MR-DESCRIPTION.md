@@ -1,6 +1,6 @@
 etnaviv/ml: V7 int8, addition and layout fixes
 
-Eight fixes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
+Nine fixes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
 running small synthetic models through Teflon and comparing every output with the CPU interpreter.
 
 1. **Detranspose outputs with a single row or column.** `is_3d()` skipped `[1,1,W,C]` and `[1,H,1,C]` graph
@@ -18,6 +18,8 @@ running small synthetic models through Teflon and comparing every output with th
    added byte by byte, and the output wasn't detransposed.
 8. **Don't accept subtractions on V7.** Only V8 can lower SUBTRACT; on V7 it hit the assertion in
    `etna_ml_lower_add_v7()` (six `test_teflon` cases abort).
+9. **Keep the size of the first operand of an addition.** The input upload copied both operands' size from
+   the caller's buffer (AddressSanitizer report in `test_teflon`), which could also overwrite the second operand.
 
 ### Testing
 
@@ -34,8 +36,10 @@ byte-identical outputs:
 
 This branch (main + the seven commits) builds, and with a DRM shim that records submits instead of running
 them it produces exactly the NN/TP configurations, coefficient buffers and command streams of the tree that
-was tested on hardware, for 20 models. I have not run the Teflon
-test suite. I have no V8 hardware; patches 1 and 7 touch the layout pass that V8 shares.
+was tested on hardware, for 20 models. `test_teflon` on the VIPNano-QI.7120 with all nine commits: 1503 passed, 34 failed, with the 32 tests of
+etnaviv-vipnano-skips.txt and the two ds_cnn tests with a FULLY_CONNECTED left out (teflon/ds_cnn.0014 hung the
+NPU). 8 of the failures are in etnaviv-vipnano-fails.txt; the other 26 fail without the series as well.
+Without the series micronet_vww.whole hung the NPU; with it the test passes. I have no V8 hardware; patches 1 and 7 touch the layout pass that V8 shares.
 
 Not addressed: per-axis quantized convolutions are still rejected.
 

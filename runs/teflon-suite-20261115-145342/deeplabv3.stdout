@@ -1,0 +1,207 @@
+Note: Google Test filter = teflon/deeplabv3.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 73 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 73 tests from teflon/deeplabv3
+[ RUN      ] teflon/deeplabv3.0000
+[       OK ] teflon/deeplabv3.0000 (442 ms)
+[ RUN      ] teflon/deeplabv3.0001
+[       OK ] teflon/deeplabv3.0001 (333 ms)
+[ RUN      ] teflon/deeplabv3.0002
+[       OK ] teflon/deeplabv3.0002 (201 ms)
+[ RUN      ] teflon/deeplabv3.0003
+[       OK ] teflon/deeplabv3.0003 (547 ms)
+[ RUN      ] teflon/deeplabv3.0004
+CPU: 00 12 c2 00 34 09 00 73 00 13 ff 00 00 00 00 09 00 49 00 56 6f 2f 00 3d 
+NPU: 2d 00 68 00 00 00 5f ea 63 00 00 ca 00 00 00 00 00 00 c2 68 00 12 1b ea 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 0 from the NPU (2d) doesn't match that from the CPU (00).
+[  FAILED  ] teflon/deeplabv3.0004 (502 ms)
+[ RUN      ] teflon/deeplabv3.0005
+[       OK ] teflon/deeplabv3.0005 (153 ms)
+[ RUN      ] teflon/deeplabv3.0006
+[       OK ] teflon/deeplabv3.0006 (270 ms)
+[ RUN      ] teflon/deeplabv3.0007
+[       OK ] teflon/deeplabv3.0007 (402 ms)
+[ RUN      ] teflon/deeplabv3.0008
+[       OK ] teflon/deeplabv3.0008 (195 ms)
+[ RUN      ] teflon/deeplabv3.0009
+CPU: fd 5a 0c 00 ff 00 84 56 00 47 0a 7c ca 00 69 9b 40 ad ae 00 78 ba 8d 00 
+NPU: fd 5a 0c 00 ff 00 84 56 00 47 0a 7c ca 00 69 9b 40 ad ae 00 78 ba 8d 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 1096 from the NPU (d6) doesn't match that from the CPU (00).
+[  FAILED  ] teflon/deeplabv3.0009 (62 ms)
+[ RUN      ] teflon/deeplabv3.0010
+[       OK ] teflon/deeplabv3.0010 (265 ms)
+[ RUN      ] teflon/deeplabv3.0011
+CPU: 00 48 ff 00 00 38 3c a5 5e a1 ff 00 4d 23 00 04 00 00 91 2e 8a 3e 9c 68 
+NPU: 00 ff 00 00 00 00 00 ff c3 ff ff 00 c0 00 00 00 90 00 ff 50 e7 00 ff 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 1 from the NPU (ff) doesn't match that from the CPU (48).
+[  FAILED  ] teflon/deeplabv3.0011 (203 ms)
+[ RUN      ] teflon/deeplabv3.0012
+[       OK ] teflon/deeplabv3.0012 (83 ms)
+[ RUN      ] teflon/deeplabv3.0013
+[       OK ] teflon/deeplabv3.0013 (105 ms)
+[ RUN      ] teflon/deeplabv3.0014
+[       OK ] teflon/deeplabv3.0014 (166 ms)
+[ RUN      ] teflon/deeplabv3.0015
+[       OK ] teflon/deeplabv3.0015 (92 ms)
+[ RUN      ] teflon/deeplabv3.0016
+[       OK ] teflon/deeplabv3.0016 (38 ms)
+[ RUN      ] teflon/deeplabv3.0017
+[       OK ] teflon/deeplabv3.0017 (94 ms)
+[ RUN      ] teflon/deeplabv3.0018
+[       OK ] teflon/deeplabv3.0018 (164 ms)
+[ RUN      ] teflon/deeplabv3.0019
+[       OK ] teflon/deeplabv3.0019 (116 ms)
+[ RUN      ] teflon/deeplabv3.0020
+[       OK ] teflon/deeplabv3.0020 (39 ms)
+[ RUN      ] teflon/deeplabv3.0021
+[       OK ] teflon/deeplabv3.0021 (109 ms)
+[ RUN      ] teflon/deeplabv3.0022
+CPU: 00 3d 00 55 00 00 52 00 5e 96 00 73 50 28 f5 45 a2 70 00 38 8f 70 00 00 
+NPU: 00 00 00 e8 db 00 b9 00 ff c3 00 ef 00 00 ff 23 ff 29 00 00 ff cc 00 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 1 from the NPU (00) doesn't match that from the CPU (3d).
+[  FAILED  ] teflon/deeplabv3.0022 (100 ms)
+[ RUN      ] teflon/deeplabv3.0023
+[       OK ] teflon/deeplabv3.0023 (54 ms)
+[ RUN      ] teflon/deeplabv3.0024
+[       OK ] teflon/deeplabv3.0024 (71 ms)
+[ RUN      ] teflon/deeplabv3.0025
+[       OK ] teflon/deeplabv3.0025 (148 ms)
+[ RUN      ] teflon/deeplabv3.0026
+[       OK ] teflon/deeplabv3.0026 (70 ms)
+[ RUN      ] teflon/deeplabv3.0027
+[       OK ] teflon/deeplabv3.0027 (32 ms)
+[ RUN      ] teflon/deeplabv3.0028
+[       OK ] teflon/deeplabv3.0028 (72 ms)
+[ RUN      ] teflon/deeplabv3.0029
+[       OK ] teflon/deeplabv3.0029 (150 ms)
+[ RUN      ] teflon/deeplabv3.0030
+[       OK ] teflon/deeplabv3.0030 (70 ms)
+[ RUN      ] teflon/deeplabv3.0031
+[       OK ] teflon/deeplabv3.0031 (31 ms)
+[ RUN      ] teflon/deeplabv3.0032
+[       OK ] teflon/deeplabv3.0032 (71 ms)
+[ RUN      ] teflon/deeplabv3.0033
+[       OK ] teflon/deeplabv3.0033 (147 ms)
+[ RUN      ] teflon/deeplabv3.0034
+[       OK ] teflon/deeplabv3.0034 (72 ms)
+[ RUN      ] teflon/deeplabv3.0035
+[       OK ] teflon/deeplabv3.0035 (32 ms)
+[ RUN      ] teflon/deeplabv3.0036
+[       OK ] teflon/deeplabv3.0036 (72 ms)
+[ RUN      ] teflon/deeplabv3.0037
+[       OK ] teflon/deeplabv3.0037 (150 ms)
+[ RUN      ] teflon/deeplabv3.0038
+[       OK ] teflon/deeplabv3.0038 (82 ms)
+[ RUN      ] teflon/deeplabv3.0039
+[       OK ] teflon/deeplabv3.0039 (111 ms)
+[ RUN      ] teflon/deeplabv3.0040
+[       OK ] teflon/deeplabv3.0040 (252 ms)
+[ RUN      ] teflon/deeplabv3.0041
+[       OK ] teflon/deeplabv3.0041 (110 ms)
+[ RUN      ] teflon/deeplabv3.0042
+[       OK ] teflon/deeplabv3.0042 (35 ms)
+[ RUN      ] teflon/deeplabv3.0043
+[       OK ] teflon/deeplabv3.0043 (109 ms)
+[ RUN      ] teflon/deeplabv3.0044
+[       OK ] teflon/deeplabv3.0044 (250 ms)
+[ RUN      ] teflon/deeplabv3.0045
+[       OK ] teflon/deeplabv3.0045 (106 ms)
+[ RUN      ] teflon/deeplabv3.0046
+[       OK ] teflon/deeplabv3.0046 (38 ms)
+[ RUN      ] teflon/deeplabv3.0047
+[       OK ] teflon/deeplabv3.0047 (112 ms)
+[ RUN      ] teflon/deeplabv3.0048
+[       OK ] teflon/deeplabv3.0048 (252 ms)
+[ RUN      ] teflon/deeplabv3.0049
+[       OK ] teflon/deeplabv3.0049 (139 ms)
+[ RUN      ] teflon/deeplabv3.0050
+[       OK ] teflon/deeplabv3.0050 (219 ms)
+[ RUN      ] teflon/deeplabv3.0051
+[       OK ] teflon/deeplabv3.0051 (226 ms)
+[ RUN      ] teflon/deeplabv3.0052
+CPU: 00 b9 4d eb 3f ff d7 8e 00 ff ad 94 5a 75 5d dd ff 5f 00 2d 12 4e 00 ff 
+NPU: 00 b9 4d eb 3f ff d7 8e 00 ff ad 94 5a 75 5d dd ff 5f 00 2d 12 4e 00 ff 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 63360 from the NPU (49) doesn't match that from the CPU (5a).
+[  FAILED  ] teflon/deeplabv3.0052 (209 ms)
+[ RUN      ] teflon/deeplabv3.0053
+[       OK ] teflon/deeplabv3.0053 (42 ms)
+[ RUN      ] teflon/deeplabv3.0054
+[       OK ] teflon/deeplabv3.0054 (219 ms)
+[ RUN      ] teflon/deeplabv3.0055
+[       OK ] teflon/deeplabv3.0055 (231 ms)
+[ RUN      ] teflon/deeplabv3.0056
+CPU: 00 2d 16 43 ff 09 e2 ae 87 ff fd ba 21 00 a0 14 ff 9d 8f 6c 0f 5d 65 ff 
+NPU: 00 2d 16 43 ff 09 e2 ae 87 ff fd ba 21 00 a0 14 ff 9d 8f 6c 0f 5d 65 ff 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 63361 from the NPU (ff) doesn't match that from the CPU (89).
+[  FAILED  ] teflon/deeplabv3.0056 (211 ms)
+[ RUN      ] teflon/deeplabv3.0057
+[       OK ] teflon/deeplabv3.0057 (46 ms)
+[ RUN      ] teflon/deeplabv3.0058
+[       OK ] teflon/deeplabv3.0058 (224 ms)
+[ RUN      ] teflon/deeplabv3.0059
+[       OK ] teflon/deeplabv3.0059 (227 ms)
+[ RUN      ] teflon/deeplabv3.0060
+CPU: 8c ff 5e a1 30 5c 7b 5d 34 78 63 67 8c 96 ba 28 73 8b a3 c8 43 b0 99 00 
+NPU: 8c ff 5e a1 30 5c 7b 5d 34 78 63 67 8c 96 ba 28 73 8b a3 c8 43 b0 99 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 126720 from the NPU (8f) doesn't match that from the CPU (d7).
+[  FAILED  ] teflon/deeplabv3.0060 (340 ms)
+[ RUN      ] teflon/deeplabv3.0061
+[       OK ] teflon/deeplabv3.0061 (37 ms)
+[ RUN      ] teflon/deeplabv3.0062
+[       OK ] teflon/deeplabv3.0062 (125 ms)
+[ RUN      ] teflon/deeplabv3.0063
+[       OK ] teflon/deeplabv3.0063 (32 ms)
+[ RUN      ] teflon/deeplabv3.0064
+[       OK ] teflon/deeplabv3.0064 (29 ms)
+[ RUN      ] teflon/deeplabv3.0065
+[       OK ] teflon/deeplabv3.0065 (42 ms)
+[ RUN      ] teflon/deeplabv3.0066
+[       OK ] teflon/deeplabv3.0066 (64 ms)
+[ RUN      ] teflon/deeplabv3.0067
+[       OK ] teflon/deeplabv3.0067 (176 ms)
+[ RUN      ] teflon/deeplabv3.0068
+[       OK ] teflon/deeplabv3.0068 (44 ms)
+[ RUN      ] teflon/deeplabv3.0069
+[       OK ] teflon/deeplabv3.0069 (26 ms)
+[ RUN      ] teflon/deeplabv3.0070
+[       OK ] teflon/deeplabv3.0070 (123 ms)
+[ RUN      ] teflon/deeplabv3.0071
+[       OK ] teflon/deeplabv3.0071 (212 ms)
+[ RUN      ] teflon/deeplabv3.whole
+CPU: 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 
+NPU: 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 0000000000000000 
+../src/gallium/targets/teflon/test_teflon.cpp:200: Failure
+Failed
+Output at 425 from the NPU (0000000000000000) doesn't match that from the CPU (0000000000000014).
+[  FAILED  ] teflon/deeplabv3.whole (5733 ms)
+[----------] 73 tests from teflon/deeplabv3 (16397 ms total)
+
+[----------] Global test environment tear-down
+[==========] 73 tests from 1 test suite ran. (16398 ms total)
+[  PASSED  ] 65 tests.
+[  FAILED  ] 8 tests, listed below:
+[  FAILED  ] teflon/deeplabv3.0004
+[  FAILED  ] teflon/deeplabv3.0009
+[  FAILED  ] teflon/deeplabv3.0011
+[  FAILED  ] teflon/deeplabv3.0022
+[  FAILED  ] teflon/deeplabv3.0052
+[  FAILED  ] teflon/deeplabv3.0056
+[  FAILED  ] teflon/deeplabv3.0060
+[  FAILED  ] teflon/deeplabv3.whole
+
+ 8 FAILED TESTS
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-145651-TFS-deeplabv3

@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-15T14:55:38-05:00 duration=1080s interval=1s
+14:55:38 up=798.60 npu=active active_ms=786218 npu_irqs=262 cma_free_kb=1640 memavail_mb=2223 temps_c=cpu:31,ddr:33
+14:55:39 up=799.79 npu=active active_ms=787407 npu_irqs=262 cma_free_kb=1648 memavail_mb=2223 temps_c=cpu:30,ddr:32
+14:55:40 up=800.91 npu=active active_ms=788531 npu_irqs=262 cma_free_kb=1648 memavail_mb=2223 temps_c=cpu:30,ddr:33
+14:55:41 up=802.03 npu=active active_ms=789651 npu_irqs=262 cma_free_kb=1648 memavail_mb=2224 temps_c=cpu:30,ddr:31
+14:55:42 up=803.16 npu=active active_ms=790778 npu_irqs=262 cma_free_kb=1648 memavail_mb=2223 temps_c=cpu:31,ddr:32
+14:55:43 up=804.25 npu=active active_ms=791885 npu_irqs=262 cma_free_kb=1648 memavail_mb=2218 temps_c=cpu:32,ddr:34
+14:55:44 up=805.35 npu=active active_ms=792978 npu_irqs=263 cma_free_kb=1656 memavail_mb=2216 temps_c=cpu:36,ddr:36
+14:55:45 up=806.47 npu=active active_ms=794095 npu_irqs=263 cma_free_kb=1656 memavail_mb=2215 temps_c=cpu:34,ddr:34
+14:55:47 up=807.57 npu=active active_ms=795193 npu_irqs=263 cma_free_kb=1660 memavail_mb=2214 temps_c=cpu:30,ddr:32
+14:55:48 up=808.68 npu=active active_ms=796305 npu_irqs=263 cma_free_kb=1660 memavail_mb=2217 temps_c=cpu:30,ddr:31
+14:55:49 up=809.79 npu=active active_ms=797415 npu_irqs=263 cma_free_kb=1660 memavail_mb=2201 temps_c=cpu:31,ddr:32
+14:55:50 up=810.88 npu=active active_ms=798505 npu_irqs=263 cma_free_kb=0 memavail_mb=2111 temps_c=cpu:32,ddr:33
+14:55:51 up=812.03 npu=active active_ms=799652 npu_irqs=263 cma_free_kb=0 memavail_mb=2108 temps_c=cpu:30,ddr:32
+14:55:52 up=813.13 npu=active active_ms=800748 npu_irqs=263 cma_free_kb=0 memavail_mb=2106 temps_c=cpu:31,ddr:32
+14:55:53 up=814.23 npu=active active_ms=801852 npu_irqs=263 cma_free_kb=564 memavail_mb=2103 temps_c=cpu:30,ddr:31
+14:55:54 up=815.33 npu=active active_ms=802951 npu_irqs=263 cma_free_kb=564 memavail_mb=2105 temps_c=cpu:30,ddr:32
+14:55:55 up=816.44 npu=active active_ms=804061 npu_irqs=263 cma_free_kb=564 memavail_mb=2104 temps_c=cpu:30,ddr:31
