@@ -1,0 +1,27 @@
+teflon/deeplabv3.0009	FAILED	FAILED
+teflon/deeplabv3.0052	FAILED	FAILED
+teflon/deeplabv3.0056	FAILED	FAILED
+teflon/deeplabv3.0060	FAILED	FAILED
+teflon/efficientdet_lite0.whole	FAILED	FAILED
+teflon/inception_v1.whole	FAILED	FAILED
+teflon/micronet_vww.whole	FAILED	not run
+teflon/movenet_lightning.0115	FAILED	not run
+teflon/movenet_lightning.0118	FAILED	not run
+teflon/movenet_lightning.0151	FAILED	not run
+teflon/movenet_lightning.whole	FAILED	not run
+teflon/movenet_thunder.0115	FAILED	not run
+teflon/movenet_thunder.0118	FAILED	not run
+teflon/movenet_thunder.0151	FAILED	not run
+teflon/movenet_thunder.whole	FAILED	not run
+teflon/ssd_mobilenet_v2.0011	FAILED	not run
+teflon/ssd_mobilenet_v2.0052	FAILED	not run
+teflon/ssd_mobilenet_v2.whole	FAILED	not run
+teflon/ssd_mobilenet_v3.whole	FAILED	not run
+teflon/yolox_nano.0001	FAILED	not run
+teflon/yolox_nano.0104	FAILED	not run
+teflon/yolox_nano.0114	FAILED	not run
+teflon/yolox_nano.0124	FAILED	not run
+teflon/yolox_nano.0127	FAILED	not run
+teflon/yolox_nano.0130	FAILED	not run
+teflon/yolox_nano.0133	FAILED	not run
+teflon/yolox_nano.whole	FAILED	not run

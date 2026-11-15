@@ -1,0 +1,21 @@
+Note: Google Test filter = teflon/inception_v1.whole
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/inception_v1
+[ RUN      ] teflon/inception_v1.whole
+CPU: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+NPU: 00 00 48 00 00 00 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 2 from the NPU (48) doesn't match that from the CPU (00).
+[  FAILED  ] teflon/inception_v1.whole (2390 ms)
+[----------] 1 test from teflon/inception_v1 (2390 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2390 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/inception_v1.whole
+
+ 1 FAILED TEST
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-143739-TFB-inception_v1

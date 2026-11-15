@@ -1,0 +1,3 @@
+[ 1548.882690] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[ 1548.882848] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: test_teflon (/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/micronet_vww.whole --gtest_brief=0)
+[ 1549.921382] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!

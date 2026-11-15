@@ -1,0 +1,21 @@
+Note: Google Test filter = teflon/efficientdet_lite0.whole
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/efficientdet_lite0
+[ RUN      ] teflon/efficientdet_lite0.whole
+CPU: 0.00411004 0.892037 0.0228279 0.929473 0.0326881 0.00426467 0.119443 0.0207353 0.00498537 0.187724 0.0309771 0.214683 0.00490643 0.192043 0.0239694 0.225591 0.00426467 0.857705 0.0207353 0.906053 0.00223391 0.910608 0.024704 0.953151 
+NPU: 0.0479545 -0.203052 0.917242 0.803052 -0.313427 -0.15511 0.801794 0.514282 -0.0918193 0.075768 0.691819 0.8461 -0.0428815 0.214474 0.944442 1.03787 -0.344845 0.447423 0.833211 1.14173 0.125776 -0.136131 1.2825 0.521142 
+../src/gallium/targets/teflon/test_teflon.cpp:81: Failure
+Failed
+Output at 1 from the NPU (-0.20305174589157104) doesn't match that from the CPU (0.89203715324401855).
+[  FAILED  ] teflon/efficientdet_lite0.whole (3684 ms)
+[----------] 1 test from teflon/efficientdet_lite0 (3684 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3684 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] teflon/efficientdet_lite0.whole
+
+ 1 FAILED TEST
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261115-143718-TFB-efficientdet_lite0

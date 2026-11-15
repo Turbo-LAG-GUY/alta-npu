@@ -33,8 +33,19 @@ EXACT, ln_64x384_i8 switch OFF (int8 NN ADD) max 1 / mean 0.05 at 2.14 ms (ON, e
 2026-11-14; every bug still there) + README.md + MR-DESCRIPTION.md + make_series.py; branch alta-etnaviv-ml-fixes in
 the worktree ~/Documents/AI_Projects/mesa-upstream-fixes (a worktree of AI_Projects/mesa; its build/ = upstream +
 series, lib 549408ab, -j2). Offline (runs/cs-offline/step6i-upstream): that build = port lib 2e21b93a's configs,
-weights and streams exactly on 20 models. Not run on the NPU. **Open, Jordan to choose: the 6i ladder with the
-upstream build (needs OK), per-channel int8 convs (refused today; needed for real TFLite int8 models), (a) transpose
+weights and streams exactly on 20 models. Not run on the NPU. **2026-11-15 afternoon (boot 94e82477): series is now 8 patches (0008 declines SUBTRACT
+on V7; branch tip 5b20ad12973, lib a05298e9; unpatched baseline lib kept as libteflon.so.base-8a9009e0 385f828f).
+Mesa's test_teflon on the NPU with the series: 1502 passed, 35 failed, no hang
+(upstream/etnaviv-ml-fixes/evidence/teflon-suite-20261115; research/port/teflon-suite-ladder.sh). Two hangs:
+(1) 07:44 series lib, teflon/ds_cnn.0014 int8 FULLY_CONNECTED (excluded since; baseline not tried; dump lost),
+(2) 14:38 UNPATCHED baseline lib in micronet_vww.whole, which the series runs without a hang
+(incidents/2026-11-15-1438-TFB-micronet_vww, devcoredump saved by the new root watcher scripts/devcd-watch).
+Baseline ladder (research/port/teflon-baseline-ladder.sh) got through 6 of 27: all 6 fail in the baseline too.
+STOP is set: REBOOT, review, clear runs/STOP. Then open: rest of the baseline ladder (21 tests; leave out
+micronet_vww.whole), the FC test with the baseline (last in a boot, watcher running), candidate fix for the ADD
+input-upload overread (in the mesa-upstream-asan worktree only, uncommitted, sanitizer-clean, not on the NPU).**
+**Older open list, Jordan to choose: the 6i ladder with the
+upstream build (done 2026-11-15), per-channel int8 convs (refused today; needed for real TFLite int8 models), (a) transpose
 tuning, (d) faster table ops.**
 
 ## Third session's START HERE (started 2026-11-14 00:03, boot 8f7f01ab)

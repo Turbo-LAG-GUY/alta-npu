@@ -39,10 +39,20 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
   `test_teflon` cases that aborted (movenet `0095`, `0136`, `whole`) no longer abort, and 19 of the proven models
   compile to byte-identical streams as with the seven-patch library 549408ab (kept beside the new one as
   `libteflon.so.549408ab-7patches`). The two ladders above ran with the seven-patch library.
-- **Not done:** Mesa's own Teflon test suite has not been run (it needs gtest, a C++ TensorFlow Lite library and
-  a downloaded model zoo, none of which are on the board).
-  Nothing was tested on V8 hardware; the patches touch V7 code and the shared layout pass (0001, 0007).
-- **Not included:** per-channel int8 convolutions are still refused by the driver.
+- **Mesa's own Teflon test suite (`test_teflon`) on the NPU, 2026-11-15, main 8a9009e0482 + 8 patches:**
+  1502 tests passed, 35 failed, no hang (`evidence/teflon-suite-20261115/README.md` has the table). Left out:
+  Mesa's skip list for this NPU (32 tests) and the two ds_cnn tests with an int8 FULLY_CONNECTED, which hung the
+  NPU in the first run (`incidents/2026-11-15-0745-TFS-ds_cnn`; not known whether unpatched main hangs too).
+  - 8 of the 35 failures are in Mesa's expected-failure list (`src/etnaviv/ci/etnaviv-vipnano-fails.txt`).
+  - Baseline rerun with unpatched main (lib 385f828f) of the other 27: the first 6 (deeplabv3 `0009` `0052`
+    `0056` `0060`, efficientdet_lite0 `whole`, inception_v1 `whole`) fail there too. Then unpatched main HUNG the
+    NPU in `micronet_vww.whole`, which the series runs without a hang (wrong output). 21 tests were not rerun
+    (`incidents/2026-11-15-1438-TFB-micronet_vww`).
+  - Seen in the failures, not fixed by this series: stride-2 depthwise convolutions on odd input sizes
+    (ssd_mobilenet_v2 `0011` `0052`, same kind as Mesa's expected posenet failures); 1x1 convolutions with 960
+    input channels on 33x33 (deeplabv3: wrong from row 12 on); an addition whose first operand is a graph input
+    uploads both operands' size from the caller's buffer (`etna_ml_subgraph_invoke`; sanitizer report, a candidate
+    fix exists but is untested on the NPU).
 
 ## Before you send
 1. **Read all eight patches.** Each message says what was wrong, why, and what was tested. You will be the one

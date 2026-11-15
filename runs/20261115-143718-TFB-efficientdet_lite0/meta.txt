@@ -1,0 +1,12 @@
+label: TFB-efficientdet_lite0
+cmd: /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/efficientdet_lite0.whole --gtest_brief=0
+cwd: /home/jordan/alta-npu
+start: 2026-11-15T14:37:18-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2306
+deadline_s: 900
+journal_cursor: s=3a6053099ccc4ca8b5823c21570d4c85;i=10520d;b=94e82477fd1941fcb7df34896bec27d3;m=5854dd01;t=66055c892aacf;x=4f8208bb67541471
+TEFLON_TEST_DELEGATE=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so.base-8a9009e0
+TEFLON_TEST_DATA=/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/tests
+end: 2026-11-15T14:37:23-05:00  rc: 1  wall_s: 5

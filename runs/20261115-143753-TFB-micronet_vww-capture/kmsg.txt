@@ -1,0 +1,5 @@
+# kmsg-catch start 2026-11-15T14:37:53-0500 uptime=1541.65
+[ 1548.882690] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+[ 1548.882848] <3> etnaviv-gpu ff100000.npu: offending task: test_teflon (/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/micronet_vww.whole --gtest_brief=0)
+[ 1549.921382] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+# kmsg-catch end uptime=1564.52

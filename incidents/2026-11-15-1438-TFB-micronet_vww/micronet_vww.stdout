@@ -1,0 +1,5 @@
+npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: /home/jordan/alta-npu/runs/20261115-143759-TFB-micronet_vww/kernel.txt
+[ 1548.882690] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[ 1548.882848] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: test_teflon (/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build-tests/src/gallium/targets/teflon/test_teflon --gtest_filter=teflon/micronet_vww.whole --gtest_brief=0)
+[ 1549.921382] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)

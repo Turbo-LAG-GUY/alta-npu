@@ -1,0 +1,5 @@
+Note: Google Test filter = teflon/micronet_vww.whole
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from teflon/micronet_vww
+[ RUN      ] teflon/micronet_vww.whole
