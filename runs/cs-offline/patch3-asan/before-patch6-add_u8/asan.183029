@@ -1,0 +1,108 @@
+=================================================================
+==183029==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000013478 at pc 0xffff979dc9f0 bp 0xffffe808c4d0 sp 0xffffe808c4c0
+READ of size 1 at 0x502000013478 thread T0
+    #0 0xffff979dc9ec in calculate_bias_correction ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:126
+    #1 0xffff979dc9ec in write_core_sequential ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:416
+    #2 0xffff979de408 in etna_ml_create_coeffs_v7 ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:590
+    #3 0xffff97963ee4 in etna_ml_compile_operation_nn ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:1297
+    #4 0xffff979584fc in etna_ml_subgraph_create ../src/gallium/drivers/etnaviv/etnaviv_ml.c:794
+    #5 0xffff974e4064 in create_subgraph ../src/gallium/frontends/teflon/tfl_device.c:1044
+    #6 0xffff974e621c in partition_init ../src/gallium/frontends/teflon/tfl_device.c:1136
+    #7 0xffff98b25190 in tflite::Subgraph::AddNodeWithParameters(std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, char const*, unsigned long, void*, TfLiteRegistration const*, int*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x425190) (BuildId: f38df0b9d3c63790)
+    #8 0xffff98b2488c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42488c) (BuildId: f38df0b9d3c63790)
+    #9 0xffff98b2440c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteContext*, TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42440c) (BuildId: f38df0b9d3c63790)
+    #10 0xffff974e789c in PrepareDelegate ../src/gallium/frontends/teflon/tfl_device.c:1635
+    #11 0xffff98b299c0 in tflite::Subgraph::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x4299c0) (BuildId: f38df0b9d3c63790)
+    #12 0xffff98b2a8bc in tflite::Subgraph::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42a8bc) (BuildId: f38df0b9d3c63790)
+    #13 0xffff98b17b88 in tflite::impl::Interpreter::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x417b88) (BuildId: f38df0b9d3c63790)
+    #14 0xffff98d3c714 in tflite::interpreter_wrapper::InterpreterWrapper::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x63c714) (BuildId: f38df0b9d3c63790)
+    #15 0xffff98d37f50 in std::enable_if<!std::is_void<pybind11::object>::value, pybind11::object>::type pybind11::detail::argument_loader<tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long>::call<pybind11::object, pybind11::detail::void_type, pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&) && (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637f50) (BuildId: f38df0b9d3c63790)
+    #16 0xffff98d37e70 in pybind11::cpp_function::initialize<pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23, pybind11::object, tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long, pybind11::name, pybind11::is_method, pybind11::sibling, char [60]>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&&, pybind11::object (*)(tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long), pybind11::name const&, pybind11::is_method const&, pybind11::sibling const&, char const (&) [60])::{lambda(pybind11::detail::function_call&)#1}::__invoke(pybind11::detail::function_call&) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637e70) (BuildId: f38df0b9d3c63790)
+    #17 0xffff989a9d8c in pybind11::cpp_function::dispatcher(_object*, _object*, _object*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x2a9d8c) (BuildId: f38df0b9d3c63790)
+    #18 0x503fb0  (/usr/bin/python3.12+0x503fb0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #19 0x4c2c44 in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2c44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #20 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #21 0x4c4810 in _PyObject_Call_Prepend (/usr/bin/python3.12+0x4c4810) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #22 0x522ec0  (/usr/bin/python3.12+0x522ec0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #23 0x51e600  (/usr/bin/python3.12+0x51e600) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #24 0x4c2cfc in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2cfc) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #25 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #26 0x5626a0 in PyEval_EvalCode (/usr/bin/python3.12+0x5626a0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #27 0x59b880  (/usr/bin/python3.12+0x59b880) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #28 0x680270  (/usr/bin/python3.12+0x680270) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #29 0x67fe44 in _PyRun_SimpleFileObject (/usr/bin/python3.12+0x67fe44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #30 0x67fc10 in _PyRun_AnyFileObject (/usr/bin/python3.12+0x67fc10) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #31 0x68ac18 in Py_RunMain (/usr/bin/python3.12+0x68ac18) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #32 0x68a7d4 in Py_BytesMain (/usr/bin/python3.12+0x68a7d4) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #33 0xffffaf2c84c0 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #34 0xffffaf2c8594 in __libc_start_main_impl ../csu/libc-start.c:360
+    #35 0x5f626c in _start (/usr/bin/python3.12+0x5f626c) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+
+0x502000013478 is located 0 bytes after 8-byte region [0x502000013470,0x502000013478)
+allocated by thread T0 here:
+    #0 0xffffafa5709c in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0xffff97960a10 in etna_ml_lower_add_v7 ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:732
+    #2 0xffff97960a10 in etna_ml_lower_add ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:884
+    #3 0xffff979564f8 in lower_operations ../src/gallium/drivers/etnaviv/etnaviv_ml.c:401
+    #4 0xffff979564f8 in etna_ml_subgraph_create ../src/gallium/drivers/etnaviv/etnaviv_ml.c:787
+    #5 0xffff974e4064 in create_subgraph ../src/gallium/frontends/teflon/tfl_device.c:1044
+    #6 0xffff974e621c in partition_init ../src/gallium/frontends/teflon/tfl_device.c:1136
+    #7 0xffff98b25190 in tflite::Subgraph::AddNodeWithParameters(std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, char const*, unsigned long, void*, TfLiteRegistration const*, int*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x425190) (BuildId: f38df0b9d3c63790)
+    #8 0xffff98b2488c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42488c) (BuildId: f38df0b9d3c63790)
+    #9 0xffff98b2440c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteContext*, TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42440c) (BuildId: f38df0b9d3c63790)
+    #10 0xffff974e789c in PrepareDelegate ../src/gallium/frontends/teflon/tfl_device.c:1635
+    #11 0xffff98b299c0 in tflite::Subgraph::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x4299c0) (BuildId: f38df0b9d3c63790)
+    #12 0xffff98b2a8bc in tflite::Subgraph::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42a8bc) (BuildId: f38df0b9d3c63790)
+    #13 0xffff98b17b88 in tflite::impl::Interpreter::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x417b88) (BuildId: f38df0b9d3c63790)
+    #14 0xffff98d3c714 in tflite::interpreter_wrapper::InterpreterWrapper::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x63c714) (BuildId: f38df0b9d3c63790)
+    #15 0xffff98d37f50 in std::enable_if<!std::is_void<pybind11::object>::value, pybind11::object>::type pybind11::detail::argument_loader<tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long>::call<pybind11::object, pybind11::detail::void_type, pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&) && (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637f50) (BuildId: f38df0b9d3c63790)
+    #16 0xffff98d37e70 in pybind11::cpp_function::initialize<pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23, pybind11::object, tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long, pybind11::name, pybind11::is_method, pybind11::sibling, char [60]>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&&, pybind11::object (*)(tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long), pybind11::name const&, pybind11::is_method const&, pybind11::sibling const&, char const (&) [60])::{lambda(pybind11::detail::function_call&)#1}::__invoke(pybind11::detail::function_call&) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637e70) (BuildId: f38df0b9d3c63790)
+    #17 0xffff989a9d8c in pybind11::cpp_function::dispatcher(_object*, _object*, _object*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x2a9d8c) (BuildId: f38df0b9d3c63790)
+    #18 0x503fb0  (/usr/bin/python3.12+0x503fb0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #19 0x4c2c44 in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2c44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #20 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #21 0x4c4810 in _PyObject_Call_Prepend (/usr/bin/python3.12+0x4c4810) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #22 0x522ec0  (/usr/bin/python3.12+0x522ec0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #23 0x51e600  (/usr/bin/python3.12+0x51e600) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #24 0x4c2cfc in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2cfc) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #25 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #26 0x5626a0 in PyEval_EvalCode (/usr/bin/python3.12+0x5626a0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #27 0x59b880  (/usr/bin/python3.12+0x59b880) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #28 0x680270  (/usr/bin/python3.12+0x680270) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #29 0x67fe44 in _PyRun_SimpleFileObject (/usr/bin/python3.12+0x67fe44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #30 0x67fc10 in _PyRun_AnyFileObject (/usr/bin/python3.12+0x67fc10) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #31 0x68ac18 in Py_RunMain (/usr/bin/python3.12+0x68ac18) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:126 in calculate_bias_correction
+Shadow bytes around the buggy address:
+  0x502000013180: fa fa fd fd fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000013200: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000013280: fa fa 00 00 fa fa 00 fa fa fa 04 fa fa fa 00 00
+  0x502000013300: fa fa 00 fa fa fa 04 fa fa fa 04 fa fa fa 00 00
+  0x502000013380: fa fa 00 fa fa fa 00 04 fa fa 00 fa fa fa 04 fa
+=>0x502000013400: fa fa 00 fa fa fa 00 00 fa fa 00 fa fa fa 00[fa]
+  0x502000013480: fa fa 04 fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==183029==ABORTING

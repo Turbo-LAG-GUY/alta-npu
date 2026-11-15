@@ -1,0 +1,107 @@
+=================================================================
+==182098==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xffff6f863c00 at pc 0xffff78a1bce0 bp 0xffffc5721170 sp 0xffffc5721160
+READ of size 1 at 0xffff6f863c00 thread T0
+    #0 0xffff78a1bcdc in write_core_6 ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:245
+    #1 0xffff78a1df34 in etna_ml_create_coeffs_v7 ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:553
+    #2 0xffff789a3e24 in etna_ml_compile_operation_nn ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:1296
+    #3 0xffff789984fc in etna_ml_subgraph_create ../src/gallium/drivers/etnaviv/etnaviv_ml.c:794
+    #4 0xffff78524064 in create_subgraph ../src/gallium/frontends/teflon/tfl_device.c:1044
+    #5 0xffff7852621c in partition_init ../src/gallium/frontends/teflon/tfl_device.c:1136
+    #6 0xffff79bd5190 in tflite::Subgraph::AddNodeWithParameters(std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, char const*, unsigned long, void*, TfLiteRegistration const*, int*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x425190) (BuildId: f38df0b9d3c63790)
+    #7 0xffff79bd488c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42488c) (BuildId: f38df0b9d3c63790)
+    #8 0xffff79bd440c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteContext*, TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42440c) (BuildId: f38df0b9d3c63790)
+    #9 0xffff7852789c in PrepareDelegate ../src/gallium/frontends/teflon/tfl_device.c:1635
+    #10 0xffff79bd99c0 in tflite::Subgraph::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x4299c0) (BuildId: f38df0b9d3c63790)
+    #11 0xffff79bda8bc in tflite::Subgraph::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42a8bc) (BuildId: f38df0b9d3c63790)
+    #12 0xffff79bc7b88 in tflite::impl::Interpreter::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x417b88) (BuildId: f38df0b9d3c63790)
+    #13 0xffff79dec714 in tflite::interpreter_wrapper::InterpreterWrapper::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x63c714) (BuildId: f38df0b9d3c63790)
+    #14 0xffff79de7f50 in std::enable_if<!std::is_void<pybind11::object>::value, pybind11::object>::type pybind11::detail::argument_loader<tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long>::call<pybind11::object, pybind11::detail::void_type, pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&) && (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637f50) (BuildId: f38df0b9d3c63790)
+    #15 0xffff79de7e70 in pybind11::cpp_function::initialize<pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23, pybind11::object, tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long, pybind11::name, pybind11::is_method, pybind11::sibling, char [60]>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&&, pybind11::object (*)(tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long), pybind11::name const&, pybind11::is_method const&, pybind11::sibling const&, char const (&) [60])::{lambda(pybind11::detail::function_call&)#1}::__invoke(pybind11::detail::function_call&) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637e70) (BuildId: f38df0b9d3c63790)
+    #16 0xffff79a59d8c in pybind11::cpp_function::dispatcher(_object*, _object*, _object*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x2a9d8c) (BuildId: f38df0b9d3c63790)
+    #17 0x503fb0  (/usr/bin/python3.12+0x503fb0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #18 0x4c2c44 in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2c44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #19 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #20 0x4c4810 in _PyObject_Call_Prepend (/usr/bin/python3.12+0x4c4810) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #21 0x522ec0  (/usr/bin/python3.12+0x522ec0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #22 0x51e600  (/usr/bin/python3.12+0x51e600) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #23 0x4c2cfc in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2cfc) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #24 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #25 0x5626a0 in PyEval_EvalCode (/usr/bin/python3.12+0x5626a0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #26 0x59b880  (/usr/bin/python3.12+0x59b880) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #27 0x680270  (/usr/bin/python3.12+0x680270) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #28 0x67fe44 in _PyRun_SimpleFileObject (/usr/bin/python3.12+0x67fe44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #29 0x67fc10 in _PyRun_AnyFileObject (/usr/bin/python3.12+0x67fc10) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #30 0x68ac18 in Py_RunMain (/usr/bin/python3.12+0x68ac18) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #31 0x68a7d4 in Py_BytesMain (/usr/bin/python3.12+0x68a7d4) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #32 0xffff903984c0 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #33 0xffff90398594 in __libc_start_main_impl ../csu/libc-start.c:360
+    #34 0x5f626c in _start (/usr/bin/python3.12+0x5f626c) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+
+0xffff6f863c00 is located 0 bytes after 1025024-byte region [0xffff6f769800,0xffff6f863c00)
+allocated by thread T0 here:
+    #0 0xffff90b276d0 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0xffff7899ec80 in transpose ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:398
+    #2 0xffff7899ec80 in etna_ml_lower_convolution ../src/gallium/drivers/etnaviv/etnaviv_ml_nn.c:622
+    #3 0xffff789962e0 in lower_operations ../src/gallium/drivers/etnaviv/etnaviv_ml.c:391
+    #4 0xffff789962e0 in etna_ml_subgraph_create ../src/gallium/drivers/etnaviv/etnaviv_ml.c:787
+    #5 0xffff78524064 in create_subgraph ../src/gallium/frontends/teflon/tfl_device.c:1044
+    #6 0xffff7852621c in partition_init ../src/gallium/frontends/teflon/tfl_device.c:1136
+    #7 0xffff79bd5190 in tflite::Subgraph::AddNodeWithParameters(std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, std::vector<int, std::allocator<int> > const&, char const*, unsigned long, void*, TfLiteRegistration const*, int*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x425190) (BuildId: f38df0b9d3c63790)
+    #8 0xffff79bd488c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42488c) (BuildId: f38df0b9d3c63790)
+    #9 0xffff79bd440c in tflite::Subgraph::ReplaceNodeSubsetsWithDelegateKernels(TfLiteContext*, TfLiteRegistration, TfLiteIntArray const*, TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42440c) (BuildId: f38df0b9d3c63790)
+    #10 0xffff7852789c in PrepareDelegate ../src/gallium/frontends/teflon/tfl_device.c:1635
+    #11 0xffff79bd99c0 in tflite::Subgraph::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x4299c0) (BuildId: f38df0b9d3c63790)
+    #12 0xffff79bda8bc in tflite::Subgraph::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x42a8bc) (BuildId: f38df0b9d3c63790)
+    #13 0xffff79bc7b88 in tflite::impl::Interpreter::ModifyGraphWithDelegateImpl(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x417b88) (BuildId: f38df0b9d3c63790)
+    #14 0xffff79dec714 in tflite::interpreter_wrapper::InterpreterWrapper::ModifyGraphWithDelegate(TfLiteDelegate*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x63c714) (BuildId: f38df0b9d3c63790)
+    #15 0xffff79de7f50 in std::enable_if<!std::is_void<pybind11::object>::value, pybind11::object>::type pybind11::detail::argument_loader<tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long>::call<pybind11::object, pybind11::detail::void_type, pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&) && (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637f50) (BuildId: f38df0b9d3c63790)
+    #16 0xffff79de7e70 in pybind11::cpp_function::initialize<pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23, pybind11::object, tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long, pybind11::name, pybind11::is_method, pybind11::sibling, char [60]>(pybind11_init__pywrap_litert_interpreter_wrapper(pybind11::module_&)::$_23&&, pybind11::object (*)(tflite::interpreter_wrapper::InterpreterWrapper&, unsigned long), pybind11::name const&, pybind11::is_method const&, pybind11::sibling const&, char const (&) [60])::{lambda(pybind11::detail::function_call&)#1}::__invoke(pybind11::detail::function_call&) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x637e70) (BuildId: f38df0b9d3c63790)
+    #17 0xffff79a59d8c in pybind11::cpp_function::dispatcher(_object*, _object*, _object*) (/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/ai_edge_litert/libpywrap_litert_common.so+0x2a9d8c) (BuildId: f38df0b9d3c63790)
+    #18 0x503fb0  (/usr/bin/python3.12+0x503fb0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #19 0x4c2c44 in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2c44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #20 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #21 0x4c4810 in _PyObject_Call_Prepend (/usr/bin/python3.12+0x4c4810) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #22 0x522ec0  (/usr/bin/python3.12+0x522ec0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #23 0x51e600  (/usr/bin/python3.12+0x51e600) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #24 0x4c2cfc in _PyObject_MakeTpCall (/usr/bin/python3.12+0x4c2cfc) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #25 0x564350 in _PyEval_EvalFrameDefault (/usr/bin/python3.12+0x564350) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #26 0x5626a0 in PyEval_EvalCode (/usr/bin/python3.12+0x5626a0) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #27 0x59b880  (/usr/bin/python3.12+0x59b880) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #28 0x680270  (/usr/bin/python3.12+0x680270) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #29 0x67fe44 in _PyRun_SimpleFileObject (/usr/bin/python3.12+0x67fe44) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #30 0x67fc10 in _PyRun_AnyFileObject (/usr/bin/python3.12+0x67fc10) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+    #31 0x68ac18 in Py_RunMain (/usr/bin/python3.12+0x68ac18) (BuildId: 73735111d7fc32c51940b47e0227d4dc77eea90e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c:245 in write_core_6
+Shadow bytes around the buggy address:
+  0xffff6f863980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xffff6f863a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xffff6f863a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xffff6f863b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xffff6f863b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xffff6f863c00:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xffff6f863c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xffff6f863d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xffff6f863d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xffff6f863e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xffff6f863e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==182098==ABORTING

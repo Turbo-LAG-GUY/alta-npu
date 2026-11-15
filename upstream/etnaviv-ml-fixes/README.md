@@ -25,6 +25,15 @@ upstream `main` today. **Nothing has been sent.** You review, decide and send.
 - **Upstream build on the NPU (2026-11-15, library 549408ab):** `runs/cs6i-upstream-ladder-20261115-033157`
   (14 rungs, patches 3 to 7) and `runs/cs-layout-upstream-ladder-20261115-033648` (7 rungs, patches 1 and 2), all
   passed with no kernel messages. Every output is byte-identical to what the port build produced on the NPU.
+- **Address sanitizer (2026-11-15, fake NPU, no hardware):** a sanitizer build of the branch
+  (`~/Documents/AI_Projects/mesa-upstream-asan`) reports both out-of-bounds reads when the fix is left out and
+  nothing with all seven patches (`runs/cs-offline/patch3-asan`):
+  - without patch 3, MobileNetV1: heap-buffer-overflow READ in `write_core_6` (`etnaviv_ml_nn_v7.c:245`), 0 bytes
+    after the 1025024-byte weight tensor of the 1001-channel convolution;
+  - without patch 6, `add_u8`: heap-buffer-overflow READ in `calculate_bias_correction`
+    (`etnaviv_ml_nn_v7.c:126`), 0 bytes after the 8-byte addition weights;
+  - with all seven: MobileNetV1 and six of the test models compile with no report.
+  You can quote these in the messages of patches 3 and 6 when you rewrite them.
 - **Not done:** Mesa's own Teflon test suite has not been run (it needs gtest, a C++ TensorFlow Lite library and
   a downloaded model zoo, none of which are on the board).
   Nothing was tested on V8 hardware; the patches touch V7 code and the shared layout pass (0001, 0007).

@@ -31,6 +31,18 @@ Where the numbers come from:
     temperature      /sys/class/thermal/thermal_zone*.
     programs         /proc/<pid>/fd entries pointing at the NPU's DRM nodes.
                      Without root, only your own processes are visible.
+    AXI SRAM         /sys/module/etnaviv/parameters/axi_sram: the alta driver's
+                     switch for the NPU's 1 MiB on-chip memory. Whether a program
+                     asked for it is its ETNA_ML_AXI_SRAM variable.
+    shader core      the NPU's programmable core. Programs opt in per operation
+                     with ETNA_ML_SHADER (compute port, mesa-compute); read from
+                     /proc/<pid>/environ, which holds the values the program was
+                     started with.
+    Teflon           which Mesa tree's libteflon.so a program has mapped
+                     (/proc/<pid>/maps).
+    hang             a kernel hang dump waiting in /sys/class/devcoredump (it is
+                     deleted after about 5 minutes), and the kit's runs/STOP file,
+                     which blocks NPU jobs until a reboot.
 """
 
 import argparse
@@ -51,8 +63,20 @@ APP_ID = "npu-status"
 ICON_VERSION = "v1"  # bump when the icon design changes: the shell caches icons by name
 LEVELS = 4           # fill steps in the top-bar icon
 HISTORY = 60         # samples kept for the terminal sparkline
+ONCHIP_CACHE_BYTES = 512 * 1024  # this NPU's on-chip SRAM (GC8000 r7120, kernel etnaviv_hwdb.c)
+AXI_SRAM_BYTES = 1024 * 1024     # its AXI SRAM (same hwdb entry); used only by programs that ask for it
+AXI_SRAM_SWITCH = "/sys/module/etnaviv/parameters/axi_sram"  # alta kernel patch 0005; absent upstream
+DEVCOREDUMP_DIR = "/sys/class/devcoredump"
+# The alta-npu kit's npu-run writes this after an NPU hang and then refuses NPU jobs until a reboot.
+STOP_FILE = os.path.join(os.path.expanduser("~"), "alta-npu", "runs", "STOP")
 
-ROOT = "/"           # tests point this at a fake /sys and /proc (--root)
+# Teflon's on-disk weight cache stops growing with less free space than this. Keep it
+# equal to NPU_CACHE_NO_GROW_BELOW in Mesa's etnaviv_ml_disk_cache.h (alta patch 0004).
+DISK_LOW_BYTES = 10 * 1024 ** 3
+DISK_REARM_BYTES = 11 * 1024 ** 3  # warn again only after free space has been back above this
+DISK_CHECK_SECONDS = 60
+
+ROOT = "/"          # tests point this at a fake /sys and /proc (--root)
 
 
 def host_path(path):
@@ -163,6 +187,9 @@ class Client:
     name: str
     cmd: str
     mapped: int  # bytes of NPU buffers mapped into the process
+    shader: str | None = None  # ETNA_ML_SHADER it was started with, e.g. "transpose,softmax"
+    axi: str | None = None     # ETNA_ML_AXI_SRAM it was started with, e.g. "all"
+    teflon: str | None = None  # Mesa tree of the libteflon.so it has mapped, e.g. "mesa-compute"
 
 
 def find_clients(nodes):
@@ -182,10 +209,15 @@ def find_clients(nodes):
                     continue
         except OSError:  # gone, or another user's process
             continue
+        mapped, teflon = _read_maps(os.path.join(base, "maps"), nodes)
+        env = _read_environ(os.path.join(base, "environ"), ("ETNA_ML_SHADER", "ETNA_ML_AXI_SRAM"))
         found.append(Client(pid=int(pid),
                             name=read_text(os.path.join(base, "comm")) or "?",
                             cmd=_describe_cmdline(os.path.join(base, "cmdline")),
-                            mapped=_mapped_bytes(os.path.join(base, "maps"), nodes)))
+                            mapped=mapped,
+                            shader=env.get("ETNA_ML_SHADER") or None,
+                            axi=env.get("ETNA_ML_AXI_SRAM") or None,
+                            teflon=teflon))
     return sorted(found, key=lambda c: c.pid)
 
 
@@ -214,18 +246,65 @@ def _describe_cmdline(path):
     return text if len(text) <= 48 else text[:47] + "…"
 
 
-def _mapped_bytes(path, nodes):
+TEFLON_LIB = re.compile(r"/([^/]+)/build/[^ ]*libteflon\.so[^/]*$")
+
+
+def _read_maps(path, nodes):
+    """(bytes of NPU buffers mapped, Mesa tree of the mapped libteflon.so or None)."""
     total = 0
+    teflon = None
     try:
         with open(path) as f:
             for line in f:
                 parts = line.split(maxsplit=5)
-                if len(parts) == 6 and parts[5].rstrip("\n") in nodes:
+                if len(parts) != 6:
+                    continue
+                name = parts[5].rstrip("\n")
+                if name in nodes:
                     lo, hi = parts[0].split("-")
                     total += int(hi, 16) - int(lo, 16)
+                elif teflon is None and "libteflon.so" in name:
+                    m = TEFLON_LIB.search(name)
+                    teflon = m.group(1) if m else "libteflon.so"
     except (OSError, ValueError):
         pass
-    return total
+    return total, teflon
+
+
+def _read_environ(path, names):
+    """The named variables as the process was started with them. Later changes
+    inside the process (os.environ in Python) don't show up here."""
+    found = {}
+    try:
+        with open(path, "rb") as f:
+            for item in f.read().split(b"\0"):
+                key, sep, value = item.partition(b"=")
+                if sep and key.decode(errors="replace") in names:
+                    found[key.decode()] = value.decode(errors="replace")[:40]
+    except OSError:
+        pass
+    return found
+
+
+def read_axi_switch():
+    """True/False for the driver's AXI SRAM switch, None if this driver has none."""
+    text = read_text(host_path(AXI_SRAM_SWITCH))
+    if text is None:
+        return None
+    return text[:1] in ("Y", "y", "1")
+
+
+def find_hang_dumps():
+    """Names of kernel device dumps waiting to be read. The kernel deletes each
+    after about five minutes, so a waiting one means a very recent hang."""
+    try:
+        return sorted(e for e in os.listdir(host_path(DEVCOREDUMP_DIR)) if e.startswith("devcd"))
+    except OSError:
+        return []
+
+
+def stop_file():
+    return STOP_FILE if ROOT == "/" else host_path(STOP_FILE)
 
 
 # --------------------------------------------------------------------------
@@ -258,6 +337,13 @@ class Status:
     irq_total: int | None = None
     clients: list = field(default_factory=list)
     history: list = field(default_factory=list)
+    axi_switch: bool | None = None                    # driver's AXI SRAM switch (None: no such switch)
+    hang_dumps: list = field(default_factory=list)    # kernel hang dumps waiting to be copied
+    stopped: bool = False                             # the kit's runs/STOP exists
+
+    @property
+    def alert(self):
+        return bool(self.hang_dumps or self.stopped)
 
     @property
     def clock_pct(self):
@@ -324,13 +410,16 @@ class Monitor:
                 self.npu = find_npu()
                 self.prev = None
             if self.npu is None:
-                return Status("missing", temps=self._temps())
+                return Status("missing", temps=self._temps(), hang_dumps=find_hang_dumps(),
+                              stopped=os.path.exists(stop_file()))
 
         cur = self._read()
         prev, self.prev = self.prev, cur
         st = Status("idle", npu=self.npu, pm_auto=cur.pm_auto,
                     throttle=cur.throttle, throttle_max=cur.throttle_max, temps=cur.temps,
-                    active_total_ms=cur.active_ms, irq_total=cur.irqs)
+                    active_total_ms=cur.active_ms, irq_total=cur.irqs,
+                    axi_switch=read_axi_switch(), hang_dumps=find_hang_dumps(),
+                    stopped=os.path.exists(stop_file()))
         d_active = d_irq = 0
         if prev is not None:
             dt = max(cur.t - prev.t, 1e-3)
@@ -397,10 +486,40 @@ def headline(st):
     return f"Working · {st.active_pct:.0f}% active"
 
 
+def alert_rows(st):
+    rows = []
+    if st.hang_dumps:
+        rows.append(("⚠ Hang dump", f"{len(st.hang_dumps)} waiting in {DEVCOREDUMP_DIR} · "
+                                    "copy it first (needs sudo), it is deleted after ~5 min"))
+    if st.stopped:
+        rows.append(("⚠ NPU jobs", "blocked since a hang (runs/STOP) · reboot before the next NPU job"))
+    return rows
+
+
+def memory_row(st):
+    cache = f"{fmt_bytes(ONCHIP_CACHE_BYTES)} cache"
+    if st.axi_switch is None:
+        return f"{cache} · {fmt_bytes(AXI_SRAM_BYTES)} AXI SRAM (this driver can't use it)"
+    if not st.axi_switch:
+        return f"{cache} · {fmt_bytes(AXI_SRAM_BYTES)} AXI SRAM (driver switch off)"
+    asked = [c for c in st.clients if c.axi]
+    use = f"asked for by {len(asked)} program{'s' if len(asked) != 1 else ''}" if asked else "no program asks for it"
+    return f"{cache} · {fmt_bytes(AXI_SRAM_BYTES)} AXI SRAM (driver switch on · {use})"
+
+
+def shader_row(st):
+    ops = sorted({op.strip() for c in st.clients if c.shader for op in c.shader.split(",") if op.strip()})
+    if not ops:
+        return "not switched on by any program"
+    n = sum(1 for c in st.clients if c.shader)
+    return f"{', '.join(ops)} · switched on in {n} program{'s' if n != 1 else ''}"
+
+
 def detail_rows(st):
     if st.npu is None:
-        return []
-    rows = [("Interrupts", "—" if st.irq_rate is None else f"{st.irq_rate:,.0f}/s"),
+        return alert_rows(st)
+    rows = alert_rows(st)
+    rows += [("Interrupts", "—" if st.irq_rate is None else f"{st.irq_rate:,.0f}/s"),
             ("Power", "powers down when idle" if st.pm_auto else "kept on (power/control = on)")]
     if st.throttle is None:
         clock = "unknown"
@@ -410,6 +529,8 @@ def detail_rows(st):
         clock = (f"throttled to {st.clock_pct:g}% "
                  f"(thermal step {st.throttle} of {st.throttle_max})")
     rows.append(("Clock", clock))
+    rows.append(("Memory", memory_row(st)))
+    rows.append(("Shader core", shader_row(st)))
     if st.temps:
         rows.append(("Temperature", " · ".join(f"{k} {v:.0f} °C" for k, v in st.temps.items())))
     totals = []
@@ -443,6 +564,9 @@ def program_lines(st):
     if st.clients:
         return [f"{c.cmd or c.name} (pid {c.pid})"
                 + (f" · {fmt_bytes(c.mapped)} mapped" if c.mapped else "")
+                + (f" · Teflon: {c.teflon}" if c.teflon else "")
+                + (f" · shader: {c.shader}" if c.shader else "")
+                + (f" · AXI SRAM: {c.axi}" if c.axi else "")
                 for c in st.clients]
     if st.state == "working" and os.geteuid() != 0:
         return ["none of yours (another user's process?)"]
@@ -462,7 +586,13 @@ def as_dict(st):
         "temperatures_c": st.temps,
         "active_total_seconds": None if st.active_total_ms is None else st.active_total_ms / 1000,
         "interrupts_total": st.irq_total,
-        "programs": [{"pid": c.pid, "name": c.name, "command": c.cmd, "mapped_bytes": c.mapped}
+        "onchip_cache_bytes": ONCHIP_CACHE_BYTES,
+        "axi_sram_bytes": AXI_SRAM_BYTES,
+        "axi_sram_driver_switch": st.axi_switch,
+        "hang_dumps_waiting": st.hang_dumps,
+        "npu_jobs_blocked": st.stopped,
+        "programs": [{"pid": c.pid, "name": c.name, "command": c.cmd, "mapped_bytes": c.mapped,
+                      "teflon": c.teflon, "shader_ops": c.shader, "axi_sram": c.axi}
                      for c in st.clients],
         "device": st.npu.name if st.npu else None,
         "drm_nodes": sorted(st.npu.nodes) if st.npu else [],
@@ -486,7 +616,7 @@ def render(st, color=False, spark_seconds=None):
         return f"\x1b[{code}m{text}\x1b[0m" if color else text
 
     tone = {"working": "1;32", "idle": "1", "missing": "1;31"}[st.state]
-    if st.state == "working" and st.throttle:
+    if st.alert or (st.state == "working" and st.throttle):
         tone = "1;33"
     lines = [f" {'NPU':<12} {paint(tone, headline(st))}"]
     if spark_seconds is not None and st.history:
@@ -545,6 +675,8 @@ def icon_name(kind, level=0):
 def icon_for(st):
     if st.state == "missing":
         return icon_name("off")
+    if st.alert:
+        return icon_name("alert")
     if st.state != "working":
         return icon_name("idle")
     pct = 100 if st.active_pct is None else st.active_pct
@@ -574,7 +706,8 @@ def write_icons():
     base = os.environ.get("XDG_RUNTIME_DIR") or os.path.expanduser("~/.cache")
     folder = os.path.join(base, APP_ID, "icons")
     os.makedirs(folder, exist_ok=True)
-    icons = {icon_name("idle"): chip_svg(), icon_name("off"): chip_svg(dim=True)}
+    icons = {icon_name("idle"): chip_svg(), icon_name("off"): chip_svg(dim=True),
+             icon_name("alert"): chip_svg(LEVELS, "warning")}
     for level in range(1, LEVELS + 1):
         icons[icon_name("load", level)] = chip_svg(level, "success")
         icons[icon_name("hot", level)] = chip_svg(level, "warning")
@@ -623,6 +756,102 @@ def single_instance_lock():
     return lock  # held until the process exits
 
 
+def weight_cache_dir():
+    """Where Teflon keeps compiled NPU weights; the same lookup as npu_cache_default_dir()."""
+    if os.environ.get("ETNA_ML_DISK_CACHE_DIR"):
+        return os.environ["ETNA_ML_DISK_CACHE_DIR"]
+    base = os.environ.get("XDG_CACHE_HOME") or os.path.join(os.path.expanduser("~"), ".cache")
+    return os.path.join(base, "teflon-npu")
+
+
+def read_disk(cache_dir):
+    """(free bytes on the disk holding the cache, bytes the cache holds), or None."""
+    place = cache_dir
+    while not os.path.isdir(place):  # no cache yet: measure the disk it would be made on
+        parent = os.path.dirname(place)
+        if parent == place:
+            return None
+        place = parent
+    try:
+        fs = os.statvfs(place)
+        used = 0
+        if place == cache_dir:
+            with os.scandir(cache_dir) as entries:
+                for entry in entries:
+                    if entry.name.endswith(".npucache") and entry.is_file(follow_symlinks=False):
+                        used += entry.stat(follow_symlinks=False).st_size
+    except OSError:
+        return None
+    return fs.f_bavail * fs.f_frsize, used
+
+
+def disk_line(free, used):
+    gib = free / 1024 ** 3
+    if free < DISK_LOW_BYTES:
+        return f"⚠ Disk low: {gib:.1f} GiB free · weight cache ({fmt_bytes(used)}) can't grow"
+    return f"Weight cache: {fmt_bytes(used)} on disk · {gib:.1f} GiB free"
+
+
+def send_notification(title, body, icon="drive-harddisk"):
+    """Desktop notification. Never raises: a missing notify-send only loses the popup."""
+    try:
+        subprocess.Popen(["notify-send", "--app-name=NPU status", f"--icon={icon}",
+                          "--urgency=critical", title, body],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        return True
+    except OSError:
+        return False
+
+
+class DiskWatch:
+    """Notifies once when free space drops under DISK_LOW_BYTES, and again only after it
+    has recovered past DISK_REARM_BYTES, so hovering around the line doesn't nag."""
+
+    def __init__(self, notify=send_notification):
+        self.notify = notify
+        self.armed = True
+
+    def check(self, free, used):
+        if free >= DISK_REARM_BYTES:
+            self.armed = True
+        elif free < DISK_LOW_BYTES and self.armed:
+            self.armed = False
+            self.notify("Disk space is low",
+                        f"{free / 1024 ** 3:.1f} GiB free, under {DISK_LOW_BYTES // 1024 ** 3} GiB. "
+                        f"The NPU weight cache ({fmt_bytes(used)}) won't grow until space is freed.")
+            return True
+        return False
+
+
+class HangWatch:
+    """One popup per new hang dump, and one when NPU jobs become blocked."""
+
+    def __init__(self, notify=send_notification):
+        self.notify = notify
+        self.seen = set()
+        self.stopped = False
+
+    def check(self, st):
+        sent = False
+        new = set(st.hang_dumps) - self.seen
+        self.seen = set(st.hang_dumps)
+        if new:
+            sent = True
+            self.notify("NPU hang: copy the dump now",
+                        f"A kernel dump is waiting ({', '.join(sorted(new))}) and is deleted after about "
+                        f"5 minutes. Copy it before anything else: "
+                        f"sudo cp {DEVCOREDUMP_DIR}/devcd*/data ~/alta-npu/incidents/",
+                        icon="dialog-warning")
+        if st.stopped and not self.stopped and not new:
+            sent = True
+            self.notify("NPU jobs are blocked",
+                        "The kit stopped NPU jobs after a hang (runs/STOP). Reboot before the next NPU job.",
+                        icon="dialog-warning")
+        self.stopped = st.stopped
+        return sent
+
+
 class TrayApp:
     PROGRAM_ROWS = 5
 
@@ -646,7 +875,11 @@ class TrayApp:
             return item
 
         self.head = add(Gtk.MenuItem(label="Reading…"))
-        self.detail = [add(Gtk.MenuItem(label="")) for _ in range(5)]
+        self.detail = [add(Gtk.MenuItem(label="")) for _ in range(9)]
+        self.hang_watch = HangWatch()
+        self.disk = add(Gtk.MenuItem(label=""))
+        self.disk_watch = DiskWatch()
+        self._disk_checked = None
         add(Gtk.SeparatorMenuItem())
         self.programs_head = add(Gtk.MenuItem(label="Programs using the NPU:"))
         self.programs = [add(Gtk.MenuItem(label="")) for _ in range(self.PROGRAM_ROWS)]
@@ -660,7 +893,7 @@ class TrayApp:
             add(Gtk.MenuItem(label="Open live view")).connect("activate", self._on_live_view)
         add(Gtk.MenuItem(label="Quit")).connect("activate", lambda *_: Gtk.main_quit())
         menu.show_all()
-        for item in self.detail + self.programs:
+        for item in self.detail + self.programs + [self.disk]:
             item.hide()
         self.indicator.set_menu(menu)
 
@@ -689,9 +922,26 @@ class TrayApp:
             self._apply(self.monitor.update())
         except Exception:  # one bad reading must not take the indicator down
             traceback.print_exc()
+        try:
+            self._check_disk()
+        except Exception:
+            traceback.print_exc()
         return True
 
+    def _check_disk(self):
+        now = time.monotonic()  # uptime, not wall time: this board's clock can jump
+        if self._disk_checked is not None and now - self._disk_checked < DISK_CHECK_SECONDS:
+            return
+        self._disk_checked = now
+        reading = read_disk(weight_cache_dir())
+        if reading is None:
+            self._show(self.disk, None)
+            return
+        self._show(self.disk, disk_line(*reading))
+        self.disk_watch.check(*reading)
+
     def _apply(self, st):
+        self.hang_watch.check(st)
         self._show(self.head, headline(st))
         rows = [f"{k}: {v}" for k, v in detail_rows(st)]
         for i, item in enumerate(self.detail):
