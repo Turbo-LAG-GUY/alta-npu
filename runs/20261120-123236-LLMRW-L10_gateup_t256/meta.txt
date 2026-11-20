@@ -1,0 +1,10 @@
+label: LLMRW-L10_gateup_t256
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-a79b7b5c -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L10_gateup_t256.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T12:32:36-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2390
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=143b56;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=9e635deff;t=660b89a0aee11;x=8d397622becf9eb0
+end: 2026-11-20T12:32:37-05:00  rc: 0  wall_s: 2

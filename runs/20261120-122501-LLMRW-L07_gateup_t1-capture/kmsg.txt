@@ -1,0 +1,2 @@
+# kmsg-catch start 2026-11-20T12:25:01-0500 uptime=42183.22
+# kmsg-catch end uptime=42200.75

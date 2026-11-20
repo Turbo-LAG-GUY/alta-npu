@@ -76,7 +76,21 @@ plus measurements on this board.
 - Quantization: per-tensor int8 weights + activations, with smoothing (SmoothQuant-style scaling) and channel
   grouping if quality needs it. Checked on the CPU in numpy before any NPU work depends on it.
 
-## Steps
+## Resume here (2026-11-20, end of the session)
+- State: nothing running; NPU idle and healthy this boot (c0a2b9d9: no hang, no kernel warning). perf is installed
+  (root step 230) and kernel profiling stays open until the next reboot.
+- Done today: L3c closed (one-token CPU + NPU split does not pay: memory bus); Mesa read-out patches 10-12 (upstream
+  series, all NPU-tested, test_teflon 1503 / 34 with every count of patches; Jordan rewrites the texts and sends);
+  zero-copy hook (test tree); L2g: rotation + per-job output scales make every-step 8-bit nearly lossless on all
+  four models (1.7B 2.63 vs fp32 2.18, was 27.2); R2: all 240 real-weight packs of SmolLM2-135M pass on the NPU
+  (runs/llm-real-ladder-20261120-120736): 256-token chunk 124 ms for all 120 layer steps = 0.485 ms per token.
+- Next: the CPU glue for a 256-token chunk (attention over the chunk, RMSNorm, RoPE, SiLU x mul, the block Hadamard
+  on the down input, planar transposes, scattering the 4 jobs' outputs back with groups.npz), then one full prompt
+  chunk end to end against the simulator's logits and against llama.cpp (pp128 104 tok/s). Also: compile all 120
+  steps in one process (memory), and the 1.7B / SmolLM3 packs.
+- Uncommitted in ~/alta-npu since caaa985: the L2g results, R2 (real_packs.py, real_offline.sh, real-ladder.sh,
+  runs), these notes.
+
 | Step | What | Where | Status |
 |---|---|---|---|
 | L0 | LLM-shaped int8 1x1 conv models (SmolLM2-135M, Qwen3-0.6B layer shapes, M = 1, 16) | `tools/llm_shapes.py` | DONE 2026-11-18 |
@@ -90,7 +104,7 @@ plus measurements on this board.
 | L6a | CPU: TAGE-style n-gram drafter acceptance on SmolLM2 greedy outputs | `ref/l6a_generate.py`, `ref/l6a_drafters.py` | DONE 2026-11-19: 1.24-1.41 tokens/step overall, 1.6-2.4 on rewrite/code; win needs cheap 4-8 position checks |
 | L2 | CPU: quality of per-tensor int8 (W8A8) on a real small model, numpy, vs fp32; also measure FFN activation sparsity (how many neurons per token matter) | - | next, CPU only |
 | L2b | CPU: train a perceptron predictor of active FFN neuron blocks; bytes saved vs quality lost | - | after L2, if sparsity is worth it |
-| L2g | CPU: fixes for the 8-bit activation outliers, every step on the NPU (M > 1 work): per-job output scales, SmoothQuant, rotation (QuaRot-style, exact in fp32: residual Q folded into the weights, per-head rotation folded into v/o, block Hadamard on the down input online on the CPU) | `ref/l2g_outliers.py`, `l2g-chain.sh` | smoke test 135M (32 tokens) 2026-11-20: rotated fp32 = fp32 exactly; rotation cuts the input outlier ratios ~3-7x and KL vs fp32 ~10x; per-job output scales help with the jobs grouped by max |w| (not by output range). Full runs on all four models queued (unit alta-llm-l2g, after l2f) |
+| L2g | CPU: fixes for the 8-bit activation outliers, every step on the NPU (M > 1 work): per-job output scales, SmoothQuant, rotation (QuaRot-style, exact in fp32: residual Q folded into the weights, per-head rotation folded into v/o, block Hadamard on the down input online on the CPU) | `ref/l2g_outliers.py`, `l2g-chain.sh` | DONE 2026-11-20 on all four models: rotation + per-job output scales (jobs grouped by max |w|), every step 8-bit: 135M 16.06 / 47.67 (fp32 15.71 / 47.38), 360M 10.93 / 40.55 (10.93 / 39.12), 1.7B 2.63 / 25.43 (2.18 / 24.49; was 27.2 / 416), SmolLM3 4.22 / 31.11 (4.27 / 30.20); KL 10-38x lower; 4 groups ~ 16 |
 | L3 | Own job builder: one layer without TFLite, offline first | - | after L1 |
 | L4 | One full transformer block on NPU + CPU, vs CPU reference | - | |
 | L5 | Whole model (SmolLM2-135M, then Qwen3-0.6B), tokens/s vs llama.cpp Q8_0 on the CPU | - | |
@@ -270,9 +284,21 @@ fused qkv / gateup jobs, 16 weight-group jobs per step, head fp32. All fixes are
   | model | fp32 | A baseline | B per-job out | S SmoothQuant + B | R rotation | RB rotation + per-job out | RB4 (4 groups) |
   |---|---|---|---|---|---|---|---|
   | 135M | 15.71 / 47.38 | 19.48 / 57.55 (0.236 / 0.304) | 17.28 / 53.73 (0.119 / 0.165) | 19.26 / 52.73 (0.237 / 0.199) | 16.08 / 51.16 (0.032 / 0.057) | **16.06 / 47.67 (0.016 / 0.023)** | 15.81 / 49.24 (0.023 / 0.032) |
+  | 360M | 10.93 / 39.12 | 11.96 / 49.48 (0.134 / 0.275) | 12.18 / 46.16 (0.112 / 0.206) | 11.33 / 44.91 (0.066 / 0.174) | 10.84 / 40.82 (0.017 / 0.038) | **10.93 / 40.55 (0.010 / 0.021)** | 11.14 / 40.12 (0.013 / 0.022) |
+  | 1.7B | 2.18 / 24.49 | 27.20 / 416.23 (2.401 / 3.211) | 13.37 / 163.24 (1.768 / 2.200) | 6.30 / 39.56 (1.100 / 0.583) | 4.58 / 30.40 (0.722 / 0.313) | **2.63 / 25.43 (0.163 / 0.084)** | 2.52 / 25.38 (0.182 / 0.089) |
+  | SmolLM3-3B | 4.27 / 30.20 | 5.29 / 35.10 (0.443 / 0.179) | 5.61 / 34.13 (0.405 / 0.162) | 4.32 / 36.39 (0.231 / 0.214) | 4.58 / 31.18 (0.103 / 0.056) | **4.22 / 31.11 (0.029 / 0.018)** | 4.19 / 30.49 (0.050 / 0.022) |
   135M: the rotated model in fp32 = fp32 exactly; RB makes EVERY step 8-bit on the NPU about as good as int8 weights
-  with fp activations on the CPU (H0: KL 0.002 / 0.003, ppl 15.73 / 47.71), top-1 = fp32 91 / 93%. 1.7B, 360M,
-  SmolLM3 running.
+  with fp activations on the CPU (H0: KL 0.002 / 0.003, ppl 15.73 / 47.71), top-1 = fp32 91 / 93%.
+  **1.7B (the model the 8-bit format broke), 173 min: FIXED.** RB gives 2.63 / 25.43 (fp32 2.18 / 24.49; the
+  current format 27.20 / 416.23), KL 15-38x lower, top-1 = fp32 89 / 85%; with 4 groups per step 2.52 / 25.38.
+  Rotation alone (R) 4.58 / 30.40 and per-job output scales alone (B) 13.37 / 163 are each far from it: rotation
+  fixes the inputs, per-job scales the outputs, and 1.7B needs both. Input outlier ratio, largest layer: down
+  2430 -> 3.1, qkv 178 -> 1.8. SmoothQuant 6.30 / 39.56. Still above int8 weights + fp activations on the CPU (H0:
+  KL 0.010 / 0.008), but usable: the NPU can now run 1.7B prompt chunks and drafted-token checks.
+  360M (14 min) and SmolLM3-3B (253 min), finished 05:45 / 09:58: RB 10.93 / 40.55 (fp32 10.93 / 39.12) and
+  4.22 / 31.11 (fp32 4.27 / 30.20); rotated fp32 = fp32 exactly on both. **On all four models rotation + per-job
+  output scales cuts KL vs fp32 10-38x** and brings every-step-8-bit perplexity to within 0-4% of fp32 (1.7B GPL-3
+  +21%). 4 groups per step are about as good as 16 everywhere (fewer jobs per step).
 
 ## L3c: fewer submits per token (2026-11-19, llm/l3/plan_cost.py, CPU only so far)
 - Paused by Jordan 2026-11-19 18:51, resumed 2026-11-20 (boot c0a2b9d9). split-ladder.sh has NOT run (needs OK, quiet
@@ -608,3 +634,7 @@ the down_proj bytes, no predictor needed. gate/up skipping needs the predictor (
 - 2026-11-20 04:17: test_teflon with all twelve patches (Jordan's OK): 1503 / 34, the same failed tests, no kernel warning. README, MR-DESCRIPTION, rewrite-list artifact (v9) updated. The series has hardware evidence for every patch.
 - 2026-11-20 04:30: zero-copy read-out hook in mesa-llm (uncommitted, test tree) + jb_run a79b7b5c; offline PASS; zero-ladder.sh (14 rungs) waits for OK.
 - 2026-11-20 04:30: zero-ladder 14/14 PASS (Jordan's OK): zero-copy read-out + consumer 0.60 -> ~0.48 ms at 256 tokens (the data still comes from DRAM once), the no-fini experiment ~0.30 ms (kernel clean pass ~0.19 ms); no stale output. Remaining read-out cost = kernel cache maintenance.
+- 2026-11-20 05:31: L2g 1.7B done: rotation + per-job output scales 2.63 / 25.43 vs fp32 2.18 / 24.49 (current format 27.20 / 416.23), 4 groups 2.52 / 25.38; rotation or per-job scales alone are not enough (4.58 / 30.40, 13.37 / 163). The 1.7B 8-bit break is fixed. 360M + SmolLM3 running.
+- 2026-11-20 12:00: L2g chain finished on all four models (360M 05:45, SmolLM3 09:58): rotation + per-job output scales, every step 8-bit, within 0-4% ppl of fp32 (1.7B GPL-3 +21%), KL 10-38x lower than the current format; 4 groups ~ 16. Board idle.
+- 2026-11-20 12:30: R2 started (Jordan: "go ahead with the real-weight NPU packs"): llm/l3/real_packs.py builds 240 packs of SmolLM2-135M (30 layers x 4 steps x 1 / 256 tokens; rotation folded in, 4 jobs per step, per-job output scales, real inputs); offline all 240 PASS (one submit each, kpc <= 20); llm/l3/real-ladder.sh waits for OK.
+- 2026-11-20 12:35: R2 real-weight ladder 240/240 PASS (Jordan's OK): every layer step of SmolLM2-135M on the NPU within 1 level of the reference; all 120 steps per token: 1 token 30.6 ms, 256-token chunk 124.1 ms = 0.485 ms per token (llama.cpp pp128: 9.6 ms per token whole model). Next: the CPU glue and a full chunk end to end. Session ends here (Jordan switches to a remote session).

@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T12:54:41-05:00 duration=300s interval=1s
+12:54:41 up=43963.48 npu=active active_ms=43951588 npu_irqs=25695 cma_free_kb=264 memavail_mb=2313 temps_c=cpu:38,ddr:41
+12:54:42 up=43964.56 npu=active active_ms=43952674 npu_irqs=25695 cma_free_kb=336 memavail_mb=2314 temps_c=cpu:37,ddr:40
+12:54:43 up=43965.76 npu=active active_ms=43953868 npu_irqs=25695 cma_free_kb=336 memavail_mb=2313 temps_c=cpu:36,ddr:40
+12:54:44 up=43966.88 npu=active active_ms=43954990 npu_irqs=25695 cma_free_kb=340 memavail_mb=2313 temps_c=cpu:36,ddr:39
+12:54:45 up=43968.03 npu=active active_ms=43956155 npu_irqs=25695 cma_free_kb=444 memavail_mb=2313 temps_c=cpu:36,ddr:39
+12:54:47 up=43969.22 npu=active active_ms=43957325 npu_irqs=25695 cma_free_kb=568 memavail_mb=2310 temps_c=cpu:40,ddr:42
+12:54:48 up=43970.32 npu=active active_ms=43958432 npu_irqs=25716 cma_free_kb=224 memavail_mb=2295 temps_c=cpu:41,ddr:44
+12:54:49 up=43971.46 npu=active active_ms=43959568 npu_irqs=25716 cma_free_kb=164 memavail_mb=2302 temps_c=cpu:38,ddr:42
+12:54:50 up=43972.59 npu=active active_ms=43960705 npu_irqs=25716 cma_free_kb=1024 memavail_mb=2310 temps_c=cpu:38,ddr:42
+12:54:51 up=43973.72 npu=active active_ms=43961830 npu_irqs=25716 cma_free_kb=1424 memavail_mb=2314 temps_c=cpu:38,ddr:41
+12:54:52 up=43974.82 npu=active active_ms=43962928 npu_irqs=25716 cma_free_kb=1500 memavail_mb=2315 temps_c=cpu:37,ddr:40
+12:54:53 up=43976.00 npu=active active_ms=43964112 npu_irqs=25716 cma_free_kb=1596 memavail_mb=2314 temps_c=cpu:37,ddr:41
+12:54:55 up=43977.12 npu=active active_ms=43965236 npu_irqs=25716 cma_free_kb=1596 memavail_mb=2313 temps_c=cpu:37,ddr:40
+12:54:56 up=43978.24 npu=active active_ms=43966346 npu_irqs=25716 cma_free_kb=1596 memavail_mb=2313 temps_c=cpu:37,ddr:40
+12:54:57 up=43979.43 npu=active active_ms=43967539 npu_irqs=25716 cma_free_kb=1596 memavail_mb=2313 temps_c=cpu:36,ddr:39
+12:54:58 up=43980.55 npu=active active_ms=43968664 npu_irqs=25716 cma_free_kb=1660 memavail_mb=2317 temps_c=cpu:36,ddr:39

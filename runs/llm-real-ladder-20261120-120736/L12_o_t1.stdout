@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 1.93 ms, compile 7.67 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L12_o_t1.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 9, "compile_ms": 7.670, "first_ms": 0.238, "ms_median_after_first": 0.1557, "ctx_ms": 0.0016, "invoke_call_ms": 0.0073, "read_ms": 0.1467, "npu_ms": 0.1202, "spins_per_wait": 30, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0228, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.0252, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-123742-LLMRW-L12_o_t1

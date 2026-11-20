@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T12:46:35-05:00 duration=300s interval=1s
+12:46:35 up=43477.99 npu=active active_ms=43466098 npu_irqs=25128 cma_free_kb=1684 memavail_mb=2382 temps_c=cpu:37,ddr:40
+12:46:37 up=43479.12 npu=active active_ms=43467233 npu_irqs=25128 cma_free_kb=1708 memavail_mb=2381 temps_c=cpu:35,ddr:37
+12:46:38 up=43480.25 npu=active active_ms=43468366 npu_irqs=25128 cma_free_kb=1708 memavail_mb=2381 temps_c=cpu:34,ddr:37
+12:46:39 up=43481.41 npu=active active_ms=43469525 npu_irqs=25128 cma_free_kb=1712 memavail_mb=2381 temps_c=cpu:34,ddr:37
+12:46:40 up=43482.56 npu=active active_ms=43470673 npu_irqs=25128 cma_free_kb=1712 memavail_mb=2380 temps_c=cpu:34,ddr:37
+12:46:41 up=43483.73 npu=active active_ms=43471842 npu_irqs=25128 cma_free_kb=1712 memavail_mb=2374 temps_c=cpu:39,ddr:39
+12:46:42 up=43484.92 npu=active active_ms=43473039 npu_irqs=25149 cma_free_kb=772 memavail_mb=2380 temps_c=cpu:35,ddr:38
+12:46:43 up=43486.07 npu=active active_ms=43474190 npu_irqs=25149 cma_free_kb=764 memavail_mb=2380 temps_c=cpu:35,ddr:38
+12:46:45 up=43487.25 npu=active active_ms=43475371 npu_irqs=25149 cma_free_kb=912 memavail_mb=2380 temps_c=cpu:35,ddr:37
+12:46:46 up=43488.36 npu=active active_ms=43476472 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2380 temps_c=cpu:35,ddr:38
+12:46:47 up=43489.51 npu=active active_ms=43477616 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2379 temps_c=cpu:35,ddr:38
+12:46:48 up=43490.64 npu=active active_ms=43478753 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2379 temps_c=cpu:34,ddr:37
+12:46:49 up=43491.79 npu=active active_ms=43479906 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2378 temps_c=cpu:34,ddr:37
+12:46:50 up=43492.94 npu=active active_ms=43481050 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2378 temps_c=cpu:34,ddr:37
+12:46:52 up=43494.08 npu=active active_ms=43482189 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2377 temps_c=cpu:35,ddr:38
+12:46:53 up=43495.25 npu=active active_ms=43483365 npu_irqs=25149 cma_free_kb=1016 memavail_mb=2377 temps_c=cpu:34,ddr:37

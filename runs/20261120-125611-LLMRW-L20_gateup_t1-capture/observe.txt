@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T12:56:11-05:00 duration=300s interval=1s
+12:56:11 up=44053.46 npu=active active_ms=44041573 npu_irqs=25800 cma_free_kb=2116 memavail_mb=2353 temps_c=cpu:37,ddr:39
+12:56:12 up=44054.67 npu=active active_ms=44042784 npu_irqs=25800 cma_free_kb=2124 memavail_mb=2353 temps_c=cpu:35,ddr:38
+12:56:13 up=44055.86 npu=active active_ms=44043973 npu_irqs=25800 cma_free_kb=2124 memavail_mb=2353 temps_c=cpu:35,ddr:37
+12:56:14 up=44056.99 npu=active active_ms=44045101 npu_irqs=25800 cma_free_kb=2132 memavail_mb=2353 temps_c=cpu:35,ddr:37
+12:56:16 up=44058.21 npu=active active_ms=44046325 npu_irqs=25800 cma_free_kb=2132 memavail_mb=2352 temps_c=cpu:35,ddr:38
+12:56:17 up=44059.38 npu=active active_ms=44047485 npu_irqs=25800 cma_free_kb=2204 memavail_mb=2348 temps_c=cpu:37,ddr:40
+12:56:18 up=44060.49 npu=active active_ms=44048596 npu_irqs=25821 cma_free_kb=2240 memavail_mb=2349 temps_c=cpu:35,ddr:38
+12:56:19 up=44061.67 npu=active active_ms=44049780 npu_irqs=25821 cma_free_kb=2240 memavail_mb=2349 temps_c=cpu:35,ddr:38
+12:56:20 up=44062.80 npu=active active_ms=44050916 npu_irqs=25821 cma_free_kb=2312 memavail_mb=2351 temps_c=cpu:35,ddr:38
+12:56:21 up=44063.93 npu=active active_ms=44052049 npu_irqs=25821 cma_free_kb=2312 memavail_mb=2351 temps_c=cpu:35,ddr:38
+12:56:22 up=44065.05 npu=active active_ms=44053163 npu_irqs=25821 cma_free_kb=2312 memavail_mb=2351 temps_c=cpu:35,ddr:38
+12:56:24 up=44066.21 npu=active active_ms=44054323 npu_irqs=25821 cma_free_kb=2312 memavail_mb=2352 temps_c=cpu:35,ddr:38
+12:56:25 up=44067.30 npu=active active_ms=44055411 npu_irqs=25821 cma_free_kb=2312 memavail_mb=2352 temps_c=cpu:35,ddr:38
+12:56:26 up=44068.47 npu=active active_ms=44056583 npu_irqs=25821 cma_free_kb=2320 memavail_mb=2354 temps_c=cpu:34,ddr:38
+12:56:27 up=44069.66 npu=active active_ms=44057771 npu_irqs=25821 cma_free_kb=2324 memavail_mb=2354 temps_c=cpu:34,ddr:37
+12:56:28 up=44070.79 npu=active active_ms=44058902 npu_irqs=25821 cma_free_kb=2324 memavail_mb=2355 temps_c=cpu:34,ddr:38

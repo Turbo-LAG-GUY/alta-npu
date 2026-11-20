@@ -1,0 +1,7 @@
+# kmsg-catch start 2026-11-20T12:51:41-0500 uptime=43783.53
+[43787.814814] <6> meson8b-dwmac ff3f0000.ethernet end0: Link is Up - 1Gbps/Full - flow control rx/tx
+[43792.860233] <6> usb 1-1.2: USB disconnect, device number 3
+[43792.891403] <6> wlx2023510a94e0: deauthenticating from 72:bd:c5:cd:e2:6d by local choice (Reason: 3=DEAUTH_LEAVING)
+[43792.991912] <4> rtw_8821cu 1-1.2:1.2: firmware failed to leave lps state
+[43793.911816] <6> Purging 561152 bytes
+# kmsg-catch end uptime=43801.07

@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.11 ms, compile 21.97 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L22_down_t256.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 9, "compile_ms": 21.969, "first_ms": 1.460, "ms_median_after_first": 1.2356, "ctx_ms": 0.0018, "invoke_call_ms": 0.1853, "read_ms": 1.0543, "npu_ms": 0.9282, "spins_per_wait": 256, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0190, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.1211, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-130047-LLMRW-L22_down_t256

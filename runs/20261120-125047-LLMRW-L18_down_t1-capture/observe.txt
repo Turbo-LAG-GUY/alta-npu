@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T12:50:47-05:00 duration=300s interval=1s
+12:50:47 up=43729.62 npu=active active_ms=43717728 npu_irqs=25422 cma_free_kb=1944 memavail_mb=2375 temps_c=cpu:36,ddr:39
+12:50:48 up=43730.73 npu=active active_ms=43718844 npu_irqs=25422 cma_free_kb=1200 memavail_mb=2374 temps_c=cpu:35,ddr:37
+12:50:49 up=43731.89 npu=active active_ms=43719999 npu_irqs=25422 cma_free_kb=1200 memavail_mb=2374 temps_c=cpu:35,ddr:37
+12:50:50 up=43733.03 npu=active active_ms=43721149 npu_irqs=25422 cma_free_kb=1200 memavail_mb=2373 temps_c=cpu:34,ddr:37
+12:50:52 up=43734.20 npu=active active_ms=43722305 npu_irqs=25422 cma_free_kb=1452 memavail_mb=2373 temps_c=cpu:34,ddr:38
+12:50:53 up=43735.34 npu=active active_ms=43723452 npu_irqs=25422 cma_free_kb=1200 memavail_mb=2372 temps_c=cpu:37,ddr:40
+12:50:54 up=43736.43 npu=active active_ms=43724543 npu_irqs=25443 cma_free_kb=68 memavail_mb=2371 temps_c=cpu:35,ddr:37
+12:50:55 up=43737.60 npu=active active_ms=43725716 npu_irqs=25443 cma_free_kb=360 memavail_mb=2373 temps_c=cpu:35,ddr:37
+12:50:56 up=43738.77 npu=active active_ms=43726880 npu_irqs=25443 cma_free_kb=484 memavail_mb=2373 temps_c=cpu:35,ddr:37
+12:50:57 up=43739.91 npu=active active_ms=43728023 npu_irqs=25443 cma_free_kb=520 memavail_mb=2373 temps_c=cpu:35,ddr:38
+12:50:58 up=43741.03 npu=active active_ms=43729145 npu_irqs=25443 cma_free_kb=696 memavail_mb=2374 temps_c=cpu:35,ddr:37
+12:51:00 up=43742.16 npu=active active_ms=43730272 npu_irqs=25443 cma_free_kb=1044 memavail_mb=2374 temps_c=cpu:34,ddr:37
+12:51:01 up=43743.30 npu=active active_ms=43731413 npu_irqs=25443 cma_free_kb=1056 memavail_mb=2374 temps_c=cpu:34,ddr:37
+12:51:02 up=43744.46 npu=active active_ms=43732572 npu_irqs=25443 cma_free_kb=1056 memavail_mb=2375 temps_c=cpu:34,ddr:37
+12:51:03 up=43745.60 npu=active active_ms=43733713 npu_irqs=25443 cma_free_kb=1056 memavail_mb=2374 temps_c=cpu:34,ddr:38
+12:51:04 up=43746.79 npu=active active_ms=43734907 npu_irqs=25443 cma_free_kb=1056 memavail_mb=2374 temps_c=cpu:34,ddr:37

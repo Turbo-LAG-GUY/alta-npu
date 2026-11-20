@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T12:51:59-05:00 duration=300s interval=1s
+12:51:59 up=43801.49 npu=active active_ms=43789596 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2378 temps_c=cpu:37,ddr:40
+12:52:00 up=43802.71 npu=active active_ms=43790817 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2378 temps_c=cpu:35,ddr:38
+12:52:01 up=43803.88 npu=active active_ms=43791986 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2378 temps_c=cpu:35,ddr:38
+12:52:03 up=43805.19 npu=active active_ms=43793297 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2377 temps_c=cpu:35,ddr:37
+12:52:04 up=43806.32 npu=active active_ms=43794435 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2377 temps_c=cpu:35,ddr:38
+12:52:05 up=43807.42 npu=active active_ms=43795531 npu_irqs=25506 cma_free_kb=1476 memavail_mb=2371 temps_c=cpu:37,ddr:41
+12:52:06 up=43808.62 npu=active active_ms=43796727 npu_irqs=25527 cma_free_kb=1648 memavail_mb=2371 temps_c=cpu:35,ddr:38
+12:52:07 up=43809.77 npu=active active_ms=43797886 npu_irqs=25527 cma_free_kb=1660 memavail_mb=2372 temps_c=cpu:35,ddr:38
+12:52:08 up=43810.94 npu=active active_ms=43799057 npu_irqs=25527 cma_free_kb=1668 memavail_mb=2373 temps_c=cpu:35,ddr:38
+12:52:09 up=43812.05 npu=active active_ms=43800165 npu_irqs=25527 cma_free_kb=1668 memavail_mb=2373 temps_c=cpu:35,ddr:37
+12:52:11 up=43813.20 npu=active active_ms=43801311 npu_irqs=25527 cma_free_kb=1688 memavail_mb=2373 temps_c=cpu:35,ddr:37
+12:52:12 up=43814.37 npu=active active_ms=43802489 npu_irqs=25527 cma_free_kb=1688 memavail_mb=2372 temps_c=cpu:35,ddr:38
+12:52:13 up=43815.49 npu=active active_ms=43803608 npu_irqs=25527 cma_free_kb=1688 memavail_mb=2372 temps_c=cpu:35,ddr:37
+12:52:14 up=43816.70 npu=active active_ms=43804817 npu_irqs=25527 cma_free_kb=1688 memavail_mb=2373 temps_c=cpu:35,ddr:38
+12:52:15 up=43817.83 npu=active active_ms=43805937 npu_irqs=25527 cma_free_kb=1688 memavail_mb=2373 temps_c=cpu:35,ddr:38
+/home/jordan/alta-npu/scripts/npu-observe: line 14: echo: write error: Broken pipe

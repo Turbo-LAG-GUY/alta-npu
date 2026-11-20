@@ -1,0 +1,3 @@
+/dev/dri/renderD128: etnaviv
+screen 6.34 ms, compile 12.88 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L01_o_t256.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 9, "compile_ms": 12.876, "first_ms": 7.271, "ms_median_after_first": 0.5850, "ctx_ms": 0.0017, "invoke_call_ms": 0.0678, "read_ms": 0.5149, "npu_ms": 0.4019, "spins_per_wait": 135, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0245, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.1121, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}

@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.09 ms, compile 38.65 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L27_gateup_t1.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 9, "compile_ms": 38.648, "first_ms": 0.531, "ms_median_after_first": 0.4006, "ctx_ms": 0.0016, "invoke_call_ms": 0.0068, "read_ms": 0.3921, "npu_ms": 0.3641, "spins_per_wait": 110, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0149, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.0273, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-131304-LLMRW-L27_gateup_t1

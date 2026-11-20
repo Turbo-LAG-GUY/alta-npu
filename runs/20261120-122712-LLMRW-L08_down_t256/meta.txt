@@ -1,0 +1,10 @@
+label: LLMRW-L08_down_t256
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-a79b7b5c -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m/L08_down_t256.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T12:27:12-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2420
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=143890;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=99ce241d9;t=660b850b750e9;x=942d36cf2b9d297e
+end: 2026-11-20T12:27:14-05:00  rc: 0  wall_s: 2

@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T13:06:59-05:00 duration=300s interval=1s
+13:06:59 up=44701.17 npu=active active_ms=44689279 npu_irqs=26556 cma_free_kb=1912 memavail_mb=2346 temps_c=cpu:37,ddr:39
+13:07:00 up=44702.34 npu=active active_ms=44690453 npu_irqs=26556 cma_free_kb=1916 memavail_mb=2345 temps_c=cpu:34,ddr:37
+13:07:01 up=44703.49 npu=active active_ms=44691602 npu_irqs=26556 cma_free_kb=1916 memavail_mb=2345 temps_c=cpu:35,ddr:38
+13:07:02 up=44704.63 npu=active active_ms=44692745 npu_irqs=26556 cma_free_kb=1916 memavail_mb=2345 temps_c=cpu:34,ddr:37
+13:07:03 up=44705.76 npu=active active_ms=44693871 npu_irqs=26556 cma_free_kb=1916 memavail_mb=2345 temps_c=cpu:34,ddr:37
+13:07:04 up=44706.92 npu=active active_ms=44695033 npu_irqs=26556 cma_free_kb=1916 memavail_mb=2343 temps_c=cpu:37,ddr:40
+13:07:05 up=44708.03 npu=active active_ms=44696139 npu_irqs=26577 cma_free_kb=864 memavail_mb=2345 temps_c=cpu:35,ddr:38
+13:07:07 up=44709.23 npu=active active_ms=44697338 npu_irqs=26577 cma_free_kb=864 memavail_mb=2344 temps_c=cpu:35,ddr:37
+13:07:08 up=44710.34 npu=active active_ms=44698457 npu_irqs=26577 cma_free_kb=864 memavail_mb=2344 temps_c=cpu:35,ddr:37
+13:07:09 up=44711.52 npu=active active_ms=44699633 npu_irqs=26577 cma_free_kb=864 memavail_mb=2344 temps_c=cpu:35,ddr:38
+13:07:10 up=44712.63 npu=active active_ms=44700741 npu_irqs=26577 cma_free_kb=864 memavail_mb=2344 temps_c=cpu:34,ddr:37
+13:07:11 up=44713.79 npu=active active_ms=44701904 npu_irqs=26577 cma_free_kb=864 memavail_mb=2343 temps_c=cpu:35,ddr:38
+13:07:12 up=44714.93 npu=active active_ms=44703044 npu_irqs=26577 cma_free_kb=864 memavail_mb=2343 temps_c=cpu:34,ddr:37
+13:07:13 up=44716.07 npu=active active_ms=44704185 npu_irqs=26577 cma_free_kb=1160 memavail_mb=2343 temps_c=cpu:34,ddr:37
+13:07:15 up=44717.17 npu=active active_ms=44705288 npu_irqs=26577 cma_free_kb=1272 memavail_mb=2343 temps_c=cpu:34,ddr:36
+13:07:16 up=44718.33 npu=active active_ms=44706438 npu_irqs=26577 cma_free_kb=1224 memavail_mb=2342 temps_c=cpu:34,ddr:37
