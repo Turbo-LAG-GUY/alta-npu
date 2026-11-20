@@ -1,0 +1,29 @@
+#version 450
+// L G1 (2026-11-19): int8 dot-product throughput. Built twice: as written (x*y = 32-bit multiply, then OpIMul is
+// replaced by OpSDot in the SPIR-V text -> dot_bench.spv), and EMUL=1 (the 4 byte products written out = what NIR
+// does on Bifrost without the patch -> emul_bench.spv). 8 independent chains per invocation.
+layout(local_size_x = 64) in;
+layout(std430, binding = 0) readonly buffer A { ivec4 a[]; };
+layout(std430, binding = 1) readonly buffer B { ivec4 b[]; };
+layout(std430, binding = 2) writeonly buffer C { int c[]; };
+layout(push_constant) uniform P { int rounds; } p;
+#ifdef EMUL
+int dot4(int x, int y) {
+   return bitfieldExtract(x, 0, 8) * bitfieldExtract(y, 0, 8) + bitfieldExtract(x, 8, 8) * bitfieldExtract(y, 8, 8) +
+          bitfieldExtract(x, 16, 8) * bitfieldExtract(y, 16, 8) + bitfieldExtract(x, 24, 8) * bitfieldExtract(y, 24, 8);
+}
+#define DOT(x, y) dot4(x, y)
+#else
+#define DOT(x, y) ((x) * (y))
+#endif
+void main() {
+   uint i = gl_GlobalInvocationID.x;
+   ivec4 x0 = a[2 * i], x1 = a[2 * i + 1], y0 = b[2 * i], y1 = b[2 * i + 1];
+   int s0 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0, s7 = 0;
+   for (int r = 0; r < p.rounds; r++) {
+      s0 += DOT(x0.x, y0.x); s1 += DOT(x0.y, y0.y); s2 += DOT(x0.z, y0.z); s3 += DOT(x0.w, y0.w);
+      s4 += DOT(x1.x, y1.x); s5 += DOT(x1.y, y1.y); s6 += DOT(x1.z, y1.z); s7 += DOT(x1.w, y1.w);
+      x0 += ivec4(0x01010101); x1 -= ivec4(0x01010101);
+   }
+   c[i] = s0 ^ s1 ^ s2 ^ s3 ^ s4 ^ s5 ^ s6 ^ s7;
+}

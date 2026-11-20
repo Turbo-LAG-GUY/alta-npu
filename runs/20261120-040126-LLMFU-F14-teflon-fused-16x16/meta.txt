@@ -1,0 +1,10 @@
+label: LLMFU-F14-teflon-fused-16x16
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_16x16_P.tflite -r /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_16x16_P_reference.npz -e /home/jordan/Documents/AI_Projects/npu-llm/bin/libteflon-fa818da9.so -n 200
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T04:01:26-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2243
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=13f90a;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=2b253ebe4;t=660b16628faf4;x=26c73f59c1e2a4cc
+end: 2026-11-20T04:01:38-05:00  rc: 0  wall_s: 12

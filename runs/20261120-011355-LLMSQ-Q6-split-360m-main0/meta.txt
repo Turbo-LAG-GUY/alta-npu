@@ -1,0 +1,10 @@
+label: LLMSQ-Q6-split-360m-main0
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-3fa43e81 -n 200 --wait spin --cpu-rows 3584 --cpu-ic 960 --main-cpu 0 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/split_360m_gateup_npu1536_g4.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T01:13:55-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2363
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=13e2c8;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=701f8292;t=660af23f491a3;x=1aa8d6d3b5d5eade
+end: 2026-11-20T01:13:57-05:00  rc: 0  wall_s: 2

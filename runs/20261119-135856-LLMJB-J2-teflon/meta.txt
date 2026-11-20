@@ -1,0 +1,10 @@
+label: LLMJB-J2-teflon
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_1x1_P.tflite -r /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_1x1_P_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-llm/build/src/gallium/targets/teflon/libteflon.so -n 200
+cwd: /home/jordan/alta-npu
+start: 2026-11-19T13:58:56-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2073
+deadline_s: 120
+journal_cursor: s=24bb392941f54ba281bdfac39a3f95c2;i=13a680;b=e01fb03e96924a3ab97a0054a1150173;m=7f6fbb1;t=660a5a7df55b7;x=30450a7c765fcb64
+end: 2026-11-19T13:59:05-05:00  rc: 0  wall_s: 9

@@ -1,0 +1,227 @@
+Note: Google Test filter = teflon/ssdlite_mobiledet.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 109 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 109 tests from teflon/ssdlite_mobiledet
+[ RUN      ] teflon/ssdlite_mobiledet.0000
+[       OK ] teflon/ssdlite_mobiledet.0000 (196 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0001
+[       OK ] teflon/ssdlite_mobiledet.0001 (74 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0002
+[       OK ] teflon/ssdlite_mobiledet.0002 (152 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0003
+[       OK ] teflon/ssdlite_mobiledet.0003 (68 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0004
+[       OK ] teflon/ssdlite_mobiledet.0004 (222 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0005
+[       OK ] teflon/ssdlite_mobiledet.0005 (79 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0006
+[       OK ] teflon/ssdlite_mobiledet.0006 (117 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0007
+[       OK ] teflon/ssdlite_mobiledet.0007 (53 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0009
+[       OK ] teflon/ssdlite_mobiledet.0009 (205 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0010
+[       OK ] teflon/ssdlite_mobiledet.0010 (78 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0012
+[       OK ] teflon/ssdlite_mobiledet.0012 (119 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0013
+[       OK ] teflon/ssdlite_mobiledet.0013 (52 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0015
+[       OK ] teflon/ssdlite_mobiledet.0015 (141 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0016
+[       OK ] teflon/ssdlite_mobiledet.0016 (45 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0017
+[       OK ] teflon/ssdlite_mobiledet.0017 (162 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0018
+[       OK ] teflon/ssdlite_mobiledet.0018 (48 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0020
+[       OK ] teflon/ssdlite_mobiledet.0020 (162 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0021
+[       OK ] teflon/ssdlite_mobiledet.0021 (46 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0023
+[       OK ] teflon/ssdlite_mobiledet.0023 (166 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0024
+[       OK ] teflon/ssdlite_mobiledet.0024 (47 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0026
+[       OK ] teflon/ssdlite_mobiledet.0026 (81 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0027
+[       OK ] teflon/ssdlite_mobiledet.0027 (104 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0028
+[       OK ] teflon/ssdlite_mobiledet.0028 (43 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0029
+[       OK ] teflon/ssdlite_mobiledet.0029 (56 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0030
+[       OK ] teflon/ssdlite_mobiledet.0030 (195 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0031
+[       OK ] teflon/ssdlite_mobiledet.0031 (49 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0033
+[       OK ] teflon/ssdlite_mobiledet.0033 (128 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0034
+[       OK ] teflon/ssdlite_mobiledet.0034 (37 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0036
+[       OK ] teflon/ssdlite_mobiledet.0036 (132 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0037
+[       OK ] teflon/ssdlite_mobiledet.0037 (39 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0039
+[       OK ] teflon/ssdlite_mobiledet.0039 (55 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0040
+[       OK ] teflon/ssdlite_mobiledet.0040 (429 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0041
+[       OK ] teflon/ssdlite_mobiledet.0041 (51 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0042
+[       OK ] teflon/ssdlite_mobiledet.0042 (66 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0043
+[       OK ] teflon/ssdlite_mobiledet.0043 (725 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0044
+[       OK ] teflon/ssdlite_mobiledet.0044 (68 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0046
+[       OK ] teflon/ssdlite_mobiledet.0046 (63 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0047
+[       OK ] teflon/ssdlite_mobiledet.0047 (306 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0048
+[       OK ] teflon/ssdlite_mobiledet.0048 (63 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0050
+[       OK ] teflon/ssdlite_mobiledet.0050 (68 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0051
+[       OK ] teflon/ssdlite_mobiledet.0051 (298 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0052
+[       OK ] teflon/ssdlite_mobiledet.0052 (61 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0054
+[       OK ] teflon/ssdlite_mobiledet.0054 (67 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0055
+[       OK ] teflon/ssdlite_mobiledet.0055 (678 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0056
+[       OK ] teflon/ssdlite_mobiledet.0056 (39 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0057
+[       OK ] teflon/ssdlite_mobiledet.0057 (46 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0058
+[       OK ] teflon/ssdlite_mobiledet.0058 (406 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0059
+[       OK ] teflon/ssdlite_mobiledet.0059 (42 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0061
+[       OK ] teflon/ssdlite_mobiledet.0061 (40 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0062
+[       OK ] teflon/ssdlite_mobiledet.0062 (280 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0063
+[       OK ] teflon/ssdlite_mobiledet.0063 (35 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0065
+[       OK ] teflon/ssdlite_mobiledet.0065 (48 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0066
+[       OK ] teflon/ssdlite_mobiledet.0066 (393 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0067
+[       OK ] teflon/ssdlite_mobiledet.0067 (41 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0069
+[       OK ] teflon/ssdlite_mobiledet.0069 (44 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0070
+[       OK ] teflon/ssdlite_mobiledet.0070 (1037 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0071
+[       OK ] teflon/ssdlite_mobiledet.0071 (78 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0072
+[       OK ] teflon/ssdlite_mobiledet.0072 (38 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0073
+[       OK ] teflon/ssdlite_mobiledet.0073 (53 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0074
+[       OK ] teflon/ssdlite_mobiledet.0074 (37 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0075
+[       OK ] teflon/ssdlite_mobiledet.0075 (31 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0076
+[       OK ] teflon/ssdlite_mobiledet.0076 (41 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0077
+[       OK ] teflon/ssdlite_mobiledet.0077 (30 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0078
+[       OK ] teflon/ssdlite_mobiledet.0078 (25 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0079
+[       OK ] teflon/ssdlite_mobiledet.0079 (36 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0080
+[       OK ] teflon/ssdlite_mobiledet.0080 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0081
+[       OK ] teflon/ssdlite_mobiledet.0081 (23 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0082
+[       OK ] teflon/ssdlite_mobiledet.0082 (25 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0083
+[       OK ] teflon/ssdlite_mobiledet.0083 (32 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0084
+[       OK ] teflon/ssdlite_mobiledet.0084 (34 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0085
+[       OK ] teflon/ssdlite_mobiledet.0085 (33 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0086
+[       OK ] teflon/ssdlite_mobiledet.0086 (87 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0087
+[       OK ] teflon/ssdlite_mobiledet.0087 (90 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0088
+[       OK ] teflon/ssdlite_mobiledet.0088 (136 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0089
+[       OK ] teflon/ssdlite_mobiledet.0089 (133 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0090
+[       OK ] teflon/ssdlite_mobiledet.0090 (51 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0091
+[       OK ] teflon/ssdlite_mobiledet.0091 (54 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0092
+[       OK ] teflon/ssdlite_mobiledet.0092 (51 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0093
+[       OK ] teflon/ssdlite_mobiledet.0093 (52 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0094
+[       OK ] teflon/ssdlite_mobiledet.0094 (34 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0095
+[       OK ] teflon/ssdlite_mobiledet.0095 (31 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0096
+[       OK ] teflon/ssdlite_mobiledet.0096 (28 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0097
+[       OK ] teflon/ssdlite_mobiledet.0097 (25 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0098
+[       OK ] teflon/ssdlite_mobiledet.0098 (44 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0099
+[       OK ] teflon/ssdlite_mobiledet.0099 (28 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0100
+[       OK ] teflon/ssdlite_mobiledet.0100 (28 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0101
+[       OK ] teflon/ssdlite_mobiledet.0101 (23 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0102
+[       OK ] teflon/ssdlite_mobiledet.0102 (54 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0103
+[       OK ] teflon/ssdlite_mobiledet.0103 (25 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0104
+[       OK ] teflon/ssdlite_mobiledet.0104 (26 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0105
+[       OK ] teflon/ssdlite_mobiledet.0105 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0106
+[       OK ] teflon/ssdlite_mobiledet.0106 (45 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0107
+[       OK ] teflon/ssdlite_mobiledet.0107 (28 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0108
+[       OK ] teflon/ssdlite_mobiledet.0108 (26 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0109
+[       OK ] teflon/ssdlite_mobiledet.0109 (26 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0110
+[       OK ] teflon/ssdlite_mobiledet.0110 (32 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0111
+[       OK ] teflon/ssdlite_mobiledet.0111 (26 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0112
+[       OK ] teflon/ssdlite_mobiledet.0112 (25 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0113
+[       OK ] teflon/ssdlite_mobiledet.0113 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0114
+[       OK ] teflon/ssdlite_mobiledet.0114 (33 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0115
+[       OK ] teflon/ssdlite_mobiledet.0115 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0116
+[       OK ] teflon/ssdlite_mobiledet.0116 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0117
+[       OK ] teflon/ssdlite_mobiledet.0117 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0118
+[       OK ] teflon/ssdlite_mobiledet.0118 (26 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0119
+[       OK ] teflon/ssdlite_mobiledet.0119 (24 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0120
+[       OK ] teflon/ssdlite_mobiledet.0120 (27 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0121
+[       OK ] teflon/ssdlite_mobiledet.0121 (28 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0122
+[       OK ] teflon/ssdlite_mobiledet.0122 (33 ms)
+[ RUN      ] teflon/ssdlite_mobiledet.0123
+[       OK ] teflon/ssdlite_mobiledet.0123 (33 ms)
+[----------] 109 tests from teflon/ssdlite_mobiledet (10684 ms total)
+
+[----------] Global test environment tear-down
+[==========] 109 tests from 1 test suite ran. (10685 ms total)
+[  PASSED  ] 109 tests.

@@ -1,0 +1,10 @@
+label: LLMFU-F7-cached-16x16
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-ad393a6f -n 200 --wait spin --alt /home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_16x16_alt.jbp /home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_16x16.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T03:58:54-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2200
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=13f90a;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=2b253ebe4;t=660b16628faf4;x=26c73f59c1e2a4cc
+end: 2026-11-20T03:58:56-05:00  rc: 0  wall_s: 2

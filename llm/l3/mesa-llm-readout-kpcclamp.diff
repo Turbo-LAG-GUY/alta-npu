@@ -1,0 +1,72 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 2203dc07ca15..b10bbcd9c108 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1095,21 +1095,16 @@ etna_ml_subgraph_read_outputs(struct pipe_context *context, struct pipe_ml_subgr
+ 
+    for (int i = 0; i < outputs_count; i++) {
+       struct pipe_resource *res = etna_ml_get_resource(subgraph, output_idxs[i]);
++      unsigned size = etna_ml_get_size(subgraph, output_idxs[i]);
++
++      /* The tensor buffers are write-combined, so every CPU load from them goes to memory: copy each output out
++       * in one bulk read, then convert it in cached memory, instead of one uncached load per byte.
++       */
++      pipe_buffer_read(context, res, 0, size, outputs[i]);
+       if (is_signed[i]) {
+-         struct pipe_transfer *src_transfer;
+-         uint8_t *src_map;
+-         src_map = (uint8_t *) pipe_buffer_map_range(context,
+-                                                     res,
+-                                                     0, pipe_buffer_size(res),
+-                                                     PIPE_MAP_READ,
+-                                                     &src_transfer);
+-         assert(src_map);
+-         for (unsigned k = 0; k < etna_ml_get_size(subgraph, output_idxs[i]); k++) {
+-            ((uint8_t *)(outputs[i]))[k] = src_map[k] - 128;
+-         }
+-         pipe_buffer_unmap(context, src_transfer);
+-      } else {
+-         pipe_buffer_read(context, res, 0, etna_ml_get_size(subgraph, output_idxs[i]), outputs[i]);
++         uint8_t *out = outputs[i];
++         for (unsigned k = 0; k < size; k++)
++            out[k] -= 128;
+       }
+    }
+ }
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index 2cbea2ad8dd7..ef70238d0e74 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -8,6 +8,7 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_screen.h"
+ 
++#include <stdio.h>
+ #include <stdlib.h>
+ 
+ /* LLM engine step L3 (test tree only, 2026-11-19): tiling experiments.
+@@ -15,6 +16,8 @@
+  *                         1x1 kernels; the accumulation-buffer bound (depth * interleave / tile_y) stays.
+  *   ETNA_ML_V7_TILE_H=N   tile height = MIN(N, the computed one): only ever smaller.
+  * Unset = upstream behaviour, bit for bit.
++ * 2026-11-20: ETNA_ML_V7_KPC_CAP is clamped to nn_accum_buffer_depth / 3 (21 on the A311D's GC8000): 24 hung the NPU
++ * (incident 2026-11-19-1106-LLM3-k24), so the hook can only lower the cap now.
+  */
+ static int
+ llm_env(const char *name)
+@@ -42,8 +45,14 @@ calc_superblocks(struct etna_screen *screen, const struct etna_operation *operat
+ 
+    if (operation->weight_width == 1) {
+       static int kpc_cap = -1;
+-      if (kpc_cap < 0)
++      if (kpc_cap < 0) {
+          kpc_cap = llm_env("ETNA_ML_V7_KPC_CAP");
++         if (kpc_cap > (int)(nn_accum_buffer_depth / 3)) {
++            fprintf(stderr, "etnaviv: ETNA_ML_V7_KPC_CAP=%d is above the hardware cap %u, using %u\n",
++                    kpc_cap, nn_accum_buffer_depth / 3, nn_accum_buffer_depth / 3);
++            kpc_cap = nn_accum_buffer_depth / 3;
++         }
++      }
+       foo = MIN2(foo, kpc_cap > 0 ? (unsigned)kpc_cap : nn_accum_buffer_depth / 3);
+    }
+ 

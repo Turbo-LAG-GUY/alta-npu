@@ -1,0 +1,76 @@
+From e932606c01c11efa943a0cb29207527a0a3c53ea Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Thu, 19 Nov 2026 05:16:26 -0500
+Subject: [PATCH] etnaviv/ml: v7 tiling experiment hooks (LLM engine L3, test
+ tree only)
+
+ETNA_ML_V7_KPC_CAP replaces the accum_depth/3 cap on kernels per superblock
+for 1x1 kernels (the accumulation-buffer bound stays); ETNA_ML_V7_TILE_H can
+only lower the tile height. Unset = unchanged. Prints the chosen tiling
+with ETNA_MESA_DEBUG=ml_msgs.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../drivers/etnaviv/etnaviv_ml_nn_v7.c        | 30 +++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index 8feb43b4d431..2cbea2ad8dd7 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -8,6 +8,21 @@
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_screen.h"
+ 
++#include <stdlib.h>
++
++/* LLM engine step L3 (test tree only, 2026-11-19): tiling experiments.
++ *   ETNA_ML_V7_KPC_CAP=N  replaces the nn_accum_buffer_depth / 3 cap on kernels per superblock for
++ *                         1x1 kernels; the accumulation-buffer bound (depth * interleave / tile_y) stays.
++ *   ETNA_ML_V7_TILE_H=N   tile height = MIN(N, the computed one): only ever smaller.
++ * Unset = upstream behaviour, bit for bit.
++ */
++static int
++llm_env(const char *name)
++{
++   const char *v = getenv(name);
++   return v ? atoi(v) : 0;
++}
++
+ static void *
+ map_resource(struct pipe_resource *resource)
+ {
+@@ -25,8 +40,12 @@ calc_superblocks(struct etna_screen *screen, const struct etna_operation *operat
+    unsigned kernels_per_core = DIV_ROUND_UP(output_channels, nn_core_count);
+    unsigned foo = (nn_accum_buffer_depth * interleave_mode) / tile_y;
+ 
+-   if (operation->weight_width == 1)
+-      foo = MIN2(foo, nn_accum_buffer_depth / 3);
++   if (operation->weight_width == 1) {
++      static int kpc_cap = -1;
++      if (kpc_cap < 0)
++         kpc_cap = llm_env("ETNA_ML_V7_KPC_CAP");
++      foo = MIN2(foo, kpc_cap > 0 ? (unsigned)kpc_cap : nn_accum_buffer_depth / 3);
++   }
+ 
+    foo = MIN2(foo, kernels_per_core);
+    foo = MIN2(foo, 127);
+@@ -105,8 +124,15 @@ etna_ml_calculate_tiling_v7(struct etna_screen *screen, const struct etna_operat
+    if (operation->stride > 1 && tile_height % 2 > 0)
+       tile_height -= 1;
+ 
++   static int tile_h_cap = -1;
++   if (tile_h_cap < 0)
++      tile_h_cap = llm_env("ETNA_ML_V7_TILE_H");
++   if (tile_h_cap > 0)
++      tile_height = MIN2(tile_height, (unsigned)tile_h_cap);
++
+    tile_height = MAX2(tile_height, 1);
+    superblocks = calc_superblocks(screen, operation, tile_height, interleave_mode);
++   ML_DBG("v7 tiling: tile %ux%u interleave %u superblocks %u\n", tile_width, tile_height, interleave_mode, superblocks);
+ 
+    if (tile_width_out)
+       *tile_width_out = tile_width;
+-- 
+2.43.0
+

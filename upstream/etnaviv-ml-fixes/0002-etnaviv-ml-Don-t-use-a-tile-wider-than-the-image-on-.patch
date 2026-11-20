@@ -1,7 +1,7 @@
 From 348aef38fbd55ad8772d5d427e4e1ee060fe3d43 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 2/9] etnaviv/ml: Don't use a tile wider than the image on V7
+Subject: [PATCH 02/12] etnaviv/ml: Don't use a tile wider than the image on V7
 
 etna_ml_calculate_tiling_v7() computes the tile from the operation's
 width and height, but the NN configuration swaps the two when it fills
@@ -27,7 +27,7 @@ Generated-by: LLM
  1 file changed, 11 insertions(+)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
-index 47ecfac6178..e7e849efad6 100644
+index 47ecfac61780..e7e849efad62 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 @@ -84,6 +84,17 @@ etna_ml_calculate_tiling_v7(struct etna_screen *screen, const struct etna_operat

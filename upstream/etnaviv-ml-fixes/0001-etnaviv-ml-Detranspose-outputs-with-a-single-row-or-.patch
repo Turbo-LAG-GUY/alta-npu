@@ -1,7 +1,7 @@
 From 5fa7d69b5d368ac6bc26482d08412940ac69dad7 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 1/9] etnaviv/ml: Detranspose outputs with a single row or
+Subject: [PATCH 01/12] etnaviv/ml: Detranspose outputs with a single row or
  column
 
 A graph output is only brought back from NCHW to NHWC when is_3d() holds,
@@ -30,7 +30,7 @@ Generated-by: LLM
  2 files changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
-index 7a44d60d8a3..f66ce17cafe 100644
+index 7a44d60d8a3b..f66ce17cafe4 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
 @@ -304,12 +304,14 @@ add_bypass(const struct pipe_ml_operation *poperation, unsigned input_tensor,
@@ -62,7 +62,7 @@ index 7a44d60d8a3..f66ce17cafe 100644
              ML_DBG("Adding detranspose.\n");
              struct etna_operation *detranspose = calloc(1, sizeof(*detranspose));
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c b/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
-index 2e97a328fc9..609c3908c6f 100644
+index 2e97a328fc96..609c3908c6fc 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
 @@ -297,6 +297,16 @@ create_detranspose_config(struct etna_ml_subgraph *subgraph, const struct etna_o

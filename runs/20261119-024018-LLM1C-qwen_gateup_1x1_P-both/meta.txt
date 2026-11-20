@@ -1,0 +1,10 @@
+label: LLM1C-qwen_gateup_1x1_P-both
+cmd: taskset -c 0,1 /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/qwen_gateup_1x1_P.tflite -r /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/qwen_gateup_1x1_P_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so -n 2000 --save /home/jordan/alta-npu/runs/llm-l1c-ladder-20261119-022619/qwen_gateup_1x1_P.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-19T02:40:19-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2199
+deadline_s: 120
+journal_cursor: s=e067e52e32074e28a41086799b0331ca;i=132f45;b=ea2b8d2f35c54ad39a93f1d3c4cc4dba;m=18ce4684a;t=6609c127881c9;x=5ddd7d608af9af9d
+end: 2026-11-19T02:41:30-05:00  rc: 0  wall_s: 72

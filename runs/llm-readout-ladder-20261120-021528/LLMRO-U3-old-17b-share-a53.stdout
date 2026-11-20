@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 6.04 ms, compile 565.06 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/split_17b_gateup_npu6656_g4.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 9, "compile_ms": 565.063, "first_ms": 3.636, "ms_median_after_first": 3.4554, "ctx_ms": 0.0010, "invoke_call_ms": 0.0150, "read_ms": 3.4353, "npu_ms": 2.6181, "spins_per_wait": 1294, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0388, "main_cpu": 0, "main_on_a73": 0.000, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-021612-LLMRO-U3-old-17b-share-a53

@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 4.52 ms, compile 600.24 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/split_17b_gateup_npu6656_g4.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 9, "compile_ms": 600.238, "first_ms": 7.663, "ms_median_after_first": 6.1584, "ctx_ms": 0.0016, "invoke_call_ms": 0.0230, "read_ms": 6.1335, "npu_ms": 4.4770, "spins_per_wait": 1931, "cpu_rows": 9728, "cpu_ms": 4.9592, "cpu_gbs": 4.017, "flush_ms": 0.0870, "main_cpu": 0, "main_on_a73": 0.000, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-011413-LLMSQ-Q7-split-17b-main0

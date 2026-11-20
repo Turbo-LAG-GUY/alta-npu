@@ -58,12 +58,21 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
       <li><label><input type="checkbox" id="c3"><span><code>etnaviv_ml.c</code><small>Inside <code>lower_operations</code>, near line 371 (patch 7)</small></span></label></li>
       <li><label><input type="checkbox" id="c8"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_operation_supported</code>, in the ADD / SUBTRACT case (patch 8)</small></span></label></li>
       <li><label><input type="checkbox" id="c9"><span><code>etnaviv_ml.c</code><small>In <code>lower_operations</code>, after the <code>recreate_tensor</code> call for additions (patch 9)</small></span></label></li>
+      <li><label><input type="checkbox" id="c10"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_subgraph_read_outputs</code>, above the <code>pipe_buffer_read</code> call (patch 10). Patch 12 replaces that block and removes this comment again, so it only shows in patch 10 itself.</small></span></label></li>
+      <li><label><input type="checkbox" id="c11a"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_create_resource</code>, on the <code>.flags</code> line of the template, near line 126 (patch 11)</small></span></label></li>
+      <li><label><input type="checkbox" id="c11b"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_create_resource</code>, above the prep / memset / fini, near line 136 (patch 11)</small></span></label></li>
+      <li><label><input type="checkbox" id="c11c"><span><code>etnaviv_ml.c</code><small>In <code>lower_operations</code>, above the loop that marks the buffers bypass and split outputs share, near line 588 (patch 11)</small></span></label></li>
+      <li><label><input type="checkbox" id="c11d"><span><code>etnaviv_ml.h</code><small>On the new <code>cpu_read</code> field of <code>struct etna_ml_tensor</code>, line 56 (patch 11)</small></span></label></li>
+      <li><label><input type="checkbox" id="c11e"><span><code>etnaviv_resource.c</code><small>In <code>etna_buffer_bo_new</code>, above the cached-memory check, near line 446 (patch 11)</small></span></label></li>
+      <li><label><input type="checkbox" id="c12a"><span><code>etnaviv_ml.c</code><small>Above the new <code>flip_sign_bits</code> helper, near line 103 (patch 12)</small></span></label></li>
+      <li><label><input type="checkbox" id="c12b"><span><code>etnaviv_ml.c</code><small>In <code>etna_ml_subgraph_read_outputs</code>, in the write-combined branch, near line 1177 (patch 12)</small></span></label></li>
+      <li><label><input type="checkbox" id="c12c"><span><code>etnaviv_resource.h</code><small>Above the new <code>etna_buffer_cpu_read_cached</code> helper, near line 43 (patch 12)</small></span></label></li>
       <li><label><input type="checkbox" id="c4"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_calculate_tiling_v7</code>, near line 87 (patch 2)</small></span></label></li>
       <li><label><input type="checkbox" id="c5"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>calculate_bias_correction</code>, near line 124 (patch 6)</small></span></label></li>
       <li><label><input type="checkbox" id="c6"><span><code>etnaviv_ml_nn_v7.c</code><small>In <code>etna_ml_create_coeffs_v7</code>, near line 538 (patch 3)</small></span></label></li>
       <li><label><input type="checkbox" id="c7"><span><code>etnaviv_ml_tp.c</code><small>In <code>create_detranspose_config</code>, near line 300 (patch 1)</small></span></label></li>
     </ul>
-    <p class="where">The fourth file in the series, <code>etnaviv_ml_nn.c</code>, has no new comment.</p>
+    <p class="where"><code>etnaviv_ml_nn.c</code>, also changed by the series, has no new comment.</p>
   </section>
 
   <section>
@@ -82,6 +91,9 @@ git rebase -i 8a9009e0482</pre>
       <li><label><input type="checkbox" id="m7"><span>7. Bring the operands of an addition to the same layout</span></label></li>
       <li><label><input type="checkbox" id="m8"><span>8. Don't accept subtractions on V7</span></label></li>
       <li><label><input type="checkbox" id="m9"><span>9. Keep the size of the first operand of an addition</span></label></li>
+      <li><label><input type="checkbox" id="m10"><span>10. Read outputs with one bulk copy<small>Added 2026-11-20. Its message quotes the read-back times measured on the board; keep the numbers when you reword it.</small></span></label></li>
+      <li><label><input type="checkbox" id="m11"><span>11. Keep graph outputs in cached memory<small>Added 2026-11-20. It also changes <code>etnaviv_resource.c</code>, outside the ML code; the message says why.</small></span></label></li>
+      <li><label><input type="checkbox" id="m12"><span>12. Convert signed tensors eight bytes at a time<small>Added 2026-11-20. It also touches <code>etnaviv_resource.h</code>, to share the cached-buffer check with the allocator.</small></span></label></li>
     </ul>
   </section>
 
@@ -96,8 +108,8 @@ git rebase -i 8a9009e0482</pre>
     <h2>4. Before sending</h2>
     <p class="where">After the rewriting above is finished.</p>
     <ul class="checks">
-      <li><label><input type="checkbox" id="b1"><span>Read all nine patches until you can explain each change<small>Mesa expects the contributor to answer the review questions. The README in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code> has the evidence for each patch.</small></span></label></li>
-      <li><label><input type="checkbox" id="b2"><span>Keep message lines to about 75 characters<small>Three current messages have longer lines: patch 1 (91), patch 4 (108) and patch 7 (109). They go away when you rewrite them.</small></span></label></li>
+      <li><label><input type="checkbox" id="b1"><span>Read all twelve patches until you can explain each change<small>Mesa expects the contributor to answer the review questions. The README in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code> has the evidence for each patch.</small></span></label></li>
+      <li><label><input type="checkbox" id="b2"><span>Keep message lines to about 75 characters<small>Three current messages have longer lines: patch 1 (91), patch 4 (108) and patch 7 (109). They go away when you rewrite them. Patches 10 to 12 stay within 71.</small></span></label></li>
       <li><label><input type="checkbox" id="b3"><span>Check the author line<small>The commits carry your git name and email address. Change them if you want to send under another identity. <code>Signed-off-by</code> is optional in Mesa.</small></span></label></li>
       <li><label><input type="checkbox" id="b4"><span>Keep <code>Generated-by: LLM</code> as the only tool trailer<small>No <code>Co-authored-by</code> for a tool and no model name.</small></span></label></li>
       <li><label><input type="checkbox" id="b5"><span>Rebase onto current Mesa <code>main</code> and rebuild once<small>The base is commit 8a9009e0482. Commands are below.</small></span></label></li>
@@ -126,7 +138,10 @@ git push mine alta-etnaviv-ml-fixes</pre>
   <section>
     <h2>Worth mentioning in the merge request</h2>
     <ul class="plain">
-      <li><strong>Test suite result:</strong> 1503 passed and 34 failed on the VIPNano-QI.7120 with all nine patches, in two runs. 8 of the failures are on Mesa's expected-failure list; the other 26 also fail without the series.</li>
+      <li><strong>Test suite result:</strong> 1503 passed and 34 failed on the VIPNano-QI.7120 with the first nine patches, in two runs, and the same 1503 and the same 34 tests with ten, eleven and all twelve (2026-11-20). 8 of the failures are on Mesa's expected-failure list; the other 26 also fail without the series.</li>
+      <li><strong>Patch 10 speed:</strong> reading back a 786 KB int8 output 22.5 ms before, 2.5 ms after; a one-token 576 to 3072 convolution through Teflon 0.85 ms per invoke before, 0.63 ms after; a 256-token one 29.5 ms before, 7.2 ms after. Outputs and the submitted jobs are unchanged.</li>
+      <li><strong>Patch 11 speed:</strong> reading back the 786 KB output 2.6 ms before, 1.5 ms after; a 256-token Teflon invoke 7.19 ms before, 6.29 ms after; small outputs unchanged. Two alternating inputs over 2800 checked invokes gave no stale output, and <code>test_teflon</code> gives the same result with it, with no kernel warning.</li>
+      <li><strong>Patch 12 speed:</strong> reading back the 786 KB output 1.5 ms before, 0.54 ms after; writing a 147 KB input 0.26 ms before, 0.10 ms after; a 256-token Teflon invoke 6.28 ms before, 4.04 ms after. Over patches 10 to 12, that invoke went from 29.5 ms to 4.0 ms. 3600 checked invokes with alternating inputs, no stale output, and <code>test_teflon</code> gives the same result with it, with no kernel warning.</li>
       <li><strong>Left out of the run:</strong> Mesa's skip list for this NPU and the two <code>ds_cnn</code> tests with a fully-connected layer.</li>
       <li><strong>Hangs in unpatched main:</strong> <code>teflon/ds_cnn.0014</code> (fully-connected, also hangs with the series) and <code>teflon/micronet_vww.whole</code> (passes with the series).</li>
     </ul>
@@ -137,7 +152,7 @@ git push mine alta-etnaviv-ml-fixes</pre>
   <section>
     <h2>Do not edit by hand</h2>
     <ul class="plain">
-      <li><strong>Patch files <code>0001</code> to <code>0009</code></strong> in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code>: exports of the branch. Mesa takes the pushed branch, so they only need regenerating if the folder should match.</li>
+      <li><strong>Patch files <code>0001</code> to <code>0012</code></strong> in <code>~/alta-npu/upstream/etnaviv-ml-fixes/</code>: exports of the branch, regenerated as a twelve-patch series on 2026-11-20 (earlier exports are in <code>previous/</code>). Mesa takes the pushed branch, so they only need regenerating if the folder should match.</li>
       <li><strong><code>make_series.py</code></strong> in the same folder still holds the old wording, and only the first seven patches.</li>
       <li><strong>The second package</strong> in <code>~/Documents/AI_Projects/upstream/etnaviv-ml-fixes/</code>: out of date, not what gets sent.</li>
     </ul>

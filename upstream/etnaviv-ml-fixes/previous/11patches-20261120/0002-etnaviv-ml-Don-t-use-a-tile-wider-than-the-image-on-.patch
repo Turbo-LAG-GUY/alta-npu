@@ -1,0 +1,53 @@
+From 348aef38fbd55ad8772d5d427e4e1ee060fe3d43 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:18 -0500
+Subject: [PATCH 02/11] etnaviv/ml: Don't use a tile wider than the image on V7
+
+etna_ml_calculate_tiling_v7() computes the tile from the operation's
+width and height, but the NN configuration swaps the two when it fills
+in the image sizes. For square images and for H <= W that makes no
+difference to the result. With H > W and W < 64 the tile can end up wider
+than the configured image, in the worst case a 64x1 tile on a 1x64 image
+for an Hx1xC tensor, and the NN job never completes: the kernel reports
+a hang, with the FE past the NN trigger and the core still busy.
+
+Compute the tile from the swapped sizes in just that case. All other
+tilings stay as they were: the configurations and coefficient buffers of
+MobileNetV1 and of 15 other models are bit-identical with and without
+this change.
+
+Tested in a local tree with the same change on a VIPNano-QI.7120
+(Amlogic A311D): a 1x1 convolution on [1, 64, 1, 384] hung the NPU on
+every run before. With this change that model and [1, 64, 8, 64] match
+the CPU within 1 level.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index 47ecfac61780..e7e849efad62 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -84,6 +84,17 @@ etna_ml_calculate_tiling_v7(struct etna_screen *screen, const struct etna_operat
+       output_height *= 2;
+    }
+ 
++   /* The image is configured with x = height and y = width (see
++    * create_nn_config()), while the tile is computed from the unswapped
++    * sizes. When that gives a tile that is wider than the configured image,
++    * the job never finishes, so tile the image as it is configured.
++    */
++   if (!operation->fully_connected && MIN2(output_width, 64) > output_height) {
++      unsigned tmp = output_width;
++      output_width = output_height;
++      output_height = tmp;
++   }
++
+    tile_width = MIN2(output_width, 64);
+    interleave_mode = calc_interleave_mode(tile_width, operation->weight_height);
+ 
+-- 
+2.43.0
+

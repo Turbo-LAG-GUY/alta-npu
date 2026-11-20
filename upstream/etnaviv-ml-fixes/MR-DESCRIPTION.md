@@ -1,6 +1,6 @@
-etnaviv/ml: V7 int8, addition and layout fixes
+etnaviv/ml: V7 int8, addition and layout fixes, faster output read-back
 
-Nine fixes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
+Twelve changes for the etnaviv NPU driver, found on a VIPNano-QI.7120 (Amlogic A311D, Libre Computer Alta) while
 running small synthetic models through Teflon and comparing every output with the CPU interpreter.
 
 1. **Detranspose outputs with a single row or column.** `is_3d()` skipped `[1,1,W,C]` and `[1,H,1,C]` graph
@@ -20,6 +20,15 @@ running small synthetic models through Teflon and comparing every output with th
    `etna_ml_lower_add_v7()` (six `test_teflon` cases abort).
 9. **Keep the size of the first operand of an addition.** The input upload copied both operands' size from
    the caller's buffer (AddressSanitizer report in `test_teflon`), which could also overwrite the second operand.
+10. **Read outputs with one bulk copy.** Signed outputs were converted byte by byte straight from the
+   write-combined tensor buffer, one uncached load per byte; reading back a 786 KB int8 output took 22.5 ms on a
+   Cortex-A73 (2.5 ms now), a 3 KB one 0.36 ms on a Cortex-A53 (0.03 ms now).
+11. **Keep graph outputs in cached memory.** Graph outputs (and buffers they alias) are allocated cached on arm64
+   through `ETNA_RESOURCE_FLAG_CPU_READ`, as CPU-read textures already are; the kernel's CPU_PREP / CPU_FINI do the
+   cache maintenance. Reading back the 786 KB output: 2.6 -> 1.5 ms.
+12. **Convert signed tensors eight bytes at a time.** The +-128 conversion of signed inputs and outputs ran one
+   byte at a time; flipping the top bit with 64-bit XORs reads the 786 KB output back in 0.54 ms (was 1.5) and
+   writes a 147 KB input in 0.10 ms (was 0.26).
 
 ### Testing
 
@@ -40,6 +49,16 @@ was tested on hardware, for 20 models. `test_teflon` on the VIPNano-QI.7120 with
 etnaviv-vipnano-skips.txt and the two ds_cnn tests with a FULLY_CONNECTED left out (teflon/ds_cnn.0014 hangs the
 NPU, with and without the series). 8 of the failures are in etnaviv-vipnano-fails.txt; the other 26 fail without the series as well.
 Without the series micronet_vww.whole hung the NPU; with it the test passes. I have no V8 hardware; patches 1 and 7 touch the layout pass that V8 shares.
+
+Patch 10 was tested on hardware in a tree with the first nine patches plus test-only hooks that are inactive
+by default: outputs unchanged, a one-token 576 -> 3072 convolution through Teflon 0.85 -> 0.63 ms per invoke,
+a 256-token one 29.5 -> 7.2 ms; the submitted jobs are byte-identical with and without it. `test_teflon` with
+all ten commits gives the same 1503 passed / 34 failed, with the same failed tests. Patch 11 was tested the same way
+(write-combined vs cached, back to back): a 256-token Teflon invoke 7.19 -> 6.29 ms, small ones unchanged; two
+alternating inputs over 2800 checked invokes gave no stale output, and `test_teflon` with all eleven commits gives
+the same 1503 passed / 34 failed with the same failed tests. Patch 12, tested the same way: a 256-token Teflon
+invoke 6.28 -> 4.04 ms (29.5 ms before patches 10-12), outputs unchanged over 3600 checked invokes;
+`test_teflon` with all twelve commits: the same 1503 passed / 34 failed, the same failed tests.
 
 Not addressed: per-axis quantized convolutions are still rejected.
 

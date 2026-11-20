@@ -1,0 +1,42 @@
+From 5b20ad129733158bbd30a1911ff61b18800dbf2f Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 05:17:13 -0500
+Subject: [PATCH 8/9] etnaviv/ml: Don't accept subtractions on V7
+
+etna_ml_operation_supported() accepts SUBTRACT on every NN core version,
+but only etna_ml_lower_add_v8() can lower it. On V7 the operation reaches
+etna_ml_lower_add_v7(), which asserts that it got an ADD; without
+assertions it would be compiled as an addition.
+
+Report subtractions as unsupported on V7 so they stay on the CPU.
+
+Found with test_teflon on a VIPNano-QI.7120 (Amlogic A311D):
+teflon/movenet_lightning.0095 and .0136 (and the same two of
+movenet_thunder) are single subtractions and aborted on the assertion,
+as did the two whole-model tests.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 19860905f9f..393a5ea9900 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -721,6 +721,12 @@ etna_ml_operation_supported(struct pipe_ml_device *pdevice,
+       case PIPE_ML_OPERATION_TYPE_ADD: {
+          supported = operation->input_tensors[0]->data == NULL &&
+                      operation->input_tensors[1]->data == NULL;
++
++         /* Only V8 has a lowering for subtractions */
++         if (operation->type == PIPE_ML_OPERATION_TYPE_SUBTRACT &&
++             etna_ml_device_screen(pdevice)->specs.nn_core_version < 8)
++            supported = false;
++
+          break;
+       }
+       case PIPE_ML_OPERATION_TYPE_CONCATENATION: {
+-- 
+2.43.0
+

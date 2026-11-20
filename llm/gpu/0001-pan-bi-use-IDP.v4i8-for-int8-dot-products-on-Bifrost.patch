@@ -1,0 +1,124 @@
+From f023bc2ea1fda27cd053fb17d1586b5a41d49edb Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Thu, 19 Nov 2026 05:13:19 -0500
+Subject: [PATCH] pan/bi: use IDP.v4i8 for int8 dot products on Bifrost v7
+ (WIP, untested)
+
+Mali-G52/G76/G51/G31 (arch 7) have IDP.v4i8 (bifrost/ISA.xml, FMA unit), but
+NIR's has_[su]dot_4x8 were only set for arch >= 9, so dot products were
+lowered to shifts and multiplies. Use IDP.v4i8 + IADD on v7 (it has no
+accumulator and no saturation; the _sat forms stay lowered). Sign of each
+source = the abs modifier (set = sign-extend).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../compiler/bifrost/bifrost_compile.c        | 30 +++++++++++++++----
+ .../compiler/bifrost/bifrost_compile.h        |  5 ++--
+ src/panfrost/compiler/pan_compiler.c          |  4 ++-
+ .../vulkan/panvk_vX_physical_device.c         |  4 +--
+ 4 files changed, 32 insertions(+), 11 deletions(-)
+
+diff --git a/src/panfrost/compiler/bifrost/bifrost_compile.c b/src/panfrost/compiler/bifrost/bifrost_compile.c
+index 1690a43292d5..15bef6bb2926 100644
+--- a/src/panfrost/compiler/bifrost/bifrost_compile.c
++++ b/src/panfrost/compiler/bifrost/bifrost_compile.c
+@@ -3489,16 +3489,34 @@ bi_emit_alu(bi_builder *b, nir_alu_instr *instr)
+    }
+    case nir_op_udot_4x8_uadd_sat:
+    case nir_op_udot_4x8_uadd: {
+-      assert(b->shader->arch >= 9);
+-      bi_idpadd_v4u8_to(b, dst, s0, s1, s2,
+-                        instr->op == nir_op_udot_4x8_uadd_sat);
++      if (b->shader->arch >= 9) {
++         bi_idpadd_v4u8_to(b, dst, s0, s1, s2,
++                           instr->op == nir_op_udot_4x8_uadd_sat);
++      } else {
++         /* Bifrost v7: IDP.v4i8 (FMA unit) has no accumulator and no
++          * saturation (has_udot_4x8_sat is false there, so NIR lowers the
++          * _sat form); its per-source sign bit lives in the abs modifier,
++          * clear = zero-extend.
++          */
++         assert(b->shader->arch == 7 && instr->op == nir_op_udot_4x8_uadd);
++         bi_index t = bi_temp(b->shader);
++         bi_idp_v4i8_to(b, t, s0, s1);
++         bi_iadd_u32_to(b, dst, t, s2, false);
++      }
+       break;
+    }
+    case nir_op_sdot_4x8_iadd_sat:
+    case nir_op_sdot_4x8_iadd: {
+-      assert(b->shader->arch >= 9);
+-      bi_idpadd_v4s8_to(b, dst, s0, s1, s2,
+-                        instr->op == nir_op_sdot_4x8_iadd_sat);
++      if (b->shader->arch >= 9) {
++         bi_idpadd_v4s8_to(b, dst, s0, s1, s2,
++                           instr->op == nir_op_sdot_4x8_iadd_sat);
++      } else {
++         /* Bifrost v7: as above, abs set on both sources = sign-extend. */
++         assert(b->shader->arch == 7 && instr->op == nir_op_sdot_4x8_iadd);
++         bi_index t = bi_temp(b->shader);
++         bi_idp_v4i8_to(b, t, bi_abs(s0), bi_abs(s1));
++         bi_iadd_s32_to(b, dst, t, s2, false);
++      }
+       break;
+    }
+ 
+diff --git a/src/panfrost/compiler/bifrost/bifrost_compile.h b/src/panfrost/compiler/bifrost/bifrost_compile.h
+index 70f6221d9b7b..1b497c4c6b2d 100644
+--- a/src/panfrost/compiler/bifrost/bifrost_compile.h
++++ b/src/panfrost/compiler/bifrost/bifrost_compile.h
+@@ -145,9 +145,9 @@ bool valhall_can_merge_workgroups(nir_shader *nir);
+                                  BITFIELD_BIT(MESA_SHADER_FRAGMENT),           \
+       .lower_hadd = arch >= 11,                                                \
+       .discard_is_demote = true,                                               \
+-      .has_udot_4x8 = arch >= 9,                                               \
++      .has_udot_4x8 = arch >= 7,                                               \
+       .has_udot_4x8_sat = arch >= 9,                                           \
+-      .has_sdot_4x8 = arch >= 9,                                               \
++      .has_sdot_4x8 = arch >= 7,                                               \
+       .has_sdot_4x8_sat = arch >= 9,                                           \
+                                                                                \
+       .divergence_analysis_options = merge_workgroups ?                        \
+@@ -157,6 +157,7 @@ bool valhall_can_merge_workgroups(nir_shader *nir);
+    };
+ 
+ DEFINE_OPTIONS(bifrost_nir_options_v6, 6, false);
++DEFINE_OPTIONS(bifrost_nir_options_v7, 7, false);
+ DEFINE_OPTIONS(bifrost_nir_options_v9, 9, false);
+ DEFINE_OPTIONS(bifrost_nir_options_v9_merge_wg, 9, true);
+ DEFINE_OPTIONS(bifrost_nir_options_v11, 11, false);
+diff --git a/src/panfrost/compiler/pan_compiler.c b/src/panfrost/compiler/pan_compiler.c
+index ce81a13e34f2..e974238d00ee 100644
+--- a/src/panfrost/compiler/pan_compiler.c
++++ b/src/panfrost/compiler/pan_compiler.c
+@@ -42,9 +42,11 @@ pan_get_nir_shader_compiler_options(unsigned arch, bool merge_wg)
+       assert(!merge_wg);
+       return &midgard_nir_options;
+    case 6:
+-   case 7:
+       assert(!merge_wg);
+       return &bifrost_nir_options_v6;
++   case 7:
++      assert(!merge_wg);
++      return &bifrost_nir_options_v7;
+    case 9:
+    case 10:
+       return merge_wg ? &bifrost_nir_options_v9_merge_wg :
+diff --git a/src/panfrost/vulkan/panvk_vX_physical_device.c b/src/panfrost/vulkan/panvk_vX_physical_device.c
+index f44b5d1294f2..dbb13f3f0683 100644
+--- a/src/panfrost/vulkan/panvk_vX_physical_device.c
++++ b/src/panfrost/vulkan/panvk_vX_physical_device.c
+@@ -1059,8 +1059,8 @@ panvk_per_arch(get_physical_device_properties)(
+       .integerDotProduct8BitUnsignedAccelerated = false,
+       .integerDotProduct8BitSignedAccelerated = false,
+       .integerDotProduct8BitMixedSignednessAccelerated = false,
+-      .integerDotProduct4x8BitPackedUnsignedAccelerated = PAN_ARCH >= 9,
+-      .integerDotProduct4x8BitPackedSignedAccelerated = PAN_ARCH >= 9,
++      .integerDotProduct4x8BitPackedUnsignedAccelerated = PAN_ARCH >= 7,
++      .integerDotProduct4x8BitPackedSignedAccelerated = PAN_ARCH >= 7,
+       .integerDotProduct16BitUnsignedAccelerated = false,
+       .integerDotProduct16BitSignedAccelerated = false,
+       .integerDotProduct16BitMixedSignednessAccelerated = false,
+-- 
+2.43.0
+

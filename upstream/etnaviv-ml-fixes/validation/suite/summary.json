@@ -1,6 +1,6 @@
 {
-  "upstream_commit": "a08a8763308224b38b31da205028213a0dcfe1d1",
-  "upstream_library_sha256": "b6c2a28d47334e129434107c3adb298060b25a3520849230d8b1cb575be17a76",
+  "upstream_commit": "940b610ac79f7704265fe317a6b27f67553eff61",
+  "upstream_library_sha256": "623a3f1e8ff8b41adb2286af1745153f47055a56f61147605b51c0fd5a57f01d",
   "port_library_sha256": "2e21b93afae1901b0ce73f84e2d9787e4a027cce27ca74e75dcf36c8bcaa64ae",
   "environment": "Bubblewrap empty /dev, LD_PRELOAD fake NPU; no strace (ptrace prohibited)",
   "results": [

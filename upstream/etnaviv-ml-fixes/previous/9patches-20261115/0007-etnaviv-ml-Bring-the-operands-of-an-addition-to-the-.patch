@@ -1,0 +1,86 @@
+From f3ac5799d2d2adabd9684276b3642bc73f43a5fa Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:19 -0500
+Subject: [PATCH 7/9] etnaviv/ml: Bring the operands of an addition to the same
+ layout
+
+Additions and subtractions are lowered as layout-agnostic. That only
+holds when both operands are in the same order. When a graph input
+(NHWC) is added to the output of a convolution (NCHW), as in a residual
+connection around the first convolution of a subgraph, the two buffers
+are added byte by byte across the two layouts. The output also takes
+the layout of the first operand, so if that is the NHWC one, the result
+is never detransposed.
+
+When any operand is in NCHW order, transpose the others to it. The
+output then inherits NCHW and gets the usual detranspose at the graph
+output. Operations whose operands already agree are lowered as before.
+
+Tested in a local tree with the same change on a VIPNano-QI.7120 (Amlogic A311D) with x -> 1x1 convolution ->
+y, ADD(x, y) on [1, 8, 8, 64], uint8 and int8 (together with the three
+previous commits): up to 154 levels off the CPU before, and the output
+was the CPU's formula applied to x in NHWC and y in NCHW order; within 1
+level now.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 33 +++++++++++++++++++++++-
+ 1 file changed, 32 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index f66ce17cafe..19860905f9f 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -314,10 +314,34 @@ layouts_differ(struct pipe_tensor *tensor)
+           tensor->dims[1] * tensor->dims[2] > 1;
+ }
+ 
++/* Whether one of the operands of an element-wise operation is in NCHW order.
++ * Graph inputs are in NHWC order, and the layouts of the other operands are
++ * known because their producers have been lowered already.
++ */
++static bool
++any_input_is_nchw(struct etna_ml_subgraph *subgraph,
++                  const struct pipe_ml_operation *poperations,
++                  unsigned count,
++                  const struct pipe_ml_operation *poperation)
++{
++   for (unsigned i = 0; i < poperation->input_count; i++) {
++      struct pipe_tensor *tensor = poperation->input_tensors[i];
++
++      if (tensor->data != NULL ||
++          !etna_ml_find_producer(poperations, count, tensor->index))
++         continue;
++
++      if (etna_ml_get_tensor(subgraph, tensor->index)->act_layout == ETNA_ML_LAYOUT_NCHW)
++         return true;
++   }
++
++   return false;
++}
++
+ /** Tensor layout inference:
+   * - Graph inputs are in NHWC order.
+   * - Graph outputs are expected in NHWC order.
+-  * - Element-wise operations don't care about the layout.
++  * - Element-wise operations don't care about the layout, as long as all their operands have the same one.
+   * - Other operations expect the tensors in NCHW order (if input_channels > 1) and their outputs are in NCHW order.
+   * - Implicit transposes and detransposes are the only operations that change channel order.
+   * - Explicit transposes and detransposes are ignored.
+@@ -344,6 +368,13 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+              poperation->type == PIPE_ML_OPERATION_TYPE_CONCATENATION)
+             operation_layout = ETNA_ML_LAYOUT_NCHW;
+ 
++         /* An element-wise operation needs its operands in the same order */
++         if ((poperation->type == PIPE_ML_OPERATION_TYPE_ADD ||
++              poperation->type == PIPE_ML_OPERATION_TYPE_SUBTRACT) &&
++             layouts_differ(poperation->input_tensors[i]) &&
++             any_input_is_nchw(subgraph, poperations, count, poperation))
++            operation_layout = ETNA_ML_LAYOUT_NCHW;
++
+          if (!etna_ml_find_producer(poperations, count, poperation->input_tensors[i]->index)) {
+             /* In TensorFlow Lite, graph inputs are in channel-last */
+             tensor->act_layout = ETNA_ML_LAYOUT_NHWC;
+-- 
+2.43.0
+

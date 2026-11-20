@@ -1,0 +1,357 @@
+Note: Google Test filter = teflon/yolox_nano.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 148 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 148 tests from teflon/yolox_nano
+[ RUN      ] teflon/yolox_nano.0000
+[       OK ] teflon/yolox_nano.0000 (56 ms)
+[ RUN      ] teflon/yolox_nano.0001
+CPU: b5 bb ae b0 12 b2 c6 76 ba 18 c9 c2 ba b6 a8 b6 15 ac ca 77 c0 17 cd bc 
+NPU: b5 bb ae b0 12 b2 c6 76 ba 18 c9 c2 ba b6 a8 b6 15 ac ca 77 c0 17 cd bc 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 448313 from the NPU (a7) doesn't match that from the CPU (ae).
+[  FAILED  ] teflon/yolox_nano.0001 (131 ms)
+[ RUN      ] teflon/yolox_nano.0002
+[       OK ] teflon/yolox_nano.0002 (307 ms)
+[ RUN      ] teflon/yolox_nano.0003
+[       OK ] teflon/yolox_nano.0003 (59 ms)
+[ RUN      ] teflon/yolox_nano.0004
+[       OK ] teflon/yolox_nano.0004 (130 ms)
+[ RUN      ] teflon/yolox_nano.0005
+[       OK ] teflon/yolox_nano.0005 (51 ms)
+[ RUN      ] teflon/yolox_nano.0006
+[       OK ] teflon/yolox_nano.0006 (43 ms)
+[ RUN      ] teflon/yolox_nano.0007
+[       OK ] teflon/yolox_nano.0007 (65 ms)
+[ RUN      ] teflon/yolox_nano.0008
+[       OK ] teflon/yolox_nano.0008 (44 ms)
+[ RUN      ] teflon/yolox_nano.0009
+[       OK ] teflon/yolox_nano.0009 (52 ms)
+[ RUN      ] teflon/yolox_nano.0010
+[       OK ] teflon/yolox_nano.0010 (45 ms)
+[ RUN      ] teflon/yolox_nano.0012
+[       OK ] teflon/yolox_nano.0012 (40 ms)
+[ RUN      ] teflon/yolox_nano.0013
+[       OK ] teflon/yolox_nano.0013 (96 ms)
+[ RUN      ] teflon/yolox_nano.0014
+[       OK ] teflon/yolox_nano.0014 (40 ms)
+[ RUN      ] teflon/yolox_nano.0015
+[       OK ] teflon/yolox_nano.0015 (44 ms)
+[ RUN      ] teflon/yolox_nano.0016
+[       OK ] teflon/yolox_nano.0016 (37 ms)
+[ RUN      ] teflon/yolox_nano.0017
+[       OK ] teflon/yolox_nano.0017 (56 ms)
+[ RUN      ] teflon/yolox_nano.0018
+[       OK ] teflon/yolox_nano.0018 (32 ms)
+[ RUN      ] teflon/yolox_nano.0019
+[       OK ] teflon/yolox_nano.0019 (36 ms)
+[ RUN      ] teflon/yolox_nano.0021
+[       OK ] teflon/yolox_nano.0021 (36 ms)
+[ RUN      ] teflon/yolox_nano.0022
+[       OK ] teflon/yolox_nano.0022 (34 ms)
+[ RUN      ] teflon/yolox_nano.0024
+[       OK ] teflon/yolox_nano.0024 (35 ms)
+[ RUN      ] teflon/yolox_nano.0025
+[       OK ] teflon/yolox_nano.0025 (36 ms)
+[ RUN      ] teflon/yolox_nano.0027
+[       OK ] teflon/yolox_nano.0027 (33 ms)
+[ RUN      ] teflon/yolox_nano.0028
+[       OK ] teflon/yolox_nano.0028 (94 ms)
+[ RUN      ] teflon/yolox_nano.0029
+[       OK ] teflon/yolox_nano.0029 (37 ms)
+[ RUN      ] teflon/yolox_nano.0030
+[       OK ] teflon/yolox_nano.0030 (30 ms)
+[ RUN      ] teflon/yolox_nano.0031
+[       OK ] teflon/yolox_nano.0031 (51 ms)
+[ RUN      ] teflon/yolox_nano.0032
+[       OK ] teflon/yolox_nano.0032 (31 ms)
+[ RUN      ] teflon/yolox_nano.0033
+[       OK ] teflon/yolox_nano.0033 (31 ms)
+[ RUN      ] teflon/yolox_nano.0034
+[       OK ] teflon/yolox_nano.0034 (52 ms)
+[ RUN      ] teflon/yolox_nano.0036
+[       OK ] teflon/yolox_nano.0036 (32 ms)
+[ RUN      ] teflon/yolox_nano.0037
+[       OK ] teflon/yolox_nano.0037 (51 ms)
+[ RUN      ] teflon/yolox_nano.0039
+[       OK ] teflon/yolox_nano.0039 (36 ms)
+[ RUN      ] teflon/yolox_nano.0040
+[       OK ] teflon/yolox_nano.0040 (31 ms)
+[ RUN      ] teflon/yolox_nano.0042
+[       OK ] teflon/yolox_nano.0042 (32 ms)
+[ RUN      ] teflon/yolox_nano.0043
+[       OK ] teflon/yolox_nano.0043 (136 ms)
+[ RUN      ] teflon/yolox_nano.0044
+[       OK ] teflon/yolox_nano.0044 (32 ms)
+[ RUN      ] teflon/yolox_nano.0045
+[       OK ] teflon/yolox_nano.0045 (27 ms)
+[ RUN      ] teflon/yolox_nano.0046
+[       OK ] teflon/yolox_nano.0046 (29 ms)
+[ RUN      ] teflon/yolox_nano.0047
+[       OK ] teflon/yolox_nano.0047 (28 ms)
+[ RUN      ] teflon/yolox_nano.0048
+[       OK ] teflon/yolox_nano.0048 (29 ms)
+[ RUN      ] teflon/yolox_nano.0049
+[       OK ] teflon/yolox_nano.0049 (28 ms)
+[ RUN      ] teflon/yolox_nano.0050
+[       OK ] teflon/yolox_nano.0050 (31 ms)
+[ RUN      ] teflon/yolox_nano.0051
+[       OK ] teflon/yolox_nano.0051 (28 ms)
+[ RUN      ] teflon/yolox_nano.0052
+[       OK ] teflon/yolox_nano.0052 (53 ms)
+[ RUN      ] teflon/yolox_nano.0053
+[       OK ] teflon/yolox_nano.0053 (33 ms)
+[ RUN      ] teflon/yolox_nano.0054
+[       OK ] teflon/yolox_nano.0054 (27 ms)
+[ RUN      ] teflon/yolox_nano.0055
+[       OK ] teflon/yolox_nano.0055 (65 ms)
+[ RUN      ] teflon/yolox_nano.0056
+[       OK ] teflon/yolox_nano.0056 (33 ms)
+[ RUN      ] teflon/yolox_nano.0057
+[       OK ] teflon/yolox_nano.0057 (28 ms)
+[ RUN      ] teflon/yolox_nano.0058
+[       OK ] teflon/yolox_nano.0058 (39 ms)
+[ RUN      ] teflon/yolox_nano.0059
+[       OK ] teflon/yolox_nano.0059 (32 ms)
+[ RUN      ] teflon/yolox_nano.0060
+[       OK ] teflon/yolox_nano.0060 (27 ms)
+[ RUN      ] teflon/yolox_nano.0061
+[       OK ] teflon/yolox_nano.0061 (36 ms)
+[ RUN      ] teflon/yolox_nano.0062
+[       OK ] teflon/yolox_nano.0062 (43 ms)
+[ RUN      ] teflon/yolox_nano.0063
+[       OK ] teflon/yolox_nano.0063 (33 ms)
+[ RUN      ] teflon/yolox_nano.0064
+[       OK ] teflon/yolox_nano.0064 (55 ms)
+[ RUN      ] teflon/yolox_nano.0065
+[       OK ] teflon/yolox_nano.0065 (52 ms)
+[ RUN      ] teflon/yolox_nano.0066
+[       OK ] teflon/yolox_nano.0066 (31 ms)
+[ RUN      ] teflon/yolox_nano.0067
+[       OK ] teflon/yolox_nano.0067 (40 ms)
+[ RUN      ] teflon/yolox_nano.0068
+[       OK ] teflon/yolox_nano.0068 (34 ms)
+[ RUN      ] teflon/yolox_nano.0069
+[       OK ] teflon/yolox_nano.0069 (26 ms)
+[ RUN      ] teflon/yolox_nano.0070
+[       OK ] teflon/yolox_nano.0070 (50 ms)
+[ RUN      ] teflon/yolox_nano.0071
+[       OK ] teflon/yolox_nano.0071 (52 ms)
+[ RUN      ] teflon/yolox_nano.0072
+[       OK ] teflon/yolox_nano.0072 (35 ms)
+[ RUN      ] teflon/yolox_nano.0073
+[       OK ] teflon/yolox_nano.0073 (56 ms)
+[ RUN      ] teflon/yolox_nano.0074
+[       OK ] teflon/yolox_nano.0074 (53 ms)
+[ RUN      ] teflon/yolox_nano.0075
+[       OK ] teflon/yolox_nano.0075 (40 ms)
+[ RUN      ] teflon/yolox_nano.0076
+[       OK ] teflon/yolox_nano.0076 (52 ms)
+[ RUN      ] teflon/yolox_nano.0077
+[       OK ] teflon/yolox_nano.0077 (34 ms)
+[ RUN      ] teflon/yolox_nano.0078
+[       OK ] teflon/yolox_nano.0078 (63 ms)
+[ RUN      ] teflon/yolox_nano.0079
+[       OK ] teflon/yolox_nano.0079 (34 ms)
+[ RUN      ] teflon/yolox_nano.0080
+[       OK ] teflon/yolox_nano.0080 (35 ms)
+[ RUN      ] teflon/yolox_nano.0081
+[       OK ] teflon/yolox_nano.0081 (30 ms)
+[ RUN      ] teflon/yolox_nano.0082
+[       OK ] teflon/yolox_nano.0082 (52 ms)
+[ RUN      ] teflon/yolox_nano.0083
+[       OK ] teflon/yolox_nano.0083 (35 ms)
+[ RUN      ] teflon/yolox_nano.0084
+[       OK ] teflon/yolox_nano.0084 (34 ms)
+[ RUN      ] teflon/yolox_nano.0085
+[       OK ] teflon/yolox_nano.0085 (42 ms)
+[ RUN      ] teflon/yolox_nano.0086
+[       OK ] teflon/yolox_nano.0086 (29 ms)
+[ RUN      ] teflon/yolox_nano.0087
+[       OK ] teflon/yolox_nano.0087 (83 ms)
+[ RUN      ] teflon/yolox_nano.0088
+[       OK ] teflon/yolox_nano.0088 (27 ms)
+[ RUN      ] teflon/yolox_nano.0089
+[       OK ] teflon/yolox_nano.0089 (34 ms)
+[ RUN      ] teflon/yolox_nano.0090
+[       OK ] teflon/yolox_nano.0090 (30 ms)
+[ RUN      ] teflon/yolox_nano.0091
+[       OK ] teflon/yolox_nano.0091 (65 ms)
+[ RUN      ] teflon/yolox_nano.0092
+[       OK ] teflon/yolox_nano.0092 (31 ms)
+[ RUN      ] teflon/yolox_nano.0093
+[       OK ] teflon/yolox_nano.0093 (27 ms)
+[ RUN      ] teflon/yolox_nano.0094
+[       OK ] teflon/yolox_nano.0094 (37 ms)
+[ RUN      ] teflon/yolox_nano.0095
+[       OK ] teflon/yolox_nano.0095 (38 ms)
+[ RUN      ] teflon/yolox_nano.0096
+[       OK ] teflon/yolox_nano.0096 (35 ms)
+[ RUN      ] teflon/yolox_nano.0097
+[       OK ] teflon/yolox_nano.0097 (36 ms)
+[ RUN      ] teflon/yolox_nano.0098
+[       OK ] teflon/yolox_nano.0098 (26 ms)
+[ RUN      ] teflon/yolox_nano.0099
+[       OK ] teflon/yolox_nano.0099 (35 ms)
+[ RUN      ] teflon/yolox_nano.0100
+[       OK ] teflon/yolox_nano.0100 (37 ms)
+[ RUN      ] teflon/yolox_nano.0101
+[       OK ] teflon/yolox_nano.0101 (25 ms)
+[ RUN      ] teflon/yolox_nano.0102
+[       OK ] teflon/yolox_nano.0102 (25 ms)
+[ RUN      ] teflon/yolox_nano.0103
+[       OK ] teflon/yolox_nano.0103 (27 ms)
+[ RUN      ] teflon/yolox_nano.0104
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0104 (25 ms)
+[ RUN      ] teflon/yolox_nano.0105
+[       OK ] teflon/yolox_nano.0105 (35 ms)
+[ RUN      ] teflon/yolox_nano.0106
+[       OK ] teflon/yolox_nano.0106 (55 ms)
+[ RUN      ] teflon/yolox_nano.0107
+[       OK ] teflon/yolox_nano.0107 (51 ms)
+[ RUN      ] teflon/yolox_nano.0108
+[       OK ] teflon/yolox_nano.0108 (34 ms)
+[ RUN      ] teflon/yolox_nano.0109
+[       OK ] teflon/yolox_nano.0109 (52 ms)
+[ RUN      ] teflon/yolox_nano.0110
+[       OK ] teflon/yolox_nano.0110 (52 ms)
+[ RUN      ] teflon/yolox_nano.0111
+[       OK ] teflon/yolox_nano.0111 (27 ms)
+[ RUN      ] teflon/yolox_nano.0112
+[       OK ] teflon/yolox_nano.0112 (27 ms)
+[ RUN      ] teflon/yolox_nano.0113
+[       OK ] teflon/yolox_nano.0113 (30 ms)
+[ RUN      ] teflon/yolox_nano.0114
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0114 (27 ms)
+[ RUN      ] teflon/yolox_nano.0115
+[       OK ] teflon/yolox_nano.0115 (50 ms)
+[ RUN      ] teflon/yolox_nano.0116
+[       OK ] teflon/yolox_nano.0116 (116 ms)
+[ RUN      ] teflon/yolox_nano.0117
+[       OK ] teflon/yolox_nano.0117 (118 ms)
+[ RUN      ] teflon/yolox_nano.0118
+[       OK ] teflon/yolox_nano.0118 (54 ms)
+[ RUN      ] teflon/yolox_nano.0119
+[       OK ] teflon/yolox_nano.0119 (118 ms)
+[ RUN      ] teflon/yolox_nano.0120
+[       OK ] teflon/yolox_nano.0120 (119 ms)
+[ RUN      ] teflon/yolox_nano.0121
+[       OK ] teflon/yolox_nano.0121 (35 ms)
+[ RUN      ] teflon/yolox_nano.0122
+[       OK ] teflon/yolox_nano.0122 (33 ms)
+[ RUN      ] teflon/yolox_nano.0123
+[       OK ] teflon/yolox_nano.0123 (41 ms)
+[ RUN      ] teflon/yolox_nano.0124
+CPU: dd e8 a3 a5 ad fd c8 71 45 ac c9 2e 9a b9 36 55 7d a0 3d fc 0f 85 b6 6c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (e8).
+[  FAILED  ] teflon/yolox_nano.0124 (36 ms)
+[ RUN      ] teflon/yolox_nano.0125
+[       OK ] teflon/yolox_nano.0125 (26 ms)
+[ RUN      ] teflon/yolox_nano.0126
+[       OK ] teflon/yolox_nano.0126 (32 ms)
+[ RUN      ] teflon/yolox_nano.0127
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0127 (28 ms)
+[ RUN      ] teflon/yolox_nano.0128
+[       OK ] teflon/yolox_nano.0128 (27 ms)
+[ RUN      ] teflon/yolox_nano.0129
+[       OK ] teflon/yolox_nano.0129 (23 ms)
+[ RUN      ] teflon/yolox_nano.0130
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0130 (29 ms)
+[ RUN      ] teflon/yolox_nano.0131
+[       OK ] teflon/yolox_nano.0131 (31 ms)
+[ RUN      ] teflon/yolox_nano.0132
+[       OK ] teflon/yolox_nano.0132 (34 ms)
+[ RUN      ] teflon/yolox_nano.0133
+CPU: dd cb ca 72 bc 06 68 89 50 0f 3b ad ae 71 ea 3a 53 3b 85 5f e7 e5 01 2c 
+NPU: dd 33 42 1e f3 19 99 1b 24 79 40 72 ba 0c 6b ae 76 6d e9 15 65 9c 60 37 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 1 from the NPU (33) doesn't match that from the CPU (cb).
+[  FAILED  ] teflon/yolox_nano.0133 (34 ms)
+[ RUN      ] teflon/yolox_nano.0134
+[       OK ] teflon/yolox_nano.0134 (56 ms)
+[ RUN      ] teflon/yolox_nano.0135
+[       OK ] teflon/yolox_nano.0135 (33 ms)
+[ RUN      ] teflon/yolox_nano.0136
+[       OK ] teflon/yolox_nano.0136 (29 ms)
+[ RUN      ] teflon/yolox_nano.0137
+[       OK ] teflon/yolox_nano.0137 (45 ms)
+[ RUN      ] teflon/yolox_nano.0138
+[       OK ] teflon/yolox_nano.0138 (32 ms)
+[ RUN      ] teflon/yolox_nano.0139
+[       OK ] teflon/yolox_nano.0139 (27 ms)
+[ RUN      ] teflon/yolox_nano.0140
+[       OK ] teflon/yolox_nano.0140 (31 ms)
+[ RUN      ] teflon/yolox_nano.0141
+[       OK ] teflon/yolox_nano.0141 (25 ms)
+[ RUN      ] teflon/yolox_nano.0142
+[       OK ] teflon/yolox_nano.0142 (29 ms)
+[ RUN      ] teflon/yolox_nano.0143
+[       OK ] teflon/yolox_nano.0143 (36 ms)
+[ RUN      ] teflon/yolox_nano.0144
+[       OK ] teflon/yolox_nano.0144 (26 ms)
+[ RUN      ] teflon/yolox_nano.0145
+[       OK ] teflon/yolox_nano.0145 (26 ms)
+[ RUN      ] teflon/yolox_nano.0146
+[       OK ] teflon/yolox_nano.0146 (170 ms)
+[ RUN      ] teflon/yolox_nano.0147
+[       OK ] teflon/yolox_nano.0147 (58 ms)
+[ RUN      ] teflon/yolox_nano.0148
+[       OK ] teflon/yolox_nano.0148 (49 ms)
+[ RUN      ] teflon/yolox_nano.0149
+[       OK ] teflon/yolox_nano.0149 (176 ms)
+[ RUN      ] teflon/yolox_nano.0150
+[       OK ] teflon/yolox_nano.0150 (51 ms)
+[ RUN      ] teflon/yolox_nano.0151
+[       OK ] teflon/yolox_nano.0151 (36 ms)
+[ RUN      ] teflon/yolox_nano.0152
+[       OK ] teflon/yolox_nano.0152 (48 ms)
+[ RUN      ] teflon/yolox_nano.0153
+[       OK ] teflon/yolox_nano.0153 (38 ms)
+[ RUN      ] teflon/yolox_nano.whole
+CPU: f8 07 ed fd c1 ca c1 c2 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 c1 
+NPU: 0d 07 03 fd ea d9 fa f8 c1 c4 c1 c1 c1 c1 c1 c1 c1 c3 c1 c1 c1 c1 c2 c4 
+../src/gallium/targets/teflon/test_teflon.cpp:98: Failure
+Failed
+Output at 0 from the NPU (0d) doesn't match that from the CPU (f8).
+[  FAILED  ] teflon/yolox_nano.whole (2211 ms)
+[----------] 148 tests from teflon/yolox_nano (9160 ms total)
+
+[----------] Global test environment tear-down
+[==========] 148 tests from 1 test suite ran. (9160 ms total)
+[  PASSED  ] 140 tests.
+[  FAILED  ] 8 tests, listed below:
+[  FAILED  ] teflon/yolox_nano.0001
+[  FAILED  ] teflon/yolox_nano.0104
+[  FAILED  ] teflon/yolox_nano.0114
+[  FAILED  ] teflon/yolox_nano.0124
+[  FAILED  ] teflon/yolox_nano.0127
+[  FAILED  ] teflon/yolox_nano.0130
+[  FAILED  ] teflon/yolox_nano.0133
+[  FAILED  ] teflon/yolox_nano.whole
+
+ 8 FAILED TESTS
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261120-025648-TFS-yolox_nano

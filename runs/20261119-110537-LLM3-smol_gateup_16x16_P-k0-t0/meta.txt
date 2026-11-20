@@ -1,0 +1,12 @@
+label: LLM3-smol_gateup_16x16_P-k0-t0
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_16x16_P.tflite -r /home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_16x16_P_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-llm/build/src/gallium/targets/teflon/libteflon.so -n 20 --save /home/jordan/alta-npu/runs/llm-l3-ladder-20261119-110448/smol_gateup_16x16_P-k0-t0.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-19T11:05:37-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2657
+deadline_s: 120
+journal_cursor: s=e067e52e32074e28a41086799b0331ca;i=136ec4;b=ea2b8d2f35c54ad39a93f1d3c4cc4dba;m=5003887ba;t=6609f85cca13d;x=3acc4ebac7568cf7
+ETNA_ML_V7_TILE_H=0
+ETNA_ML_V7_KPC_CAP=0
+end: 2026-11-19T11:05:41-05:00  rc: 0  wall_s: 3

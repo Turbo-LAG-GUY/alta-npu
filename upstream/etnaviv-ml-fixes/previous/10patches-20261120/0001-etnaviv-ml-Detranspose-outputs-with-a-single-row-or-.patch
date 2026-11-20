@@ -1,0 +1,87 @@
+From 5fa7d69b5d368ac6bc26482d08412940ac69dad7 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:18 -0500
+Subject: [PATCH 01/10] etnaviv/ml: Detranspose outputs with a single row or
+ column
+
+A graph output is only brought back from NCHW to NHWC when is_3d() holds,
+that is with more than one row, column and channel. But the two layouts
+also differ for 1xWxC and Hx1xC tensors (TFLite hands a [1, T, C]
+transformer tensor to the delegate as [1, 1, T, C]), so the output of a
+convolution on such a tensor reached the application still in channel
+planes.
+
+Detranspose whenever the tensor has more than one channel and more than
+one pixel. For the single-row case configure the TP as Hx1xC, which is
+the same permutation: the 1xHxC form has an x size of 1 and puts H * C in
+the 16-bit y size.
+
+Tested in a local tree with the same change on a VIPNano-QI.7120
+(Amlogic A311D): the output of a 1x1 convolution on [1, 1, 64, 384] was
+left in planar order before, and is within 1 level of the CPU now. 3D tensors keep their TP
+configuration bit for bit.
+
+Fixes: c728e73d650 ("etnaviv/ml: Track memory layout of tensors")
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c    | 12 +++++++-----
+ src/gallium/drivers/etnaviv/etnaviv_ml_tp.c | 10 ++++++++++
+ 2 files changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 7a44d60d8a3b..f66ce17cafe4 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -304,12 +304,14 @@ add_bypass(const struct pipe_ml_operation *poperation, unsigned input_tensor,
+    list_addtail(&operation->link, etna_operations);
+ }
+ 
++/* Whether NCHW and NHWC put the bytes of this tensor in a different order:
++ * only with more than one channel and more than one pixel.
++ */
+ static bool
+-is_3d(struct pipe_tensor *tensor)
++layouts_differ(struct pipe_tensor *tensor)
+ {
+-   return tensor->dims[1] > 1 &&
+-          tensor->dims[2] > 1 &&
+-          tensor->dims[3] > 1;
++   return tensor->dims[3] > 1 &&
++          tensor->dims[1] * tensor->dims[2] > 1;
+ }
+ 
+ /** Tensor layout inference:
+@@ -519,7 +521,7 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+ 
+          ML_DBG("type %d i %d tensor %d layout %d == %d\n", poperation->type, i, poperation->output_tensors[i]->index, tensor->exp_layout, tensor->act_layout);
+          if (!etna_ml_find_consumer(poperations, count, poperation->output_tensors[i]->index) &&
+-             is_3d(poperation->output_tensors[i]) &&
++             layouts_differ(poperation->output_tensors[i]) &&
+              tensor->exp_layout != tensor->act_layout) {
+             ML_DBG("Adding detranspose.\n");
+             struct etna_operation *detranspose = calloc(1, sizeof(*detranspose));
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c b/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
+index 2e97a328fc96..609c3908c6fc 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_tp.c
+@@ -297,6 +297,16 @@ create_detranspose_config(struct etna_ml_subgraph *subgraph, const struct etna_o
+    unsigned input_width = operation->input_width;
+    unsigned input_height = operation->input_height;
+    unsigned input_channels = operation->input_channels;
++
++   /* The input is read as one linear run of planes, so 1xHxC and Hx1xC are
++    * the same permutation. Use the second form: it has no x size of 1, and
++    * its y size is C instead of H * C, which only has 16 bits.
++    */
++   if (input_width == 1 && input_height > 1) {
++      input_width = input_height;
++      input_height = 1;
++   }
++
+    struct etna_bo *bo = etna_ml_create_bo(subgraph->screen, sizeof(struct etna_tp_params));
+ 
+    etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
+-- 
+2.43.0
+

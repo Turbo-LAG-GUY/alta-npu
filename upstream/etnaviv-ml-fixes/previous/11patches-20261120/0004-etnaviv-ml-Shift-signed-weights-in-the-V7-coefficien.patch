@@ -1,0 +1,62 @@
+From 275a3267f7d4c0ad24077c96c2f1b4ca62325838 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:18 -0500
+Subject: [PATCH 04/11] etnaviv/ml: Shift signed weights in the V7 coefficient
+ stream
+
+Signed tensors are stored shifted by 128 (see etna_tensor_zero_point()),
+and the zero point of signed weights is shifted accordingly. The V8
+encoder adds 128 to each signed weight when it encodes it, but the V7
+writers put the int8 bytes in the stream as they are, next to the
+shifted zero point, and compute the bias correction from the same
+mismatched pair. A weight of 0 with zero point 0 is thus seen by the
+hardware as 0 - 128.
+
+Every int8 convolution is wrong on V7 because of this: a 1x1 convolution
+with identity weights returns 127 for every output.
+
+Shift the weights before they are encoded. With this, an int8 model
+produces exactly the configurations and coefficient buffers of the uint8
+model that has all its values and zero points shifted by 128.
+
+Tested in a local tree with the same change on a VIPNano-QI.7120 (Amlogic A311D) with int8 1x1, 3x3, strided
+3x3 and depthwise convolutions: all within 1 level of the CPU, and
+bit-identical to the outputs of the equivalent uint8 models minus 128.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index f0f43ca151a9..a9caa60c8968 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -539,13 +539,23 @@ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_op
+    /* When the kernels don't divide evenly between the cores, the writers
+     * below read kernels and biases past the end of the tensors for the last
+     * core. Give those unused kernels zero weights and biases.
++    *
++    * Signed weights are still int8 here, while weight_zero_point is already
++    * in the shifted 0..255 range (see etna_tensor_zero_point()). The writers
++    * compare the weights with it and use both for the bias correction, so
++    * shift the weights as well, as the V8 encoder does.
+     */
+-   if (total_kernels > output_channels) {
++   if (total_kernels > output_channels || operation->weight_signed) {
+       size_t kernel_size = operation->weight_width * operation->weight_height * input_channels;
+ 
+       memcpy(&padded, operation, sizeof(padded));
+       padded.weight_tensor = malloc(total_kernels * kernel_size);
+       memcpy(padded.weight_tensor, operation->weight_tensor, output_channels * kernel_size);
++      if (operation->weight_signed) {
++         for (size_t i = 0; i < output_channels * kernel_size; i++)
++            padded.weight_tensor[i] ^= 0x80;
++         padded.weight_signed = false;
++      }
+       memset(padded.weight_tensor + output_channels * kernel_size, operation->weight_zero_point,
+              (total_kernels - output_channels) * kernel_size);
+       padded.weight_tensor_size = total_kernels * kernel_size;
+-- 
+2.43.0
+

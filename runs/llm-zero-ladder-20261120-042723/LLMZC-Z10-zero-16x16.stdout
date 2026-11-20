@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.14 ms, compile 53.12 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_16x16.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 3, "compile_ms": 53.118, "first_ms": 3.401, "ms_median_after_first": 3.4324, "ctx_ms": 0.0029, "invoke_call_ms": 0.1004, "read_ms": 3.3286, "npu_ms": 2.8100, "spins_per_wait": 879, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0468, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.5095, "readout": "zero", "consume": true, "consume_sum": -3150632, "alt": true, "checked_invokes": 200, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-043014-LLMZC-Z10-zero-16x16

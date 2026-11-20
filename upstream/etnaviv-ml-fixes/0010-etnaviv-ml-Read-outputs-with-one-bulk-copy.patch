@@ -1,0 +1,58 @@
+From 328286da6e0ead2a9df9240c04fa77f54da27b73 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Fri, 20 Nov 2026 02:29:23 -0500
+Subject: [PATCH 10/12] etnaviv/ml: Read outputs with one bulk copy
+
+The tensor buffers are write-combined, so converting signed outputs
+byte by byte straight from the mapping costs one uncached load per
+byte. Copy each output out with pipe_buffer_read(), as unsigned outputs
+already are, and convert it in cached memory.
+
+On a VIPNano-QI.7120 (A311D), reading back a 786 KB int8 output went
+from 22.5 ms to 2.5 ms on a Cortex-A73, and a 3 KB one from 0.36 ms to
+0.03 ms on a Cortex-A53. Outputs are unchanged.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 24 ++++++++++--------------
+ 1 file changed, 10 insertions(+), 14 deletions(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 2203dc07ca15..d9da88c5e788 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1095,21 +1095,17 @@ etna_ml_subgraph_read_outputs(struct pipe_context *context, struct pipe_ml_subgr
+ 
+    for (int i = 0; i < outputs_count; i++) {
+       struct pipe_resource *res = etna_ml_get_resource(subgraph, output_idxs[i]);
++      unsigned size = etna_ml_get_size(subgraph, output_idxs[i]);
++
++      /* The tensor buffers are write-combined: copy each output out in
++       * one bulk read and convert it in cached memory, instead of doing one
++       * uncached load per byte.
++       */
++      pipe_buffer_read(context, res, 0, size, outputs[i]);
+       if (is_signed[i]) {
+-         struct pipe_transfer *src_transfer;
+-         uint8_t *src_map;
+-         src_map = (uint8_t *) pipe_buffer_map_range(context,
+-                                                     res,
+-                                                     0, pipe_buffer_size(res),
+-                                                     PIPE_MAP_READ,
+-                                                     &src_transfer);
+-         assert(src_map);
+-         for (unsigned k = 0; k < etna_ml_get_size(subgraph, output_idxs[i]); k++) {
+-            ((uint8_t *)(outputs[i]))[k] = src_map[k] - 128;
+-         }
+-         pipe_buffer_unmap(context, src_transfer);
+-      } else {
+-         pipe_buffer_read(context, res, 0, etna_ml_get_size(subgraph, output_idxs[i]), outputs[i]);
++         uint8_t *out = outputs[i];
++         for (unsigned k = 0; k < size; k++)
++            out[k] -= 128;
+       }
+    }
+ }
+-- 
+2.43.0
+

@@ -40,3 +40,6 @@ __pycache__/
 
 # Fake-NPU dumps of Mesa's Teflon test suite (1568 tests); regenerate with research/port/tools/teflon_suite_offline.sh
 /runs/cs-offline/teflon-suite*/
+
+# perf recordings: they hold kernel addresses (this boot's layout); the text reports next to them are kept
+/runs/**/*.data

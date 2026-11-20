@@ -1,0 +1,103 @@
+Note: Google Test filter = teflon/posenet_mobilenet_v1.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 33 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 33 tests from teflon/posenet_mobilenet_v1
+[ RUN      ] teflon/posenet_mobilenet_v1.0000
+[       OK ] teflon/posenet_mobilenet_v1.0000 (230 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0001
+[       OK ] teflon/posenet_mobilenet_v1.0001 (166 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0002
+[       OK ] teflon/posenet_mobilenet_v1.0002 (257 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0003
+CPU: 00 ff 56 00 aa ed 84 a0 90 ff 00 00 75 ff 64 64 6a 18 ff 5f 6c 73 ff 78 
+NPU: ff 00 18 00 ff aa 65 e4 ff ff 72 ff 45 00 2e 00 88 f3 ff 40 ac 00 93 00 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 0 from the NPU (ff) doesn't match that from the CPU (00).
+[  FAILED  ] teflon/posenet_mobilenet_v1.0003 (169 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0004
+[       OK ] teflon/posenet_mobilenet_v1.0004 (149 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0005
+[       OK ] teflon/posenet_mobilenet_v1.0005 (185 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0006
+[       OK ] teflon/posenet_mobilenet_v1.0006 (200 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0007
+CPU: ff 9b ff 20 50 5c cb 4d d8 00 00 00 c4 71 1f 05 85 57 e7 00 b2 00 c6 30 
+NPU: ff ec eb 00 3a ba ff f4 ff 00 49 93 ff ff 63 00 00 00 ff 00 ff 00 ff 98 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 1 from the NPU (ec) doesn't match that from the CPU (9b).
+[  FAILED  ] teflon/posenet_mobilenet_v1.0007 (102 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0008
+[       OK ] teflon/posenet_mobilenet_v1.0008 (103 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0009
+[       OK ] teflon/posenet_mobilenet_v1.0009 (118 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0010
+[       OK ] teflon/posenet_mobilenet_v1.0010 (152 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0011
+CPU: 00 89 16 ff bc 00 db ff 33 85 9d 62 ff e0 73 43 00 10 ff 4f cb 84 8b 6a 
+NPU: 00 47 25 ff ff 00 ff ff a4 ff 00 ff 4e 6f 14 8c 00 00 ff ff 63 e6 ff d3 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 1 from the NPU (47) doesn't match that from the CPU (89).
+[  FAILED  ] teflon/posenet_mobilenet_v1.0011 (77 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0012
+[       OK ] teflon/posenet_mobilenet_v1.0012 (85 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0013
+[       OK ] teflon/posenet_mobilenet_v1.0013 (125 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0014
+[       OK ] teflon/posenet_mobilenet_v1.0014 (130 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0015
+[       OK ] teflon/posenet_mobilenet_v1.0015 (124 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0016
+[       OK ] teflon/posenet_mobilenet_v1.0016 (136 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0017
+[       OK ] teflon/posenet_mobilenet_v1.0017 (124 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0018
+[       OK ] teflon/posenet_mobilenet_v1.0018 (131 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0019
+[       OK ] teflon/posenet_mobilenet_v1.0019 (123 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0020
+[       OK ] teflon/posenet_mobilenet_v1.0020 (134 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0021
+[       OK ] teflon/posenet_mobilenet_v1.0021 (125 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0022
+[       OK ] teflon/posenet_mobilenet_v1.0022 (128 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0023
+[       OK ] teflon/posenet_mobilenet_v1.0023 (120 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0024
+[       OK ] teflon/posenet_mobilenet_v1.0024 (132 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0025
+[       OK ] teflon/posenet_mobilenet_v1.0025 (124 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0026
+[       OK ] teflon/posenet_mobilenet_v1.0026 (137 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0027
+[       OK ] teflon/posenet_mobilenet_v1.0027 (42 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0028
+[       OK ] teflon/posenet_mobilenet_v1.0028 (47 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0029
+[       OK ] teflon/posenet_mobilenet_v1.0029 (44 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0030
+[       OK ] teflon/posenet_mobilenet_v1.0030 (45 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.0031
+[       OK ] teflon/posenet_mobilenet_v1.0031 (29 ms)
+[ RUN      ] teflon/posenet_mobilenet_v1.whole
+CPU: 0c 0e 02 00 00 1b 08 2c 1e 14 14 0d 14 0a 0a 01 0b 1d 19 01 00 00 26 1b 
+NPU: 05 00 00 0b 11 1d 1a 0f 17 07 08 17 14 0e 0b 06 00 00 00 00 04 01 0c 04 
+../src/gallium/targets/teflon/test_teflon.cpp:115: Failure
+Failed
+Output at 0 from the NPU (05) doesn't match that from the CPU (0c).
+[  FAILED  ] teflon/posenet_mobilenet_v1.whole (2304 ms)
+[----------] 33 tests from teflon/posenet_mobilenet_v1 (6318 ms total)
+
+[----------] Global test environment tear-down
+[==========] 33 tests from 1 test suite ran. (6319 ms total)
+[  PASSED  ] 29 tests.
+[  FAILED  ] 4 tests, listed below:
+[  FAILED  ] teflon/posenet_mobilenet_v1.0003
+[  FAILED  ] teflon/posenet_mobilenet_v1.0007
+[  FAILED  ] teflon/posenet_mobilenet_v1.0011
+[  FAILED  ] teflon/posenet_mobilenet_v1.whole
+
+ 4 FAILED TESTS
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261120-041052-TFS-posenet_mobilenet_v1

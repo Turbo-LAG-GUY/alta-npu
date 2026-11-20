@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.92 ms, compile 74.04 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_1x1.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 3, "compile_ms": 74.044, "first_ms": 0.810, "ms_median_after_first": 0.4012, "ctx_ms": 0.0009, "invoke_call_ms": 0.0057, "read_ms": 0.3947, "npu_ms": 0.3864, "spins_per_wait": 175, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0231, "main_cpu": 0, "main_on_a73": 0.000, "readout_ms": 0.0076, "readout": "zero-nofini", "consume": true, "consume_sum": -12400, "alt": true, "checked_invokes": 200, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-042806-LLMZC-Z3-nofini-1x1-a53

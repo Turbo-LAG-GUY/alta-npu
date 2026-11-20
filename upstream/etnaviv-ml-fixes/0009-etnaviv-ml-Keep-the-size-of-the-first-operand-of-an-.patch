@@ -1,7 +1,7 @@
 From a08a8763308224b38b31da205028213a0dcfe1d1 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 14:53:01 -0500
-Subject: [PATCH 9/9] etnaviv/ml: Keep the size of the first operand of an
+Subject: [PATCH 09/12] etnaviv/ml: Keep the size of the first operand of an
  addition
 
 The operands of an addition share one buffer. recreate_tensor() gave
@@ -22,7 +22,7 @@ Generated-by: LLM
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
-index 393a5ea9900..2203dc07ca1 100644
+index 393a5ea9900e..2203dc07ca15 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
 @@ -240,7 +240,6 @@ recreate_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned size)

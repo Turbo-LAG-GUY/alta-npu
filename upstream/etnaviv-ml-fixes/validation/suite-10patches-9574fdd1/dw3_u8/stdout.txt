@@ -1,0 +1,93 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 DWCONV          v1  supported   in: 0(u8) 1(u8) 2(i32) out: 3(u8)
+
+teflon: compiling graph: 4 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.050000  85 no       1x16x16x32
+  1 0.010000  80 yes      1x3x3x32
+  2 0.000500   0 yes      1x1x1x32
+  3 0.242192  7a no       1x16x16x32
+
+idx type            inputs               outputs             
+==========================================================================
+  0 DWCONV          0,1,2                3                   
+
+Adding transpose.
+operation 1 input tensor 4 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+Adding detranspose.
+created resource 0x1a9caac0 for tensor 0 with size 8192
+created resource 0x1a9cabd0 for tensor 4 with size 8192
+created resource 0x1a9cace0 for tensor 5 with size 8192
+Ensuring all output tensors have their memory backing.
+created resource 0x1a9cadf0 for tensor 3 with size 8192
+
+dumping intermediate graph: 3 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   4
+  1 NN     4   5 in2:   0
+  2 TP     5   3
+
+write_core_interleaved core 0 zrl_bits 5 map (nil)
+write_core_interleaved core 1 zrl_bits 5 map (nil)
+write_core_interleaved core 2 zrl_bits 5 map (nil)
+write_core_interleaved core 3 zrl_bits 5 map (nil)
+write_core_interleaved core 4 zrl_bits 5 map (nil)
+write_core_interleaved core 5 zrl_bits 5 map (nil)
+write_core_interleaved core 6 zrl_bits 5 map (nil)
+write_core_interleaved core 7 zrl_bits 5 map (nil)
+write_core_interleaved core 0 zrl_bits 4 map (nil)
+write_core_interleaved core 1 zrl_bits 4 map (nil)
+write_core_interleaved core 2 zrl_bits 4 map (nil)
+write_core_interleaved core 3 zrl_bits 4 map (nil)
+write_core_interleaved core 4 zrl_bits 4 map (nil)
+write_core_interleaved core 5 zrl_bits 4 map (nil)
+write_core_interleaved core 6 zrl_bits 4 map (nil)
+write_core_interleaved core 7 zrl_bits 4 map (nil)
+write_core_interleaved core 0 zrl_bits 5 map 0xffffb46c6040
+write_core_interleaved core 1 zrl_bits 5 map 0xffffb46c6140
+write_core_interleaved core 2 zrl_bits 5 map 0xffffb46c6240
+write_core_interleaved core 3 zrl_bits 5 map 0xffffb46c6340
+write_core_interleaved core 4 zrl_bits 5 map 0xffffb46c6440
+write_core_interleaved core 5 zrl_bits 5 map 0xffffb46c6540
+write_core_interleaved core 6 zrl_bits 5 map 0xffffb46c6640
+write_core_interleaved core 7 zrl_bits 5 map 0xffffb46c6740
+coefficients_size 0x800 (2048) image_size 0x0 (0)
+teflon: compiled graph, took 2 ms
+Dumping buffer from 0xffffb4a89000 at offset 0 with size 8192 to mesa-input-000-000.bin
+Dumping buffer from 0xffffb46c9000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffffb46ce000 at offset 0 with size 8192 to mesa-input-001-000.bin
+Dumping buffer from 0xffffb46c5000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffffb46c6000 at offset 0 with size 12288 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffffb46cc000 at offset 0 with size 8192 to mesa-input-002-000.bin
+Dumping buffer from 0xffffb46c4000 at offset 0 with size 4096 to mesa-tp-002-000.bin
+Running the NN job took 0 ms.
+teflon: invoked graph, took 1 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/dw3_u8.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 2.2,
+ "invoke_ms": [
+  1.11
+ ],
+ "invoke_ms_median": 1.11,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": true
+}

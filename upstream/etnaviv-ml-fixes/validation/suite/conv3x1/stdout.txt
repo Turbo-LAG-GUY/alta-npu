@@ -22,11 +22,11 @@ operation 1 input tensor 4 layouts 1 2.
 Adding convolution.
 type 1 i 0 tensor 3 layout 1 == 2
 Adding detranspose.
-created resource 0xf0c8920 for tensor 0 with size 3211264
-created resource 0xf0c8a30 for tensor 4 with size 3211264
-created resource 0xf0c8b40 for tensor 5 with size 3211264
+created resource 0x1e65fa80 for tensor 0 with size 3211264
+created resource 0x1e65fb90 for tensor 4 with size 3211264
+created resource 0x1e65fca0 for tensor 5 with size 3211264
 Ensuring all output tensors have their memory backing.
-created resource 0xf0c8c50 for tensor 3 with size 3211264
+created resource 0x1e65fdb0 for tensor 3 with size 3211264
 
 dumping intermediate graph: 3 operations
 
@@ -84,34 +84,34 @@ write_core_interleaved core 4 zrl_bits 0 map (nil)
 write_core_interleaved core 5 zrl_bits 0 map (nil)
 write_core_interleaved core 6 zrl_bits 0 map (nil)
 write_core_interleaved core 7 zrl_bits 0 map (nil)
-write_core_interleaved core 0 zrl_bits 0 map 0xffffa67cc040
-write_core_interleaved core 1 zrl_bits 0 map 0xffffa67de180
-write_core_interleaved core 2 zrl_bits 0 map 0xffffa67f02c0
-write_core_interleaved core 3 zrl_bits 0 map 0xffffa6802400
-write_core_interleaved core 4 zrl_bits 0 map 0xffffa6814540
-write_core_interleaved core 5 zrl_bits 0 map 0xffffa6826680
-write_core_interleaved core 6 zrl_bits 0 map 0xffffa68387c0
-write_core_interleaved core 7 zrl_bits 0 map 0xffffa684a900
+write_core_interleaved core 0 zrl_bits 0 map 0xffff9138c040
+write_core_interleaved core 1 zrl_bits 0 map 0xffff9139e180
+write_core_interleaved core 2 zrl_bits 0 map 0xffff913b02c0
+write_core_interleaved core 3 zrl_bits 0 map 0xffff913c2400
+write_core_interleaved core 4 zrl_bits 0 map 0xffff913d4540
+write_core_interleaved core 5 zrl_bits 0 map 0xffff913e6680
+write_core_interleaved core 6 zrl_bits 0 map 0xffff913f87c0
+write_core_interleaved core 7 zrl_bits 0 map 0xffff9140a900
 coefficients_size 0x90a00 (592384) image_size 0x32000 (204800)
-teflon: compiled graph, took 92 ms
-Dumping buffer from 0xffffa686c000 at offset 0 with size 3670016 to mesa-input-000-000.bin
-Dumping buffer from 0xffffb95aa000 at offset 0 with size 4096 to mesa-tp-000-000.bin
-Dumping buffer from 0xffffa5980000 at offset 0 with size 3670016 to mesa-input-001-000.bin
-Dumping buffer from 0xffffb95a9000 at offset 0 with size 4096 to mesa-nn-001-000.bin
-Dumping buffer from 0xffffa67cc000 at offset 0 with size 655360 to mesa-compressed-001-000.bin
-Dumping buffer from 0xffffa5600000 at offset 0 with size 3670016 to mesa-input-002-000.bin
-Dumping buffer from 0xffffb91ef000 at offset 0 with size 4096 to mesa-tp-002-000.bin
+teflon: compiled graph, took 99 ms
+Dumping buffer from 0xffff9142c000 at offset 0 with size 3670016 to mesa-input-000-000.bin
+Dumping buffer from 0xffffa417f000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff90540000 at offset 0 with size 3670016 to mesa-input-001-000.bin
+Dumping buffer from 0xffffa417e000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffff9138c000 at offset 0 with size 655360 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffff901c0000 at offset 0 with size 3670016 to mesa-input-002-000.bin
+Dumping buffer from 0xffffa417d000 at offset 0 with size 4096 to mesa-tp-002-000.bin
 Running the NN job took 1 ms.
-teflon: invoked graph, took 14 ms
+teflon: invoked graph, took 21 ms
 {
  "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
  "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite",
  "etna_ml_shader": null,
- "setup_ms": 93.0,
+ "setup_ms": 100.7,
  "invoke_ms": [
-  14.17
+  21.93
  ],
- "invoke_ms_median": 14.17,
+ "invoke_ms_median": 21.93,
  "invoke_ms_median_after_first": null,
  "all_invokes_identical": true,
  "max_diff_vs_first": 0,

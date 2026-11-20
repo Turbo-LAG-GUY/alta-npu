@@ -241,38 +241,38 @@ operation 1 input tensor 26 layouts 1 2.
 Adding convolution.
 type 1 i 0 tensor 30 layout 1 == 2
 Adding detranspose.
-created resource 0x3280bda0 for tensor 87 with size 150528
-created resource 0x3280bea0 for tensor 88 with size 150528
-created resource 0x3282a120 for tensor 89 with size 153228
-created resource 0x32b93250 for tensor 6 with size 401408
-created resource 0x327fefc0 for tensor 32 with size 401408
-created resource 0x327ff0a0 for tensor 36 with size 802816
-created resource 0x32804dd0 for tensor 38 with size 200704
-created resource 0x32b913f0 for tensor 42 with size 401408
-created resource 0x32b914f0 for tensor 44 with size 401408
-created resource 0x32808380 for tensor 48 with size 401408
-created resource 0x32808480 for tensor 50 with size 100352
-created resource 0x32808580 for tensor 54 with size 200704
-created resource 0x32808680 for tensor 56 with size 200704
-created resource 0x32808780 for tensor 60 with size 200704
-created resource 0x32808880 for tensor 62 with size 50176
-created resource 0x32808dd0 for tensor 66 with size 100352
-created resource 0x32808ed0 for tensor 68 with size 100352
-created resource 0x32808fd0 for tensor 72 with size 100352
-created resource 0x328090d0 for tensor 74 with size 100352
-created resource 0x3281a870 for tensor 78 with size 100352
-created resource 0x3281a970 for tensor 80 with size 100352
-created resource 0x3281aa70 for tensor 84 with size 100352
-created resource 0x3281ab70 for tensor 8 with size 100352
-created resource 0x3281ac70 for tensor 12 with size 100352
-created resource 0x3281ad70 for tensor 14 with size 100352
-created resource 0x3281ae70 for tensor 18 with size 100352
-created resource 0x3281af70 for tensor 20 with size 25088
-created resource 0x3281b070 for tensor 24 with size 50176
-created resource 0x3281b170 for tensor 26 with size 50176
-created resource 0x3281b270 for tensor 90 with size 50176
+created resource 0x2c1c0d50 for tensor 87 with size 150528
+created resource 0x2c1c5980 for tensor 88 with size 150528
+created resource 0x2c1c8f40 for tensor 89 with size 153228
+created resource 0x2c54f2f0 for tensor 6 with size 401408
+created resource 0x2c54f3f0 for tensor 32 with size 401408
+created resource 0x2c1e6310 for tensor 36 with size 802816
+created resource 0x2c1e6410 for tensor 38 with size 200704
+created resource 0x2c1d70f0 for tensor 42 with size 401408
+created resource 0x2c1d71f0 for tensor 44 with size 401408
+created resource 0x2c1d72f0 for tensor 48 with size 401408
+created resource 0x2c1d73f0 for tensor 50 with size 100352
+created resource 0x2c1d74f0 for tensor 54 with size 200704
+created resource 0x2c1d75f0 for tensor 56 with size 200704
+created resource 0x2c1d76f0 for tensor 60 with size 200704
+created resource 0x2c1d77f0 for tensor 62 with size 50176
+created resource 0x2c1d8190 for tensor 66 with size 100352
+created resource 0x2c1d86e0 for tensor 68 with size 100352
+created resource 0x2c1d87e0 for tensor 72 with size 100352
+created resource 0x2c1d88e0 for tensor 74 with size 100352
+created resource 0x2c1d89e0 for tensor 78 with size 100352
+created resource 0x2c1d8ae0 for tensor 80 with size 100352
+created resource 0x2c1d8be0 for tensor 84 with size 100352
+created resource 0x2c1d8ce0 for tensor 8 with size 100352
+created resource 0x2c1d8de0 for tensor 12 with size 100352
+created resource 0x2c1d8ee0 for tensor 14 with size 100352
+created resource 0x2c1d8fe0 for tensor 18 with size 100352
+created resource 0x2c1d90e0 for tensor 20 with size 25088
+created resource 0x2c1d91e0 for tensor 24 with size 50176
+created resource 0x2c1d92e0 for tensor 26 with size 50176
+created resource 0x2c1d93e0 for tensor 90 with size 50176
 Ensuring all output tensors have their memory backing.
-created resource 0x3281b370 for tensor 30 with size 50176
+created resource 0x2c1d94e0 for tensor 30 with size 50176
 
 dumping intermediate graph: 30 operations
 
@@ -351,14 +351,14 @@ write_core_interleaved core 4 zrl_bits 1 map (nil)
 write_core_interleaved core 5 zrl_bits 1 map (nil)
 write_core_interleaved core 6 zrl_bits 1 map (nil)
 write_core_interleaved core 7 zrl_bits 1 map (nil)
-write_core_interleaved core 0 zrl_bits 2 map 0xffffb7679040
-write_core_interleaved core 1 zrl_bits 2 map 0xffffb7679100
-write_core_interleaved core 2 zrl_bits 2 map 0xffffb76791c0
-write_core_interleaved core 3 zrl_bits 2 map 0xffffb7679280
-write_core_interleaved core 4 zrl_bits 2 map 0xffffb7679340
-write_core_interleaved core 5 zrl_bits 2 map 0xffffb7679400
-write_core_interleaved core 6 zrl_bits 2 map 0xffffb76794c0
-write_core_interleaved core 7 zrl_bits 2 map 0xffffb7679580
+write_core_interleaved core 0 zrl_bits 2 map 0xffff8256b040
+write_core_interleaved core 1 zrl_bits 2 map 0xffff8256b100
+write_core_interleaved core 2 zrl_bits 2 map 0xffff8256b1c0
+write_core_interleaved core 3 zrl_bits 2 map 0xffff8256b280
+write_core_interleaved core 4 zrl_bits 2 map 0xffff8256b340
+write_core_interleaved core 5 zrl_bits 2 map 0xffff8256b400
+write_core_interleaved core 6 zrl_bits 2 map 0xffff8256b4c0
+write_core_interleaved core 7 zrl_bits 2 map 0xffff8256b580
 coefficients_size 0x600 (1536) image_size 0x0 (0)
 write_core_interleaved core 0 zrl_bits 5 map (nil)
 write_core_interleaved core 1 zrl_bits 5 map (nil)
@@ -376,14 +376,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffb6f6d040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffb6f6d100
-write_core_interleaved core 2 zrl_bits 5 map 0xffffb6f6d1c0
-write_core_interleaved core 3 zrl_bits 5 map 0xffffb6f6d2c0
-write_core_interleaved core 4 zrl_bits 5 map 0xffffb6f6d380
-write_core_interleaved core 5 zrl_bits 5 map 0xffffb6f6d440
-write_core_interleaved core 6 zrl_bits 5 map 0xffffb6f6d500
-write_core_interleaved core 7 zrl_bits 5 map 0xffffb6f6d5c0
+write_core_interleaved core 0 zrl_bits 5 map 0xffff82191040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff82191100
+write_core_interleaved core 2 zrl_bits 5 map 0xffff821911c0
+write_core_interleaved core 3 zrl_bits 5 map 0xffff821912c0
+write_core_interleaved core 4 zrl_bits 5 map 0xffff82191380
+write_core_interleaved core 5 zrl_bits 5 map 0xffff82191440
+write_core_interleaved core 6 zrl_bits 5 map 0xffff82191500
+write_core_interleaved core 7 zrl_bits 5 map 0xffff821915c0
 coefficients_size 0x800 (2048) image_size 0x0 (0)
 write_core_6 core 0 zrl_bits 0
 write_core_6 core 1 zrl_bits 0
@@ -411,14 +411,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffb63f6040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffb63f6240
-write_core_interleaved core 2 zrl_bits 5 map 0xffffb63f6440
-write_core_interleaved core 3 zrl_bits 5 map 0xffffb63f6640
-write_core_interleaved core 4 zrl_bits 5 map 0xffffb63f6840
-write_core_interleaved core 5 zrl_bits 5 map 0xffffb63f6a40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffb63f6c40
-write_core_interleaved core 7 zrl_bits 5 map 0xffffb63f6e40
+write_core_interleaved core 0 zrl_bits 5 map 0xffff81977040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff81977240
+write_core_interleaved core 2 zrl_bits 5 map 0xffff81977440
+write_core_interleaved core 3 zrl_bits 5 map 0xffff81977640
+write_core_interleaved core 4 zrl_bits 5 map 0xffff81977840
+write_core_interleaved core 5 zrl_bits 5 map 0xffff81977a40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff81977c40
+write_core_interleaved core 7 zrl_bits 5 map 0xffff81977e40
 coefficients_size 0x1000 (4096) image_size 0xc800 (51200)
 image_cache_end_address 57344 image_cache_start_address 6144 image_cache_size 51200 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -447,14 +447,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa4dd8040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa4dd8600
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa4dd8bc0
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa4dd91c0
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa4dd9780
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa4dd9d80
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa4dda340
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa4dda940
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6fcb8040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6fcb8600
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6fcb8bc0
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6fcb91c0
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6fcb9780
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6fcb9d80
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6fcba340
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6fcba940
 coefficients_size 0x3000 (12288) image_size 0x16000 (90112)
 image_cache_end_address 104448 image_cache_start_address 14336 image_cache_size 90112 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -483,14 +483,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa4db0040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa4db0640
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa4db0c40
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa4db1240
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa4db1840
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa4db1e40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa4db2440
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa4db2a40
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6fc90040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6fc90640
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6fc90c40
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6fc91240
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6fc91840
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6fc91e40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6fc92440
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6fc92a40
 coefficients_size 0x3000 (12288) image_size 0x16000 (90112)
 image_cache_end_address 104448 image_cache_start_address 14336 image_cache_size 90112 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -519,14 +519,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa3700040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa37012c0
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa3702540
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa3703780
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa37049c0
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa3705c40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa3706ec0
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa3708100
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6fbf0040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6fbf12c0
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6fbf2540
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6fbf3780
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6fbf49c0
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6fbf5c40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6fbf6ec0
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6fbf8100
 coefficients_size 0x9400 (37888) image_size 0x2d000 (184320)
 image_cache_end_address 224256 image_cache_start_address 39936 image_cache_size 184320 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -555,14 +555,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa3660040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa36612c0
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa3662540
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa36637c0
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa3664a40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa3665cc0
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa3666f40
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa36681c0
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6e71f040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6e7202c0
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6e721540
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6e7227c0
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6e723a40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6e724cc0
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6e725f40
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6e7271c0
 coefficients_size 0x9400 (37888) image_size 0x2d000 (184320)
 image_cache_end_address 224256 image_cache_start_address 39936 image_cache_size 184320 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -591,14 +591,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa2d3f040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa2d43340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa2d47640
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa2d4b940
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa2d4fc40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa2d53f40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa2d58240
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa2d5c540
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6e49f040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6e4a3340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6e4a7640
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6e4ab940
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6e4afc40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6e4b3f40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6e4b8240
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6e4bc540
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -627,14 +627,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa2abf040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa2ac3340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa2ac7600
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa2acb900
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa2acfbc0
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa2ad3ec0
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa2ad8180
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa2adc440
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6e1cf040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6e1d3340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6e1d7600
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6e1db900
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6e1dfbc0
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6e1e3ec0
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6e1e8180
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6e1ec440
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -663,14 +663,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa27ef040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa27f3340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa27f7640
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa27fb940
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa27ffc40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa2803f40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa2808240
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa280c540
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6deff040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6df03340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6df07640
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6df0b940
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6df0fc40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6df13f40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6df18240
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6df1c540
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -699,14 +699,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa1b3d040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa1b41340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa1b45640
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa1b49940
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa1b4dc40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa1b51f40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa1b56240
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa1b5a540
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6d2ed040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6d2f1340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6d2f5640
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6d2f9940
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6d2fdc40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6d301f40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6d306240
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6d30a540
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -735,14 +735,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa18bd040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa18c1340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa18c5640
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa18c9940
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa18cdc40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa18d1f40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa18d6240
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa18da540
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6d01d040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6d021340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6d025640
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6d029940
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6d02dc40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6d031f40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6d036240
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6d03a540
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -771,14 +771,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa163d040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa1641340
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa1645640
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa1649940
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa164dc40
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa1651f40
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa1656240
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa165a540
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6cd4d040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6cd51340
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6cd55640
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6cd59940
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6cd5dc40
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6cd61f40
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6cd66240
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6cd6a540
 coefficients_size 0x21800 (137216) image_size 0x20000 (131072)
 image_cache_end_address 270336 image_cache_start_address 139264 image_cache_size 131072 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -806,14 +806,14 @@ write_core_interleaved core 4 zrl_bits 4 map (nil)
 write_core_interleaved core 5 zrl_bits 4 map (nil)
 write_core_interleaved core 6 zrl_bits 4 map (nil)
 write_core_interleaved core 7 zrl_bits 4 map (nil)
-write_core_interleaved core 0 zrl_bits 5 map 0xffffa0b9d040
-write_core_interleaved core 1 zrl_bits 5 map 0xffffa0bac980
-write_core_interleaved core 2 zrl_bits 5 map 0xffffa0bbc2c0
-write_core_interleaved core 3 zrl_bits 5 map 0xffffa0bcbc00
-write_core_interleaved core 4 zrl_bits 5 map 0xffffa0bdb540
-write_core_interleaved core 5 zrl_bits 5 map 0xffffa0beae80
-write_core_interleaved core 6 zrl_bits 5 map 0xffffa0bfa7c0
-write_core_interleaved core 7 zrl_bits 5 map 0xffffa0c0a100
+write_core_interleaved core 0 zrl_bits 5 map 0xffff6c2ad040
+write_core_interleaved core 1 zrl_bits 5 map 0xffff6c2bc980
+write_core_interleaved core 2 zrl_bits 5 map 0xffff6c2cc2c0
+write_core_interleaved core 3 zrl_bits 5 map 0xffff6c2dbc00
+write_core_interleaved core 4 zrl_bits 5 map 0xffff6c2eb540
+write_core_interleaved core 5 zrl_bits 5 map 0xffff6c2fae80
+write_core_interleaved core 6 zrl_bits 5 map 0xffff6c30a7c0
+write_core_interleaved core 7 zrl_bits 5 map 0xffff6c31a100
 coefficients_size 0x7ca00 (510464) image_size 0x18000 (98304)
 image_cache_end_address 524288 image_cache_start_address 425984 image_cache_size 98304 oc_sram_size 524288
 write_core_6 core 0 zrl_bits 0
@@ -825,7 +825,7 @@ write_core_6 core 5 zrl_bits 0
 write_core_6 core 6 zrl_bits 0
 write_core_6 core 7 zrl_bits 0
 coefficients_size 0x102200 (1057280) image_size 0x10000 (65536)
-teflon: compiled graph, took 1455 ms
+teflon: compiled graph, took 1683 ms
 
 teflon: compiling graph: 88 tensors 1 operations
 idx scale     zp has_data size        
@@ -927,10 +927,10 @@ Adding transpose.
 operation 1 input tensor 4 layouts 1 2.
 Adding convolution.
 type 1 i 0 tensor 1 layout 1 == 2
-created resource 0x32800470 for tensor 0 with size 1024
-created resource 0x32800620 for tensor 4 with size 1024
+created resource 0x2c1b9fd0 for tensor 0 with size 1024
+created resource 0x2c1bd5a0 for tensor 4 with size 1024
 Ensuring all output tensors have their memory backing.
-created resource 0x32800720 for tensor 1 with size 1001
+created resource 0x2c1bd6a0 for tensor 1 with size 1001
 
 dumping intermediate graph: 2 operations
 
@@ -948,112 +948,112 @@ write_core_6 core 5 zrl_bits 0
 write_core_6 core 6 zrl_bits 0
 write_core_6 core 7 zrl_bits 0
 coefficients_size 0xfe000 (1040384) image_size 0x4000 (16384)
-teflon: compiled graph, took 32 ms
-Dumping buffer from 0xffffb3608000 at offset 0 with size 163840 to mesa-input-000-000.bin
-Dumping buffer from 0xffffb767b000 at offset 0 with size 4096 to mesa-tp-000-000.bin
-Dumping buffer from 0xffffa5d58000 at offset 0 with size 163840 to mesa-input-001-000.bin
-Dumping buffer from 0xffffb767a000 at offset 0 with size 4096 to mesa-tp-001-000.bin
-Dumping buffer from 0xffffa5d30000 at offset 0 with size 163840 to mesa-input-002-000.bin
-Dumping buffer from 0xffffb72a3000 at offset 0 with size 4096 to mesa-nn-002-000.bin
-Dumping buffer from 0xffffb7679000 at offset 0 with size 4096 to mesa-compressed-002-000.bin
-Dumping buffer from 0xffffa5cc0000 at offset 0 with size 458752 to mesa-input-003-000.bin
-Dumping buffer from 0xffffb72a2000 at offset 0 with size 4096 to mesa-nn-003-000.bin
-Dumping buffer from 0xffffb6f6d000 at offset 0 with size 12288 to mesa-compressed-003-000.bin
-Dumping buffer from 0xffffa5c50000 at offset 0 with size 458752 to mesa-input-004-000.bin
-Dumping buffer from 0xffffb71f1000 at offset 0 with size 4096 to mesa-nn-004-000.bin
-Dumping buffer from 0xffffb72a1000 at offset 0 with size 4096 to mesa-compressed-004-000.bin
-Dumping buffer from 0xffffa5b70000 at offset 0 with size 917504 to mesa-input-005-000.bin
-Dumping buffer from 0xffffb71b1000 at offset 0 with size 4096 to mesa-nn-005-000.bin
-Dumping buffer from 0xffffb63f6000 at offset 0 with size 40960 to mesa-compressed-005-000.bin
-Dumping buffer from 0xffffa5b38000 at offset 0 with size 229376 to mesa-input-006-000.bin
-Dumping buffer from 0xffffb716f000 at offset 0 with size 4096 to mesa-nn-006-000.bin
-Dumping buffer from 0xffffb6f6a000 at offset 0 with size 12288 to mesa-compressed-006-000.bin
-Dumping buffer from 0xffffa5ac8000 at offset 0 with size 458752 to mesa-input-007-000.bin
-Dumping buffer from 0xffffb716e000 at offset 0 with size 4096 to mesa-nn-007-000.bin
-Dumping buffer from 0xffffa4dd8000 at offset 0 with size 163840 to mesa-compressed-007-000.bin
-Dumping buffer from 0xffffa5a58000 at offset 0 with size 458752 to mesa-input-008-000.bin
-Dumping buffer from 0xffffb6fa1000 at offset 0 with size 4096 to mesa-nn-008-000.bin
-Dumping buffer from 0xffffb6b79000 at offset 0 with size 20480 to mesa-compressed-008-000.bin
-Dumping buffer from 0xffffa5180000 at offset 0 with size 458752 to mesa-input-009-000.bin
-Dumping buffer from 0xffffb6f69000 at offset 0 with size 4096 to mesa-nn-009-000.bin
-Dumping buffer from 0xffffa4db0000 at offset 0 with size 163840 to mesa-compressed-009-000.bin
-Dumping buffer from 0xffffb72a4000 at offset 0 with size 114688 to mesa-input-010-000.bin
-Dumping buffer from 0xffffb6f68000 at offset 0 with size 4096 to mesa-nn-010-000.bin
-Dumping buffer from 0xffffb48a6000 at offset 0 with size 40960 to mesa-compressed-010-000.bin
-Dumping buffer from 0xffffa5a20000 at offset 0 with size 229376 to mesa-input-011-000.bin
-Dumping buffer from 0xffffb6f67000 at offset 0 with size 4096 to mesa-nn-011-000.bin
-Dumping buffer from 0xffffa3700000 at offset 0 with size 655360 to mesa-compressed-011-000.bin
-Dumping buffer from 0xffffa5148000 at offset 0 with size 229376 to mesa-input-012-000.bin
-Dumping buffer from 0xffffb6cd1000 at offset 0 with size 4096 to mesa-nn-012-000.bin
-Dumping buffer from 0xffffa4d9c000 at offset 0 with size 81920 to mesa-compressed-012-000.bin
-Dumping buffer from 0xffffa5110000 at offset 0 with size 229376 to mesa-input-013-000.bin
-Dumping buffer from 0xffffb6c11000 at offset 0 with size 4096 to mesa-nn-013-000.bin
-Dumping buffer from 0xffffa3660000 at offset 0 with size 655360 to mesa-compressed-013-000.bin
-Dumping buffer from 0xffffb71f2000 at offset 0 with size 57344 to mesa-input-014-000.bin
-Dumping buffer from 0xffffb6b78000 at offset 0 with size 4096 to mesa-nn-014-000.bin
-Dumping buffer from 0xffffa4d74000 at offset 0 with size 163840 to mesa-compressed-014-000.bin
-Dumping buffer from 0xffffada04000 at offset 0 with size 114688 to mesa-input-015-000.bin
-Dumping buffer from 0xffffb6b77000 at offset 0 with size 4096 to mesa-nn-015-000.bin
-Dumping buffer from 0xffffa2d3f000 at offset 0 with size 2621440 to mesa-compressed-015-000.bin
-Dumping buffer from 0xffffa5a04000 at offset 0 with size 114688 to mesa-input-016-000.bin
-Dumping buffer from 0xffffb6b76000 at offset 0 with size 4096 to mesa-nn-016-000.bin
-Dumping buffer from 0xffffa4d24000 at offset 0 with size 327680 to mesa-compressed-016-000.bin
-Dumping buffer from 0xffffa50f4000 at offset 0 with size 114688 to mesa-input-017-000.bin
-Dumping buffer from 0xffffb6b75000 at offset 0 with size 4096 to mesa-nn-017-000.bin
-Dumping buffer from 0xffffa2abf000 at offset 0 with size 2621440 to mesa-compressed-017-000.bin
-Dumping buffer from 0xffffa50d8000 at offset 0 with size 114688 to mesa-input-018-000.bin
-Dumping buffer from 0xffffb63f5000 at offset 0 with size 4096 to mesa-nn-018-000.bin
-Dumping buffer from 0xffffa2a6f000 at offset 0 with size 327680 to mesa-compressed-018-000.bin
-Dumping buffer from 0xffffa50bc000 at offset 0 with size 114688 to mesa-input-019-000.bin
-Dumping buffer from 0xffffb63f4000 at offset 0 with size 4096 to mesa-nn-019-000.bin
-Dumping buffer from 0xffffa27ef000 at offset 0 with size 2621440 to mesa-compressed-019-000.bin
-Dumping buffer from 0xffffa50a0000 at offset 0 with size 114688 to mesa-input-020-000.bin
-Dumping buffer from 0xffffb63f3000 at offset 0 with size 4096 to mesa-nn-020-000.bin
-Dumping buffer from 0xffffa279f000 at offset 0 with size 327680 to mesa-compressed-020-000.bin
-Dumping buffer from 0xffffa5084000 at offset 0 with size 114688 to mesa-input-021-000.bin
-Dumping buffer from 0xffffb5faf000 at offset 0 with size 4096 to mesa-nn-021-000.bin
-Dumping buffer from 0xffffa1b3d000 at offset 0 with size 2621440 to mesa-compressed-021-000.bin
-Dumping buffer from 0xffffa5068000 at offset 0 with size 114688 to mesa-input-022-000.bin
-Dumping buffer from 0xffffb5fae000 at offset 0 with size 4096 to mesa-nn-022-000.bin
-Dumping buffer from 0xffffa274f000 at offset 0 with size 327680 to mesa-compressed-022-000.bin
-Dumping buffer from 0xffffa504c000 at offset 0 with size 114688 to mesa-input-023-000.bin
-Dumping buffer from 0xffffb5fad000 at offset 0 with size 4096 to mesa-nn-023-000.bin
-Dumping buffer from 0xffffa18bd000 at offset 0 with size 2621440 to mesa-compressed-023-000.bin
-Dumping buffer from 0xffffa5030000 at offset 0 with size 114688 to mesa-input-024-000.bin
-Dumping buffer from 0xffffb5fac000 at offset 0 with size 4096 to mesa-nn-024-000.bin
-Dumping buffer from 0xffffa26ff000 at offset 0 with size 327680 to mesa-compressed-024-000.bin
-Dumping buffer from 0xffffa5014000 at offset 0 with size 114688 to mesa-input-025-000.bin
-Dumping buffer from 0xffffb48a5000 at offset 0 with size 4096 to mesa-nn-025-000.bin
-Dumping buffer from 0xffffa163d000 at offset 0 with size 2621440 to mesa-compressed-025-000.bin
-Dumping buffer from 0xffffb767c000 at offset 0 with size 28672 to mesa-input-026-000.bin
-Dumping buffer from 0xffffb48a4000 at offset 0 with size 4096 to mesa-nn-026-000.bin
-Dumping buffer from 0xffffa159d000 at offset 0 with size 655360 to mesa-compressed-026-000.bin
-Dumping buffer from 0xffffb71b2000 at offset 0 with size 57344 to mesa-input-027-000.bin
-Dumping buffer from 0xffffb48a3000 at offset 0 with size 4096 to mesa-nn-027-000.bin
-Dumping buffer from 0xffffa0b9d000 at offset 0 with size 10485760 to mesa-compressed-027-000.bin
-Dumping buffer from 0xffffb6fa2000 at offset 0 with size 57344 to mesa-input-028-000.bin
-Dumping buffer from 0xffffb48a2000 at offset 0 with size 4096 to mesa-nn-028-000.bin
-Dumping buffer from 0xffffa0a5d000 at offset 0 with size 1310720 to mesa-compressed-028-000.bin
-Dumping buffer from 0xffffb6cd2000 at offset 0 with size 57344 to mesa-input-029-000.bin
-Dumping buffer from 0xffffb48a1000 at offset 0 with size 4096 to mesa-tp-029-000.bin
-Running the NN job took 0 ms.
-teflon: invoked graph, took 39 ms
-Dumping buffer from 0xffffb487f000 at offset 0 with size 4096 to mesa-input-030-000.bin
-Dumping buffer from 0xffffb487c000 at offset 0 with size 4096 to mesa-tp-030-000.bin
-Dumping buffer from 0xffffb487e000 at offset 0 with size 4096 to mesa-input-031-000.bin
-Dumping buffer from 0xffffb487b000 at offset 0 with size 4096 to mesa-nn-031-000.bin
-Dumping buffer from 0xffffa3100000 at offset 0 with size 1048576 to mesa-compressed-031-000.bin
-Running the NN job took 0 ms.
-teflon: invoked graph, took 1 ms
+teflon: compiled graph, took 31 ms
+Dumping buffer from 0xffff79208000 at offset 0 with size 163840 to mesa-input-000-000.bin
+Dumping buffer from 0xffff8256d000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff76808000 at offset 0 with size 163840 to mesa-input-001-000.bin
+Dumping buffer from 0xffff8256c000 at offset 0 with size 4096 to mesa-tp-001-000.bin
+Dumping buffer from 0xffff70c28000 at offset 0 with size 163840 to mesa-input-002-000.bin
+Dumping buffer from 0xffff8256a000 at offset 0 with size 4096 to mesa-nn-002-000.bin
+Dumping buffer from 0xffff8256b000 at offset 0 with size 4096 to mesa-compressed-002-000.bin
+Dumping buffer from 0xffff70990000 at offset 0 with size 458752 to mesa-input-003-000.bin
+Dumping buffer from 0xffff82569000 at offset 0 with size 4096 to mesa-nn-003-000.bin
+Dumping buffer from 0xffff82191000 at offset 0 with size 12288 to mesa-compressed-003-000.bin
+Dumping buffer from 0xffff70920000 at offset 0 with size 458752 to mesa-input-004-000.bin
+Dumping buffer from 0xffff820a8000 at offset 0 with size 4096 to mesa-nn-004-000.bin
+Dumping buffer from 0xffff820e1000 at offset 0 with size 4096 to mesa-compressed-004-000.bin
+Dumping buffer from 0xffff70840000 at offset 0 with size 917504 to mesa-input-005-000.bin
+Dumping buffer from 0xffff820a7000 at offset 0 with size 4096 to mesa-nn-005-000.bin
+Dumping buffer from 0xffff81977000 at offset 0 with size 40960 to mesa-compressed-005-000.bin
+Dumping buffer from 0xffff70808000 at offset 0 with size 229376 to mesa-input-006-000.bin
+Dumping buffer from 0xffff820a3000 at offset 0 with size 4096 to mesa-nn-006-000.bin
+Dumping buffer from 0xffff820a4000 at offset 0 with size 12288 to mesa-compressed-006-000.bin
+Dumping buffer from 0xffff6ff80000 at offset 0 with size 458752 to mesa-input-007-000.bin
+Dumping buffer from 0xffff820a2000 at offset 0 with size 4096 to mesa-nn-007-000.bin
+Dumping buffer from 0xffff6fcb8000 at offset 0 with size 163840 to mesa-compressed-007-000.bin
+Dumping buffer from 0xffff6ff10000 at offset 0 with size 458752 to mesa-input-008-000.bin
+Dumping buffer from 0xffff820a1000 at offset 0 with size 4096 to mesa-nn-008-000.bin
+Dumping buffer from 0xffff81e5b000 at offset 0 with size 20480 to mesa-compressed-008-000.bin
+Dumping buffer from 0xffff6fea0000 at offset 0 with size 458752 to mesa-input-009-000.bin
+Dumping buffer from 0xffff8205f000 at offset 0 with size 4096 to mesa-nn-009-000.bin
+Dumping buffer from 0xffff6fc90000 at offset 0 with size 163840 to mesa-compressed-009-000.bin
+Dumping buffer from 0xffff82194000 at offset 0 with size 114688 to mesa-input-010-000.bin
+Dumping buffer from 0xffff8205e000 at offset 0 with size 4096 to mesa-nn-010-000.bin
+Dumping buffer from 0xffff812d5000 at offset 0 with size 40960 to mesa-compressed-010-000.bin
+Dumping buffer from 0xffff6fe68000 at offset 0 with size 229376 to mesa-input-011-000.bin
+Dumping buffer from 0xffff81e91000 at offset 0 with size 4096 to mesa-nn-011-000.bin
+Dumping buffer from 0xffff6fbf0000 at offset 0 with size 655360 to mesa-compressed-011-000.bin
+Dumping buffer from 0xffff6fe30000 at offset 0 with size 229376 to mesa-input-012-000.bin
+Dumping buffer from 0xffff81e5a000 at offset 0 with size 4096 to mesa-nn-012-000.bin
+Dumping buffer from 0xffff6ee6c000 at offset 0 with size 81920 to mesa-compressed-012-000.bin
+Dumping buffer from 0xffff6fdf8000 at offset 0 with size 229376 to mesa-input-013-000.bin
+Dumping buffer from 0xffff81e59000 at offset 0 with size 4096 to mesa-nn-013-000.bin
+Dumping buffer from 0xffff6e71f000 at offset 0 with size 655360 to mesa-compressed-013-000.bin
+Dumping buffer from 0xffff820e2000 at offset 0 with size 57344 to mesa-input-014-000.bin
+Dumping buffer from 0xffff81e58000 at offset 0 with size 4096 to mesa-nn-014-000.bin
+Dumping buffer from 0xffff6ee44000 at offset 0 with size 163840 to mesa-compressed-014-000.bin
+Dumping buffer from 0xffff70c0c000 at offset 0 with size 114688 to mesa-input-015-000.bin
+Dumping buffer from 0xffff81e57000 at offset 0 with size 4096 to mesa-nn-015-000.bin
+Dumping buffer from 0xffff6e49f000 at offset 0 with size 2621440 to mesa-compressed-015-000.bin
+Dumping buffer from 0xffff6fddc000 at offset 0 with size 114688 to mesa-input-016-000.bin
+Dumping buffer from 0xffff81bc1000 at offset 0 with size 4096 to mesa-nn-016-000.bin
+Dumping buffer from 0xffff6e44f000 at offset 0 with size 327680 to mesa-compressed-016-000.bin
+Dumping buffer from 0xffff6fdc0000 at offset 0 with size 114688 to mesa-input-017-000.bin
+Dumping buffer from 0xffff81b01000 at offset 0 with size 4096 to mesa-nn-017-000.bin
+Dumping buffer from 0xffff6e1cf000 at offset 0 with size 2621440 to mesa-compressed-017-000.bin
+Dumping buffer from 0xffff6fda4000 at offset 0 with size 114688 to mesa-input-018-000.bin
+Dumping buffer from 0xffff81976000 at offset 0 with size 4096 to mesa-nn-018-000.bin
+Dumping buffer from 0xffff6e17f000 at offset 0 with size 327680 to mesa-compressed-018-000.bin
+Dumping buffer from 0xffff6fd88000 at offset 0 with size 114688 to mesa-input-019-000.bin
+Dumping buffer from 0xffff81975000 at offset 0 with size 4096 to mesa-nn-019-000.bin
+Dumping buffer from 0xffff6deff000 at offset 0 with size 2621440 to mesa-compressed-019-000.bin
+Dumping buffer from 0xffff6fd6c000 at offset 0 with size 114688 to mesa-input-020-000.bin
+Dumping buffer from 0xffff812d4000 at offset 0 with size 4096 to mesa-nn-020-000.bin
+Dumping buffer from 0xffff6d56d000 at offset 0 with size 327680 to mesa-compressed-020-000.bin
+Dumping buffer from 0xffff6fd50000 at offset 0 with size 114688 to mesa-input-021-000.bin
+Dumping buffer from 0xffff812d3000 at offset 0 with size 4096 to mesa-nn-021-000.bin
+Dumping buffer from 0xffff6d2ed000 at offset 0 with size 2621440 to mesa-compressed-021-000.bin
+Dumping buffer from 0xffff6fd34000 at offset 0 with size 114688 to mesa-input-022-000.bin
+Dumping buffer from 0xffff80e8f000 at offset 0 with size 4096 to mesa-nn-022-000.bin
+Dumping buffer from 0xffff6d29d000 at offset 0 with size 327680 to mesa-compressed-022-000.bin
+Dumping buffer from 0xffff6fd18000 at offset 0 with size 114688 to mesa-input-023-000.bin
+Dumping buffer from 0xffff80e8e000 at offset 0 with size 4096 to mesa-nn-023-000.bin
+Dumping buffer from 0xffff6d01d000 at offset 0 with size 2621440 to mesa-compressed-023-000.bin
+Dumping buffer from 0xffff6fcfc000 at offset 0 with size 114688 to mesa-input-024-000.bin
+Dumping buffer from 0xffff80e8d000 at offset 0 with size 4096 to mesa-nn-024-000.bin
+Dumping buffer from 0xffff6cfcd000 at offset 0 with size 327680 to mesa-compressed-024-000.bin
+Dumping buffer from 0xffff6fce0000 at offset 0 with size 114688 to mesa-input-025-000.bin
+Dumping buffer from 0xffff80e8c000 at offset 0 with size 4096 to mesa-nn-025-000.bin
+Dumping buffer from 0xffff6cd4d000 at offset 0 with size 2621440 to mesa-compressed-025-000.bin
+Dumping buffer from 0xffff820a9000 at offset 0 with size 28672 to mesa-input-026-000.bin
+Dumping buffer from 0xffff7f78f000 at offset 0 with size 4096 to mesa-nn-026-000.bin
+Dumping buffer from 0xffff6ccad000 at offset 0 with size 655360 to mesa-compressed-026-000.bin
+Dumping buffer from 0xffff81e92000 at offset 0 with size 57344 to mesa-input-027-000.bin
+Dumping buffer from 0xffff7f78e000 at offset 0 with size 4096 to mesa-nn-027-000.bin
+Dumping buffer from 0xffff6c2ad000 at offset 0 with size 10485760 to mesa-compressed-027-000.bin
+Dumping buffer from 0xffff81bc2000 at offset 0 with size 57344 to mesa-input-028-000.bin
+Dumping buffer from 0xffff7f78d000 at offset 0 with size 4096 to mesa-nn-028-000.bin
+Dumping buffer from 0xffff6c16d000 at offset 0 with size 1310720 to mesa-compressed-028-000.bin
+Dumping buffer from 0xffff81b02000 at offset 0 with size 57344 to mesa-input-029-000.bin
+Dumping buffer from 0xffff7f78c000 at offset 0 with size 4096 to mesa-tp-029-000.bin
+Running the NN job took 1 ms.
+teflon: invoked graph, took 35 ms
+Dumping buffer from 0xffff7f78b000 at offset 0 with size 4096 to mesa-input-030-000.bin
+Dumping buffer from 0xffff7f788000 at offset 0 with size 4096 to mesa-tp-030-000.bin
+Dumping buffer from 0xffff7f78a000 at offset 0 with size 4096 to mesa-input-031-000.bin
+Dumping buffer from 0xffff7f787000 at offset 0 with size 4096 to mesa-nn-031-000.bin
+Dumping buffer from 0xffff6e900000 at offset 0 with size 1048576 to mesa-compressed-031-000.bin
+Running the NN job took 1 ms.
+teflon: invoked graph, took 2 ms
 {
  "delegate": "/home/jordan/Documents/AI_Projects/mesa-compute/build/src/gallium/targets/teflon/libteflon.so",
  "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
  "etna_ml_shader": null,
- "setup_ms": 1494.2,
+ "setup_ms": 1721.8,
  "invoke_ms": [
-  39.92
+  36.91
  ],
- "invoke_ms_median": 39.92,
+ "invoke_ms_median": 36.91,
  "invoke_ms_median_after_first": null,
  "all_invokes_identical": true,
  "max_diff_vs_first": 0,

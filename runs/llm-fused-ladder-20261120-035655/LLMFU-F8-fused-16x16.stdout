@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.53 ms, compile 46.50 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_16x16.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 3, "compile_ms": 46.502, "first_ms": 3.664, "ms_median_after_first": 3.4808, "ctx_ms": 0.0030, "invoke_call_ms": 0.0990, "read_ms": 3.3739, "npu_ms": 2.7967, "spins_per_wait": 868, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0466, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.5384, "alt": true, "checked_invokes": 200, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-035912-LLMFU-F8-fused-16x16

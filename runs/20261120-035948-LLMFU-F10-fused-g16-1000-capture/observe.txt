@@ -1,0 +1,17 @@
+# npu-observe start 2026-11-20T03:59:48-05:00 duration=300s interval=1s
+03:59:48 up=11871.07 npu=active active_ms=11859182 npu_irqs=14603 cma_free_kb=10616 memavail_mb=2241 temps_c=cpu:37,ddr:40
+03:59:50 up=11872.24 npu=active active_ms=11860349 npu_irqs=14603 cma_free_kb=10616 memavail_mb=2242 temps_c=cpu:35,ddr:38
+03:59:51 up=11873.31 npu=active active_ms=11861421 npu_irqs=14603 cma_free_kb=10616 memavail_mb=2241 temps_c=cpu:35,ddr:39
+03:59:52 up=11874.42 npu=active active_ms=11862539 npu_irqs=14603 cma_free_kb=10616 memavail_mb=2241 temps_c=cpu:35,ddr:38
+03:59:53 up=11875.55 npu=active active_ms=11863660 npu_irqs=14603 cma_free_kb=780 memavail_mb=2248 temps_c=cpu:35,ddr:38
+03:59:54 up=11876.68 npu=active active_ms=11864794 npu_irqs=14603 cma_free_kb=780 memavail_mb=2239 temps_c=cpu:38,ddr:40
+03:59:55 up=11877.81 npu=active active_ms=11865920 npu_irqs=15604 cma_free_kb=784 memavail_mb=2239 temps_c=cpu:37,ddr:39
+03:59:56 up=11878.97 npu=active active_ms=11867078 npu_irqs=15604 cma_free_kb=784 memavail_mb=2241 temps_c=cpu:37,ddr:39
+03:59:58 up=11880.11 npu=active active_ms=11868227 npu_irqs=15604 cma_free_kb=788 memavail_mb=2242 temps_c=cpu:36,ddr:38
+03:59:59 up=11881.23 npu=active active_ms=11869342 npu_irqs=15604 cma_free_kb=788 memavail_mb=2243 temps_c=cpu:35,ddr:38
+04:00:00 up=11882.37 npu=active active_ms=11870482 npu_irqs=15604 cma_free_kb=788 memavail_mb=2242 temps_c=cpu:35,ddr:38
+04:00:01 up=11883.49 npu=active active_ms=11871603 npu_irqs=15604 cma_free_kb=788 memavail_mb=2242 temps_c=cpu:35,ddr:38
+04:00:02 up=11884.63 npu=active active_ms=11872746 npu_irqs=15604 cma_free_kb=1032 memavail_mb=2258 temps_c=cpu:35,ddr:38
+04:00:03 up=11885.75 npu=active active_ms=11873864 npu_irqs=15604 cma_free_kb=1032 memavail_mb=2256 temps_c=cpu:35,ddr:38
+04:00:04 up=11886.96 npu=active active_ms=11875069 npu_irqs=15604 cma_free_kb=1032 memavail_mb=2255 temps_c=cpu:35,ddr:38
+04:00:06 up=11888.09 npu=active active_ms=11876208 npu_irqs=15604 cma_free_kb=1032 memavail_mb=2254 temps_c=cpu:35,ddr:37

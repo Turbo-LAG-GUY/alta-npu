@@ -1,0 +1,10 @@
+label: LLMSP-S6-split-17b-gateup
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run -n 200 --wait spin --cpu-rows 9728 --cpu-ic 2048 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/split_17b_gateup_npu6656_g4.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-20T00:57:21-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2321
+deadline_s: 120
+journal_cursor: s=c1ef6e546f5a4bdfaa423ef778565ac4;i=13e024;b=c0a2b9d94aa64a07a8f7bec5b698a6eb;m=30552608;t=660aee42a351a;x=b6dc2baf4a6907e4
+end: 2026-11-20T00:57:24-05:00  rc: 0  wall_s: 4

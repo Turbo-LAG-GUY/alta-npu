@@ -1,0 +1,96 @@
+; SPIR-V
+; Version: 1.5
+; Generator: Khronos Glslang Reference Front End; 11
+; Bound: 45
+; Schema: 0
+               OpCapability Shader
+               OpCapability DotProduct
+               OpCapability DotProductInput4x8BitPacked
+               OpExtension "SPV_KHR_integer_dot_product"
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %gl_GlobalInvocationID %_ %__0 %__1
+               OpExecutionMode %main LocalSize 64 1 1
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %i "i"
+               OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
+               OpName %C "C"
+               OpMemberName %C 0 "c"
+               OpName %_ ""
+               OpName %A "A"
+               OpMemberName %A 0 "a"
+               OpName %__0 ""
+               OpName %B "B"
+               OpMemberName %B 0 "b"
+               OpName %__1 ""
+               OpDecorate %gl_GlobalInvocationID BuiltIn GlobalInvocationId
+               OpDecorate %_runtimearr_int ArrayStride 4
+               OpDecorate %C Block
+               OpMemberDecorate %C 0 NonReadable
+               OpMemberDecorate %C 0 Offset 0
+               OpDecorate %_ NonReadable
+               OpDecorate %_ Binding 2
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %_runtimearr_int_0 ArrayStride 4
+               OpDecorate %A Block
+               OpMemberDecorate %A 0 NonWritable
+               OpMemberDecorate %A 0 Offset 0
+               OpDecorate %__0 NonWritable
+               OpDecorate %__0 Binding 0
+               OpDecorate %__0 DescriptorSet 0
+               OpDecorate %_runtimearr_int_1 ArrayStride 4
+               OpDecorate %B Block
+               OpMemberDecorate %B 0 NonWritable
+               OpMemberDecorate %B 0 Offset 0
+               OpDecorate %__1 NonWritable
+               OpDecorate %__1 Binding 1
+               OpDecorate %__1 DescriptorSet 0
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%gl_GlobalInvocationID = OpVariable %_ptr_Input_v3uint Input
+     %uint_0 = OpConstant %uint 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+        %int = OpTypeInt 32 1
+%_runtimearr_int = OpTypeRuntimeArray %int
+          %C = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_C = OpTypePointer StorageBuffer %C
+          %_ = OpVariable %_ptr_StorageBuffer_C StorageBuffer
+      %int_0 = OpConstant %int 0
+%_runtimearr_int_0 = OpTypeRuntimeArray %int
+          %A = OpTypeStruct %_runtimearr_int_0
+%_ptr_StorageBuffer_A = OpTypePointer StorageBuffer %A
+        %__0 = OpVariable %_ptr_StorageBuffer_A StorageBuffer
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+%_runtimearr_int_1 = OpTypeRuntimeArray %int
+          %B = OpTypeStruct %_runtimearr_int_1
+%_ptr_StorageBuffer_B = OpTypePointer StorageBuffer %B
+        %__1 = OpVariable %_ptr_StorageBuffer_B StorageBuffer
+      %int_7 = OpConstant %int 7
+    %uint_64 = OpConstant %uint 64
+     %uint_1 = OpConstant %uint 1
+%gl_WorkGroupSize = OpConstantComposite %v3uint %uint_64 %uint_1 %uint_1
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+          %i = OpVariable %_ptr_Function_uint Function
+         %14 = OpAccessChain %_ptr_Input_uint %gl_GlobalInvocationID %uint_0
+         %15 = OpLoad %uint %14
+               OpStore %i %15
+         %22 = OpLoad %uint %i
+         %27 = OpLoad %uint %i
+         %29 = OpAccessChain %_ptr_StorageBuffer_int %__0 %int_0 %27
+         %30 = OpLoad %int %29
+         %35 = OpLoad %uint %i
+         %36 = OpAccessChain %_ptr_StorageBuffer_int %__1 %int_0 %35
+         %37 = OpLoad %int %36
+         %38 = OpSDot %int %30 %37 PackedVectorFormat4x8Bit
+         %40 = OpIAdd %int %38 %int_7
+         %41 = OpAccessChain %_ptr_StorageBuffer_int %_ %int_0 %22
+               OpStore %41 %40
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,40 @@
+Note: Google Test filter = teflon/ds_cnn.*-teflon/ds_cnn.0014:teflon/ds_cnn.whole:teflon/movenet_lightning.0112:teflon/movenet_lightning.0141:teflon/movenet_lightning.0152:teflon/movenet_thunder.0112:teflon/movenet_thunder.0141:teflon/movenet_thunder.0152:teflon/ssdlite_mobiledet.whole:teflon/ssdlite_mobiledet.0008:teflon/ssdlite_mobiledet.0011:teflon/ssdlite_mobiledet.0014:teflon/ssdlite_mobiledet.0019:teflon/ssdlite_mobiledet.0022:teflon/ssdlite_mobiledet.0025:teflon/ssdlite_mobiledet.0032:teflon/ssdlite_mobiledet.0035:teflon/ssdlite_mobiledet.0038:teflon/ssdlite_mobiledet.0045:teflon/ssdlite_mobiledet.0049:teflon/ssdlite_mobiledet.0053:teflon/ssdlite_mobiledet.0060:teflon/ssdlite_mobiledet.0064:teflon/ssdlite_mobiledet.0068:teflon/yolox_nano.0011:teflon/yolox_nano.0020:teflon/yolox_nano.0023:teflon/yolox_nano.0026:teflon/yolox_nano.0035:teflon/yolox_nano.0038:teflon/yolox_nano.0041
+[==========] Running 15 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 15 tests from teflon/ds_cnn
+[ RUN      ] teflon/ds_cnn.0000
+[       OK ] teflon/ds_cnn.0000 (31 ms)
+[ RUN      ] teflon/ds_cnn.0001
+[       OK ] teflon/ds_cnn.0001 (81 ms)
+[ RUN      ] teflon/ds_cnn.0002
+[       OK ] teflon/ds_cnn.0002 (29 ms)
+[ RUN      ] teflon/ds_cnn.0003
+[       OK ] teflon/ds_cnn.0003 (33 ms)
+[ RUN      ] teflon/ds_cnn.0004
+[       OK ] teflon/ds_cnn.0004 (28 ms)
+[ RUN      ] teflon/ds_cnn.0005
+[       OK ] teflon/ds_cnn.0005 (36 ms)
+[ RUN      ] teflon/ds_cnn.0006
+[       OK ] teflon/ds_cnn.0006 (27 ms)
+[ RUN      ] teflon/ds_cnn.0007
+[       OK ] teflon/ds_cnn.0007 (34 ms)
+[ RUN      ] teflon/ds_cnn.0008
+[       OK ] teflon/ds_cnn.0008 (28 ms)
+[ RUN      ] teflon/ds_cnn.0009
+[       OK ] teflon/ds_cnn.0009 (34 ms)
+[ RUN      ] teflon/ds_cnn.0010
+[       OK ] teflon/ds_cnn.0010 (30 ms)
+[ RUN      ] teflon/ds_cnn.0011
+[       OK ] teflon/ds_cnn.0011 (35 ms)
+[ RUN      ] teflon/ds_cnn.0012
+[       OK ] teflon/ds_cnn.0012 (26 ms)
+[ RUN      ] teflon/ds_cnn.0013
+[       OK ] teflon/ds_cnn.0013 (26 ms)
+[ RUN      ] teflon/ds_cnn.0015
+[       OK ] teflon/ds_cnn.0015 (24 ms)
+[----------] 15 tests from teflon/ds_cnn (510 ms total)
+
+[----------] Global test environment tear-down
+[==========] 15 tests from 1 test suite ran. (510 ms total)
+[  PASSED  ] 15 tests.
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-025255-TFS-ds_cnn

@@ -1,0 +1,10 @@
+label: LLM1-smol_kv_576x192_m1
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-llm/models/shapes/smol_kv_576x192_m1.tflite -r /home/jordan/Documents/AI_Projects/npu-llm/models/shapes/smol_kv_576x192_m1_reference.npz -e /home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so -n 20 --save /home/jordan/alta-npu/runs/llm-l1-ladder-20261118-183408/smol_kv_576x192_m1.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-18T18:34:20-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2471
+deadline_s: 120
+journal_cursor: s=ea65e0d5d58441dfa5a041d37e12afdc;i=130fbf;b=28cd3aa79f1e4d8fa02aa54742312f42;m=174a0b449;t=660956b4af285;x=23f08d78090fd91a
+end: 2026-11-18T18:34:23-05:00  rc: 0  wall_s: 3

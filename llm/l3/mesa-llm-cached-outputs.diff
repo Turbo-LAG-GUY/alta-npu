@@ -1,0 +1,119 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index b10bbcd9c108..a436c71bca1c 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -82,7 +82,7 @@ etna_ml_create_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned
+       return;
+    }
+ 
+-   res = etna_ml_create_resource(&subgraph->screen->base, size);
++   res = etna_ml_create_resource(&subgraph->screen->base, size, tensor->cpu_read);
+    tensor->resource = res;
+    tensor->size = size;
+ 
+@@ -115,11 +115,28 @@ etna_ml_create_bo(struct etna_screen *screen, size_t size)
+ }
+ 
+ struct pipe_resource *
+-etna_ml_create_resource(struct pipe_screen *pscreen, size_t size)
++etna_ml_create_resource(struct pipe_screen *pscreen, size_t size, bool cpu_read)
+ {
+-   struct pipe_resource *res = pipe_buffer_create(pscreen, 0, PIPE_USAGE_DEFAULT, size);
+-   void *ptr = etna_bo_map(etna_buffer_resource(res)->bo);
+-   memset(ptr, 0, pipe_buffer_size(res));
++   struct pipe_resource templ = {
++      .target = PIPE_BUFFER,
++      .format = PIPE_FORMAT_R8_UNORM,
++      .usage = PIPE_USAGE_DEFAULT,
++      /* Lets the driver put a buffer the CPU reads back in cached memory */
++      .flags = cpu_read ? ETNA_RESOURCE_FLAG_CPU_READ : 0,
++      .width0 = size,
++      .height0 = 1,
++      .depth0 = 1,
++      .array_size = 1,
++   };
++   struct pipe_resource *res = pscreen->resource_create(pscreen, &templ);
++   struct etna_bo *bo = etna_buffer_resource(res)->bo;
++
++   /* The prep / fini pair also writes the zeroes of a cached buffer back to
++    * memory, so no dirty line can overwrite what the NPU writes later.
++    */
++   etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
++   memset(etna_bo_map(bo), 0, pipe_buffer_size(res));
++   etna_bo_cpu_fini(bo);
+ 
+    return res;
+ }
+@@ -543,6 +560,8 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+ 
+       for (int i = 0; i < poperation->output_count; i++) {
+          struct etna_ml_tensor *tensor = etna_ml_get_tensor(subgraph, poperation->output_tensors[i]->index);
++         if (poperation->output_tensors[i]->is_external_output)
++            tensor->cpu_read = true;
+          if (tensor->exp_layout == ETNA_ML_LAYOUT_ANY &&
+              tensor->act_layout == ETNA_ML_LAYOUT_ANY) {
+             ML_DBG("Copying layout to output tensor %d.\n", poperation->output_tensors[i]->index);
+@@ -564,6 +583,25 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+       }
+    }
+ 
++   /* The outputs of a bypass or a split live in their input's buffer, so
++    * when the CPU reads one of them back it reads that buffer.
++    */
++   for (bool changed = true; changed;) {
++      changed = false;
++      list_for_each_entry(struct etna_operation, operation, etna_operations, link) {
++         if (operation->type != ETNA_JOB_TYPE_BYPASS && operation->type != ETNA_JOB_TYPE_SPLIT)
++            continue;
++         struct etna_ml_tensor *input = etna_ml_get_tensor(subgraph, operation->input_tensors[0]);
++         unsigned outputs = operation->type == ETNA_JOB_TYPE_SPLIT ? operation->output_count : 1;
++         for (unsigned i = 0; i < outputs; i++) {
++            if (!input->cpu_read && etna_ml_get_tensor(subgraph, operation->output_tensors[i])->cpu_read) {
++               input->cpu_read = true;
++               changed = true;
++            }
++         }
++      }
++   }
++
+    list_for_each_entry(struct etna_operation, operation, etna_operations, link) {
+       if (operation->type == ETNA_JOB_TYPE_CONCAT) {
+          etna_ml_create_tensor(subgraph, operation->output_tensors[0], operation->output_tensor_sizes[0]);
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index 718765ba6942..256fe1b19efa 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -53,6 +53,7 @@ struct etna_ml_tensor {
+    unsigned size;
+    enum etna_ml_tensor_layout exp_layout; /* expected */
+    enum etna_ml_tensor_layout act_layout; /* actual */
++   bool cpu_read; /* the CPU reads it back (a graph output, or the buffer one aliases) */
+ };
+ 
+ struct etna_ml_subgraph {
+@@ -155,7 +156,7 @@ unsigned etna_ml_get_size(struct etna_ml_subgraph *subgraph, unsigned idx);
+ 
+ struct etna_bo *etna_ml_create_bo(struct etna_screen *screen, size_t size);
+ 
+-struct pipe_resource *etna_ml_create_resource(struct pipe_screen *pscreen, size_t size);
++struct pipe_resource *etna_ml_create_resource(struct pipe_screen *pscreen, size_t size, bool cpu_read);
+ 
+ struct etna_core_npu_info *etna_ml_get_core_info(struct etna_screen *screen);
+ 
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_resource.c b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+index 31c578a40722..f8ad7bb26cba 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_resource.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_resource.c
+@@ -443,6 +443,12 @@ etna_buffer_bo_new(struct etna_screen *screen, const struct pipe_resource *prsc)
+ {
+    uint32_t flags = DRM_ETNA_GEM_CACHE_WC;
+ 
++   /* As for textures: the cache maintenance of a cached BO is cheap on arm64,
++    * and reading it back is much faster than reading write-combined memory.
++    */
++   if (DETECT_ARCH_AARCH64 && (prsc->flags & ETNA_RESOURCE_FLAG_CPU_READ))
++      flags = DRM_ETNA_GEM_CACHE_CACHED;
++
+    if (prsc->bind & PIPE_BIND_VERTEX_BUFFER)
+       flags |= DRM_ETNA_GEM_FORCE_MMU;
+ 

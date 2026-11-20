@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 2.22 ms, compile 40.65 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_16x16.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 1000, "batch": 1, "ops": 3, "compile_ms": 40.646, "first_ms": 4.608, "ms_median_after_first": 4.6270, "ctx_ms": 0.0032, "invoke_call_ms": 0.2590, "read_ms": 4.3627, "npu_ms": 2.8156, "spins_per_wait": 878, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0462, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 1.5175, "alt": true, "checked_invokes": 1000, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-031839-LLMCA-K9-cached-16x16-1000

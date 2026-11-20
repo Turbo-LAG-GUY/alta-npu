@@ -23,12 +23,12 @@ Adding reshuffle for convolution operation.
 Adding convolution.
 type 1 i 0 tensor 3 layout 1 == 2
 Adding detranspose.
-created resource 0xbdd7000 for tensor 0 with size 4096
-created resource 0xbdd7110 for tensor 4 with size 4096
-created resource 0xbdd7220 for tensor 5 with size 5184
-created resource 0xbdd7330 for tensor 6 with size 2048
+created resource 0x70e7f30 for tensor 0 with size 4096
+created resource 0x70e8040 for tensor 4 with size 4096
+created resource 0x70e8150 for tensor 5 with size 5184
+created resource 0x70e8260 for tensor 6 with size 2048
 Ensuring all output tensors have their memory backing.
-created resource 0xbdd7440 for tensor 3 with size 2048
+created resource 0x70e8370 for tensor 3 with size 2048
 
 dumping intermediate graph: 4 operations
 
@@ -84,39 +84,39 @@ write_core_interleaved core 4 zrl_bits 1 map (nil)
 write_core_interleaved core 5 zrl_bits 1 map (nil)
 write_core_interleaved core 6 zrl_bits 1 map (nil)
 write_core_interleaved core 7 zrl_bits 1 map (nil)
-write_core_interleaved core 0 zrl_bits 2 map 0xffffab3b3040
-write_core_interleaved core 1 zrl_bits 2 map 0xffffab3b3380
-write_core_interleaved core 2 zrl_bits 2 map 0xffffab3b36c0
-write_core_interleaved core 3 zrl_bits 2 map 0xffffab3b3a00
-write_core_interleaved core 4 zrl_bits 2 map 0xffffab3b3d40
-write_core_interleaved core 5 zrl_bits 2 map 0xffffab3b4080
-write_core_interleaved core 6 zrl_bits 2 map 0xffffab3b43c0
-write_core_interleaved core 7 zrl_bits 2 map 0xffffab3b4700
+write_core_interleaved core 0 zrl_bits 2 map 0xffff88375040
+write_core_interleaved core 1 zrl_bits 2 map 0xffff88375380
+write_core_interleaved core 2 zrl_bits 2 map 0xffff883756c0
+write_core_interleaved core 3 zrl_bits 2 map 0xffff88375a00
+write_core_interleaved core 4 zrl_bits 2 map 0xffff88375d40
+write_core_interleaved core 5 zrl_bits 2 map 0xffff88376080
+write_core_interleaved core 6 zrl_bits 2 map 0xffff883763c0
+write_core_interleaved core 7 zrl_bits 2 map 0xffff88376700
 coefficients_size 0x1a00 (6656) image_size 0x0 (0)
 teflon: compiled graph, took 3 ms
-Dumping buffer from 0xffffab779000 at offset 0 with size 4096 to mesa-input-000-000.bin
-Dumping buffer from 0xffffab3ba000 at offset 0 with size 4096 to mesa-tp-000-000.bin
-Dumping buffer from 0xffffab3bf000 at offset 0 with size 4096 to mesa-input-001-000.bin
-Dumping buffer from 0xffffab3b9000 at offset 0 with size 4096 to mesa-tp-001-000.bin
-Dumping buffer from 0xffffab3b8000 at offset 0 with size 4096 to mesa-tp-001-001.bin
-Dumping buffer from 0xffffab3b7000 at offset 0 with size 4096 to mesa-tp-001-002.bin
-Dumping buffer from 0xffffab3b6000 at offset 0 with size 4096 to mesa-tp-001-003.bin
-Dumping buffer from 0xffffab3bd000 at offset 0 with size 8192 to mesa-input-002-000.bin
-Dumping buffer from 0xffffab3b2000 at offset 0 with size 4096 to mesa-nn-002-000.bin
-Dumping buffer from 0xffffab3b3000 at offset 0 with size 12288 to mesa-compressed-002-000.bin
-Dumping buffer from 0xffffab3bc000 at offset 0 with size 4096 to mesa-input-003-000.bin
-Dumping buffer from 0xffffab3b1000 at offset 0 with size 4096 to mesa-tp-003-000.bin
-Running the NN job took 1 ms.
+Dumping buffer from 0xffff8873b000 at offset 0 with size 4096 to mesa-input-000-000.bin
+Dumping buffer from 0xffff8837c000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff8873a000 at offset 0 with size 4096 to mesa-input-001-000.bin
+Dumping buffer from 0xffff8837b000 at offset 0 with size 4096 to mesa-tp-001-000.bin
+Dumping buffer from 0xffff8837a000 at offset 0 with size 4096 to mesa-tp-001-001.bin
+Dumping buffer from 0xffff88379000 at offset 0 with size 4096 to mesa-tp-001-002.bin
+Dumping buffer from 0xffff88378000 at offset 0 with size 4096 to mesa-tp-001-003.bin
+Dumping buffer from 0xffff8837e000 at offset 0 with size 8192 to mesa-input-002-000.bin
+Dumping buffer from 0xffff88374000 at offset 0 with size 4096 to mesa-nn-002-000.bin
+Dumping buffer from 0xffff88375000 at offset 0 with size 12288 to mesa-compressed-002-000.bin
+Dumping buffer from 0xffff88739000 at offset 0 with size 4096 to mesa-input-003-000.bin
+Dumping buffer from 0xffff88373000 at offset 0 with size 4096 to mesa-tp-003-000.bin
+Running the NN job took 0 ms.
 teflon: invoked graph, took 2 ms
 {
  "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
  "model": "/home/jordan/Documents/AI_Projects/npu-shader/models/int8nn/c3s2_i8.tflite",
  "etna_ml_shader": null,
- "setup_ms": 3.3,
+ "setup_ms": 3.9,
  "invoke_ms": [
-  1.53
+  1.66
  ],
- "invoke_ms_median": 1.53,
+ "invoke_ms_median": 1.66,
  "invoke_ms_median_after_first": null,
  "all_invokes_identical": true,
  "max_diff_vs_first": 0,

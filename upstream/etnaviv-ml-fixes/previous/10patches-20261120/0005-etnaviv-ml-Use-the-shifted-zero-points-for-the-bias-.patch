@@ -1,0 +1,36 @@
+From 7703cd7f5afe9126e6dcc90c317cfd27f298968b Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:18 -0500
+Subject: [PATCH 05/10] etnaviv/ml: Use the shifted zero points for the bias of
+ V7 additions
+
+etna_ml_lower_add_v7() passes the raw zero points of its inputs to
+compute_bias_add(). With int8 inputs these are in -128..127: they wrap
+in the uint8_t parameters, and the offset term is 128 levels off from
+what the hardware needs for the stored (shifted) tensors.
+
+Use etna_tensor_zero_point(), as for all other operands. Nothing changes
+for uint8 inputs.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+index f9b4d6832902..8da754dd9d98 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -745,7 +745,8 @@ etna_ml_lower_add_v7(struct etna_ml_subgraph *subgraph,
+    operation->bias_tensor_size = 4;
+    int32_t *bias_map = (int32_t *)operation->bias_tensor;
+    bias_map[0] = compute_bias_add(poperation->input_tensors[1]->scale, poperation->input_tensors[0]->scale,
+-                                  poperation->input_tensors[1]->zero_point, poperation->input_tensors[0]->zero_point,
++                                  etna_tensor_zero_point(poperation->input_tensors[1]),
++                                  etna_tensor_zero_point(poperation->input_tensors[0]),
+                                   operation->weight_scale);
+ }
+ 
+-- 
+2.43.0
+

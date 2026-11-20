@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 1.96 ms, compile 38.79 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_1x1.jbp", "offline": false, "ctx": "persist", "invokes": 200, "batch": 4, "ops": 3, "compile_ms": 38.791, "first_ms": 1.514, "ms_median_after_first": 1.5084, "ctx_ms": 0.0025, "invoke_call_ms": 0.0327, "read_ms": 1.4703, "diff_vs_expected_max": 0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261119-135938-LLMJB-J4-batch4

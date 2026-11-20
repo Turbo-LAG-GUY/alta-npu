@@ -1,8 +1,8 @@
 From 1cf13ef75f467ab16fa6e1f0422711afe4b5adba Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:19 -0500
-Subject: [PATCH 6/9] etnaviv/ml: Don't read past the weights of an addition on
- V7
+Subject: [PATCH 06/12] etnaviv/ml: Don't read past the weights of an addition
+ on V7
 
 The weight tensor of an addition is 8 bytes: a 2x2 kernel in which only
 the first weight is set, which the coefficient writers treat as having a
@@ -25,7 +25,7 @@ Generated-by: LLM
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
-index a9caa60c896..8feb43b4d43 100644
+index a9caa60c8968..8feb43b4d431 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 @@ -121,8 +121,10 @@ static uint32_t

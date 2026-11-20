@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 4.82 ms, compile 95.41 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_1x1.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 3, "compile_ms": 95.412, "first_ms": 6.268, "ms_median_after_first": 1.0234, "ctx_ms": 0.0013, "invoke_call_ms": 0.0141, "read_ms": 1.0035, "npu_ms": 0.5954, "spins_per_wait": 264, "cpu_rows": 3072, "cpu_ms": 0.5330, "cpu_gbs": 3.320, "flush_ms": 0.0610, "main_cpu": -1, "main_on_a73": 0.050, "cpu_check": true, "diff_vs_expected_max": 0}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-011300-LLMSQ-Q3-both-smol-unpinned

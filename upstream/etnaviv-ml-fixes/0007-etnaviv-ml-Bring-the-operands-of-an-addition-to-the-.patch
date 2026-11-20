@@ -1,8 +1,8 @@
 From f3ac5799d2d2adabd9684276b3642bc73f43a5fa Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:19 -0500
-Subject: [PATCH 7/9] etnaviv/ml: Bring the operands of an addition to the same
- layout
+Subject: [PATCH 07/12] etnaviv/ml: Bring the operands of an addition to the
+ same layout
 
 Additions and subtractions are lowered as layout-agnostic. That only
 holds when both operands are in the same order. When a graph input
@@ -28,7 +28,7 @@ Generated-by: LLM
  1 file changed, 32 insertions(+), 1 deletion(-)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
-index f66ce17cafe..19860905f9f 100644
+index f66ce17cafe4..19860905f9f7 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
 @@ -314,10 +314,34 @@ layouts_differ(struct pipe_tensor *tensor)

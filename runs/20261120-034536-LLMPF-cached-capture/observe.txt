@@ -1,0 +1,26 @@
+# npu-observe start 2026-11-20T03:45:36-05:00 duration=300s interval=1s
+03:45:36 up=11018.94 npu=active active_ms=11007048 npu_irqs=11192 cma_free_kb=5464 memavail_mb=2093 temps_c=cpu:43,ddr:46
+03:45:38 up=11020.20 npu=active active_ms=11008312 npu_irqs=11192 cma_free_kb=1768 memavail_mb=2081 temps_c=cpu:40,ddr:44
+03:45:39 up=11021.33 npu=active active_ms=11009437 npu_irqs=11192 cma_free_kb=1768 memavail_mb=2082 temps_c=cpu:40,ddr:44
+03:45:40 up=11022.42 npu=active active_ms=11010536 npu_irqs=11192 cma_free_kb=1768 memavail_mb=2080 temps_c=cpu:39,ddr:43
+03:45:41 up=11023.56 npu=active active_ms=11011668 npu_irqs=11192 cma_free_kb=1768 memavail_mb=2079 temps_c=cpu:39,ddr:42
+03:45:42 up=11024.66 npu=active active_ms=11012774 npu_irqs=11192 cma_free_kb=328 memavail_mb=2075 temps_c=cpu:40,ddr:44
+03:45:43 up=11025.92 npu=active active_ms=11014036 npu_irqs=11192 cma_free_kb=5848 memavail_mb=2089 temps_c=cpu:43,ddr:46
+03:45:45 up=11027.16 npu=active active_ms=11015275 npu_irqs=11192 cma_free_kb=6084 memavail_mb=2073 temps_c=cpu:40,ddr:44
+03:45:46 up=11028.65 npu=active active_ms=11016759 npu_irqs=11192 cma_free_kb=35124 memavail_mb=2089 temps_c=cpu:41,ddr:45
+03:45:48 up=11030.16 npu=active active_ms=11018265 npu_irqs=11192 cma_free_kb=47200 memavail_mb=2080 temps_c=cpu:40,ddr:43
+03:45:49 up=11031.70 npu=active active_ms=11019805 npu_irqs=11192 cma_free_kb=48940 memavail_mb=2159 temps_c=cpu:42,ddr:45
+03:45:50 up=11032.78 npu=active active_ms=11020886 npu_irqs=11192 cma_free_kb=1848 memavail_mb=2158 temps_c=cpu:41,ddr:44
+03:45:51 up=11033.93 npu=active active_ms=11022036 npu_irqs=11245 cma_free_kb=1848 memavail_mb=2140 temps_c=cpu:44,ddr:46
+03:45:52 up=11035.03 npu=active active_ms=11023135 npu_irqs=11470 cma_free_kb=0 memavail_mb=2140 temps_c=cpu:46,ddr:49
+03:45:54 up=11036.17 npu=active active_ms=11024279 npu_irqs=11593 cma_free_kb=3556 memavail_mb=2120 temps_c=cpu:42,ddr:47
+03:45:56 up=11038.75 npu=active active_ms=11026863 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2152 temps_c=cpu:41,ddr:44
+03:45:57 up=11039.87 npu=active active_ms=11027981 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2151 temps_c=cpu:40,ddr:44
+03:45:58 up=11040.99 npu=active active_ms=11029110 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2149 temps_c=cpu:39,ddr:43
+03:46:00 up=11042.12 npu=active active_ms=11030229 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2149 temps_c=cpu:39,ddr:43
+03:46:01 up=11043.21 npu=active active_ms=11031322 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2149 temps_c=cpu:39,ddr:42
+03:46:02 up=11044.32 npu=active active_ms=11032436 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2148 temps_c=cpu:38,ddr:41
+03:46:03 up=11045.44 npu=active active_ms=11033560 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2148 temps_c=cpu:38,ddr:42
+03:46:04 up=11046.57 npu=active active_ms=11034682 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2146 temps_c=cpu:38,ddr:41
+03:46:05 up=11047.70 npu=active active_ms=11035809 npu_irqs=11593 cma_free_kb=1660 memavail_mb=2147 temps_c=cpu:38,ddr:41
+cut: write error: Broken pipe

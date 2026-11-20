@@ -1,0 +1,18 @@
+# npu-observe start 2026-11-19T02:37:24-05:00 duration=300s interval=1s
+02:37:24 up=7202.31 npu=active active_ms=7186635 npu_irqs=1239 cma_free_kb=3476 memavail_mb=2424 temps_c=cpu:35,ddr:38
+02:37:26 up=7203.47 npu=active active_ms=7187793 npu_irqs=1239 cma_free_kb=3476 memavail_mb=2424 temps_c=cpu:35,ddr:37
+02:37:27 up=7204.60 npu=active active_ms=7188931 npu_irqs=1239 cma_free_kb=3484 memavail_mb=2423 temps_c=cpu:34,ddr:37
+02:37:28 up=7205.78 npu=active active_ms=7190106 npu_irqs=1239 cma_free_kb=3484 memavail_mb=2421 temps_c=cpu:34,ddr:36
+02:37:29 up=7206.95 npu=active active_ms=7191275 npu_irqs=1239 cma_free_kb=3484 memavail_mb=2421 temps_c=cpu:34,ddr:36
+02:37:30 up=7208.11 npu=active active_ms=7192431 npu_irqs=1239 cma_free_kb=3484 memavail_mb=2415 temps_c=cpu:36,ddr:39
+02:37:31 up=7209.26 npu=active active_ms=7193587 npu_irqs=1256 cma_free_kb=3484 memavail_mb=2396 temps_c=cpu:36,ddr:39
+02:37:32 up=7210.41 npu=active active_ms=7194736 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2415 temps_c=cpu:35,ddr:38
+02:37:34 up=7211.60 npu=active active_ms=7195922 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2415 temps_c=cpu:35,ddr:37
+02:37:35 up=7212.81 npu=active active_ms=7197143 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2414 temps_c=cpu:34,ddr:37
+02:37:36 up=7213.94 npu=active active_ms=7198273 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2414 temps_c=cpu:35,ddr:38
+02:37:37 up=7215.07 npu=active active_ms=7199401 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2413 temps_c=cpu:35,ddr:37
+02:37:38 up=7216.21 npu=active active_ms=7200540 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2410 temps_c=cpu:34,ddr:36
+02:37:39 up=7217.40 npu=active active_ms=7201724 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2410 temps_c=cpu:34,ddr:36
+02:37:41 up=7218.56 npu=active active_ms=7202900 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2409 temps_c=cpu:34,ddr:37
+02:37:42 up=7219.73 npu=active active_ms=7204071 npu_irqs=1260 cma_free_kb=3484 memavail_mb=2408 temps_c=cpu:34,ddr:36
+awk: close failed on file "/dev/stdout" (Broken pipe)

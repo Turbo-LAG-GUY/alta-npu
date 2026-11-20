@@ -1,0 +1,47 @@
+From a08a8763308224b38b31da205028213a0dcfe1d1 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 14:53:01 -0500
+Subject: [PATCH 09/11] etnaviv/ml: Keep the size of the first operand of an
+ addition
+
+The operands of an addition share one buffer. recreate_tensor() gave
+the tensor of the first operand the size of that buffer, so when the
+first operand is an input of the subgraph, etna_ml_subgraph_invoke()
+copied twice the operand's size from the caller's buffer. That reads
+past the end of it, and it overwrites the second operand when that one
+is an input as well and was uploaded before.
+
+Keep the size of the operand in the tensor.
+
+Found with AddressSanitizer in test_teflon's micronet_vww.whole, which
+passes with this change on a VIPNano-QI.7120 (A311D).
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 393a5ea9900e..2203dc07ca15 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -240,7 +240,6 @@ recreate_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned size)
+       for (int i = 0; i < num_tensors; i++) {
+          if (etna_ml_get_resource(subgraph, i) == old_res) {
+             pipe_resource_reference(&tensors[i]->resource, new_res);
+-            tensors[i]->size = size;
+          }
+       }
+    }
+@@ -593,6 +592,8 @@ lower_operations(struct etna_ml_subgraph *subgraph,
+       } else if (operation->type == ETNA_JOB_TYPE_NN && operation->input_count > 1) { /* Add or Subtraction */
+          recreate_tensor(subgraph, operation->input_tensors[0], operation->input_tensor_sizes[0] +
+                                                                         operation->input_tensor_sizes[1]);
++         /* The buffer holds both operands, the tensor is only the first one */
++         etna_ml_get_tensor(subgraph, operation->input_tensors[0])->size = operation->input_tensor_sizes[0];
+          reference_tensor_with_offset(subgraph,
+                                       operation->input_tensors[0],
+                                       operation->input_tensors[1],
+-- 
+2.43.0
+

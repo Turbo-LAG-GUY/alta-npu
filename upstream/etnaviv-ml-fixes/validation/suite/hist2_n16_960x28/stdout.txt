@@ -38,13 +38,13 @@ operation 1 input tensor 6 layouts 1 2.
 Adding convolution.
 type 1 i 0 tensor 9 layout 1 == 2
 Adding detranspose.
-created resource 0x1059a450 for tensor 0 with size 134400
-created resource 0x1059ae70 for tensor 10 with size 134400
-created resource 0x1059af80 for tensor 3 with size 430080
-created resource 0x1059b090 for tensor 6 with size 430080
-created resource 0x1059b1a0 for tensor 11 with size 107520
+created resource 0xf591e40 for tensor 0 with size 134400
+created resource 0xf592860 for tensor 10 with size 134400
+created resource 0xf592970 for tensor 3 with size 430080
+created resource 0xf592a80 for tensor 6 with size 430080
+created resource 0xf592b90 for tensor 11 with size 107520
 Ensuring all output tensors have their memory backing.
-created resource 0x1059b2b0 for tensor 9 with size 107520
+created resource 0xf592ca0 for tensor 9 with size 107520
 
 dumping intermediate graph: 5 operations
 
@@ -104,14 +104,14 @@ write_core_interleaved core 4 zrl_bits 0 map (nil)
 write_core_interleaved core 5 zrl_bits 0 map (nil)
 write_core_interleaved core 6 zrl_bits 0 map (nil)
 write_core_interleaved core 7 zrl_bits 0 map (nil)
-write_core_interleaved core 0 zrl_bits 0 map 0xffffbc311040
-write_core_interleaved core 1 zrl_bits 0 map 0xffffbc3110c0
-write_core_interleaved core 2 zrl_bits 0 map 0xffffbc311140
-write_core_interleaved core 3 zrl_bits 0 map 0xffffbc3111c0
-write_core_interleaved core 4 zrl_bits 0 map 0xffffbc311240
-write_core_interleaved core 5 zrl_bits 0 map 0xffffbc3112c0
-write_core_interleaved core 6 zrl_bits 0 map 0xffffbc311340
-write_core_interleaved core 7 zrl_bits 0 map 0xffffbc3113c0
+write_core_interleaved core 0 zrl_bits 0 map 0xffff9b9c1040
+write_core_interleaved core 1 zrl_bits 0 map 0xffff9b9c10c0
+write_core_interleaved core 2 zrl_bits 0 map 0xffff9b9c1140
+write_core_interleaved core 3 zrl_bits 0 map 0xffff9b9c11c0
+write_core_interleaved core 4 zrl_bits 0 map 0xffff9b9c1240
+write_core_interleaved core 5 zrl_bits 0 map 0xffff9b9c12c0
+write_core_interleaved core 6 zrl_bits 0 map 0xffff9b9c1340
+write_core_interleaved core 7 zrl_bits 0 map 0xffff9b9c13c0
 coefficients_size 0x400 (1024) image_size 0x0 (0)
 write_core_interleaved core 0 zrl_bits 5 map (nil)
 write_core_interleaved core 1 zrl_bits 5 map (nil)
@@ -161,14 +161,14 @@ write_core_interleaved core 4 zrl_bits 0 map (nil)
 write_core_interleaved core 5 zrl_bits 0 map (nil)
 write_core_interleaved core 6 zrl_bits 0 map (nil)
 write_core_interleaved core 7 zrl_bits 0 map (nil)
-write_core_interleaved core 0 zrl_bits 0 map 0xffffbc26e040
-write_core_interleaved core 1 zrl_bits 0 map 0xffffbc26e180
-write_core_interleaved core 2 zrl_bits 0 map 0xffffbc26e2c0
-write_core_interleaved core 3 zrl_bits 0 map 0xffffbc26e400
-write_core_interleaved core 4 zrl_bits 0 map 0xffffbc26e540
-write_core_interleaved core 5 zrl_bits 0 map 0xffffbc26e680
-write_core_interleaved core 6 zrl_bits 0 map 0xffffbc26e7c0
-write_core_interleaved core 7 zrl_bits 0 map 0xffffbc26e900
+write_core_interleaved core 0 zrl_bits 0 map 0xffff9b91e040
+write_core_interleaved core 1 zrl_bits 0 map 0xffff9b91e180
+write_core_interleaved core 2 zrl_bits 0 map 0xffff9b91e2c0
+write_core_interleaved core 3 zrl_bits 0 map 0xffff9b91e400
+write_core_interleaved core 4 zrl_bits 0 map 0xffff9b91e540
+write_core_interleaved core 5 zrl_bits 0 map 0xffff9b91e680
+write_core_interleaved core 6 zrl_bits 0 map 0xffff9b91e7c0
+write_core_interleaved core 7 zrl_bits 0 map 0xffff9b91e900
 coefficients_size 0xa00 (2560) image_size 0x0 (0)
 write_core_interleaved core 0 zrl_bits 5 map (nil)
 write_core_interleaved core 1 zrl_bits 5 map (nil)
@@ -194,36 +194,36 @@ write_core_interleaved core 0 zrl_bits 0 map (nil)
 write_core_interleaved core 1 zrl_bits 0 map (nil)
 write_core_interleaved core 2 zrl_bits 0 map (nil)
 write_core_interleaved core 3 zrl_bits 0 map (nil)
-write_core_interleaved core 0 zrl_bits 0 map 0xffffbc26c040
-write_core_interleaved core 1 zrl_bits 0 map 0xffffbc26c100
-write_core_interleaved core 2 zrl_bits 0 map 0xffffbc26c1c0
-write_core_interleaved core 3 zrl_bits 0 map 0xffffbc26c280
+write_core_interleaved core 0 zrl_bits 0 map 0xffff9b91c040
+write_core_interleaved core 1 zrl_bits 0 map 0xffff9b91c100
+write_core_interleaved core 2 zrl_bits 0 map 0xffff9b91c1c0
+write_core_interleaved core 3 zrl_bits 0 map 0xffff9b91c280
 coefficients_size 0x300 (768) image_size 0x0 (0)
-teflon: compiled graph, took 5 ms
-Dumping buffer from 0xffffb5c08000 at offset 0 with size 163840 to mesa-input-000-000.bin
-Dumping buffer from 0xffffbc6e9000 at offset 0 with size 4096 to mesa-tp-000-000.bin
-Dumping buffer from 0xffffb0808000 at offset 0 with size 163840 to mesa-input-001-000.bin
-Dumping buffer from 0xffffbc26f000 at offset 0 with size 4096 to mesa-nn-001-000.bin
-Dumping buffer from 0xffffbc311000 at offset 0 with size 4096 to mesa-compressed-001-000.bin
-Dumping buffer from 0xffffaa33d000 at offset 0 with size 458752 to mesa-input-002-000.bin
-Dumping buffer from 0xffffbc26d000 at offset 0 with size 4096 to mesa-nn-002-000.bin
-Dumping buffer from 0xffffbc26e000 at offset 0 with size 4096 to mesa-compressed-002-000.bin
-Dumping buffer from 0xffffaa2cd000 at offset 0 with size 458752 to mesa-input-003-000.bin
-Dumping buffer from 0xffffbc26b000 at offset 0 with size 4096 to mesa-nn-003-000.bin
-Dumping buffer from 0xffffbc26c000 at offset 0 with size 4096 to mesa-compressed-003-000.bin
-Dumping buffer from 0xffffbc312000 at offset 0 with size 114688 to mesa-input-004-000.bin
-Dumping buffer from 0xffffbc26a000 at offset 0 with size 4096 to mesa-tp-004-000.bin
+teflon: compiled graph, took 10 ms
+Dumping buffer from 0xffff9b176000 at offset 0 with size 163840 to mesa-input-000-000.bin
+Dumping buffer from 0xffff9bd99000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff92008000 at offset 0 with size 163840 to mesa-input-001-000.bin
+Dumping buffer from 0xffff9b91f000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffff9b9c1000 at offset 0 with size 4096 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffff899fd000 at offset 0 with size 458752 to mesa-input-002-000.bin
+Dumping buffer from 0xffff9b91d000 at offset 0 with size 4096 to mesa-nn-002-000.bin
+Dumping buffer from 0xffff9b91e000 at offset 0 with size 4096 to mesa-compressed-002-000.bin
+Dumping buffer from 0xffff8998d000 at offset 0 with size 458752 to mesa-input-003-000.bin
+Dumping buffer from 0xffff9b91b000 at offset 0 with size 4096 to mesa-nn-003-000.bin
+Dumping buffer from 0xffff9b91c000 at offset 0 with size 4096 to mesa-compressed-003-000.bin
+Dumping buffer from 0xffff9b9c2000 at offset 0 with size 114688 to mesa-input-004-000.bin
+Dumping buffer from 0xffff9b91a000 at offset 0 with size 4096 to mesa-tp-004-000.bin
 Running the NN job took 0 ms.
-teflon: invoked graph, took 5 ms
+teflon: invoked graph, took 8 ms
 {
  "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
  "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_960x28.tflite",
  "etna_ml_shader": null,
- "setup_ms": 6.4,
+ "setup_ms": 11.1,
  "invoke_ms": [
-  5.3
+  8.79
  ],
- "invoke_ms_median": 5.3,
+ "invoke_ms_median": 8.79,
  "invoke_ms_median_after_first": null,
  "all_invokes_identical": true,
  "max_diff_vs_first": 0,

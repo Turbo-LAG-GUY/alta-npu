@@ -1,0 +1,125 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 0(u8) 1(u8) 2(i32) out: 3(u8)
+
+teflon: compiling graph: 4 tensors 1 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.007812  80 no       1x112x112x256
+  1 0.007812  80 yes      256x3x3x256
+  2 0.000061   0 yes      1x1x1x256
+  3 0.064951  80 no       1x112x112x256
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,1,2                3                   
+
+Adding transpose.
+operation 1 input tensor 4 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+Adding detranspose.
+created resource 0xd38da20 for tensor 0 with size 3211264
+created resource 0xd38db30 for tensor 4 with size 3211264
+created resource 0xd38dc40 for tensor 5 with size 3211264
+Ensuring all output tensors have their memory backing.
+created resource 0xd38dd50 for tensor 3 with size 3211264
+
+dumping intermediate graph: 3 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0   4
+  1 NN     4   5 in2:   0
+  2 TP     5   3
+
+write_core_interleaved core 0 zrl_bits 5 map (nil)
+write_core_interleaved core 1 zrl_bits 5 map (nil)
+write_core_interleaved core 2 zrl_bits 5 map (nil)
+write_core_interleaved core 3 zrl_bits 5 map (nil)
+write_core_interleaved core 4 zrl_bits 5 map (nil)
+write_core_interleaved core 5 zrl_bits 5 map (nil)
+write_core_interleaved core 6 zrl_bits 5 map (nil)
+write_core_interleaved core 7 zrl_bits 5 map (nil)
+write_core_interleaved core 0 zrl_bits 4 map (nil)
+write_core_interleaved core 1 zrl_bits 4 map (nil)
+write_core_interleaved core 2 zrl_bits 4 map (nil)
+write_core_interleaved core 3 zrl_bits 4 map (nil)
+write_core_interleaved core 4 zrl_bits 4 map (nil)
+write_core_interleaved core 5 zrl_bits 4 map (nil)
+write_core_interleaved core 6 zrl_bits 4 map (nil)
+write_core_interleaved core 7 zrl_bits 4 map (nil)
+write_core_interleaved core 0 zrl_bits 3 map (nil)
+write_core_interleaved core 1 zrl_bits 3 map (nil)
+write_core_interleaved core 2 zrl_bits 3 map (nil)
+write_core_interleaved core 3 zrl_bits 3 map (nil)
+write_core_interleaved core 4 zrl_bits 3 map (nil)
+write_core_interleaved core 5 zrl_bits 3 map (nil)
+write_core_interleaved core 6 zrl_bits 3 map (nil)
+write_core_interleaved core 7 zrl_bits 3 map (nil)
+write_core_interleaved core 0 zrl_bits 2 map (nil)
+write_core_interleaved core 1 zrl_bits 2 map (nil)
+write_core_interleaved core 2 zrl_bits 2 map (nil)
+write_core_interleaved core 3 zrl_bits 2 map (nil)
+write_core_interleaved core 4 zrl_bits 2 map (nil)
+write_core_interleaved core 5 zrl_bits 2 map (nil)
+write_core_interleaved core 6 zrl_bits 2 map (nil)
+write_core_interleaved core 7 zrl_bits 2 map (nil)
+write_core_interleaved core 0 zrl_bits 1 map (nil)
+write_core_interleaved core 1 zrl_bits 1 map (nil)
+write_core_interleaved core 2 zrl_bits 1 map (nil)
+write_core_interleaved core 3 zrl_bits 1 map (nil)
+write_core_interleaved core 4 zrl_bits 1 map (nil)
+write_core_interleaved core 5 zrl_bits 1 map (nil)
+write_core_interleaved core 6 zrl_bits 1 map (nil)
+write_core_interleaved core 7 zrl_bits 1 map (nil)
+write_core_interleaved core 0 zrl_bits 0 map (nil)
+write_core_interleaved core 1 zrl_bits 0 map (nil)
+write_core_interleaved core 2 zrl_bits 0 map (nil)
+write_core_interleaved core 3 zrl_bits 0 map (nil)
+write_core_interleaved core 4 zrl_bits 0 map (nil)
+write_core_interleaved core 5 zrl_bits 0 map (nil)
+write_core_interleaved core 6 zrl_bits 0 map (nil)
+write_core_interleaved core 7 zrl_bits 0 map (nil)
+write_core_interleaved core 0 zrl_bits 0 map 0xffff78f5c040
+write_core_interleaved core 1 zrl_bits 0 map 0xffff78f6e180
+write_core_interleaved core 2 zrl_bits 0 map 0xffff78f802c0
+write_core_interleaved core 3 zrl_bits 0 map 0xffff78f92400
+write_core_interleaved core 4 zrl_bits 0 map 0xffff78fa4540
+write_core_interleaved core 5 zrl_bits 0 map 0xffff78fb6680
+write_core_interleaved core 6 zrl_bits 0 map 0xffff78fc87c0
+write_core_interleaved core 7 zrl_bits 0 map 0xffff78fda900
+coefficients_size 0x90a00 (592384) image_size 0x32000 (204800)
+teflon: compiled graph, took 151 ms
+Dumping buffer from 0xffff78ffc000 at offset 0 with size 3670016 to mesa-input-000-000.bin
+Dumping buffer from 0xffff8bd1f000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffff78110000 at offset 0 with size 3670016 to mesa-input-001-000.bin
+Dumping buffer from 0xffff8bd1e000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffff78f5c000 at offset 0 with size 655360 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffff73c80000 at offset 0 with size 3670016 to mesa-input-002-000.bin
+Dumping buffer from 0xffff8bd1d000 at offset 0 with size 4096 to mesa-tp-002-000.bin
+Running the NN job took 0 ms.
+teflon: invoked graph, took 49 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv3x1.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 152.8,
+ "invoke_ms": [
+  49.61
+ ],
+ "invoke_ms_median": 49.61,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": true
+}

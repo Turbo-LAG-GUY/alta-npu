@@ -1,0 +1,3 @@
+/dev/dri/renderD128: etnaviv
+screen 3.79 ms, compile 575.34 ms (9 ops, 4 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/split_17b_gateup_npu6656_g4.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 9, "compile_ms": 575.343, "first_ms": 2.889, "ms_median_after_first": 2.5752, "ctx_ms": 0.0010, "invoke_call_ms": 0.0105, "read_ms": 2.5650, "npu_ms": 2.5157, "spins_per_wait": 1223, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0410, "main_cpu": 0, "main_on_a73": 0.000, "readout_ms": 0.0419, "readout": "zero", "consume": true, "consume_sum": 3713, "alt": true, "checked_invokes": 200, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}

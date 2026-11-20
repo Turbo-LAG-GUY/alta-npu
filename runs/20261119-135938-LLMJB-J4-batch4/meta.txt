@@ -1,0 +1,10 @@
+label: LLMJB-J4-batch4
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run -n 200 --batch 4 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_1x1.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-19T13:59:38-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2081
+deadline_s: 120
+journal_cursor: s=24bb392941f54ba281bdfac39a3f95c2;i=13a680;b=e01fb03e96924a3ab97a0054a1150173;m=7f6fbb1;t=660a5a7df55b7;x=30450a7c765fcb64
+end: 2026-11-19T13:59:40-05:00  rc: 0  wall_s: 1

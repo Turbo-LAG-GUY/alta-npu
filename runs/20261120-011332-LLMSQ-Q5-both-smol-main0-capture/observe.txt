@@ -1,0 +1,15 @@
+# npu-observe start 2026-11-20T01:13:32-05:00 duration=300s interval=1s
+01:13:32 up=1894.96 npu=active active_ms=1883073 npu_irqs=2010 cma_free_kb=12184 memavail_mb=2345 temps_c=cpu:39,ddr:42
+01:13:34 up=1896.13 npu=active active_ms=1884242 npu_irqs=2010 cma_free_kb=844 memavail_mb=2266 temps_c=cpu:38,ddr:42
+01:13:35 up=1897.42 npu=active active_ms=1885532 npu_irqs=2010 cma_free_kb=844 memavail_mb=2268 temps_c=cpu:38,ddr:41
+01:13:36 up=1898.66 npu=active active_ms=1886774 npu_irqs=2010 cma_free_kb=844 memavail_mb=2270 temps_c=cpu:38,ddr:41
+01:13:37 up=1900.01 npu=active active_ms=1888125 npu_irqs=2010 cma_free_kb=872 memavail_mb=2356 temps_c=cpu:38,ddr:42
+01:13:39 up=1901.25 npu=active active_ms=1889362 npu_irqs=2211 cma_free_kb=220 memavail_mb=2291 temps_c=cpu:40,ddr:43
+01:13:40 up=1902.65 npu=active active_ms=1890768 npu_irqs=2211 cma_free_kb=204 memavail_mb=2301 temps_c=cpu:38,ddr:42
+01:13:41 up=1903.95 npu=active active_ms=1892059 npu_irqs=2211 cma_free_kb=204 memavail_mb=2307 temps_c=cpu:38,ddr:41
+01:13:43 up=1905.23 npu=active active_ms=1893341 npu_irqs=2211 cma_free_kb=204 memavail_mb=2314 temps_c=cpu:38,ddr:41
+01:13:44 up=1906.50 npu=active active_ms=1894613 npu_irqs=2211 cma_free_kb=204 memavail_mb=2324 temps_c=cpu:37,ddr:41
+01:13:45 up=1907.99 npu=active active_ms=1896098 npu_irqs=2211 cma_free_kb=1136 memavail_mb=2365 temps_c=cpu:37,ddr:40
+01:13:47 up=1909.20 npu=active active_ms=1897310 npu_irqs=2211 cma_free_kb=1136 memavail_mb=2366 temps_c=cpu:37,ddr:41
+01:13:48 up=1910.40 npu=active active_ms=1898511 npu_irqs=2211 cma_free_kb=1136 memavail_mb=2364 temps_c=cpu:37,ddr:41
+01:13:49 up=1911.68 npu=active active_ms=1899794 npu_irqs=2211 cma_free_kb=1136 memavail_mb=2364 temps_c=cpu:37,ddr:40

@@ -1,0 +1,147 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 CONV            v1  supported   in: 0(u8) 1(u8) 2(i32) out: 3(u8)
+  1 CONV            v1  supported   in: 3(u8) 4(u8) 5(i32) out: 6(u8)
+  2 CONV            v1  supported   in: 6(u8) 7(u8) 8(i32) out: 9(u8)
+  3 CONV            v1  supported   in: 9(u8) 10(u8) 11(i32) out: 12(u8)
+
+teflon: compiling graph: 13 tensors 4 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.007812  80 no       1x112x112x256
+  1 0.007812  80 yes      256x1x1x256
+  2 0.000061   0 yes      1x1x1x256
+  3 0.021650  80 no       1x112x112x256
+  4 0.007812  80 yes      256x1x1x256
+  5 0.000169   0 yes      1x1x1x256
+  6 0.032476  80 no       1x112x112x256
+  7 0.007812  80 yes      256x1x1x256
+  8 0.000254   0 yes      1x1x1x256
+  9 0.048714  80 no       1x112x112x256
+ 10 0.007812  80 yes      256x1x1x256
+ 11 0.000381   0 yes      1x1x1x256
+ 12 0.073070  80 no       1x112x112x256
+
+idx type            inputs               outputs             
+==========================================================================
+  0 CONV            0,1,2                3                   
+  1 CONV            3,4,5                6                   
+  2 CONV            6,7,8                9                   
+  3 CONV            9,10,11              12                  
+
+Adding transpose.
+operation 1 input tensor 13 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 1 == 2
+operation 1 input tensor 3 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 6 layout 1 == 2
+operation 1 input tensor 6 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 9 layout 1 == 2
+operation 1 input tensor 9 layouts 1 2.
+Adding convolution.
+type 1 i 0 tensor 12 layout 1 == 2
+Adding detranspose.
+created resource 0x151fde30 for tensor 0 with size 3211264
+created resource 0x151fdf40 for tensor 13 with size 3211264
+created resource 0x151fe050 for tensor 3 with size 3211264
+created resource 0x151fe160 for tensor 6 with size 3211264
+created resource 0x151fe270 for tensor 9 with size 3211264
+created resource 0x151fe380 for tensor 14 with size 3211264
+Ensuring all output tensors have their memory backing.
+created resource 0x151fe490 for tensor 12 with size 3211264
+
+dumping intermediate graph: 6 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 TP     0  13
+  1 NN    13   3 in2:   0
+  2 NN     3   6 in2:   0
+  3 NN     6   9 in2:   0
+  4 NN     9  14 in2:   0
+  5 TP    14  12
+
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x10a00 (68096) image_size 0x30000 (196608)
+image_cache_end_address 266752 image_cache_start_address 70144 image_cache_size 196608 oc_sram_size 524288
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x10a00 (68096) image_size 0x30000 (196608)
+image_cache_end_address 266752 image_cache_start_address 70144 image_cache_size 196608 oc_sram_size 524288
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x10a00 (68096) image_size 0x30000 (196608)
+image_cache_end_address 266752 image_cache_start_address 70144 image_cache_size 196608 oc_sram_size 524288
+write_core_6 core 0 zrl_bits 0
+write_core_6 core 1 zrl_bits 0
+write_core_6 core 2 zrl_bits 0
+write_core_6 core 3 zrl_bits 0
+write_core_6 core 4 zrl_bits 0
+write_core_6 core 5 zrl_bits 0
+write_core_6 core 6 zrl_bits 0
+write_core_6 core 7 zrl_bits 0
+coefficients_size 0x10a00 (68096) image_size 0x30000 (196608)
+image_cache_end_address 266752 image_cache_start_address 70144 image_cache_size 196608 oc_sram_size 524288
+teflon: compiled graph, took 53 ms
+Dumping buffer from 0xffffa855b000 at offset 0 with size 3670016 to mesa-input-000-000.bin
+Dumping buffer from 0xffffbb9e0000 at offset 0 with size 4096 to mesa-tp-000-000.bin
+Dumping buffer from 0xffffa3c80000 at offset 0 with size 3670016 to mesa-input-001-000.bin
+Dumping buffer from 0xffffbb9df000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffffbb60c000 at offset 0 with size 81920 to mesa-compressed-001-000.bin
+Dumping buffer from 0xffffa3900000 at offset 0 with size 3670016 to mesa-input-002-000.bin
+Dumping buffer from 0xffffbb9de000 at offset 0 with size 4096 to mesa-nn-002-000.bin
+Dumping buffer from 0xffffb600c000 at offset 0 with size 81920 to mesa-compressed-002-000.bin
+Dumping buffer from 0xffffa3580000 at offset 0 with size 3670016 to mesa-input-003-000.bin
+Dumping buffer from 0xffffbb9dd000 at offset 0 with size 4096 to mesa-nn-003-000.bin
+Dumping buffer from 0xffffa8547000 at offset 0 with size 81920 to mesa-compressed-003-000.bin
+Dumping buffer from 0xffffa3200000 at offset 0 with size 3670016 to mesa-input-004-000.bin
+Dumping buffer from 0xffffbb9dc000 at offset 0 with size 4096 to mesa-nn-004-000.bin
+Dumping buffer from 0xffffa8533000 at offset 0 with size 81920 to mesa-compressed-004-000.bin
+Dumping buffer from 0xffffa2e80000 at offset 0 with size 3670016 to mesa-input-005-000.bin
+Dumping buffer from 0xffffbb9db000 at offset 0 with size 4096 to mesa-tp-005-000.bin
+Running the NN job took 0 ms.
+teflon: invoked graph, took 33 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-upstream-fixes/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-bench/models/conv1x4.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 54.7,
+ "invoke_ms": [
+  33.41
+ ],
+ "invoke_ms_median": 33.41,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 0,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": true
+}

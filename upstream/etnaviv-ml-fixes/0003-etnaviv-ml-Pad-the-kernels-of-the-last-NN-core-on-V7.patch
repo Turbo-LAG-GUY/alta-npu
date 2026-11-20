@@ -1,7 +1,7 @@
 From 2279c4a35f27acc497beec67ffed3e901c638192 Mon Sep 17 00:00:00 2001
 From: Jordan Williams Johnson <jordandwj@gmail.com>
 Date: Sun, 15 Nov 2026 02:46:18 -0500
-Subject: [PATCH 3/9] etnaviv/ml: Pad the kernels of the last NN core on V7
+Subject: [PATCH 03/12] etnaviv/ml: Pad the kernels of the last NN core on V7
 
 The V7 coefficient writers emit DIV_ROUND_UP(output_channels, cores) *
 cores kernels. When the output channels don't divide evenly between the
@@ -18,7 +18,7 @@ Generated-by: LLM
  1 file changed, 28 insertions(+)
 
 diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
-index e7e849efad6..f0f43ca151a 100644
+index e7e849efad62..f0f43ca151a9 100644
 --- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 +++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
 @@ -533,6 +533,29 @@ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_op

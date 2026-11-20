@@ -1,0 +1,74 @@
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 22a06ef74301..7daf66cf1972 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1183,6 +1183,47 @@ etna_ml_subgraph_read_outputs(struct pipe_context *context, struct pipe_ml_subgr
+    }
+ }
+ 
++/* LLM engine step R3 (test tree only, 2026-11-20): zero-copy read-out for our
++ * own runtime (llm/l3/jb_run.c), called directly, not through Gallium.
++ * etna_ml_subgraph_map_output() returns the graph output as the NPU wrote it,
++ * after the same flush and fence wait as etna_ml_subgraph_read_outputs(); a
++ * signed output is offset by 128 (byte ^ 0x80 is the int8 value). The pointer
++ * is valid until etna_ml_subgraph_unmap_output(). With skip_fini the buffer
++ * is mapped with CPU_PREP only and unmap does no CPU_FINI: an experiment that
++ * leaves out the kernel's clean pass, correct only while the CPU never writes
++ * to the buffer, and not how the kernel interface is meant to be used.
++ */
++const void *
++etna_ml_subgraph_map_output(struct pipe_context *context,
++                            struct pipe_ml_subgraph *psubgraph, unsigned idx,
++                            unsigned *size, struct pipe_transfer **transfer,
++                            bool skip_fini)
++{
++   struct etna_ml_subgraph *subgraph = (struct etna_ml_subgraph *)(psubgraph);
++   struct pipe_resource *res = etna_ml_get_resource(subgraph, idx);
++
++   context->flush(context, NULL, 0);
++   *size = etna_ml_get_size(subgraph, idx);
++
++   if (skip_fini) {
++      struct etna_bo *bo = etna_buffer_resource(res)->bo;
++      *transfer = NULL;
++      if (etna_bo_cpu_prep(bo, DRM_ETNA_PREP_READ))
++         return NULL;
++      return etna_bo_map(bo);
++   }
++
++   return pipe_buffer_map_range(context, res, 0, *size, PIPE_MAP_READ, transfer);
++}
++
++void
++etna_ml_subgraph_unmap_output(struct pipe_context *context,
++                              struct pipe_transfer *transfer)
++{
++   if (transfer)
++      pipe_buffer_unmap(context, transfer);
++}
++
+ void
+ etna_ml_subgraph_destroy(struct pipe_ml_device *pdevice, struct pipe_ml_subgraph *psubgraph)
+ {
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index 5480a494680d..ad07898a88bf 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -179,6 +179,17 @@ etna_ml_subgraph_read_outputs(struct pipe_context *context, struct pipe_ml_subgr
+                               unsigned outputs_count, unsigned output_idxs[], void *outputs[],
+                               bool is_signed[]);
+ 
++/* Zero-copy read-out, LLM engine test tree only (see etnaviv_ml.c) */
++const void *
++etna_ml_subgraph_map_output(struct pipe_context *context,
++                            struct pipe_ml_subgraph *psubgraph, unsigned idx,
++                            unsigned *size, struct pipe_transfer **transfer,
++                            bool skip_fini);
++
++void
++etna_ml_subgraph_unmap_output(struct pipe_context *context,
++                              struct pipe_transfer *transfer);
++
+ void
+ etna_ml_subgraph_destroy(struct pipe_ml_device *pdevice, struct pipe_ml_subgraph *subgraph);
+ 

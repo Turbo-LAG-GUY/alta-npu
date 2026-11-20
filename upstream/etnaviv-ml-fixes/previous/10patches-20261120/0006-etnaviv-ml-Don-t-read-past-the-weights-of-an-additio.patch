@@ -1,0 +1,45 @@
+From 1cf13ef75f467ab16fa6e1f0422711afe4b5adba Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 15 Nov 2026 02:46:19 -0500
+Subject: [PATCH 06/10] etnaviv/ml: Don't read past the weights of an addition
+ on V7
+
+The weight tensor of an addition is 8 bytes: a 2x2 kernel in which only
+the first weight is set, which the coefficient writers treat as having a
+single input channel. calculate_bias_correction() however sums
+weight_width * weight_height * input_channels bytes, with the channel
+count of the tensors being added: for 64 channels it reads 256 bytes
+from an 8-byte allocation and adds whatever follows it to the bias.
+
+The bias of an addition, uint8 or int8, thus depended on the contents of
+the heap: compiling the same uint8 model three times gave three
+different bias values.
+
+Limit the sum to the kernel. The correction is then weight[0] *
+input_zero_point, and the resulting bias is the expected
+-addition_offset * zp1 - weight[0] * zp0.
+
+Generated-by: LLM
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index a9caa60c8968..8feb43b4d431 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -121,8 +121,10 @@ static uint32_t
+ calculate_bias_correction(uint8_t *weights, const struct etna_operation *operation)
+ {
+    int32_t correction = 0;
++   /* The weights of an addition are a single 2x2 kernel with one channel */
++   unsigned input_channels = operation->addition ? 1 : operation->input_channels;
+ 
+-   for (unsigned i = 0; i < operation->weight_width * operation->weight_height * operation->input_channels; i++) {
++   for (unsigned i = 0; i < operation->weight_width * operation->weight_height * input_channels; i++) {
+       correction += (weights[i] - operation->weight_zero_point) * operation->input_zero_point;
+    }
+ 
+-- 
+2.43.0
+

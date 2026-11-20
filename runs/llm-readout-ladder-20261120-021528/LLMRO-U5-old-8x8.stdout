@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.03 ms, compile 43.15 ms (3 ops, 1 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/smol_gateup_8x8.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 200, "batch": 1, "ops": 3, "compile_ms": 43.152, "first_ms": 6.813, "ms_median_after_first": 6.5316, "ctx_ms": 0.0017, "invoke_call_ms": 0.0652, "read_ms": 6.4557, "npu_ms": 0.8876, "spins_per_wait": 284, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0139, "main_cpu": -1, "main_on_a73": 1.000, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261120-021649-LLMRO-U5-old-8x8

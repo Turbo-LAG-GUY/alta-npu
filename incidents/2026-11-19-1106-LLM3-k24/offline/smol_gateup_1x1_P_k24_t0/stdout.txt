@@ -1,0 +1,91 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+Teflon delegate: loaded etnaviv driver
+idx type            ver support     inputs
+================================================================================================
+  0 TRANSPOSE       v1  supported   in: 4(i8) 6(i32) out: 0(i8)
+  1 CONV            v3  supported   in: 0(i8) 1(i8) 2(i32) out: 3(i8)
+  2 TRANSPOSE       v1  supported   in: 3(i8) 7(i32) out: 5(i8)
+
+teflon: compiling graph: 8 tensors 3 operations
+idx scale     zp has_data size        
+=======================================
+  0 0.050000   0 no       1x1x1x576
+  1 0.006667   0 yes      3072x1x1x576
+  2 0.000333   0 yes      1x1x1x3072
+  3 0.222720 fffffffc no       1x1x1x3072
+  4 0.050000   0 no       1x576x1x1
+  5 0.222720 fffffffc no       1x3072x1x1
+  6 0.000000   0 yes      1x1x1x4
+  7 0.000000   0 yes      1x1x1x4
+
+idx type            inputs               outputs             
+==========================================================================
+  0 TRANSPOSE       4,6                  0                   
+  1 CONV            0,1,2                3                   
+  2 TRANSPOSE       3,7                  5                   
+
+operation 19 input tensor 4 layouts 1 1.
+type 19 i 0 tensor 0 layout 2 == 2
+operation 1 input tensor 0 layouts 2 2.
+Adding convolution.
+type 1 i 0 tensor 3 layout 2 == 2
+operation 19 input tensor 3 layouts 2 2.
+type 19 i 0 tensor 5 layout 2 == 2
+created resource 0x2f1010a0 for tensor 4 with size 576
+src_tensor 4 (ffffa000) dst_tensor 0 offset 0 size 576
+created resource 0x2f1011b0 for tensor 3 with size 3072
+src_tensor 3 (ffff9000) dst_tensor 5 offset 0 size 3072
+Ensuring all output tensors have their memory backing.
+
+dumping intermediate graph: 3 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 BYPASS   4   0
+  1 NN     0   3 in2:   0
+  2 BYPASS   3   5
+
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 0 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 1 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 2 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 3 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 4 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 5 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 6 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+write_core_6 core 7 zrl_bits 0
+v7 tiling: tile 1x1 interleave 2 superblocks 16
+coefficients_size 0x1b6200 (1794560) image_size 0x2400 (9216)
+teflon: compiled graph, took 56 ms
+Dumping buffer from 0xffff99eb9000 at offset 0 with size 4096 to mesa-input-000-000.bin
+Dumping buffer from 0xffff99afe000 at offset 0 with size 4096 to mesa-nn-000-000.bin
+Dumping buffer from 0xffff862e6000 at offset 0 with size 1835008 to mesa-compressed-000-000.bin
+Running the NN job took 1 ms.
+teflon: invoked graph, took 9 ms
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-llm/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/Documents/AI_Projects/npu-llm/models/sizes/smol_gateup_1x1_P.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 66.8,
+ "invoke_ms": [
+  9.67
+ ],
+ "invoke_ms_median": 9.67,
+ "invoke_ms_median_after_first": null,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 214,
+ "diff_vs_cpu_mean_worst": 124.072,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": false
+}
