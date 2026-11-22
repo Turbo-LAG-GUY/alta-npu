@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SUPERSEDED 2026-11-21 by root step 250 (job-queue driver f317fc8f: hw_job_limit settable at runtime). DO NOT RUN.
 # 240 - let the NPU take up to 4 jobs at a time again (etnaviv hw_job_limit=4, the driver's default), 2026-11-21.
 # Why: root step 080 set hw_job_limit=1 on 2026-11-07 to test whether overlapping NPU jobs caused the hard freezes.
 # They did not: the freezes went on with 1 (memory alta-freeze-findings: "hw_job_limit=1 is no fix") and ended with

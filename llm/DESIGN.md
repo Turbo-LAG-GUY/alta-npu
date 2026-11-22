@@ -76,7 +76,26 @@ plus measurements on this board.
 - Quantization: per-tensor int8 weights + activations, with smoothing (SmoothQuant-style scaling) and channel
   grouping if quality needs it. Checked on the CPU in numpy before any NPU work depends on it.
 
-## Resume here (2026-11-20, end of the session)
+## Resume here (2026-11-21, handoff: context window full)
+- State: boot d6e90679 (rebooted 2026-11-21 by the other session's work), nothing of this session running. The NPU
+  driver is now the job-queue build f317fc8f (root step 250, by session ai-projects-60): hw_job_limit is settable at
+  runtime (now 4; /etc/modprobe.d still says 1 at load). My root step 240 (hw_job_limit=4 via modprobe) is
+  SUPERSEDED: do not run it. Another Claude session (ai-projects-60) also does NPU work: message it before NPU runs.
+- Done 2026-11-21: llm/l3/jb_engine.c = all 120 steps of SmolLM2-135M compiled in one process (2.5 s) and run back to
+  back on the NPU, every output within 1 level (runs/llm-engine-ladder-20261121-153843): 256-token chunk 140 ms of
+  linear steps (0.547 ms/token), 1 token 32.7 ms. Groups test (llm/ref/l2h_groups.py, llm/l2h-chain.sh): fewer jobs
+  per step cost quality; KL GPL-3 / README for 4 / 2 / 1 jobs: 135M .023/.032, .033/.037, .053/.064; 360M .013/.022,
+  .020/.053, .034/.083; 1.7B 4 jobs 2.52/25.38 (KL .182/.089), 2 jobs 2.68/24.67 (.242/.109), 1 job not run (the
+  reboot stopped the chain: rerun with `systemd-run --user --unit=alta-llm-l2h --collect llm/l2h-chain.sh
+  SmolLM2-1.7B-Instruct`).
+- Next, in order: (1) the speed of 1- and 2-job packs on the NPU (real_packs.py with GROUPS = 1 / 2, offline, then
+  the engine ladder, Jordan's OK) to decide jobs per step; (2) the CPU glue for a 256-token chunk (RMSNorm, RoPE,
+  attention, SiLU x mul, block Hadamard, scatter by groups.npz) and one chunk end to end vs the simulator and
+  llama.cpp (pp128 104 tok/s); (3) 1.7B / SmolLM3 packs (wider steps, where the NPU gains most); (4) with the
+  job-queue driver: submit ahead / two chunks in flight (the other session found the deeper ring alone gives no
+  speedup, 2 threads +13% from CPU overlap).
+
+## Earlier resume note (2026-11-20, end of the session)
 - **Priority (Jordan, 2026-11-21): bigger jobs, not driver switches.** ETNA_MESA_DEBUG=npu_parallel is a small lever at
   best (session ai-projects-60's ladder, research/npupar/NOTES.md). The big loss is too little work per job: one token
   at a time uses about 0.4% of the NPU's best measured rate (a 256-token chunk about 25%). The fix is bigger jobs:
@@ -661,3 +680,4 @@ the down_proj bytes, no predictor needed. gate/up skipping needs the predictor (
 - 2026-11-21 15:50: R2 step 1 (Jordan: "go ahead with the engine process"): llm/l3/jb_engine.c compiles all 120 steps in one process and runs them back to back; offline PASS (8-9.5 s compile, peak 119 MB at 1 token = the weights once, one submit per step, streams as alone). llm/l3/engine-ladder.sh (2 rungs) waits for OK.
 - 2026-11-21 15:40: engine ladder 2/2 PASS (Jordan's OK): all 120 steps in one process, back to back; 256-token chunk 140.0 ms (0.547 ms/token), 1 token 32.7 ms, compile 2.5 s. Next: the CPU glue.
 - 2026-11-21 16:20: L2h groups test 135M + 360M: 4 jobs per step best, 2 jobs ~1.5x the KL, 1 job ~2-4x (360M README +17% over fp32); 1.7B running. Root step 240 (hw_job_limit=4) written, not run.
+- 2026-11-21 16:40: handoff (context window full). Engine process PASS on the NPU; groups test 135M/360M done, 1.7B partial; root step 240 superseded by step 250 (job-queue driver). Resume from "Resume here".
