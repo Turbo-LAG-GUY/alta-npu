@@ -46,3 +46,7 @@ __pycache__/
 
 # NPU logits of chunk_glue runs (85 MB, regenerable with llm/l3/chunk_glue.py --save-logits): kept on the board
 /runs/llm-wide-ladder-20261121-211302/x1-npu-logits.npz
+
+# Fake-NPU dumps of the AXI SRAM limit fixes (2026-11-22, 236-425 MB each); regenerate with
+# research/sram-limits/offline_check.sh. Each run's verdict is kept next to it (offline-*.VERDICT.txt).
+/research/sram-limits/offline-*/

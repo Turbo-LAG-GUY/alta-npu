@@ -1,0 +1,3 @@
+npu: /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite through /home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.4ab532ed-columns; ETNA_ML_AXI_SRAM=all ETNA_ML_STRIPS=auto ETNA_ML_STRIPS_COLUMNS=(unset)
+worker ready
+worker frames=11520 median_ms=18.66 p95_ms=30.71 max_ms=55.49

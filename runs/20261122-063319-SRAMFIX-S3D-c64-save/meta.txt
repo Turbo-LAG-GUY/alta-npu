@@ -1,0 +1,17 @@
+label: SRAMFIX-S3D-c64-save
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_64x64.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_reference_64x64.npz -e /home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.e962cc17-sram-fixes2 -n 20 --save /home/jordan/alta-npu/runs/sram-limits-s3diag-20261122-063312/npu_out.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T06:33:19-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1432
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=154e9c;b=d6e906790e744d9e93de5f493c6a60e7;m=ae7c4111a;t=660dbac30bcb4;x=94639424fc35f2c6
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_STRIPS_COLUMNS=1
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_STRIPS=32
+ETNA_ML_DISK_CACHE=0
+ETNA_ML_STRIPS_VERBOSE=1
+end: 2026-11-22T06:33:22-05:00  rc: 3  wall_s: 2
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

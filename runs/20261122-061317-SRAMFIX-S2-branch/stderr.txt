@@ -1,0 +1,2 @@
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.

@@ -1,0 +1,16 @@
+etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 columns, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 40 of 1024 KiB (1 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 0.39 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== PERCH-P1-c64-columns rc=0 match=true kernel_warnings=0
+"invoke_ms_median_after_first": 12.36 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== PERCH-P2-n8-540-whole rc=0 match=true kernel_warnings=0
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 9 strips of 107 columns, 916 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 18 of 18 intermediate tensors, using 932 of 1024 KiB (1 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 12.17 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== PERCH-P3-n8-540-columns rc=0 match=true kernel_warnings=0
+"invoke_ms_median_after_first": 22.84 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== PERCH-P4-n16-540-whole rc=0 match=true kernel_warnings=0
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 17 strips of 57 columns, 992 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 34 of 34 intermediate tensors, using 1016 of 1024 KiB (1 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 14.32 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== PERCH-P5-n16-540-columns rc=0 match=true kernel_warnings=0

@@ -1,0 +1,42 @@
+mn new: etnaviv/ml: AXI SRAM: placed 28 of 29 intermediate tensors, using 980 of 1024 KiB (1 partition outputs kept in RAM)
+mn new: etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 4 of 1024 KiB (1 partition outputs kept in RAM)
+mn new: rc=0
+mn mesa-nn-*.bin: 28 files, 0 differ
+mn mesa-tp-*.bin: 4 files, 0 differ
+mn mesa-compressed-*.bin: 28 files, 0 differ
+mn shim_submit_*.stream: 3 files, 0 differ
+rows new: etnaviv/ml: strips: 5 operations at 960x540 (WxH) in 12 strips of 45 rows, 1104 KiB of in-between tensors per strip, input transposed per strip, output detransposed per strip
+rows new: etnaviv/ml: AXI SRAM: placed 48 of 48 intermediate tensors, using 964 of 1024 KiB (1 partition outputs kept in RAM)
+rows new: rc=0
+rows mesa-nn-*.bin: 36 files, 0 differ
+rows mesa-tp-*.bin: 24 files, 0 differ
+rows mesa-compressed-*.bin: 36 files, 0 differ
+rows shim_submit_*.stream: 2 files, 0 differ
+branch new: etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+branch new: rc=0
+branch mesa-nn-*.bin: 3 files, 0 differ
+branch mesa-tp-*.bin: 3 files, 0 differ
+branch mesa-compressed-*.bin: 3 files, 0 differ
+branch shim_submit_*.stream: 2 files, 0 differ
+planar-nocols new: etnaviv/ml: strips: a channels-first output needs column strips (one job per output channel in the last layer), not yet proven on the NPU; not splitting (ETNA_ML_STRIPS_COLUMNS=1 tries them)
+planar-nocols new: etnaviv/ml: strips: a channels-first output needs column strips (one job per output channel in the last layer), not yet proven on the NPU; not splitting (ETNA_ML_STRIPS_COLUMNS=1 tries them)
+planar-nocols new: rc=0
+planar-nocols mesa-nn-*.bin: 3 files, 0 differ
+planar-nocols mesa-tp-*.bin: 0 files, 0 differ
+planar-nocols mesa-compressed-*.bin: 3 files, 0 differ
+planar-nocols shim_submit_*.stream: 2 files, 0 differ
+## target: hist2_n8_planar_960x540, columns auto
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 9 strips of 107 columns, 916 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 18 of 18 intermediate tensors, using 932 of 1024 KiB (1 partition outputs kept in RAM)
+rc=0
+bytes written 2073600 of 2073600, written twice 0, at a wrong row 0, outside 0..2073599: 0
+PASS
+54 NN configs, 0 with a tile wider than the image; 2 submits
+## hist2_n16_planar_960x540, columns auto
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 17 strips of 57 columns, 992 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 34 of 34 intermediate tensors, using 1016 of 1024 KiB (1 partition outputs kept in RAM)
+rc=0
+ref out (4, 540, 960)
+bytes written 2073600 of 2073600, written twice 0, at a wrong row 0, outside 0..2073599: 0
+PASS
+102 NN configs, 0 with a tile wider than the image; 2 submits

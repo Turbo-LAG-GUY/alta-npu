@@ -1,0 +1,22 @@
+# columns-by-default equivalence 2026-11-22T06:45:58-05:00: new 4ab532ed without ETNA_ML_STRIPS_COLUMNS vs NPU-proven 3d1c6999 with =1
+hist2_n8_planar_64x64: etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 columns, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+hist2_n8_planar_64x64 mesa-nn-*.bin: 12 files, 0 differ
+hist2_n8_planar_64x64 mesa-tp-*.bin: 0 files, 0 differ
+hist2_n8_planar_64x64 mesa-compressed-*.bin: 12 files, 0 differ
+hist2_n8_planar_64x64 shim_submit_*.stream: 2 files, 0 differ
+hist2_n8_planar_960x540: etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 9 strips of 107 columns, 916 KiB of in-between tensors per strip, input channels-first, output channels-first
+hist2_n8_planar_960x540 mesa-nn-*.bin: 54 files, 0 differ
+hist2_n8_planar_960x540 mesa-tp-*.bin: 0 files, 0 differ
+hist2_n8_planar_960x540 mesa-compressed-*.bin: 54 files, 0 differ
+hist2_n8_planar_960x540 shim_submit_*.stream: 2 files, 0 differ
+hist2_n16_planar_960x540: etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 17 strips of 57 columns, 992 KiB of in-between tensors per strip, input channels-first, output channels-first
+hist2_n16_planar_960x540 mesa-nn-*.bin: 102 files, 0 differ
+hist2_n16_planar_960x540 mesa-tp-*.bin: 0 files, 0 differ
+hist2_n16_planar_960x540 mesa-compressed-*.bin: 102 files, 0 differ
+hist2_n16_planar_960x540 shim_submit_*.stream: 2 files, 0 differ
+hist2_n8_960x540: etnaviv/ml: strips: 5 operations at 960x540 (WxH) in 12 strips of 45 rows, 1104 KiB of in-between tensors per strip, input transposed per strip, output detransposed per strip
+hist2_n8_960x540 mesa-nn-*.bin: 36 files, 0 differ
+hist2_n8_960x540 mesa-tp-*.bin: 24 files, 0 differ
+hist2_n8_960x540 mesa-compressed-*.bin: 36 files, 0 differ
+hist2_n8_960x540 shim_submit_*.stream: 2 files, 0 differ
+etnaviv/ml: strips: column strips off (ETNA_ML_STRIPS_COLUMNS=0), not splitting

@@ -1,0 +1,80 @@
+alta (strips tree only, on top of 0005 + 0006 + upstream series 0002): column strips write their last layer with one
+NN job per output channel. The NN unit spaces output planes by out_image_x_size * out_image_y_size and ignores both
+strides (proven on the NPU 2026-11-22 from a saved output, research/sram-limits/s3_layout_check.py, 100% of bytes),
+while out_image_x_stride works as the row pitch, so one job can't write several planes of a wider channels-first
+buffer. Each job takes its slice of the weights ([oc][w][h][ic] after lowering) and of the biases.
+Proven on the NPU 2026-11-22 (perchannel-ladder, library 3d1c6999): 64x64 and the 960x540 planar n8/n16 models match
+the CPU (max 1); n16 22.84 -> 14.32 ms, n8 12.36 -> 12.17. Column strips now follow ETNA_ML_STRIPS by default
+(ETNA_ML_STRIPS_COLUMNS=0 turns them off); library 4ab532ed, byte-identical commands to 3d1c6999 with =1 offline.
+
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1339,12 +1339,19 @@
+        * or a detransposed output needs strips of rows, which are contiguous in a channels-last buffer. */
+       bool cols = planar_out;
+       const char *cols_env = getenv("ETNA_ML_STRIPS_COLUMNS");
+-      if (cols && !(cols_env && atoi(cols_env))) {
++      if (cols && cols_env && !atoi(cols_env)) {
+          /* Their first test hung the NPU on every invoke (incident 2026-11-12-1003-STRIPS-C64): the v7 tiling made
+-          * 64-wide tiles for 33-35-wide strips, the H > W hang fixed since (upstream series patch 0002, the same
+-          * fix proven on the NPU 2026-11-14). Still opt-in until a column-strip job passes on the NPU. */
+-         fprintf(stderr, "etnaviv/ml: strips: a channels-first output needs column strips, not yet proven on the NPU; "
+-                         "not splitting (ETNA_ML_STRIPS_COLUMNS=1 tries them)\n");
++          * 64-wide tiles for 33-35-wide strips, the H > W hang fixed since (upstream series patch 0002). Then the
++          * output came out wrong because the NN unit spaces output planes by its own x * y size; the last layer
++          * now runs one job per output channel. Proven on the NPU 2026-11-22 (perchannel-ladder: 64x64 and both
++          * 960x540 planar models match the CPU). ETNA_ML_STRIPS_COLUMNS=0 turns them off. */
++         fprintf(stderr, "etnaviv/ml: strips: column strips off (ETNA_ML_STRIPS_COLUMNS=0), not splitting\n");
++         continue;
++      }
++      if (cols && (chain[len - 1].op->weight_tensor_size != chain[len - 1].out_ch * chain[len - 1].op->weight_width *
++                                                             chain[len - 1].op->weight_height * chain[len - 1].in_ch ||
++                   chain[len - 1].op->bias_tensor_size != chain[len - 1].out_ch * sizeof(uint32_t))) {
++         fprintf(stderr, "etnaviv/ml: strips: unexpected weight or bias size for one job per channel, not splitting\n");
+          continue;
+       }
+       if (cols && !planar_in) {
+@@ -1465,6 +1472,43 @@
+                fprintf(stderr, "etnaviv/ml: strips: strip %u op %u is out of bounds or has a bad offset, aborting\n", s, l);
+                abort();
+             }
++
++            /* alta: the NN unit spaces its output planes by out_image_x_size * out_image_y_size and ignores both
++             * strides (S3 diagnostic 2026-11-22, research/sram-limits), while out_image_x_stride does work as the
++             * row pitch. So a column strip can't write several planes of the wider channels-first output in one
++             * job: write one output channel per job, each into its own plane. Weights ([oc][w][h][ic]) and biases
++             * are per output channel after lowering, so each job takes a slice. */
++            if (cols && planar_out && l + 1 == len && op->type == ETNA_JOB_TYPE_NN && c->out_ch > 1) {
++               unsigned kernel = op->weight_width * op->weight_height * op->input_channels;
++
++               for (unsigned oc = 0; oc < c->out_ch; oc++) {
++                  struct etna_operation *one = malloc(sizeof(*one));
++
++                  memcpy(one, op, sizeof(*one));
++                  one->weight_tensor = malloc(kernel);
++                  memcpy(one->weight_tensor, op->weight_tensor + oc * kernel, kernel);
++                  one->weight_tensor_size = kernel;
++                  one->bias_tensor = malloc(sizeof(uint32_t));
++                  memcpy(one->bias_tensor, op->bias_tensor + oc * sizeof(uint32_t), sizeof(uint32_t));
++                  one->bias_tensor_size = sizeof(uint32_t);
++                  one->output_channels = 1;
++                  one->output_tensor_sizes[0] = out_rows * out_cols;
++                  one->output_tensors[0] = strip_view(subgraph, ext_out, (oc * height) * width + p0,
++                                                      (height - 1) * width + out_cols);
++                  if (!strip_in_bounds(subgraph, one->output_tensors[0], width, height, out_rows, out_cols, 1)) {
++                     fprintf(stderr, "etnaviv/ml: strips: strip %u channel %u is out of bounds, aborting\n", s, oc);
++                     abort();
++                  }
++                  if (verbose)
++                     fprintf(stderr, "etnaviv/ml: strips: strip %u op %u channel %u -> tensor %u (+%u)\n", s, l, oc,
++                             one->output_tensors[0], etna_ml_get_offset(subgraph, one->output_tensors[0]));
++                  list_addtail(&one->link, &strips);
++               }
++               free(op->weight_tensor);
++               free(op->bias_tensor);
++               free(op);
++               continue;
++            }
+             list_addtail(&op->link, &strips);
+          }
+       }

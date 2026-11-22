@@ -1,0 +1,14 @@
+label: SRAMFIX-S1-mobilenet
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/mesa-axi-sram/mobilenet_v1_1.0_224_quant.tflite -r /home/jordan/alta-npu/research/sram-limits/mobilenet_reference_grace_hopper.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.1593e603-sram-fixes2 -n 20
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T06:21:01-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1446
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=154e6c;b=d6e906790e744d9e93de5f493c6a60e7;m=ad3903f6e;t=660db97fceb08;x=9abfff69e45b175
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_DISK_CACHE=0
+end: 2026-11-22T06:21:05-05:00  rc: 0  wall_s: 4
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

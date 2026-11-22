@@ -1,0 +1,65 @@
+# sram-limits offline verdict 2026-11-22T06:00:02-05:00, boot d6e90679, fake NPU shim, empty /dev, no NPU
+kit new /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so.a7b117a4-sram-fixes (old 41b08ede); strips new /home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.8c1912b6-sram-fixes (old ad2c9c5c, hung a7058018)
+## L2 branch model, old kit
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 32 of 1024 KiB
+etnaviv/ml: output tensor 3 is in the AXI SRAM, which the CPU can't read. Unset ETNA_ML_AXI_SRAM.
+rc=134
+## L2 branch model, new kit
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+invoke OK ['out_a', 'out_b']
+rc=0
+## L2 branch model, new strips
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+invoke OK ['out_a', 'out_b']
+rc=0
+## L1 npu_no_batching
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: AXI SRAM: not used with ETNA_MESA_DEBUG=npu_no_batching or npu_parallel, using RAM
+invoke OK ['out_a', 'out_b']
+rc=0
+## L1 npu_parallel
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: AXI SRAM: not used with ETNA_MESA_DEBUG=npu_no_batching or npu_parallel, using RAM
+invoke OK ['out_a', 'out_b']
+rc=0
+## L1 540 forced strips, old (submits)
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: strips: 5 operations at 960x540 (WxH) in 540 strips of 1 rows, 64 KiB of in-between tensors per strip, input transposed per strip, output detransposed per strip
+etnaviv/ml: AXI SRAM: placed 2160 of 2160 intermediate tensors, using 76 of 1024 KiB
+invoke OK ['corrections']
+rc=0
+3
+## L1 540 forced strips, new (submits)
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+etnaviv/ml: strips: 5 operations at 960x540 (WxH) in 540 strips of 1 rows, 64 KiB of in-between tensors per strip, input transposed per strip, output detransposed per strip
+etnaviv/ml: AXI SRAM: 2700 operations need up to 61624 command words, more than one submit holds (16384), using RAM
+invoke OK ['corrections']
+rc=0
+3
+## no-change: MobileNet old/new kit
+etnaviv/ml: AXI SRAM: placed 28 of 29 intermediate tensors, using 980 of 1024 KiB (1 partition outputs kept in RAM)
+etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 4 of 1024 KiB (1 partition outputs kept in RAM)
+## no-change: row strips auto 540p old/new strips
+etnaviv/ml: AXI SRAM: placed 48 of 48 intermediate tensors, using 964 of 1024 KiB (1 partition outputs kept in RAM)
+mn mesa-nn-*.bin: 28 files, 0 differ
+mn mesa-tp-*.bin: 4 files, 0 differ
+mn mesa-compressed-*.bin: 28 files, 0 differ
+mn shim_submit_*.stream: 3 files, 0 differ
+rows mesa-nn-*.bin: 36 files, 0 differ
+rows mesa-tp-*.bin: 24 files, 0 differ
+rows mesa-compressed-*.bin: 36 files, 0 differ
+rows shim_submit_*.stream: 2 files, 0 differ
+## L3 STRIPS-C64 replay: hung library
+6 NN configs, 6 with a tile wider than the image; 2 submits
+## L3 STRIPS-C64 replay: new, COLUMNS=1
+etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 columns, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+mesa-nn-000-000.bin: out 34x64 tile 34x10 in_x_stride 64 out_x_stride 34
+mesa-nn-001-000.bin: out 33x64 tile 33x10 in_x_stride 34 out_x_stride 33
+mesa-nn-002-000.bin: out 32x64 tile 32x22 in_x_stride 33 out_x_stride 64
+mesa-nn-003-000.bin: out 34x64 tile 34x10 in_x_stride 64 out_x_stride 34
+mesa-nn-004-000.bin: out 33x64 tile 33x10 in_x_stride 34 out_x_stride 33
+mesa-nn-005-000.bin: out 32x64 tile 32x22 in_x_stride 33 out_x_stride 64
+6 NN configs, 0 with a tile wider than the image; 2 submits

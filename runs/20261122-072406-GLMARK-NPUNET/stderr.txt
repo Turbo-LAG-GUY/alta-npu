@@ -1,0 +1,2 @@
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 17 strips of 57 columns, 992 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 34 of 34 intermediate tensors, using 1016 of 1024 KiB (1 partition outputs kept in RAM)

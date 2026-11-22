@@ -1,0 +1,35 @@
+# copy-fix offline verdict 2026-11-22T06:16:59-05:00, boot d6e90679: kit 1593e603, strips e962cc17 (prev a7b117a4 / 8c1912b6)
+## branch_exact kit a7b117a4 SRAM=all
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+rc=0
+TP jobs: 2, NN jobs: 3
+## branch_exact kit a7b117a4 SRAM=0
+rc=0
+TP jobs: 2, NN jobs: 3
+## branch_exact kit 1593e603 SRAM=all
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+rc=0
+TP jobs: 3, NN jobs: 3
+## branch_exact kit 1593e603 SRAM=0
+rc=0
+TP jobs: 3, NN jobs: 3
+## MobileNet a7b117a4 vs 1593e603
+etnaviv/ml: AXI SRAM: placed 28 of 29 intermediate tensors, using 980 of 1024 KiB (1 partition outputs kept in RAM)
+etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 4 of 1024 KiB (1 partition outputs kept in RAM)
+## rows auto 8c1912b6 vs e962cc17
+etnaviv/ml: AXI SRAM: placed 48 of 48 intermediate tensors, using 964 of 1024 KiB (1 partition outputs kept in RAM)
+## C64 columns 8c1912b6 vs e962cc17
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 40 of 1024 KiB (1 partition outputs kept in RAM)
+6 NN configs, 0 with a tile wider than the image; 2 submits
+mn mesa-nn-*.bin: 28 files, 0 differ
+mn mesa-tp-*.bin: 4 files, 0 differ
+mn mesa-compressed-*.bin: 28 files, 0 differ
+mn shim_submit_*.stream: 3 files, 0 differ
+rows mesa-nn-*.bin: 36 files, 0 differ
+rows mesa-tp-*.bin: 24 files, 0 differ
+rows mesa-compressed-*.bin: 36 files, 0 differ
+rows shim_submit_*.stream: 2 files, 0 differ
+c64 mesa-nn-*.bin: 6 files, 0 differ
+c64 mesa-tp-*.bin: 0 files, 0 differ
+c64 mesa-compressed-*.bin: 6 files, 0 differ
+c64 shim_submit_*.stream: 2 files, 0 differ

@@ -1,0 +1,17 @@
+label: PERCH-P1-c64-columns
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_64x64.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_reference_64x64.npz -e /home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.3d1c6999-perchannel -n 20
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T06:43:35-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1352
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=154ef1;b=d6e906790e744d9e93de5f493c6a60e7;m=b2954fa8d;t=660dbedc1a626;x=68aa331a06842
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_STRIPS_COLUMNS=1
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_STRIPS=32
+ETNA_ML_DISK_CACHE=0
+ETNA_ML_STRIPS_VERBOSE=1
+end: 2026-11-22T06:43:37-05:00  rc: 0  wall_s: 2
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

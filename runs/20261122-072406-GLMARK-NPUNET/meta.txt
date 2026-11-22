@@ -1,0 +1,14 @@
+label: GLMARK-NPUNET
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-upscale/worker.py --shm /dev/shm/npu-upscale-cmp --planes 5:4 --backend npu:/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite:/home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.4ab532ed-columns --idle-exit 60 --ready-file /home/jordan/Documents/AI_Projects/npu-upscale/compare/npunet-20261122-071850/worker.ready
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T07:24:06-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1475
+deadline_s: 900
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=155751;b=d6e906790e744d9e93de5f493c6a60e7;m=b876fe88d;t=660dc4bdc9426;x=d015f389d0164488
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_AXI_SRAM=all
+ETNA_ML_STRIPS=auto
+end: 2026-11-22T07:29:24-05:00  rc: 0  wall_s: 318
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

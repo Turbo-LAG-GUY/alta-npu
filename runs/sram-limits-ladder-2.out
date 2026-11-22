@@ -1,0 +1,12 @@
+etnaviv/ml: AXI SRAM: placed 28 of 29 intermediate tensors, using 980 of 1024 KiB (1 partition outputs kept in RAM)
+etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 4 of 1024 KiB (1 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 8.23 "all_invokes_identical": true "diff_vs_cpu_max": 4 "diff_vs_cpu_mean_worst": 0.012 
+== SRAMFIX-S1-mobilenet rc=0 match=true kernel_warnings=0
+etnaviv/ml: AXI SRAM: placed 3 of 3 intermediate tensors, using 32 of 1024 KiB (2 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 0.63 "all_invokes_identical": true "diff_vs_cpu_max": 1 "diff_vs_cpu_mean_worst": 0.0 
+== SRAMFIX-S2-branch rc=0 match=true kernel_warnings=0
+etnaviv/ml: strips: 3 operations at 64x64 (WxH) in 2 strips of 32 columns, 40 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 4 of 4 intermediate tensors, using 40 of 1024 KiB (1 partition outputs kept in RAM)
+"invoke_ms_median_after_first": 0.5 "all_invokes_identical": true "diff_vs_cpu_max": 239 "diff_vs_cpu_mean_worst": 53.06 
+== SRAMFIX-S3-c64-columns rc=3 match=false kernel_warnings=0
+STOPPED at SRAMFIX-S3-c64-columns (see /home/jordan/alta-npu/runs/sram-limits-ladder-20261122-062053/SRAMFIX-S3-c64-columns.stdout and PROGRESS.md)

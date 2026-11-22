@@ -1,0 +1,60 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-strips/build/src/gallium/targets/teflon/libteflon.so.3d1c6999-perchannel",
+ "model": "/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite",
+ "etna_ml_shader": null,
+ "setup_ms": 45.0,
+ "invoke_ms": [
+  14.9,
+  11.68,
+  11.51,
+  12.43,
+  11.6,
+  11.75,
+  11.51,
+  11.74,
+  12.17,
+  12.86,
+  12.31,
+  12.41,
+  12.36,
+  13.13,
+  12.54,
+  11.97,
+  12.26,
+  11.89,
+  12.28,
+  11.95
+ ],
+ "invoke_ms_median": 12.22,
+ "invoke_ms_median_after_first": 12.17,
+ "all_invokes_identical": true,
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 1,
+ "diff_vs_cpu_mean_worst": 0.0,
+ "bytes_differing_from_saved": null,
+ "tolerance": 0,
+ "cpu_mean_limit": 2.0,
+ "bytes_beyond_tolerance": null,
+ "match": true
+}
+etnaviv/ml: strips: strip 6 op 2 channel 0 -> tensor 66 (+642)
+etnaviv/ml: strips: strip 6 op 2 channel 1 -> tensor 67 (+519042)
+etnaviv/ml: strips: strip 6 op 2 channel 2 -> tensor 68 (+1037442)
+etnaviv/ml: strips: strip 6 op 2 channel 3 -> tensor 69 (+1555842)
+etnaviv/ml: strips: strip 7 op 0 (conv): input columns 746..859 -> output 747..858, offset 0, input plane rows 0 pitch 960, output pitch 0, tensors 70 (+746) -> 71 (+0)
+etnaviv/ml: strips: strip 7 op 1 (conv): input columns 747..858 -> output 748..857, offset 0, input plane rows 0 pitch 0, output pitch 0, tensors 71 (+0) -> 72 (+0)
+etnaviv/ml: strips: strip 7 op 2 (conv): input columns 748..857 -> output 749..856, offset 0, input plane rows 0 pitch 0, output pitch 960, tensors 72 (+0) -> 73 (+749)
+etnaviv/ml: strips: strip 7 op 2 channel 0 -> tensor 74 (+749)
+etnaviv/ml: strips: strip 7 op 2 channel 1 -> tensor 75 (+519149)
+etnaviv/ml: strips: strip 7 op 2 channel 2 -> tensor 76 (+1037549)
+etnaviv/ml: strips: strip 7 op 2 channel 3 -> tensor 77 (+1555949)
+etnaviv/ml: strips: strip 8 op 0 (conv): input columns 853..960 -> output 854..960, offset 0, input plane rows 0 pitch 960, output pitch 0, tensors 78 (+853) -> 79 (+0)
+etnaviv/ml: strips: strip 8 op 1 (conv): input columns 854..960 -> output 855..960, offset 0, input plane rows 0 pitch 0, output pitch 0, tensors 79 (+0) -> 80 (+0)
+etnaviv/ml: strips: strip 8 op 2 (conv): input columns 855..960 -> output 856..960, offset 0, input plane rows 0 pitch 0, output pitch 960, tensors 80 (+0) -> 81 (+856)
+etnaviv/ml: strips: strip 8 op 2 channel 0 -> tensor 82 (+856)
+etnaviv/ml: strips: strip 8 op 2 channel 1 -> tensor 83 (+519256)
+etnaviv/ml: strips: strip 8 op 2 channel 2 -> tensor 84 (+1037656)
+etnaviv/ml: strips: strip 8 op 2 channel 3 -> tensor 85 (+1556056)
+etnaviv/ml: strips: 3 operations at 960x540 (WxH) in 9 strips of 107 columns, 916 KiB of in-between tensors per strip, input channels-first, output channels-first
+etnaviv/ml: AXI SRAM: placed 18 of 18 intermediate tensors, using 932 of 1024 KiB (1 partition outputs kept in RAM)
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-064414-PERCH-P3-n8-540-columns

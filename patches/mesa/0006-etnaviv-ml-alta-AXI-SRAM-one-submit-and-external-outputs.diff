@@ -1,0 +1,279 @@
+alta: AXI SRAM safety (2026-11-22). Applies on top of 0002-0004 (kit tree mesa-axi-sram) and 0002-0005 (mesa-strips).
+- Shared outputs: backport of upstream Mesa's pipe_tensor::is_external_output. Teflon marks a partition's outputs while the
+  driver compiles it; tensors that a CPU layer or the caller reads stay in RAM, so etna_ml_subgraph_read_outputs no longer
+  aborts when an NPU layer and a CPU layer both read a tensor. Such a tensor also gets a detransposed copy that
+  read_outputs returns: Mesa (upstream too) only detransposed outputs that nothing inside the subgraph reads, so the
+  CPU got the NPU's channels-first layout (found on the NPU 2026-11-22, run SRAMFIX-S2-branch; also with the SRAM off).
+- Not exclusive: the SRAM is one physical 1 MiB that every NPU program maps, so an SRAM tensor is only safe inside one
+  hardware job. The SRAM is now refused with ETNA_MESA_DEBUG=npu_no_batching (one submit per operation) and npu_parallel
+  (operations overlap, breaking the space reuse), and for partitions whose commands could pass libdrm's 0x4000-word
+  command buffer (which would flush in the middle). Invoke flushes first when the batch wouldn't fit after what is queued,
+  and warns once if a split is ever seen.
+p_state.h changes: rebuild the whole teflon target.
+
+--- a/src/gallium/include/pipe/p_state.h
++++ b/src/gallium/include/pipe/p_state.h
+--- a/src/gallium/include/pipe/p_state.h
++++ b/src/gallium/include/pipe/p_state.h
+@@ -1043,6 +1043,12 @@
+     * Whether the tensor contains data in INT8 or UINT8 format.
+     */
+    bool is_signed;
++   /**
++    * Whether something outside this subgraph reads this tensor (a CPU layer or
++    * the caller), so it must stay in CPU-readable memory. Only set during
++    * ml_subgraph_create. alta: backport of upstream Mesa's field.
++    */
++   bool is_external_output;
+    uint8_t type_size;
+ };
+ 
+--- a/src/gallium/frontends/teflon/tfl_device.c
++++ b/src/gallium/frontends/teflon/tfl_device.c
+@@ -552,11 +552,19 @@
+    if (debug_get_option_debug_teflon() & TEFLON_DEBUG_VERBOSE)
+       dump_graph(delegate->tensors, tf_context->tensors_size, operations, params->nodes_to_replace->size);
+ 
++   /* alta (as upstream Mesa): tell the driver which tensors are read outside this partition, by a
++    * CPU layer or the caller, so it keeps them in memory the CPU can read. */
++   for (int i = 0; i < params->output_tensors->size; i++)
++      delegate->tensors[params->output_tensors->data[i]].is_external_output = true;
++
+    struct pipe_ml_subgraph *subgraph;
+    subgraph = delegate->ml_dev->ml_subgraph_create(delegate->ml_dev,
+                                                    operations,
+                                                    params->nodes_to_replace->size);
+ 
++   for (int i = 0; i < params->output_tensors->size; i++)
++      delegate->tensors[params->output_tensors->data[i]].is_external_output = false;
++
+    struct teflon_subgraph *tsubgraph = calloc(1, sizeof(*tsubgraph));
+    tsubgraph->base = subgraph;
+ 
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -53,6 +53,9 @@
+    unsigned size;
+    enum etna_ml_tensor_layout exp_layout; /* expected */
+    enum etna_ml_tensor_layout act_layout; /* actual */
++   /* alta: a tensor read both inside the subgraph and by the CPU: index of the detransposed copy that
++    * etna_ml_subgraph_read_outputs returns instead (copies come after every TFLite index, so 0 = none) */
++   unsigned cpu_copy;
+ };
+ 
+ struct etna_ml_subgraph {
+@@ -66,6 +69,10 @@
+ 
+    /* alta: the AXI SRAM buffer, if any. Not a reference: the tensors hold those. */
+    struct pipe_resource *axi_sram;
++
++   /* alta: upper bound of the command words one invoke emits, set when tensors are in the AXI SRAM.
++    * The whole invoke must go out in one submit (see place_tensors_in_axi_sram). */
++   unsigned axi_sram_words;
+ };
+ 
+ struct etna_vip_instruction {
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -520,15 +520,27 @@
+          }
+ 
+          ML_DBG("type %d i %d tensor %d layout %d == %d\n", poperation->type, i, poperation->output_tensors[i]->index, tensor->exp_layout, tensor->act_layout);
+-         if (!etna_ml_find_consumer(poperations, count, poperation->output_tensors[i]->index) &&
++         /* alta: a tensor that an operation here reads AND the CPU reads (Teflon's is_external_output) needs
++          * the detranspose too. Upstream only adds it when nothing here reads the tensor, so the CPU got the
++          * NPU's channels-first layout. Here the readers inside keep the tensor as it is, and the CPU gets a
++          * detransposed copy (tensor->cpu_copy). */
++         bool consumed = etna_ml_find_consumer(poperations, count, poperation->output_tensors[i]->index) != NULL;
++         if ((!consumed || poperation->output_tensors[i]->is_external_output) &&
+              is_3d(poperation->output_tensors[i]) &&
+              tensor->exp_layout != tensor->act_layout) {
+-            ML_DBG("Adding detranspose.\n");
++            ML_DBG("Adding detranspose%s.\n", consumed ? " (copy for the CPU)" : "");
+             struct etna_operation *detranspose = calloc(1, sizeof(*detranspose));
+             etna_ml_lower_detranspose(subgraph, poperation->output_tensors[i], detranspose);
+-            operation->output_tensors[i] = etna_ml_allocate_tensor(subgraph);
+-            detranspose->input_tensors[0] = operation->output_tensors[i];
+-            detranspose->output_tensors[0] = poperation->output_tensors[i]->index;
++            if (consumed) {
++               unsigned copy = etna_ml_allocate_tensor(subgraph);
++               etna_ml_get_tensor(subgraph, poperation->output_tensors[i]->index)->cpu_copy = copy;
++               detranspose->input_tensors[0] = poperation->output_tensors[i]->index;
++               detranspose->output_tensors[0] = copy;
++            } else {
++               operation->output_tensors[i] = etna_ml_allocate_tensor(subgraph);
++               detranspose->input_tensors[0] = operation->output_tensors[i];
++               detranspose->output_tensors[0] = poperation->output_tensors[i]->index;
++            }
+             list_addtail(&detranspose->link, etna_operations);
+          }
+       }
+@@ -1008,6 +1020,10 @@
+ #define DRM_ETNA_GEM_ALTA_AXI_SRAM 0x00200000
+ #define AXI_SRAM_SIZE (1024 * 1024)
+ #define AXI_SRAM_PAGE 4096
++/* libdrm-etnaviv grows a command buffer up to 0x4000 words, then flushes it early (etnaviv_cmd_stream.c). */
++#define AXI_SRAM_STREAM_WORDS 0x4000
++/* The batch's leading zeroes, close_batch() and some slack. */
++#define AXI_SRAM_BATCH_WORDS 64
+ 
+ static struct pipe_resource *
+ create_axi_sram_resource(struct etna_ml_subgraph *subgraph)
+@@ -1034,7 +1050,8 @@
+  * clobbered between operations.
+  */
+ static void
+-place_tensors_in_axi_sram(struct etna_ml_subgraph *subgraph, struct list_head *operations)
++place_tensors_in_axi_sram(struct etna_ml_subgraph *subgraph, struct list_head *operations,
++                          const struct pipe_ml_operation *poperations, unsigned pcount)
+ {
+    const char *env = getenv("ETNA_ML_AXI_SRAM");
+    unsigned max_placed = !env ? 0 : (!strcmp(env, "all") ? UINT_MAX : (unsigned)atoi(env));
+@@ -1042,6 +1059,28 @@
+    if (!max_placed)
+       return;
+ 
++   /*
++    * alta: the SRAM is one physical 1 MiB that every NPU program maps, so a tensor in it is only safe from
++    * its writer to its last reader if nothing else runs on the NPU in between. That holds within one
++    * hardware job, so the whole invoke must be one submit, run in order:
++    * - ETNA_MESA_DEBUG=npu_no_batching submits every operation on its own;
++    * - npu_parallel lets operations of a job overlap, which breaks the reuse of SRAM space below;
++    * - the command stream is flushed early once it passes AXI_SRAM_STREAM_WORDS (libdrm's 0x4000 cap).
++    */
++   if (DBG_ENABLED(ETNA_DBG_NPU_NO_BATCHING) || DBG_ENABLED(ETNA_DBG_NPU_PARALLEL)) {
++      fprintf(stderr, "etnaviv/ml: AXI SRAM: not used with ETNA_MESA_DEBUG=npu_no_batching or npu_parallel, using RAM\n");
++      return;
++   }
++   unsigned tp_cores = etna_ml_get_core_info(subgraph->screen)->tp_core_count;
++   unsigned words = AXI_SRAM_BATCH_WORDS;
++   list_for_each_entry(struct etna_operation, operation, operations, link)
++      words += operation->type == ETNA_JOB_TYPE_TP ? 10 * MAX2(tp_cores, 1) + 2 : 10;
++   if (words > AXI_SRAM_STREAM_WORDS) {
++      fprintf(stderr, "etnaviv/ml: AXI SRAM: %u operations need up to %u command words, more than one submit holds "
++              "(%u), using RAM\n", list_length(operations), words, AXI_SRAM_STREAM_WORDS);
++      return;
++   }
++
+    unsigned tensor_count = util_dynarray_num_elements(&subgraph->tensors, struct etna_ml_tensor *);
+    struct etna_ml_tensor **tensors = util_dynarray_begin(&subgraph->tensors);
+    int *writer = malloc(tensor_count * sizeof(*writer));
+@@ -1054,6 +1093,19 @@
+    for (unsigned t = 0; t < tensor_count; t++)
+       writer[t] = last_reader[t] = -1;
+ 
++   /* alta: a tensor that a CPU layer or the caller also reads stays in RAM, even if an NPU layer here
++    * reads it too. Teflon marks these (pipe_tensor::is_external_output). */
++   unsigned external = 0;
++   for (unsigned i = 0; i < pcount; i++) {
++      for (unsigned j = 0; j < poperations[i].output_count; j++) {
++         const struct pipe_tensor *pt = poperations[i].output_tensors[j];
++         if (pt->is_external_output && pt->index < tensor_count && !excluded[pt->index]) {
++            excluded[pt->index] = true;
++            external++;
++         }
++      }
++   }
++
+    list_for_each_entry(struct etna_operation, operation, operations, link) {
+       bool plain = operation->type == ETNA_JOB_TYPE_NN || operation->type == ETNA_JOB_TYPE_TP;
+ 
+@@ -1112,9 +1164,10 @@
+          top = MAX2(top, items[k].offset + items[k].size);
+       }
+       subgraph->axi_sram = sram;
++      subgraph->axi_sram_words = words;
+       pipe_resource_reference(&sram, NULL); /* the tensors hold references now */
+-      fprintf(stderr, "etnaviv/ml: AXI SRAM: placed %u of %u intermediate tensors, using %u of %u KiB\n",
+-              placed, n, top / 1024, AXI_SRAM_SIZE / 1024);
++      fprintf(stderr, "etnaviv/ml: AXI SRAM: placed %u of %u intermediate tensors, using %u of %u KiB"
++              " (%u partition outputs kept in RAM)\n", placed, n, top / 1024, AXI_SRAM_SIZE / 1024, external);
+    } else if (placed) {
+       fprintf(stderr, "etnaviv/ml: AXI SRAM not available (is /sys/module/etnaviv/parameters/axi_sram 1?), using RAM\n");
+    }
+@@ -1158,7 +1211,7 @@
+ 
+    ml_cache_trim();
+    lower_operations(subgraph, poperations, count, &operations);
+-   place_tensors_in_axi_sram(subgraph, &operations);
++   place_tensors_in_axi_sram(subgraph, &operations, poperations, count);
+ 
+    list_for_each_entry(struct etna_operation, operation, &operations, link) {
+       struct etna_vip_instruction instruction = {0};
+@@ -1279,6 +1332,12 @@
+       is_initialized = true;
+    }
+ 
++   /* alta: with tensors in the AXI SRAM, the invoke must be one submit. Flush what is queued first if the
++    * whole invoke wouldn't fit after it, so libdrm can't flush in the middle. */
++   if (subgraph->axi_sram && stream->offset + subgraph->axi_sram_words > AXI_SRAM_STREAM_WORDS) {
++      pctx->flush(pctx, NULL, 0);
++      stream = ctx->stream;
++   }
+    if (!DBG_ENABLED(ETNA_DBG_NPU_NO_BATCHING)) {
+       /* These zeroes match the blob's cmdstream. They are here to make diff'ing easier.*/
+       etna_cmd_stream_emit(stream, 0x0);
+@@ -1308,6 +1367,9 @@
+       }
+    }
+ 
++   unsigned sram_offset = stream->offset; /* alta: after the input uploads, which may flush */
++   bool sram_split = false;
++
+    static unsigned i = 0;
+    util_dynarray_foreach(&subgraph->operations, struct etna_vip_instruction, operation) {
+ 
+@@ -1366,6 +1428,11 @@
+             UNREACHABLE("Unsupported ML operation type");
+       }
+ 
++      /* alta: an early flush resets the offset; it must not happen with tensors in the AXI SRAM */
++      if (subgraph->axi_sram && stream->offset < sram_offset)
++         sram_split = true;
++      sram_offset = stream->offset;
++
+       if (DBG_ENABLED(ETNA_DBG_NPU_NO_BATCHING)) {
+          ML_DBG("Running operation %d - %d\n", i, operation->type);
+          close_batch(pctx);
+@@ -1392,6 +1459,14 @@
+    if (!DBG_ENABLED(ETNA_DBG_NPU_NO_BATCHING))
+       close_batch(pctx);
+ 
++   if (sram_split || (subgraph->axi_sram && stream->offset < sram_offset)) {
++      static bool warned;
++      if (!warned)
++         fprintf(stderr, "etnaviv/ml: AXI SRAM: an invoke was split across submits; its results may be wrong "
++                 "if another NPU program ran in between. Please report (set ETNA_ML_AXI_SRAM=0 meanwhile).\n");
++      warned = true;
++   }
++
+    if (DBG_ENABLED(ETNA_DBG_FLUSH_ALL))
+       pctx->flush(pctx, NULL, 0);
+ }
+@@ -1431,7 +1506,10 @@
+    }
+ 
+    for (int i = 0; i < outputs_count; i++) {
+-      struct pipe_resource *res = etna_ml_get_resource(subgraph, output_idxs[i]);
++      /* alta: a tensor also read inside the subgraph is returned from its detransposed copy, if it has one */
++      unsigned idx = etna_ml_get_tensor(subgraph, output_idxs[i])->cpu_copy ?
++                     etna_ml_get_tensor(subgraph, output_idxs[i])->cpu_copy : output_idxs[i];
++      struct pipe_resource *res = etna_ml_get_resource(subgraph, idx);
+       if (res == subgraph->axi_sram) {
+          fprintf(stderr, "etnaviv/ml: output tensor %u is in the AXI SRAM, which the CPU can't read. Unset ETNA_ML_AXI_SRAM.\n",
+                  output_idxs[i]);
+@@ -1446,12 +1524,12 @@
+                                                      PIPE_MAP_READ,
+                                                      &src_transfer);
+          assert(src_map);
+-         for (unsigned k = 0; k < etna_ml_get_size(subgraph, output_idxs[i]); k++) {
++         for (unsigned k = 0; k < etna_ml_get_size(subgraph, idx); k++) {
+             ((uint8_t *)(outputs[i]))[k] = src_map[k] - 128;
+          }
+          pipe_buffer_unmap(context, src_transfer);
+       } else {
+-         pipe_buffer_read(context, res, 0, etna_ml_get_size(subgraph, output_idxs[i]), outputs[i]);
++         pipe_buffer_read(context, res, 0, etna_ml_get_size(subgraph, idx), outputs[i]);
+       }
+    }
+ }
