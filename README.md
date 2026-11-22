@@ -137,7 +137,7 @@ A board with 4 GB of RAM and a habit of locking up calls for care, so all of thi
 | [runs/](runs), [results/](results) | Per-job records (command, output, kernel log, step markers, samples) and JSON results |
 | [incidents/](incidents) | The five incidents, with notes and captures |
 | [build/](build) | The record of the installed build, and its combined diff |
-| [indicator/](indicator) | `npu_status.py`: a GNOME top-bar indicator and terminal view of what the NPU is doing |
+| [indicator/](indicator) | `npu_status.py`: a GNOME top-bar indicator and terminal view of what the NPU is doing; `npu_control.py`: the NPU job-queue window (limit, priority by name, what to do after a hang); `gpu_status.py`: the same kind of indicator for the Mali GPU |
 | [demo/](demo) | `classify.py`: the first standalone NPU demo |
 | [CLAUDE.md](CLAUDE.md), [.claude/](.claude) | Claude Code's project instructions, permissions and guard hook |
 | [PROGRESS.md](PROGRESS.md), [RESULTS.md](RESULTS.md), [CHANGELOG.md](CHANGELOG.md), [templates/](templates) | The records |
@@ -195,7 +195,7 @@ before running it. The root steps change the system.
   object files) and the copied kernel sources.
 - **The Mesa checkout** (Mesa main at `c5423d3e273`, plus the one-line change in [patches/mesa](patches/mesa)) and the
   Python venv.
-- **Copies, not originals:** `indicator/npu_status.py` and `demo/classify.py` are copies. The copies that actually
+- **Copies, not originals:** the files in `indicator/` and `demo/classify.py` are copies. The copies that actually
   run live in `~/Documents/AI_Projects`.
 
 ## Credits
