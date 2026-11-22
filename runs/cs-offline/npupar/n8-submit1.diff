@@ -1,0 +1,33 @@
+--- /tmp/claude-1000/-home-jordan-Documents-AI-Projects/58f9749a-8267-4d36-bd93-3969dca99e4c/scratchpad/npupar-offline/n8-par10/shim_submit_0001.stream
++++ /tmp/claude-1000/-home-jordan-Documents-AI-Projects/58f9749a-8267-4d36-bd93-3969dca99e4c/scratchpad/npupar-offline/n8-def10/shim_submit_0001.stream
+@@ -9,19 +9,19 @@
+ 0393C VIVS_GL_OCB_REMAP_START                  = 0x00000000
+ 03940 VIVS_GL_OCB_REMAP_END                    = 0x00000000
+-03930 VIVS_GL_NN_CONFIG                        = 0x00000000
+-010A0 VIVS_PS_NN_INST_ADDR                     = 0xff379001
+-010A4 VIVS_PS_UNK10A4                          = 0x00000001
++03930 VIVS_GL_NN_CONFIG                        = 0x00000010
++010A0 VIVS_PS_NN_INST_ADDR                     = 0xff379000
++010A4 VIVS_PS_UNK10A4                          = 0x00000000
+ 0393C VIVS_GL_OCB_REMAP_START                  = 0x00000000
+ 03940 VIVS_GL_OCB_REMAP_END                    = 0x00000000
+-03930 VIVS_GL_NN_CONFIG                        = 0x00000000
+-010A0 VIVS_PS_NN_INST_ADDR                     = 0xff377002
+-010A4 VIVS_PS_UNK10A4                          = 0x00000002
++03930 VIVS_GL_NN_CONFIG                        = 0x00000010
++010A0 VIVS_PS_NN_INST_ADDR                     = 0xff377000
++010A4 VIVS_PS_UNK10A4                          = 0x00000000
+ 0393C VIVS_GL_OCB_REMAP_START                  = 0x00000000
+ 03940 VIVS_GL_OCB_REMAP_END                    = 0x00000000
+-03930 VIVS_GL_NN_CONFIG                        = 0x00000000
+-010A0 VIVS_PS_NN_INST_ADDR                     = 0xff375003
+-010A4 VIVS_PS_UNK10A4                          = 0x00000003
+-0380C VIVS_GL_FLUSH_CACHE                      = 0x00000403
+-0380C VIVS_GL_FLUSH_CACHE                      = 0x00000403
++03930 VIVS_GL_NN_CONFIG                        = 0x00000010
++010A0 VIVS_PS_NN_INST_ADDR                     = 0xff375000
++010A4 VIVS_PS_UNK10A4                          = 0x00000000
++0380C VIVS_GL_FLUSH_CACHE                      = 0x00000c23
++0380C VIVS_GL_FLUSH_CACHE                      = 0x00000c23
+ zero
+ zero

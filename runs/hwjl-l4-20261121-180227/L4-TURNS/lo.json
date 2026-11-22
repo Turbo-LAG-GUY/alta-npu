@@ -1,0 +1,27 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
+ "threads": 3,
+ "invokes": 512,
+ "wall_ms": 5007.6,
+ "ms_per_invoke_throughput": 9.78,
+ "invokes_per_s": 102.24,
+ "invoke_ms_median": 28.62,
+ "invoke_ms_median_per_thread": [
+  28.57,
+  28.68,
+  28.59
+ ],
+ "invoke_ms_p90": 32.09,
+ "invoke_ms_max": 53.39,
+ "name": "hwjl_lo",
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 4,
+ "diff_vs_cpu_mean_worst": 0.012,
+ "bytes_differing_from_saved_total": 0,
+ "outputs_byte_checked": 512,
+ "outputs_cpu_checked": 6,
+ "errors": [],
+ "all_invokes_identical": true,
+ "match": true
+}

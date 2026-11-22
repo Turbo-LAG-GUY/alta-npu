@@ -1,0 +1,488 @@
+alta: program priority by process name, with a ring guard for lower priorities
+
+hw_job_prio (0644) holds up to 16 rules "name=high|normal|low" (process name
+as in /proc/<pid>/comm). A program gets its priority when it opens the NPU;
+writing the table also moves programs that already have it open
+(drm_sched_entity_set_priority + drm_sched_entity_modify_sched under
+gpu->sched_lock, so drm_sched moves the entity to the new run queue at its
+next quiet moment). Unnamed programs stay at normal, as in stock etnaviv.
+Bad rules are skipped with a warning.
+
+hw_job_clients (0444) lists the programs with the NPU open:
+"<pid> <name> <priority> <applied|pending>".
+
+hw_job_prio_guard_ms (0644, default 100, 0 = off): while a higher-priority
+job has run within that time, a lower-priority job enters only an empty
+ring, so a higher-priority job waits for at most one lower-priority job.
+
+Applies on top of 0001-0006; touches etnaviv_drv.c, etnaviv_gpu.h and
+etnaviv_sched.c.
+
+--- a/drivers/gpu/drm/etnaviv/etnaviv_drv.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_drv.c
+@@ -9,6 +9,10 @@
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
++#include <linux/pid.h>
++#include <linux/rcupdate.h>
++#include <linux/sched.h>
++#include <linux/string.h>
+ #include <linux/uaccess.h>
+ 
+ #include <drm/drm_debugfs.h>
+@@ -59,12 +63,304 @@
+ 	}
+ }
+ 
++/*
++ * alta: program priority by name.
++ *
++ * hw_job_prio holds up to ETNA_PRIO_NAMES rules "name=high|normal|low",
++ * separated by commas or newlines; name is the process name as in
++ * /proc/<pid>/comm (at most 15 characters). Programs not named run at normal,
++ * as in stock etnaviv. A program gets its priority when it opens the NPU, and
++ * writing the table also moves the programs that already have it open: their
++ * scheduler entities get the new priority, and drm_sched moves them to the new
++ * run queue at their next quiet moment (no job queued, the last one done; see
++ * drm_sched_entity_select_rq()). Bad rules are skipped with a warning, so a
++ * typo never stops the module from loading.
++ *
++ * The scheduler always takes the next job from the highest priority that has
++ * one ready; lower priorities run in the gaps. hw_job_prio_guard_ms
++ * (etnaviv_sched.c) keeps a lower-priority program from filling the ring right
++ * before a higher one's next job.
++ *
++ * hw_job_clients (read-only) lists the programs that have the NPU open:
++ * "<pid> <name> <priority> <applied|pending>" per line.
++ *
++ * Lock order: kernel_param_lock -> etnaviv_prio_lock -> dev->filelist_mutex
++ * -> gpu->sched_lock. A program that opens the NPU while the table is being
++ * written can miss that one write (it is added to the file list after open);
++ * the next write catches it.
++ */
++#define ETNA_PRIO_NAMES	16
++
++struct etnaviv_prio_rule {
++	char name[TASK_COMM_LEN];
++	enum drm_sched_priority prio;
++};
++
++static DEFINE_MUTEX(etnaviv_prio_lock);
++static struct etnaviv_prio_rule etnaviv_prio_rules[ETNA_PRIO_NAMES];
++static unsigned int etnaviv_prio_nrules;
++/* the registered drm device, for writes to hw_job_prio; NULL when unbound */
++static struct drm_device *etnaviv_prio_drm;
++
++static const char *etnaviv_prio_name(enum drm_sched_priority prio)
++{
++	switch (prio) {
++	case DRM_SCHED_PRIORITY_KERNEL:	return "kernel";
++	case DRM_SCHED_PRIORITY_HIGH:	return "high";
++	case DRM_SCHED_PRIORITY_NORMAL:	return "normal";
++	case DRM_SCHED_PRIORITY_LOW:	return "low";
++	default:			return "?";
++	}
++}
++
++/* etnaviv_prio_lock held */
++static enum drm_sched_priority etnaviv_prio_lookup(const char *comm)
++{
++	unsigned int i;
++
++	for (i = 0; i < etnaviv_prio_nrules; i++)
++		if (!strcmp(etnaviv_prio_rules[i].name, comm))
++			return etnaviv_prio_rules[i].prio;
++
++	return DRM_SCHED_PRIORITY_NORMAL;
++}
++
++/* The process name and pid of the program that has @file open. */
++static pid_t etnaviv_prio_file_comm(struct drm_file *file, char *comm,
++				    size_t len)
++{
++	struct task_struct *task;
++	struct pid *pid;
++	pid_t nr;
++
++	rcu_read_lock();
++	pid = rcu_dereference(file->pid);
++	task = pid_task(pid, PIDTYPE_TGID);
++	if (task)
++		__get_task_comm(comm, len, task);
++	else
++		strscpy(comm, "?", len);
++	nr = pid_vnr(pid);
++	rcu_read_unlock();
++
++	return nr;
++}
++
++/* dev->filelist_mutex held, so @file stays open */
++static void etnaviv_prio_set_file(struct etnaviv_drm_private *priv,
++				  struct drm_file *file,
++				  enum drm_sched_priority prio)
++{
++	struct etnaviv_file_private *ctx = file->driver_priv;
++	int i;
++
++	for (i = 0; i < ETNA_MAX_PIPES; i++) {
++		struct etnaviv_gpu *gpu = priv->gpu[i];
++		struct drm_sched_entity *entity = &ctx->sched_entity[i];
++
++		if (!gpu)
++			continue;
++
++		/*
++		 * drm_sched_entity_modify_sched() must not race with job arm
++		 * and push; etnaviv does both under gpu->sched_lock.
++		 */
++		mutex_lock(&gpu->sched_lock);
++		if (entity->priority != prio) {
++			drm_sched_entity_set_priority(entity, prio);
++			drm_sched_entity_modify_sched(entity,
++						      &gpu->alta_sched_list, 1);
++		}
++		mutex_unlock(&gpu->sched_lock);
++	}
++}
++
++/* etnaviv_prio_lock held */
++static void etnaviv_prio_apply_all(struct drm_device *dev)
++{
++	struct etnaviv_drm_private *priv = dev->dev_private;
++	char comm[TASK_COMM_LEN];
++	struct drm_file *file;
++
++	mutex_lock(&dev->filelist_mutex);
++	list_for_each_entry(file, &dev->filelist, lhead) {
++		etnaviv_prio_file_comm(file, comm, sizeof(comm));
++		etnaviv_prio_set_file(priv, file, etnaviv_prio_lookup(comm));
++	}
++	mutex_unlock(&dev->filelist_mutex);
++}
++
++static int etnaviv_prio_parse_level(const char *s,
++				    enum drm_sched_priority *prio)
++{
++	if (!strcmp(s, "high"))
++		*prio = DRM_SCHED_PRIORITY_HIGH;
++	else if (!strcmp(s, "normal"))
++		*prio = DRM_SCHED_PRIORITY_NORMAL;
++	else if (!strcmp(s, "low"))
++		*prio = DRM_SCHED_PRIORITY_LOW;
++	else
++		return -EINVAL;
++
++	return 0;
++}
++
++static int etnaviv_prio_param_set(const char *val,
++				  const struct kernel_param *kp)
++{
++	struct etnaviv_prio_rule *rules;
++	char *buf, *cur, *item;
++	unsigned int n = 0;
++
++	rules = kcalloc(ETNA_PRIO_NAMES, sizeof(*rules), GFP_KERNEL);
++	buf = kstrdup(val, GFP_KERNEL);
++	if (!rules || !buf) {
++		kfree(rules);
++		kfree(buf);
++		return -ENOMEM;
++	}
++
++	cur = buf;
++	while ((item = strsep(&cur, ",\n")) != NULL) {
++		enum drm_sched_priority prio;
++		char *eq, *name, *level;
++
++		item = strim(item);
++		if (!*item)
++			continue;
++
++		eq = strrchr(item, '=');
++		if (!eq) {
++			pr_warn("etnaviv: alta: hw_job_prio: skipping \"%s\" (want name=high|normal|low)\n",
++				item);
++			continue;
++		}
++		*eq = '\0';
++		name = strim(item);
++		level = strim(eq + 1);
++		if (!*name || strlen(name) >= TASK_COMM_LEN ||
++		    etnaviv_prio_parse_level(level, &prio)) {
++			pr_warn("etnaviv: alta: hw_job_prio: skipping \"%s=%s\" (name 1-%d characters, level high|normal|low)\n",
++				name, level, TASK_COMM_LEN - 1);
++			continue;
++		}
++		if (n == ETNA_PRIO_NAMES) {
++			pr_warn("etnaviv: alta: hw_job_prio: more than %d names, skipping the rest\n",
++				ETNA_PRIO_NAMES);
++			break;
++		}
++		strscpy(rules[n].name, name, sizeof(rules[n].name));
++		rules[n].prio = prio;
++		n++;
++	}
++	kfree(buf);
++
++	mutex_lock(&etnaviv_prio_lock);
++	memcpy(etnaviv_prio_rules, rules, sizeof(etnaviv_prio_rules));
++	etnaviv_prio_nrules = n;
++	if (etnaviv_prio_drm)
++		etnaviv_prio_apply_all(etnaviv_prio_drm);
++	mutex_unlock(&etnaviv_prio_lock);
++
++	kfree(rules);
++	return 0;
++}
++
++static int etnaviv_prio_param_get(char *buffer, const struct kernel_param *kp)
++{
++	unsigned int i;
++	int len = 0;
++
++	mutex_lock(&etnaviv_prio_lock);
++	for (i = 0; i < etnaviv_prio_nrules; i++)
++		len += scnprintf(buffer + len, PAGE_SIZE - len, "%s%s=%s",
++				 i ? "," : "", etnaviv_prio_rules[i].name,
++				 etnaviv_prio_name(etnaviv_prio_rules[i].prio));
++	mutex_unlock(&etnaviv_prio_lock);
++	len += scnprintf(buffer + len, PAGE_SIZE - len, "\n");
++
++	return len;
++}
++
++static const struct kernel_param_ops etnaviv_prio_param_ops = {
++	.set = etnaviv_prio_param_set,
++	.get = etnaviv_prio_param_get,
++};
++module_param_cb(hw_job_prio, &etnaviv_prio_param_ops, NULL, 0644);
++MODULE_PARM_DESC(hw_job_prio,
++		 "alta: program priority by process name, name=high|normal|low,... (default: everyone normal)");
++
++static int etnaviv_clients_param_get(char *buffer,
++				     const struct kernel_param *kp)
++{
++	char comm[TASK_COMM_LEN];
++	struct etnaviv_drm_private *priv;
++	struct drm_device *dev;
++	struct drm_file *file;
++	int len = 0;
++
++	mutex_lock(&etnaviv_prio_lock);
++	dev = etnaviv_prio_drm;
++	if (!dev)
++		goto out;
++	priv = dev->dev_private;
++
++	mutex_lock(&dev->filelist_mutex);
++	list_for_each_entry(file, &dev->filelist, lhead) {
++		struct etnaviv_file_private *ctx = file->driver_priv;
++		pid_t nr = etnaviv_prio_file_comm(file, comm, sizeof(comm));
++		int i;
++
++		for (i = 0; i < ETNA_MAX_PIPES; i++) {
++			struct etnaviv_gpu *gpu = priv->gpu[i];
++			struct drm_sched_entity *entity = &ctx->sched_entity[i];
++			enum drm_sched_priority prio;
++			bool applied;
++
++			if (!gpu)
++				continue;
++
++			mutex_lock(&gpu->sched_lock);
++			prio = entity->priority;
++			applied = prio < gpu->sched.num_rqs &&
++				  entity->rq == gpu->sched.sched_rq[prio];
++			mutex_unlock(&gpu->sched_lock);
++
++			len += scnprintf(buffer + len, PAGE_SIZE - len,
++					 "%d %s %s %s\n", nr, comm,
++					 etnaviv_prio_name(prio),
++					 applied ? "applied" : "pending");
++			break;	/* one line per program: the first pipe */
++		}
++	}
++	mutex_unlock(&dev->filelist_mutex);
++out:
++	mutex_unlock(&etnaviv_prio_lock);
++
++	return len;
++}
++
++static const struct kernel_param_ops etnaviv_clients_param_ops = {
++	.get = etnaviv_clients_param_get,
++};
++module_param_cb(hw_job_clients, &etnaviv_clients_param_ops, NULL, 0444);
++MODULE_PARM_DESC(hw_job_clients,
++		 "alta: programs with the NPU open: pid name priority applied|pending (read-only)");
++
+ static int etnaviv_open(struct drm_device *dev, struct drm_file *file)
+ {
+ 	struct etnaviv_drm_private *priv = dev->dev_private;
+ 	struct etnaviv_file_private *ctx;
++	enum drm_sched_priority prio;
++	char comm[TASK_COMM_LEN];
+ 	int ret, i;
+ 
++	/* alta: hw_job_prio, by the name of the program opening the NPU */
++	__get_task_comm(comm, sizeof(comm), current->group_leader);
++	mutex_lock(&etnaviv_prio_lock);
++	prio = etnaviv_prio_lookup(comm);
++	mutex_unlock(&etnaviv_prio_lock);
++
+ 	ctx = kzalloc(sizeof(*ctx), GFP_KERNEL);
+ 	if (!ctx)
+ 		return -ENOMEM;
+@@ -88,8 +384,7 @@
+ 		if (gpu) {
+ 			sched = &gpu->sched;
+ 			drm_sched_entity_init(&ctx->sched_entity[i],
+-					      DRM_SCHED_PRIORITY_NORMAL, &sched,
+-					      1, NULL);
++					      prio, &sched, 1, NULL);
+ 		}
+ 	}
+ 
+@@ -572,6 +867,11 @@
+ 	if (ret)
+ 		goto out_unbind;
+ 
++	/* alta: hw_job_prio writes may walk this device's open files now */
++	mutex_lock(&etnaviv_prio_lock);
++	etnaviv_prio_drm = drm;
++	mutex_unlock(&etnaviv_prio_lock);
++
+ 	return 0;
+ 
+ out_unbind:
+@@ -591,6 +891,11 @@
+ 	struct drm_device *drm = dev_get_drvdata(dev);
+ 	struct etnaviv_drm_private *priv = drm->dev_private;
+ 
++	/* alta: waits for a running hw_job_prio / hw_job_clients walk */
++	mutex_lock(&etnaviv_prio_lock);
++	etnaviv_prio_drm = NULL;
++	mutex_unlock(&etnaviv_prio_lock);
++
+ 	drm_dev_unregister(drm);
+ 
+ 	component_unbind_all(dev, drm);
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -165,6 +165,17 @@
+ 	 */
+ 	unsigned long alta_last_ctx;
+ 
++	/*
++	 * alta: program priority (hw_job_prio, etnaviv_drv.c). alta_sched_list
++	 * is the one-entry scheduler list handed to
++	 * drm_sched_entity_modify_sched(), so a priority change moves the
++	 * entity to its new run queue at its next quiet moment.
++	 * alta_prio_seen: ktime (ns) of the last job run at each priority, for
++	 * hw_job_prio_guard_ms (etnaviv_sched.c).
++	 */
++	struct drm_gpu_scheduler *alta_sched_list;
++	u64 alta_prio_seen[DRM_SCHED_PRIORITY_COUNT];
++
+ 	void __iomem *mmio;
+ 	int irq;
+ 
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -114,6 +114,46 @@
+ MODULE_PARM_DESC(hw_job_turns,
+ 		 "alta: jobs from different programs never share the ring (default: off)");
+ 
++/*
++ * alta: hw_job_prio_guard_ms (default 100, 0 = off), for program priority
++ * (hw_job_prio, etnaviv_drv.c).
++ * The scheduler always takes the next job from the highest priority that has
++ * one ready, so a lower-priority program runs in the gaps of a higher one. The
++ * NPU cannot pre-empt a job, though, and a lower-priority program that submits
++ * ahead could fill the ring just before the higher one's next job arrives. So
++ * while a higher-priority job has run within the last hw_job_prio_guard_ms, a
++ * lower-priority job enters only an empty ring (same mechanism as
++ * hw_job_turns): at most one of them is in the ring, and higher-priority jobs
++ * can still queue behind it. A higher-priority job then waits for at most the
++ * one lower-priority job already running.
++ */
++static unsigned int etnaviv_hw_jobs_prio_guard_ms = 100;
++module_param_named(hw_job_prio_guard_ms, etnaviv_hw_jobs_prio_guard_ms, uint, 0644);
++MODULE_PARM_DESC(hw_job_prio_guard_ms,
++		 "alta: after a higher-priority job, lower-priority jobs enter only an empty ring for this long (ms, default: 100, 0: off)");
++
++/* Safe under a spinlock. */
++static bool etnaviv_sched_higher_prio_active(struct etnaviv_gpu *gpu,
++					     enum drm_sched_priority prio)
++{
++	u64 guard = (u64)READ_ONCE(etnaviv_hw_jobs_prio_guard_ms) * NSEC_PER_MSEC;
++	u64 now;
++	int p;
++
++	if (!guard)
++		return false;
++
++	now = ktime_get_ns();
++	for (p = DRM_SCHED_PRIORITY_KERNEL; p < prio && p < DRM_SCHED_PRIORITY_COUNT; p++) {
++		u64 seen = READ_ONCE(gpu->alta_prio_seen[p]);
++
++		if (seen && now - seen < guard)
++			return true;
++	}
++
++	return false;
++}
++
+ /* Called with the scheduler's run queue spinlock held: must not sleep. */
+ static u32 etnaviv_sched_update_job_credits(struct drm_sched_job *sched_job)
+ {
+@@ -121,10 +161,14 @@
+ 	struct etnaviv_gpu *gpu = submit->gpu;
+ 	int limit = clamp(READ_ONCE(etnaviv_hw_jobs_limit), 1, ETNA_HW_JOBS_MAX);
+ 
+-	if (READ_ONCE(etnaviv_hw_jobs_turns) &&
+-	    atomic_read(&gpu->sched.credit_count) &&
+-	    READ_ONCE(gpu->alta_last_ctx) != (unsigned long)submit->ctx)
+-		return ETNA_SCHED_CREDITS;
++	if (atomic_read(&gpu->sched.credit_count)) {
++		if (READ_ONCE(etnaviv_hw_jobs_turns) &&
++		    READ_ONCE(gpu->alta_last_ctx) != (unsigned long)submit->ctx)
++			return ETNA_SCHED_CREDITS;
++
++		if (etnaviv_sched_higher_prio_active(gpu, sched_job->s_priority))
++			return ETNA_SCHED_CREDITS;
++	}
+ 
+ 	return ETNA_SCHED_CREDITS / limit;
+ }
+@@ -156,6 +200,9 @@
+ 	 * ring shares this file.
+ 	 */
+ 	WRITE_ONCE(submit->gpu->alta_last_ctx, (unsigned long)submit->ctx);
++	if (sched_job->s_priority < DRM_SCHED_PRIORITY_COUNT)
++		WRITE_ONCE(submit->gpu->alta_prio_seen[sched_job->s_priority],
++			   ktime_get_ns());
+ 
+ 	if (likely(!sched_job->s_fence->finished.error))
+ 		fence = etnaviv_gpu_submit(submit);
+@@ -283,11 +330,15 @@
+ 	if (ret)
+ 		return ret;
+ 
++	/* alta: for drm_sched_entity_modify_sched() (hw_job_prio) */
++	gpu->alta_sched_list = &gpu->sched;
++
+ 	dev_info(gpu->dev,
+-		 "alta: hw_job_limit %d (writable, 1-%d), hw_job_auto %s, hw_job_turns %s\n",
++		 "alta: hw_job_limit %d (writable, 1-%d), hw_job_auto %s, hw_job_turns %s, program priority (guard %u ms)\n",
+ 		 READ_ONCE(etnaviv_hw_jobs_limit), ETNA_HW_JOBS_MAX,
+ 		 str_on_off(READ_ONCE(etnaviv_hw_jobs_auto)),
+-		 str_on_off(READ_ONCE(etnaviv_hw_jobs_turns)));
++		 str_on_off(READ_ONCE(etnaviv_hw_jobs_turns)),
++		 READ_ONCE(etnaviv_hw_jobs_prio_guard_ms));
+ 
+ 	return 0;
+ }

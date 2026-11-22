@@ -1,0 +1,234 @@
+alta: make hw_job_limit writable at runtime, trip to 1 after a recovered hang
+
+hw_job_limit (how many jobs may sit in the NPU's hardware ring at once) was
+read-only and fixed at module load. Now it can be written at any time
+(1-4, /sys/module/etnaviv/parameters/hw_job_limit). The scheduler's credit
+pool is fixed at 12 and every job asks for 12 / limit credits through the
+scheduler's update_job_credits hook, so lowering the limit never trips the
+credit underflow warning, and the change applies as the ring drains.
+
+hw_job_auto (default on): a hang or MMU fault the driver recovers from sets
+hw_job_limit to 1 until someone writes it again; hw_job_trips counts these
+and hw_job_trip_from holds the limit before the last one, for a desktop tool
+that warns the user and offers to put it back or reboot.
+
+hw_job_turns (default off): jobs from different DRM files (programs) never
+share the ring. Off, programs share it as in stock etnaviv.
+
+Logs "alta: hw_job_limit N (writable, 1-4), hw_job_auto on, hw_job_turns off"
+at load and "alta: hw_job_limit N -> 1 after a recovered hang" on a trip.
+Applies on top of 0001-0005; touches etnaviv_sched.c and etnaviv_gpu.h only.
+
+--- a/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
++++ b/drivers/gpu/drm/etnaviv/etnaviv_gpu.h
+@@ -159,6 +159,12 @@
+ 	u32 hangcheck_dma_addr;
+ 	u32 hangcheck_fence;
+ 
++	/*
++	 * alta: the DRM file of the job the scheduler ran last, for
++	 * hw_job_turns (etnaviv_sched.c). Only compared, never dereferenced.
++	 */
++	unsigned long alta_last_ctx;
++
+ 	void __iomem *mmio;
+ 	int irq;
+ 
+--- a/drivers/gpu/drm/etnaviv/etnaviv_sched.c
++++ b/drivers/gpu/drm/etnaviv/etnaviv_sched.c
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include <linux/moduleparam.h>
++#include <linux/string_choices.h>
+ 
+ #include "etnaviv_drv.h"
+ #include "etnaviv_dump.h"
+@@ -14,14 +15,148 @@
+ 
+ static int etnaviv_job_hang_limit = 0;
+ module_param_named(job_hang_limit, etnaviv_job_hang_limit, int , 0444);
++
++/*
++ * alta: hw_job_limit can change at runtime.
++ *
++ * It is how many jobs may sit in the hardware ring at once (1-4). The front end
++ * still runs them one after the other; a limit above 1 only lets the next job
++ * wait in the ring, so the core does not idle while the CPU takes the interrupt
++ * and queues the next job. It matters only when a program submits ahead.
++ *
++ * The scheduler's credit pool stays at ETNA_SCHED_CREDITS for its whole life,
++ * and each job asks for ETNA_SCHED_CREDITS / limit credits each time the
++ * scheduler looks at it (update_job_credits). 12 divides by 1, 2, 3 and 4, so
++ * exactly "limit" jobs fit. Changing sched->credit_limit itself would trip the
++ * underflow warning in drm_sched_available_credits() whenever it went below the
++ * credits in flight. A job keeps the credits it started with until it is done,
++ * so a lower limit takes effect as the ring drains and a higher one at the next
++ * job the scheduler looks at. Stock etnaviv took any value here; above 4 is
++ * clamped: the one-page kernel ring wraps without checking how far the front
++ * end has read, so the job limit is what keeps queued jobs from being
++ * overwritten, and 4 is the value stock etnaviv ships with.
++ */
++#define ETNA_SCHED_CREDITS	12
++#define ETNA_HW_JOBS_MAX	4
++
+ static int etnaviv_hw_jobs_limit = 4;
+-module_param_named(hw_job_limit, etnaviv_hw_jobs_limit, int , 0444);
++
++static int etnaviv_hw_jobs_limit_set(const char *val,
++				     const struct kernel_param *kp)
++{
++	int n, ret;
++
++	ret = kstrtoint(val, 0, &n);
++	if (ret)
++		return ret;
++
++	if (n < 1 || n > ETNA_HW_JOBS_MAX) {
++		pr_warn("etnaviv: alta: hw_job_limit %d is outside 1-%d, using %d\n",
++			n, ETNA_HW_JOBS_MAX, clamp(n, 1, ETNA_HW_JOBS_MAX));
++		n = clamp(n, 1, ETNA_HW_JOBS_MAX);
++	}
++
++	WRITE_ONCE(etnaviv_hw_jobs_limit, n);
++	return 0;
++}
++
++static const struct kernel_param_ops etnaviv_hw_jobs_limit_ops = {
++	.set = etnaviv_hw_jobs_limit_set,
++	.get = param_get_int,
++};
++module_param_cb(hw_job_limit, &etnaviv_hw_jobs_limit_ops,
++		&etnaviv_hw_jobs_limit, 0644);
++MODULE_PARM_DESC(hw_job_limit,
++		 "alta: jobs in the hardware ring at once, 1-4, writable at runtime (default: 4)");
++
++/*
++ * alta: hw_job_auto (default on): after a hang or MMU fault the driver has to
++ * recover from, hw_job_limit drops to 1 and stays there until someone writes
++ * it again. The kernel cannot ask the user, so it leaves a record instead:
++ * hw_job_trips counts the trips since the module loaded and hw_job_trip_from
++ * holds the limit before the last one (0: none yet). A desktop tool can then
++ * warn the user and offer to put the limit back or to reboot.
++ */
++static bool etnaviv_hw_jobs_auto = true;
++module_param_named(hw_job_auto, etnaviv_hw_jobs_auto, bool, 0644);
++MODULE_PARM_DESC(hw_job_auto,
++		 "alta: set hw_job_limit to 1 after a recovered hang (default: on)");
++
++static unsigned int etnaviv_hw_jobs_trips;
++module_param_named(hw_job_trips, etnaviv_hw_jobs_trips, uint, 0444);
++MODULE_PARM_DESC(hw_job_trips,
++		 "alta: recovered hangs that tripped hw_job_auto since the module loaded");
++
++static int etnaviv_hw_jobs_trip_from;
++module_param_named(hw_job_trip_from, etnaviv_hw_jobs_trip_from, int, 0444);
++MODULE_PARM_DESC(hw_job_trip_from,
++		 "alta: hw_job_limit before the last trip (0: no trip since the module loaded)");
++
++/*
++ * alta: hw_job_turns (default off).
++ * Off, as in stock etnaviv: jobs from different programs share the ring. The
++ * kernel writes an MMU context switch and a cache flush between two jobs of
++ * different programs (etnaviv_buffer_queue), so they can follow each other
++ * directly, and the scheduler's FIFO decides whose job goes in next.
++ * On: jobs from different DRM files (in practice: different programs) never
++ * share the ring. A job whose file differs from the one of the jobs in the
++ * ring asks for all credits, so it waits until the ring is empty; the
++ * scheduler asks again then, and it gets the normal share, so the same program
++ * can queue behind it. One program that submits ahead keeps the full limit;
++ * two programs take turns, and neither waits behind a deep queue of the
++ * other's jobs. If the ring empties between the check and the scheduler's
++ * credit test, the job runs holding all credits: one overlap lost, nothing
++ * worse. The FIFO stops at a job that does not fit (-ENOSPC), so the waiting
++ * program is not starved.
++ */
++static bool etnaviv_hw_jobs_turns;
++module_param_named(hw_job_turns, etnaviv_hw_jobs_turns, bool, 0644);
++MODULE_PARM_DESC(hw_job_turns,
++		 "alta: jobs from different programs never share the ring (default: off)");
++
++/* Called with the scheduler's run queue spinlock held: must not sleep. */
++static u32 etnaviv_sched_update_job_credits(struct drm_sched_job *sched_job)
++{
++	struct etnaviv_gem_submit *submit = to_etnaviv_submit(sched_job);
++	struct etnaviv_gpu *gpu = submit->gpu;
++	int limit = clamp(READ_ONCE(etnaviv_hw_jobs_limit), 1, ETNA_HW_JOBS_MAX);
++
++	if (READ_ONCE(etnaviv_hw_jobs_turns) &&
++	    atomic_read(&gpu->sched.credit_count) &&
++	    READ_ONCE(gpu->alta_last_ctx) != (unsigned long)submit->ctx)
++		return ETNA_SCHED_CREDITS;
++
++	return ETNA_SCHED_CREDITS / limit;
++}
++
++/* The scheduler is stopped when this runs (etnaviv_sched_timedout_job). */
++static void etnaviv_hw_jobs_trip(struct etnaviv_gpu *gpu)
++{
++	int old = READ_ONCE(etnaviv_hw_jobs_limit);
++
++	if (!READ_ONCE(etnaviv_hw_jobs_auto))
++		return;
++
++	WRITE_ONCE(etnaviv_hw_jobs_trip_from, old);
++	WRITE_ONCE(etnaviv_hw_jobs_trips, etnaviv_hw_jobs_trips + 1);
++	WRITE_ONCE(etnaviv_hw_jobs_limit, 1);
++	dev_warn(gpu->dev,
++		 "alta: hw_job_limit %d -> 1 after a recovered hang (hw_job_auto, trip %u)\n",
++		 old, etnaviv_hw_jobs_trips);
++}
+ 
+ static struct dma_fence *etnaviv_sched_run_job(struct drm_sched_job *sched_job)
+ {
+ 	struct etnaviv_gem_submit *submit = to_etnaviv_submit(sched_job);
+ 	struct dma_fence *fence = NULL;
+ 
++	/*
++	 * alta: run_job and update_job_credits both run on the scheduler's
++	 * ordered submit workqueue, so with hw_job_turns on, every job in the
++	 * ring shares this file.
++	 */
++	WRITE_ONCE(submit->gpu->alta_last_ctx, (unsigned long)submit->ctx);
++
+ 	if (likely(!sched_job->s_fence->finished.error))
+ 		fence = etnaviv_gpu_submit(submit);
+ 	else
+@@ -64,6 +199,9 @@
+ 	/* block scheduler */
+ 	drm_sched_stop(&gpu->sched, sched_job);
+ 
++	/* alta: a hang or MMU fault the driver has to recover from */
++	etnaviv_hw_jobs_trip(gpu);
++
+ 	if(sched_job)
+ 		drm_sched_increase_karma(sched_job);
+ 
+@@ -96,6 +234,7 @@
+ 	.run_job = etnaviv_sched_run_job,
+ 	.timedout_job = etnaviv_sched_timedout_job,
+ 	.free_job = etnaviv_sched_free_job,
++	.update_job_credits = etnaviv_sched_update_job_credits,
+ };
+ 
+ int etnaviv_sched_push_job(struct etnaviv_gem_submit *submit)
+@@ -138,12 +277,18 @@
+ 
+ 	ret = drm_sched_init(&gpu->sched, &etnaviv_sched_ops, NULL,
+ 			     DRM_SCHED_PRIORITY_COUNT,
+-			     etnaviv_hw_jobs_limit, etnaviv_job_hang_limit,
++			     ETNA_SCHED_CREDITS, etnaviv_job_hang_limit,
+ 			     msecs_to_jiffies(500), NULL, NULL,
+ 			     dev_name(gpu->dev), gpu->dev);
+ 	if (ret)
+ 		return ret;
+ 
++	dev_info(gpu->dev,
++		 "alta: hw_job_limit %d (writable, 1-%d), hw_job_auto %s, hw_job_turns %s\n",
++		 READ_ONCE(etnaviv_hw_jobs_limit), ETNA_HW_JOBS_MAX,
++		 str_on_off(READ_ONCE(etnaviv_hw_jobs_auto)),
++		 str_on_off(READ_ONCE(etnaviv_hw_jobs_turns)));
++
+ 	return 0;
+ }
+ 

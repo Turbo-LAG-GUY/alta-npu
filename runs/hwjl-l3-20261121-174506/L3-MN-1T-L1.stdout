@@ -1,0 +1,23 @@
+{
+ "delegate": "/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so",
+ "model": "/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite",
+ "threads": 1,
+ "invokes": 200,
+ "wall_ms": 1689.8,
+ "ms_per_invoke_throughput": 8.449,
+ "invokes_per_s": 118.36,
+ "invoke_ms_median": 7.8,
+ "invoke_ms_median_per_thread": [
+  7.8
+ ],
+ "max_diff_vs_first": 0,
+ "diff_vs_cpu_max": 4,
+ "diff_vs_cpu_mean_worst": 0.012,
+ "bytes_differing_from_saved_total": null,
+ "outputs_checked": 201,
+ "errors": [],
+ "all_invokes_identical": true,
+ "match": true
+}
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261121-174753-L3-MN-1T-L1

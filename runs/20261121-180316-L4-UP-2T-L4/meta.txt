@@ -1,0 +1,11 @@
+label: L4-UP-2T-L4
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/alta-npu/research/hw-job-limit/pipeline_check.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_reference_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -t 2 -n 100 --compare /home/jordan/alta-npu/runs/hwjl-l4-20261121-180227/up.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-21T18:03:16-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2210
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=153b09;b=d6e906790e744d9e93de5f493c6a60e7;m=93b1c026;t=660d1581e6bc0;x=1a4e21d996cbd729
+ETNA_ML_DISK_CACHE_DIR=/home/jordan/alta-npu/runs/hwjl-l4-20261121-180227/cache
+end: 2026-11-21T18:03:21-05:00  rc: 0  wall_s: 5

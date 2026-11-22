@@ -25,6 +25,13 @@ mkdir -p "$ROOT"
 refuse() { echo "npu-run: REFUSED: $*" >&2; exit 77; }
 klog()   { journalctl -k --no-pager -q "$@" 2>/dev/null; }
 up_s()   { cut -d. -f1 /proc/uptime; }   # monotonic whole seconds since boot
+# Job-queue driver (alta patches 0006/0007, root step 250, 2026-11-21): hw_job_* parameters; empty on other builds.
+QP="${NPU_RUN_QUEUE_PARAMS:-/sys/module/etnaviv/parameters}"   # override only for tests
+trips()  { cat "$QP/hw_job_trips" 2>/dev/null || echo 0; }
+qstate() { [ -r "$QP/hw_job_trips" ] || { echo "n/a (driver without job-queue controls; hw_job_limit=$(cat "$QP/hw_job_limit" 2>/dev/null))"; return; }
+           echo "limit=$(cat $QP/hw_job_limit) auto=$(cat $QP/hw_job_auto) turns=$(cat $QP/hw_job_turns)" \
+                "guard_ms=$(cat $QP/hw_job_prio_guard_ms) trips=$(cat $QP/hw_job_trips) trip_from=$(cat $QP/hw_job_trip_from)" \
+                "prio=[$(cat $QP/hw_job_prio 2>/dev/null)] clients=[$(tr '\n' ';' < $QP/hw_job_clients 2>/dev/null)]"; }
 
 # 0. Stop latch.
 [ -e "$ROOT/STOP" ] && refuse "STOP latch present ($(head -1 "$ROOT/STOP")). Reboot, review that run, then: rm $ROOT/STOP"
@@ -48,6 +55,7 @@ fi
 
 # 3. Do not start on a board that is already in trouble or short of memory.
 klog -b 0 | grep -qiE 'recover hung gpu|failed to reset|mmu fault' && refuse "this boot already logged an etnaviv hang or MMU fault - reboot first"
+[ "$(trips)" -gt 0 ] && refuse "the driver dropped the job queue to 1 after a recovered hang this boot (hw_job_trips=$(trips)) - reboot first"
 AVAIL_MB="$(awk '/^MemAvailable:/ {print int($2/1024)}' /proc/meminfo)"
 [ "$AVAIL_MB" -ge "${NPU_MIN_AVAIL_MB:-600}" ] || refuse "only ${AVAIL_MB} MB available (< ${NPU_MIN_AVAIL_MB:-600} MB) - stop builds first"
 
@@ -59,6 +67,7 @@ flock -n 9 || { echo "npu-run: another NPU job holds $LOCK" >&2; exit 75; }
 RUN="$ROOT/$(date +%Y%m%d-%H%M%S)-$LABEL"
 mkdir -p "$RUN"
 START="$(up_s)"
+TRIPS0="$(trips)"
 WALLSTART="$(date +%s)"   # only for the fallback below
 CURSOR="$(klog -n 1 --show-cursor | sed -n 's/^-- cursor: //p')"   # kernel-log position just before the job
 {
@@ -71,6 +80,7 @@ CURSOR="$(klog -n 1 --show-cursor | sed -n 's/^-- cursor: //p')"   # kernel-log 
   echo "mem_available_mb: $AVAIL_MB"
   echo "deadline_s: $TIMEOUT"
   echo "journal_cursor: ${CURSOR:-none}"
+  echo "job_queue_before: $(qstate)"
   env | grep -E '^(TEFLON_|ETNA_|MESA_)' || true
 } > "$RUN/meta.txt"
 
@@ -107,6 +117,7 @@ done
 if [ -z "$RC" ]; then wait "$PID"; RC=$?; fi
 sleep 1  # let late kernel messages land
 echo "end: $(date -Is)  rc: $RC  wall_s: $(( $(up_s) - START ))" >> "$RUN/meta.txt"
+echo "job_queue_after: $(qstate)" >> "$RUN/meta.txt"
 if [ -n "$CURSOR" ]; then
   klog --after-cursor "$CURSOR" -o short-monotonic > "$RUN/kernel.txt"
 else
@@ -115,8 +126,11 @@ fi
 
 # 6. Verdict. During a healthy run etnaviv logs nothing at all.
 BAD='recover hung gpu|failed to reset|mmu fault|not yet idle|not idle|timed? ?out|out of memory|oom-kill|soft lockup|hung_task|rcu.*stall|Internal error|Oops|BUG:'
+#    A rise in hw_job_trips (the driver recovered a hang and dropped the queue to 1) counts too, even if the journal
+#    missed the lines.
 if grep -iE 'etnaviv|ff100000\.npu' "$RUN/kernel.txt" | grep -viE 'alta: SH_EU' | grep -q . \
-   || grep -qiE "$BAD" "$RUN/kernel.txt"; then
+   || grep -qiE "$BAD" "$RUN/kernel.txt" || [ "$(trips)" -gt "$TRIPS0" ]; then
+  [ "$(trips)" -gt "$TRIPS0" ] && echo "npu-run: hw_job_trips went from $TRIPS0 to $(trips): the driver recovered a hang" | tee -a "$RUN/meta.txt" >&2
   printf '%s %s (kernel messages)\n' "$(date -Is)" "$RUN" > "$ROOT/STOP"
   echo "npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: $RUN/kernel.txt" >&2
   head -20 "$RUN/kernel.txt" >&2

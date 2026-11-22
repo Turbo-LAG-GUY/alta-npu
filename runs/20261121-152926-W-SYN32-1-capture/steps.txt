@@ -1,0 +1,7 @@
+[ 2125.015270] pid=44112 start: delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-upscale/models/width_n32_planar_960x540.tflite ETNA_ML_SHADER=None
+[ 2125.026536] pid=44112 load_delegate: begin
+[ 2125.060293] pid=44112 load_delegate: done
+[ 2125.142834] pid=44112 allocate_tensors: done (75.1 ms)
+[ 2125.149754] pid=44112 invoke 1/1: begin
+[ 2125.206367] pid=44112 invoke 1/1: done (47.02 ms)
+[ 2125.295540] pid=44112 finished

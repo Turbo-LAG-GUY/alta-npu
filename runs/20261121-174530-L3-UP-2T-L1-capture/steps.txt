@@ -1,0 +1,9 @@
+[ 1511.721529] pid=24383 tid=24383 start: threads=2 iterations=100 delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite
+[ 1511.729790] pid=24383 tid=24383 worker 0: load_delegate + allocate
+[ 1511.799675] pid=24383 tid=24383 worker 0: warm-up invoke
+[ 1511.824345] pid=24383 tid=24383 worker 0: warm-up done
+[ 1511.838009] pid=24383 tid=24383 worker 1: load_delegate + allocate
+[ 1511.890093] pid=24383 tid=24383 worker 1: warm-up invoke
+[ 1511.906324] pid=24383 tid=24383 worker 1: warm-up done
+[ 1512.058324] pid=24383 tid=24383 timed run: begin
+[ 1520.998639] pid=24383 tid=24383 timed run: done (8935.7 ms)

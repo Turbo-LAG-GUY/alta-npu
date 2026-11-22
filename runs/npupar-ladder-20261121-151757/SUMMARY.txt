@@ -1,0 +1,6 @@
+NPUPAR-U8-BASE     n=10 median= 13.63 med_after_1st= 13.19 min= 12.31 max= 24.85 mean= 14.64 same_each=True cpu_max=1 vs_saved=- match=True
+NPUPAR-U8-PAR1     n= 1 median= 16.17 med_after_1st= 16.17 min= 16.17 max= 16.17 mean= 16.17 same_each=True cpu_max=1 vs_saved=0 match=True
+NPUPAR-U8-PAR10    n=10 median= 13.24 med_after_1st= 13.08 min= 11.43 max= 14.87 mean= 13.27 same_each=True cpu_max=1 vs_saved=0 match=True
+NPUPAR-U8-BASE2    n=10 median= 13.14 med_after_1st= 12.76 min= 11.86 max= 16.07 mean= 13.55 same_each=True cpu_max=1 vs_saved=0 match=True
+NPUPAR-U16-BASE    n=10 median= 25.16 med_after_1st= 25.18 min= 22.32 max= 25.92 mean= 24.66 same_each=True cpu_max=1 vs_saved=- match=True
+NPUPAR-U16-PAR10   n=10 median= 24.63 med_after_1st= 24.61 min= 22.28 max= 26.56 mean= 24.21 same_each=True cpu_max=1 vs_saved=0 match=True

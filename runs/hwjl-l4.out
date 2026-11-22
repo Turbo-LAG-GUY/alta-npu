@@ -1,0 +1,22 @@
+== L4-UP-1T-L1 limit=1 threads=1: ms_per_invoke_throughput=16.458 invoke_ms_median=12.97 bytes_differing_from_saved_total=None match=True
+== L4-UP-2T-L1 limit=1 threads=2: ms_per_invoke_throughput=13.393 invoke_ms_median=20.28 bytes_differing_from_saved_total=0 match=True
+== L4-UP-2T-L4 limit=4 threads=2: ms_per_invoke_throughput=13.221 invoke_ms_median=20.84 bytes_differing_from_saved_total=0 match=True
+== L4-MN-SAVE limit=1 threads=1: ms_per_invoke_throughput=8.322 invoke_ms_median=7.83 bytes_differing_from_saved_total=None match=True
+== L4-NOPRIO prio=[] guard=100 turns=N
+   hi: invokes=184 invokes_per_s=36.65 invoke_ms_median=27.07 invoke_ms_p90=29.04 invoke_ms_max=34.16 bytes_differing_from_saved_total=0 match=True
+   lo: invokes=543 invokes_per_s=108.07 invoke_ms_median=27.14 invoke_ms_p90=29.37 invoke_ms_max=49.53 bytes_differing_from_saved_total=0 match=True
+   clients during: 44187 hwjl_hi normal applied;44187 hwjl_hi normal applied;43843 hwjl_lo normal applied;43843 hwjl_lo normal applied;43843 hwjl_lo normal applied;43843 hwjl_lo normal applied;43843 hwjl_lo normal applied;43843 hwjl_lo normal applied;
+== L4-PRIO prio=[hwjl_hi=high,hwjl_lo=low] guard=100 turns=N
+   hi: invokes=306 invokes_per_s=60.99 invoke_ms_median=15.07 invoke_ms_p90=20.66 invoke_ms_max=23.2 bytes_differing_from_saved_total=0 match=True
+   lo: invokes=401 invokes_per_s=79.83 invoke_ms_median=35.3 invoke_ms_p90=44.38 invoke_ms_max=64.82 bytes_differing_from_saved_total=0 match=True
+   clients during: 45448 hwjl_hi high applied;45448 hwjl_hi high applied;45106 hwjl_lo low applied;45106 hwjl_lo low applied;45106 hwjl_lo low applied;45106 hwjl_lo low applied;45106 hwjl_lo low applied;45106 hwjl_lo low applied;
+== L4-PRIO-G0 prio=[hwjl_hi=high,hwjl_lo=low] guard=0 turns=N
+   hi: invokes=185 invokes_per_s=36.99 invoke_ms_median=26.86 invoke_ms_p90=29.17 invoke_ms_max=40.86 bytes_differing_from_saved_total=0 match=True
+   lo: invokes=538 invokes_per_s=107.29 invoke_ms_median=26.98 invoke_ms_p90=30.33 invoke_ms_max=46.87 bytes_differing_from_saved_total=0 match=True
+   clients during: 46712 hwjl_hi high applied;46712 hwjl_hi high applied;46371 hwjl_lo low applied;46371 hwjl_lo low applied;46371 hwjl_lo low applied;46371 hwjl_lo low applied;46371 hwjl_lo low applied;46371 hwjl_lo low applied;
+== L4-TURNS prio=[] guard=100 turns=Y
+   hi: invokes=174 invokes_per_s=34.62 invoke_ms_median=28.52 invoke_ms_p90=31.67 invoke_ms_max=48.35 bytes_differing_from_saved_total=0 match=True
+   lo: invokes=512 invokes_per_s=102.24 invoke_ms_median=28.62 invoke_ms_p90=32.09 invoke_ms_max=53.39 bytes_differing_from_saved_total=0 match=True
+   clients during: 47986 hwjl_hi normal applied;47986 hwjl_hi normal applied;47628 hwjl_lo normal applied;47628 hwjl_lo normal applied;47628 hwjl_lo normal applied;47628 hwjl_lo normal applied;47628 hwjl_lo normal applied;47628 hwjl_lo normal applied;
+restored: limit 1 prio [] guard 100 turns N
+all rungs passed: /home/jordan/alta-npu/runs/hwjl-l4-20261121-180227

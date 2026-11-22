@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py", line 47, in <module>
+    ref = np.load(a.reference)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/home/jordan/Documents/AI_Projects/.venv/lib/python3.12/site-packages/numpy/lib/npyio.py", line 427, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jordan/alta-npu/models/mobilenet_v1_mesa_reference.npz'
+npu-run: rc=1 record=/home/jordan/alta-npu/runs/20261121-173927-L1-MN

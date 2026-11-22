@@ -43,6 +43,15 @@ Where the numbers come from:
     hang             a kernel hang dump waiting in /sys/class/devcoredump (it is
                      deleted after about 5 minutes), and the kit's runs/STOP file,
                      which blocks NPU jobs until a reboot.
+    job queue        /sys/module/etnaviv/parameters/hw_job_*: how many jobs wait in
+                     the NPU at once, and whether the driver dropped that to 1 after
+                     a recovered hang (alta kernel patches 0006 and 0007). The menu's
+                     "Job queue…" opens npu_control.py, the window that changes it.
+
+The indicator writes nothing to the NPU. It does write the job-queue settings you
+saved in that window, once per boot when it starts ("apply when I log in"), and
+when the driver drops the queue to 1 after a hang it tells you and opens the
+window so you can put it back, keep it at 1 or reboot (npu_queue.py).
 """
 
 import argparse
@@ -58,6 +67,11 @@ import time
 import traceback
 from collections import deque
 from dataclasses import dataclass, field
+
+try:
+    import npu_queue  # job-queue settings (alta patches 0006/0007); ships beside this file
+except ImportError:
+    npu_queue = None
 
 APP_ID = "npu-status"
 ICON_VERSION = "v1"  # bump when the icon design changes: the shell caches icons by name
@@ -877,6 +891,9 @@ class TrayApp:
         self.head = add(Gtk.MenuItem(label="Reading…"))
         self.detail = [add(Gtk.MenuItem(label="")) for _ in range(9)]
         self.hang_watch = HangWatch()
+        self.queue = add(Gtk.MenuItem(label=""))
+        self.queue.connect("activate", lambda *_: self._open_queue_window())
+        self.trip_watch = npu_queue.TripWatch() if npu_queue else None
         self.disk = add(Gtk.MenuItem(label=""))
         self.disk_watch = DiskWatch()
         self._disk_checked = None
@@ -889,17 +906,22 @@ class TrayApp:
         toggle = add(Gtk.CheckMenuItem(label="Show load in top bar"))
         toggle.set_active(self.settings["show_label"])
         toggle.connect("toggled", self._on_toggle_label)
+        if npu_queue:
+            add(Gtk.MenuItem(label="Job queue…")).connect("activate",
+                                                         lambda *_: self._open_queue_window())
         if shutil.which("gnome-terminal"):
             add(Gtk.MenuItem(label="Open live view")).connect("activate", self._on_live_view)
         add(Gtk.MenuItem(label="Quit")).connect("activate", lambda *_: Gtk.main_quit())
         menu.show_all()
-        for item in self.detail + self.programs + [self.disk]:
+        for item in self.detail + self.programs + [self.disk, self.queue]:
             item.hide()
         self.indicator.set_menu(menu)
 
         for sig in (signal.SIGINT, signal.SIGTERM):
             GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig, self._quit)
         GLib.timeout_add(int(interval * 1000), self._tick)
+        if npu_queue:
+            GLib.idle_add(self._queue_at_login)
 
     def _quit(self):
         self.Gtk.main_quit()
@@ -926,7 +948,46 @@ class TrayApp:
             self._check_disk()
         except Exception:
             traceback.print_exc()
+        try:
+            self._check_queue()
+        except Exception:
+            traceback.print_exc()
         return True
+
+    # -- job queue (npu_queue.py, npu_control.py) --------------------------
+
+    def _queue_at_login(self):
+        """Apply the saved job-queue settings once per boot; say so if some were held back."""
+        try:
+            for msg in npu_queue.apply_at_login():
+                send_notification("NPU job queue", msg, icon="dialog-information")
+        except Exception:
+            traceback.print_exc()
+        return False
+
+    def _check_queue(self):
+        if not npu_queue:
+            return
+        st = npu_queue.read_state(clients=False)
+        self._show(self.queue, npu_queue.summary(st))
+        trip = self.trip_watch.check(st)
+        if trip:
+            frm, n = trip
+            send_notification("NPU queue dropped to 1 job",
+                              f"The NPU hung and the driver recovered it, so the queue went from "
+                              f"{frm} to 1 job at a time ({n}× this boot). Choose in the Job queue "
+                              f"window: put it back, keep 1 for now, or reboot.",
+                              icon="dialog-warning")
+            self._open_queue_window(trip=True)
+
+    def _open_queue_window(self, trip=False):
+        cmd = [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                            "npu_control.py")]
+        if trip:
+            cmd.append("--trip")
+        if ROOT != "/":
+            cmd += ["--root", ROOT]
+        subprocess.Popen(cmd, stdin=subprocess.DEVNULL, start_new_session=True)
 
     def _check_disk(self):
         now = time.monotonic()  # uptime, not wall time: this board's clock can jump
@@ -1066,6 +1127,8 @@ def main():
 
     global ROOT
     ROOT = os.path.abspath(args.root)
+    if npu_queue:
+        npu_queue.ROOT = ROOT
     interval = max(args.interval, 0.25)
 
     if args.once:

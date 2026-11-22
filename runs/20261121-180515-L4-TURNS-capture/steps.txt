@@ -1,0 +1,18 @@
+[ 2696.866387] pid=47628 tid=47628 start: threads=3 iterations=40 delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite
+[ 2696.896862] pid=47628 tid=47628 worker 0: load_delegate + allocate
+[ 2698.537706] pid=47628 tid=47628 worker 0: warm-up invoke
+[ 2698.551379] pid=47628 tid=47628 worker 0: warm-up done
+[ 2698.555265] pid=47628 tid=47628 worker 1: load_delegate + allocate
+[ 2698.959107] pid=47628 tid=47628 worker 1: warm-up invoke
+[ 2698.975497] pid=47628 tid=47628 worker 1: warm-up done
+[ 2698.984627] pid=47628 tid=47628 worker 2: load_delegate + allocate
+[ 2699.392419] pid=47628 tid=47628 worker 2: warm-up invoke
+[ 2699.560251] pid=47628 tid=47628 worker 2: warm-up done
+[ 2700.018528] pid=47986 tid=47986 start: threads=1 iterations=40 delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite
+[ 2700.037713] pid=47986 tid=47986 worker 0: load_delegate + allocate
+[ 2701.620062] pid=47986 tid=47986 worker 0: warm-up invoke
+[ 2701.645062] pid=47986 tid=47986 worker 0: warm-up done
+[ 2701.677427] pid=47986 tid=47986 timed run: begin
+[ 2701.684103] pid=47628 tid=47628 timed run: begin
+[ 2706.707994] pid=47986 tid=47986 timed run: done (5026.7 ms)
+[ 2706.710428] pid=47628 tid=47628 timed run: done (5007.6 ms)

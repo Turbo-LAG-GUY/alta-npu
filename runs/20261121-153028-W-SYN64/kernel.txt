@@ -1,0 +1,1 @@
+[ 2182.047664] jordan-aml-a311d-cc kernel: Purging 577536 bytes

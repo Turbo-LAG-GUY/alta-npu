@@ -1,0 +1,35 @@
+== hw_job_limit set to 1
+== L1-UP8 (limit 1) rc=0
+ "invoke_ms_median": 12.65,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 1,
+ "match": true
+== L1-MN (limit 1) rc=0
+ "invoke_ms_median": 8.16,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 4,
+ "match": true
+== hw_job_limit set to 2
+== L2-UP8-2 (limit 2) rc=0
+ "invoke_ms_median": 13.79,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 1,
+ "match": true
+== L2-MN-2 (limit 2) rc=0
+ "invoke_ms_median": 8.68,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 4,
+ "match": true
+== hw_job_limit set to 4
+== L2-UP8-4 (limit 4) rc=0
+ "invoke_ms_median": 13.24,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 1,
+ "match": true
+== L2-MN-4 (limit 4) rc=0
+ "invoke_ms_median": 8.36,
+ "all_invokes_identical": true,
+ "diff_vs_cpu_max": 4,
+ "match": true
+limit back to 1
+all rungs passed: /home/jordan/alta-npu/runs/hwjl-ladder-20261121-173959

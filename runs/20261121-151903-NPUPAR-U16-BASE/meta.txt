@@ -1,0 +1,11 @@
+label: NPUPAR-U16-BASE
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n16_planar_reference_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -n 10 --save /home/jordan/alta-npu/runs/npupar-ladder-20261121-151757/u16_base.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-21T15:19:03-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2306
+deadline_s: 120
+journal_cursor: s=a85e36cf753941639c453b48411feed6;i=1519b3;b=f9492f52e3f74266825cb6eaa55aeee1;m=53155397;t=660cf0c534cd9;x=db37cf4b3256a682
+ETNA_ML_DISK_CACHE_DIR=/home/jordan/alta-npu/runs/npupar-ladder-20261121-151757/cache
+end: 2026-11-21T15:19:06-05:00  rc: 0  wall_s: 3

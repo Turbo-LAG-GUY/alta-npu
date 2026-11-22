@@ -1,0 +1,6 @@
+[ 1649.047104] pid=28647 tid=28647 start: threads=1 iterations=200 delegate=/home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so model=/home/jordan/alta-npu/models/mobilenet_v1_mesa.tflite
+[ 1649.049622] pid=28647 tid=28647 worker 0: load_delegate + allocate
+[ 1650.623437] pid=28647 tid=28647 worker 0: warm-up invoke
+[ 1650.730917] pid=28647 tid=28647 worker 0: warm-up done
+[ 1650.747917] pid=28647 tid=28647 timed run: begin
+[ 1652.441247] pid=28647 tid=28647 timed run: done (1689.8 ms)

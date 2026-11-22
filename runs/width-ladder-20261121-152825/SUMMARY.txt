@@ -1,0 +1,8 @@
+W-REAL8            n=10 median= 13.50 med_after_1st= 13.25 min= 12.00 max= 19.30 mean= 14.10 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN8             n=10 median= 13.02 med_after_1st= 12.48 min= 11.57 max= 22.15 mean= 13.89 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN16            n=10 median= 23.95 med_after_1st= 23.61 min= 22.30 max= 25.76 mean= 24.07 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN32-1          n= 1 median= 47.02 med_after_1st= 47.02 min= 47.02 max= 47.02 mean= 47.02 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN32            n=10 median= 41.76 med_after_1st= 42.13 min= 39.70 max= 43.93 mean= 41.66 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN64-1          n= 1 median= 75.00 med_after_1st= 75.00 min= 75.00 max= 75.00 mean= 75.00 same_each=True cpu_max=1 vs_saved=- match=True
+W-SYN64            n=10 median= 72.26 med_after_1st= 71.62 min= 70.03 max= 83.96 mean= 74.43 same_each=True cpu_max=1 vs_saved=- match=True
+W-REAL16           n=10 median= 24.57 med_after_1st= 24.57 min= 21.88 max= 27.26 mean= 24.32 same_each=True cpu_max=1 vs_saved=- match=True

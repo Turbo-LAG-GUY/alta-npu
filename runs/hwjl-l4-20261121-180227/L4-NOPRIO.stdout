@@ -1,0 +1,2 @@
+prio_pair: hi rc=0 lo rc=0
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261121-180357-L4-NOPRIO

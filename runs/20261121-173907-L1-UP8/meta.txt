@@ -1,0 +1,11 @@
+label: L1-UP8
+cmd: /home/jordan/Documents/AI_Projects/.venv/bin/python -I /home/jordan/Documents/AI_Projects/npu-shader/teflon_check.py -m /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_960x540.tflite -r /home/jordan/Documents/AI_Projects/npu-upscale/models/hist2_n8_planar_reference_960x540.npz -e /home/jordan/Documents/AI_Projects/mesa-axi-sram/build/src/gallium/targets/teflon/libteflon.so -n 10 --save /home/jordan/alta-npu/runs/hwjl-ladder-20261121-173901/up8.npy
+cwd: /home/jordan/alta-npu
+start: 2026-11-21T17:39:08-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2176
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=1539ac;b=d6e906790e744d9e93de5f493c6a60e7;m=3ba4cf20;t=660d100117ab6;x=985a9e00bc19668d
+ETNA_ML_DISK_CACHE_DIR=/home/jordan/alta-npu/runs/hwjl-ladder-20261121-173901/cache
+end: 2026-11-21T17:39:11-05:00  rc: 0  wall_s: 4

@@ -1,0 +1,4 @@
+L1-UP8 before: hw_job_limit=1 hw_job_auto=Y hw_job_turns=N hw_job_trips=0 hw_job_trip_from=0 hw_job_prio_guard_ms=100 clients=[]
+L1-UP8 after:  hw_job_limit=1 hw_job_auto=Y hw_job_turns=N hw_job_trips=0 hw_job_trip_from=0 hw_job_prio_guard_ms=100 clients=[]
+L1-MN before: hw_job_limit=1 hw_job_auto=Y hw_job_turns=N hw_job_trips=0 hw_job_trip_from=0 hw_job_prio_guard_ms=100 clients=[]
+L1-MN after:  hw_job_limit=4 hw_job_auto=Y hw_job_turns=N hw_job_trips=0 hw_job_trip_from=0 hw_job_prio_guard_ms=100 clients=[]

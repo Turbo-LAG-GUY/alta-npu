@@ -30,7 +30,10 @@ fi
 #    "gcc: error: unrecognized command-line option '-fmin-function-alignment=8'" (GCC 13 vs a GCC 14 kernel).
 #    kbuild's "compiler differs" warning is harmless when only the binary NAME differs (gcc vs gcc-14).
 command -v modinfo >/dev/null || die "modinfo not found (package kmod)"
-CCTEXT="$(sed -n 's/^CONFIG_CC_VERSION_TEXT="\(.*\)"$/\1/p' "$HDR/.config" 2>/dev/null || true)"
+# The module gets the HEADERS' compiler flags, so match the headers' compiler: .config, else the headers package's
+# include/config/auto.conf (value quoted or not). /proc/version is the last resort; it can differ, e.g. the
+# night-light Image (~/nightlight-fix) is a local GCC 13 build of the same release, while the headers are GCC 14.
+CCTEXT="$(sed -nE 's/^CONFIG_CC_VERSION_TEXT="?([^"]*)"?$/\1/p' "$HDR/.config" "$HDR/include/config/auto.conf" 2>/dev/null | head -1 || true)"
 cands=()
 if [ -n "$CCTEXT" ]; then cands+=("$(printf '%s' "$CCTEXT" | awk '{print $1}')"); else CCTEXT="$(cat /proc/version)"; fi
 GCCMAJ="$(printf '%s\n' "$CCTEXT" | sed -nE 's/.*gcc[^,]*\) ([0-9]+)\.[0-9]+(\.[0-9]+)?.*/\1/p' | head -1)"

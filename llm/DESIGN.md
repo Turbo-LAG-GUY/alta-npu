@@ -77,6 +77,22 @@ plus measurements on this board.
   grouping if quality needs it. Checked on the CPU in numpy before any NPU work depends on it.
 
 ## Resume here (2026-11-20, end of the session)
+- **Priority (Jordan, 2026-11-21): bigger jobs, not driver switches.** ETNA_MESA_DEBUG=npu_parallel is a small lever at
+  best (session ai-projects-60's ladder, research/npupar/NOTES.md). The big loss is too little work per job: one token
+  at a time uses about 0.4% of the NPU's best measured rate (a 256-token chunk about 25%). The fix is bigger jobs:
+  chunked prompt reading and checking several guessed tokens at once (L6).
+  Same lesson from session ai-projects-60's width ladder (2026-11-21, runs/width-ladder-20261121-152825): 3x3 convs at
+  960x540 went from 97 GOPS at 8 channels to 603 GOPS at 64 (34x the math for 5.6x the time).
+  For the engine (Jordan, 2026-11-21: "don't forget the NPU is wider now"): make every job as wide as quality allows.
+  (1) Fewer weight-group jobs per step: 4 groups split each step into 4 narrower jobs (135M gateup 768 rows per job),
+  and the simulator found 4 groups ~ 16, so try 1-2 groups (quality first, in the simulator). (2) Bigger chunks
+  (more tokens per job). (3) The wider models: 1.7B / SmolLM3 steps are 3.6x wider than 135M (hidden 2048, gateup
+  16384 rows), and the outlier fix made them usable on the NPU, so the engine's NPU gain is largest there.
+  Groups test (llm/ref/l2h_groups.py, 2026-11-21): fewer jobs cost quality. KL vs fp32 GPL-3 / README, 4 / 2 / 1 jobs:
+  135M 0.023 / 0.032, 0.033 / 0.037, 0.053 / 0.064 (ppl 1 job 16.31 / 48.95 vs fp32 15.71 / 47.38); 360M 0.013 /
+  0.022, 0.020 / 0.053, 0.034 / 0.083 (1 job README 45.73 = +17%). Even 1 job beats the old format by far (135M
+  19.48 / 57.55). 1.7B running (it needed per-job output scales most). Whether wider jobs pay for this depends on
+  their speed on the NPU, not measured yet (packs with 1 / 2 jobs + the engine ladder).
 - State: nothing running; NPU idle and healthy this boot (c0a2b9d9: no hang, no kernel warning). perf is installed
   (root step 230) and kernel profiling stays open until the next reboot.
 - Done today: L3c closed (one-token CPU + NPU split does not pay: memory bus); Mesa read-out patches 10-12 (upstream
@@ -84,6 +100,10 @@ plus measurements on this board.
   zero-copy hook (test tree); L2g: rotation + per-job output scales make every-step 8-bit nearly lossless on all
   four models (1.7B 2.63 vs fp32 2.18, was 27.2); R2: all 240 real-weight packs of SmolLM2-135M pass on the NPU
   (runs/llm-real-ladder-20261120-120736): 256-token chunk 124 ms for all 120 layer steps = 0.485 ms per token.
+- 2026-11-21: engine process (llm/l3/jb_engine.c) PASS on the NPU (runs/llm-engine-ladder-20261121-153843): all 120
+  steps compiled in one process in 2.5 s and run back to back, every output within 1 level; a 256-token chunk takes
+  140 ms for all linear steps (0.547 ms per token; 13% slower than the per-step sum, colder caches), 1 token 32.7 ms.
+  GEM buffers do not show in the process RSS on the device (peak 10.5 MB at 1 token); measure them system-wide later.
 - Next: the CPU glue for a 256-token chunk (attention over the chunk, RMSNorm, RoPE, SiLU x mul, the block Hadamard
   on the down input, planar transposes, scattering the 4 jobs' outputs back with groups.npz), then one full prompt
   chunk end to end against the simulator's logits and against llama.cpp (pp128 104 tok/s). Also: compile all 120
@@ -638,3 +658,6 @@ the down_proj bytes, no predictor needed. gate/up skipping needs the predictor (
 - 2026-11-20 12:00: L2g chain finished on all four models (360M 05:45, SmolLM3 09:58): rotation + per-job output scales, every step 8-bit, within 0-4% ppl of fp32 (1.7B GPL-3 +21%), KL 10-38x lower than the current format; 4 groups ~ 16. Board idle.
 - 2026-11-20 12:30: R2 started (Jordan: "go ahead with the real-weight NPU packs"): llm/l3/real_packs.py builds 240 packs of SmolLM2-135M (30 layers x 4 steps x 1 / 256 tokens; rotation folded in, 4 jobs per step, per-job output scales, real inputs); offline all 240 PASS (one submit each, kpc <= 20); llm/l3/real-ladder.sh waits for OK.
 - 2026-11-20 12:35: R2 real-weight ladder 240/240 PASS (Jordan's OK): every layer step of SmolLM2-135M on the NPU within 1 level of the reference; all 120 steps per token: 1 token 30.6 ms, 256-token chunk 124.1 ms = 0.485 ms per token (llama.cpp pp128: 9.6 ms per token whole model). Next: the CPU glue and a full chunk end to end. Session ends here (Jordan switches to a remote session).
+- 2026-11-21 15:50: R2 step 1 (Jordan: "go ahead with the engine process"): llm/l3/jb_engine.c compiles all 120 steps in one process and runs them back to back; offline PASS (8-9.5 s compile, peak 119 MB at 1 token = the weights once, one submit per step, streams as alone). llm/l3/engine-ladder.sh (2 rungs) waits for OK.
+- 2026-11-21 15:40: engine ladder 2/2 PASS (Jordan's OK): all 120 steps in one process, back to back; 256-token chunk 140.0 ms (0.547 ms/token), 1 token 32.7 ms, compile 2.5 s. Next: the CPU glue.
+- 2026-11-21 16:20: L2h groups test 135M + 360M: 4 jobs per step best, 2 jobs ~1.5x the KL, 1 job ~2-4x (360M README +17% over fp32); 1.7B running. Root step 240 (hw_job_limit=4) written, not run.

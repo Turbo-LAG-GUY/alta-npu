@@ -5,7 +5,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd)"
 S=/home/jordan/Documents/AI_Projects/mesa-llm
 B=$S/build
-OUT=/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run
+NAME=${1:-jb_run}   # jb_run (default) or jb_engine
+OUT=/home/jordan/Documents/AI_Projects/npu-llm/bin/$NAME
 FLAGS=$(python3 - "$B" <<'PY'
 import json, os, shlex, sys
 b = sys.argv[1]
@@ -22,6 +23,6 @@ for c in json.load(open(os.path.join(b, "compile_commands.json"))):
 PY
 )
 LIBS=$(find "$B/src" -name "*.a" -not -path "*.p/*" -not -name "libgtest*" | sort | tr '\n' ' ')
-eval "gcc -O2 -g $FLAGS -I$S/src/gallium/winsys -Wall -Wno-unused-function -o $OUT $here/jb_run.c \
+eval "gcc -O2 -g $FLAGS -I$S/src/gallium/winsys -Wall -Wno-unused-function -o $OUT $here/$NAME.c \
   -Wl,--start-group $LIBS -Wl,--end-group $(pkg-config --libs libdrm) -lstdc++ -lm -lpthread -lz -lzstd -lexpat -ldl"
 echo "built $OUT"
