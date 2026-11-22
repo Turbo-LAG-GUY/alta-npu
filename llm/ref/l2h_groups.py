@@ -5,6 +5,10 @@ weight group is one job (its own weight scale and output scale), so fewer groups
 Same setup as l2g_outliers.py row RB: rotation (residual Q folded into the weights, per-head Hadamard into v / o,
 block Hadamard on the down input), per-job output scales, jobs grouped by max |w|, every step 8-bit on the NPU,
 position 0 on the CPU, head fp32. Rows: 4, 2 and 1 jobs per step (1 = one weight scale and one output scale per step).
+Rows can be chosen with L2H_ROWS (default "4,2,1"); "mixed" = the 135M-sized mix qkv 2, o 1, gateup 4, down 2;
+"sram" = the NPU timing ladder's rule (runs/llm-wide-ladder-20261121-211302): jobs per step = ceil(weight bytes /
+512 KiB), each job as wide as fits the VIP SRAM (135M: = mixed; 360M qkv 3 o 2 gateup 10 down 5; 1.7B 24 8 64 32).
+OPENBLAS_CORETYPE is pinned to CORTEXA73 (the start core picks the kernel otherwise; see llm/DESIGN.md 2026-11-21).
 Usage: l2h_groups.py MODEL_DIR [TOKENS]     writes npu-llm/runs/l2h-groups-<model>-<stamp>.json
 """
 import json
@@ -12,7 +16,8 @@ import os
 import sys
 import time
 
-import numpy as np
+os.environ.setdefault("OPENBLAS_CORETYPE", "CORTEXA73")
+import numpy as np  # noqa: E402
 
 MD = os.path.abspath(sys.argv[1])
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -22,7 +27,16 @@ from l2_quality import logsoftmax, score  # noqa: E402
 from smollm import SmolLM, Quant  # noqa: E402
 
 RUNS = "/home/jordan/Documents/AI_Projects/npu-llm/runs"
-GROUPS = (4, 2, 1)
+MIXED = {"qkv": 2, "o": 1, "gateup": 4, "down": 2}
+GROUPS = tuple(r if r in ("mixed", "sram") else int(r) for r in os.environ.get("L2H_ROWS", "4,2,1").split(","))
+SRAM = 512 * 1024
+
+
+def sram_groups(m):
+    """jobs per step kind so that every job's int8 weights fit the 512 KiB VIP SRAM."""
+    I = m.cfg["intermediate_size"]
+    rows_ic = {"qkv": ((m.H + 2 * m.KV) * m.hd, m.D), "o": (m.D, m.H * m.hd), "gateup": (2 * I, m.D), "down": (m.D, I)}
+    return {k: -(-r * ic // SRAM) for k, (r, ic) in rows_ic.items()}
 
 
 def main():
@@ -48,7 +62,12 @@ def main():
         out["rows"].append({"jobs": None, "text": tn, **{k: float(v) for k, v in s.items()}})
         print("%-36s %-7s %8.2f" % ("fp32", tn, s["ppl"]), flush=True)
     for g in GROUPS:
-        Quant.WGROUPS, Quant.WGROUPS_BY = g, None
+        if g == "mixed":
+            Quant.WGROUPS, Quant.WGROUPS_BY = 4, MIXED
+        elif g == "sram":
+            Quant.WGROUPS, Quant.WGROUPS_BY = 4, sram_groups(m)
+        else:
+            Quant.WGROUPS, Quant.WGROUPS_BY = g, None
         Quant.WQ.clear()
         G.QuantG.GRP.clear()
         q = G.QuantG("w8a8", True, rec, chout=chout, per_job_out=True, quant_head=False, fp_first=True)
@@ -57,7 +76,8 @@ def main():
             s = score(refs[tn], logsoftmax(m.forward(ids, q)), np.asarray(ids))
             out["rows"].append({"jobs": g, "text": tn, **{k: float(v) for k, v in s.items()}})
             print("%-36s %-7s %8.2f %9.1f%% %10.4f   (%.0f s)" % (
-                "%d job%s per step" % (g, "s" if g > 1 else ""), tn, s["ppl"], 100 * s["top1_vs_fp32"],
+                "mixed qkv2 o1 gateup4 down2" if g == "mixed" else
+                "sram %s" % " ".join("%s%d" % kv for kv in sram_groups(m).items()) if g == "sram" else "%d job%s per step" % (g, "s" if g > 1 else ""), tn, s["ppl"], 100 * s["top1_vs_fp32"],
                 s["kl_vs_fp32"], time.monotonic() - t), flush=True)
     Quant.WQ.clear()
     path = os.path.join(RUNS, "l2h-groups-%s-%s.json" % (name, time.strftime("%Y%m%d-%H%M%S")))

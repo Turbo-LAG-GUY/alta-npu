@@ -1,0 +1,50 @@
+compiled 120 steps (30 layers, 256 tokens) in 7826 ms (median 21.1, max 79.7 per step); weights 106.8 MB (freed after compile); resident now anon 98.7 + file 3.0 + shmem 0.0 MB, peak 103.3 MB; test data 104.7 MB
+  qkv     30 steps: 24.09 ms per round (NPU incl. submit 17.59, read-out 6.24)
+  o       30 steps: 19.43 ms per round (NPU incl. submit 15.09, read-out 4.15)
+  gateup  30 steps: 48.08 ms per round (NPU incl. submit 30.39, read-out 17.60)
+  down    30 steps: 40.32 ms per round (NPU incl. submit 35.82, read-out 4.35)
+"compile_ms": 7825.8 "round_ms_median": 137.825 "ms_per_token": 0.5384 "readout_ms": 32.335 
+== LLMW-W1-4jobs-256 rc=0 max_diff=1 bad=0 kernel_warnings=0
+compiled 120 steps (30 layers, 256 tokens) in 8808 ms (median 25.5, max 89.3 per step); weights 106.8 MB (freed after compile); resident now anon 93.3 + file 3.0 + shmem 0.0 MB, peak 97.3 MB; test data 104.7 MB
+  qkv     30 steps: 20.54 ms per round (NPU incl. submit 14.26, read-out 6.10)
+  o       30 steps: 15.62 ms per round (NPU incl. submit 11.46, read-out 4.15)
+  gateup  30 steps: 104.70 ms per round (NPU incl. submit 85.77, read-out 18.29)
+  down    30 steps: 31.32 ms per round (NPU incl. submit 26.97, read-out 4.24)
+"compile_ms": 8807.9 "round_ms_median": 177.668 "ms_per_token": 0.6940 "readout_ms": 32.795 
+== LLMW-W2-2jobs-256 rc=0 max_diff=1 bad=0 kernel_warnings=0
+compiled 120 steps (30 layers, 256 tokens) in 8300 ms (median 24.2, max 78.7 per step); weights 106.8 MB (freed after compile); resident now anon 93.0 + file 3.0 + shmem 0.0 MB, peak 97.4 MB; test data 104.7 MB
+  qkv     30 steps: 36.03 ms per round (NPU incl. submit 29.69, read-out 6.04)
+  o       30 steps: 13.72 ms per round (NPU incl. submit 9.72, read-out 3.98)
+  gateup  30 steps: 104.27 ms per round (NPU incl. submit 85.46, read-out 18.17)
+  down    30 steps: 53.61 ms per round (NPU incl. submit 49.28, read-out 4.19)
+"compile_ms": 8300.1 "round_ms_median": 211.323 "ms_per_token": 0.8255 "readout_ms": 32.380 
+== LLMW-W3-1job-256 rc=0 max_diff=1 bad=0 kernel_warnings=0
+compiled 120 steps (30 layers, 1 tokens) in 6893 ms (median 22.2, max 75.5 per step); weights 106.8 MB (freed after compile); resident now anon 4.5 + file 3.0 + shmem 0.0 MB, peak 10.4 MB; test data 0.4 MB
+  qkv     30 steps: 5.67 ms per round (NPU incl. submit 4.85, read-out 0.81)
+  o       30 steps: 4.49 ms per round (NPU incl. submit 3.71, read-out 0.79)
+  gateup  30 steps: 11.96 ms per round (NPU incl. submit 11.09, read-out 0.86)
+  down    30 steps: 7.90 ms per round (NPU incl. submit 7.11, read-out 0.79)
+"compile_ms": 6892.6 "round_ms_median": 31.654 "ms_per_token": 31.6537 "readout_ms": 3.252 
+== LLMW-W4-4jobs-1 rc=0 max_diff=1 bad=0 kernel_warnings=0
+compiled 120 steps (30 layers, 1 tokens) in 6762 ms (median 22.5, max 76.8 per step); weights 106.8 MB (freed after compile); resident now anon 4.5 + file 3.0 + shmem 0.0 MB, peak 11.3 MB; test data 0.4 MB
+  qkv     30 steps: 5.35 ms per round (NPU incl. submit 4.87, read-out 0.45)
+  o       30 steps: 4.15 ms per round (NPU incl. submit 3.69, read-out 0.44)
+  gateup  30 steps: 11.99 ms per round (NPU incl. submit 11.50, read-out 0.49)
+  down    30 steps: 7.16 ms per round (NPU incl. submit 6.71, read-out 0.44)
+"compile_ms": 6762.4 "round_ms_median": 29.787 "ms_per_token": 29.7865 "readout_ms": 1.814 
+== LLMW-W5-2jobs-1 rc=0 max_diff=1 bad=0 kernel_warnings=0
+compiled 120 steps (30 layers, 1 tokens) in 6727 ms (median 22.2, max 68.8 per step); weights 106.8 MB (freed after compile); resident now anon 7.2 + file 3.0 + shmem 0.0 MB, peak 13.2 MB; test data 0.4 MB
+  qkv     30 steps: 4.79 ms per round (NPU incl. submit 4.52, read-out 0.26)
+  o       30 steps: 3.40 ms per round (NPU incl. submit 3.14, read-out 0.26)
+  gateup  30 steps: 11.40 ms per round (NPU incl. submit 11.10, read-out 0.29)
+  down    30 steps: 6.61 ms per round (NPU incl. submit 6.35, read-out 0.26)
+"compile_ms": 6727.0 "round_ms_median": 27.204 "ms_per_token": 27.2040 "readout_ms": 1.063 
+== LLMW-W6-1job-1 rc=0 max_diff=1 bad=0 kernel_warnings=0
+  engine: /dev/dri/renderD128: etnaviv
+  engine: compiled 120 steps (30 layers, 256 tokens) in 2576 ms (median 18.9, max 48.3 per step); weights 106.8 MB (freed after compile); resident now anon 98.7 + file 3.0 + shmem 0.0 MB, peak 790.5 MB; test data 104.7 MB
+  engine: ready 120
+steps on their recorded inputs: max 1 levels from the packs, 0 steps > 1 (0.7 s)
+gpl3    ppl 15.86 (fp32 15.62)  top1=fp32 89.1%  KL 0.0173   wall 13.00 s = backend 0.32 + quant/scatter 3.11 + other CPU 9.57   (NPU 137.2 ms, read-out 33.8 ms)
+readme  ppl 48.25 (fp32 46.68)  top1=fp32 90.3%  KL 0.0270   wall 12.19 s = backend 0.38 + quant/scatter 1.64 + other CPU 10.17   (NPU 126.8 ms, read-out 41.6 ms)
+== LLMW-X1-chunk-end-to-end rc=0 max_diff=1 bad=0 kernel_warnings=0
+ALL PASSED: /home/jordan/alta-npu/runs/llm-wide-ladder-20261121-211302

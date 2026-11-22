@@ -190,6 +190,8 @@ class QuantG(Quant):
 
     def wgroups(self, key, W):
         g = Quant.WGROUPS
+        if Quant.WGROUPS_BY is not None:                 # per step kind (2026-11-21: mixed jobs per step)
+            g = Quant.WGROUPS_BY.get(key.split(".")[-1], g)
         ck = "%s#%s%d" % (key, self.group_by, g)
         if ck in Quant.WQ:
             return Quant.WQ[ck], QuantG.GRP[ck]

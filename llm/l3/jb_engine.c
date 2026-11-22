@@ -9,6 +9,12 @@
  * Reports compile time, peak memory, the time per round (= all layer steps of one chunk) and per step kind.
  *
  *   jb_engine [--offline] [-n ROUNDS] [--tokens T] [--layers L] PACK_DIR
+ *   jb_engine [--offline] --serve SHM [--tokens T] PACK_DIR
+ *
+ * --serve (2026-11-21, R2 step 2, for llm/l3/chunk_glue.py): compile every step, print "ready <steps>", then for each
+ * stdin line "<step index>" (model order: layer x qkv o gateup down) run that step with its input taken from SHM's
+ * input slot (bytes 0 .. 4 MiB, planar int8) and its outputs read straight into the output slot (from 4 MiB, the jobs'
+ * outputs back to back), answer "ok <npu ms incl. submit> <read-out ms>". EOF on stdin ends it.
  *
  * --offline: the fake NPU (LD_PRELOAD=.../npu-shader/shim/libnpu_etna_shim.so, inside bwrap with an empty /dev).
  * Device runs ONLY through scripts/npu-run with Jordan's OK for that step.
@@ -23,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
@@ -265,14 +272,86 @@ rss(double *anon, double *file, double *shmem)
       fclose(f);
 }
 
+#define SERVE_IN_MAX (4u << 20)
+#define SERVE_OUT_MAX (4u << 20)
+
+static int
+serve(struct pipe_screen *ps, struct pipe_context *pc, struct pack *packs, unsigned np, const char *shm_path)
+{
+   int sfd = open(shm_path, O_RDWR | O_CLOEXEC);
+   uint8_t *shm = sfd < 0 ? MAP_FAILED : mmap(NULL, SERVE_IN_MAX + SERVE_OUT_MAX, PROT_READ | PROT_WRITE, MAP_SHARED, sfd, 0);
+   if (shm == MAP_FAILED) {
+      fprintf(stderr, "%s: cannot map %u bytes\n", shm_path, SERVE_IN_MAX + SERVE_OUT_MAX);
+      return 2;
+   }
+   for (unsigned p = 0; p < np; p++) {
+      struct pack *k = &packs[p];
+      uint32_t off = 0;
+      if (k->input_bytes > SERVE_IN_MAX) {
+         fprintf(stderr, "%s: input too big for the slot\n", k->name);
+         return 2;
+      }
+      for (unsigned o = 0; o < k->n_out; o++) {
+         k->outs[o] = shm + SERVE_IN_MAX + off;
+         off += k->expected_bytes[k->out_idx[o]];
+      }
+      if (off > SERVE_OUT_MAX) {
+         fprintf(stderr, "%s: outputs too big for the slot\n", k->name);
+         return 2;
+      }
+   }
+   printf("ready %u\n", np);
+   fflush(stdout);
+   char line[64];
+   unsigned served = 0;
+   while (fgets(line, sizeof(line), stdin)) {
+      char *end;
+      long idx = strtol(line, &end, 10);
+      if (end == line || idx < 0 || (unsigned long)idx >= np) {
+         printf("err bad step index\n");
+         fflush(stdout);
+         continue;
+      }
+      struct pack *k = &packs[idx];
+      double a = now_ms();
+      void *in_buf = shm;
+      pc->ml_subgraph_invoke(pc, k->sg, 1, &k->in_idx, &in_buf, &k->in_signed);
+      struct pipe_fence_handle *fence = NULL;
+      pc->flush(pc, &fence, 0);
+      double f0 = now_ms();
+      bool done;
+      while (!(done = ps->fence_finish(ps, NULL, fence, 0)) && now_ms() - f0 < 3000)
+         ;
+      ps->fence_reference(ps, &fence, NULL);
+      if (!done) {
+         fprintf(stderr, "%s: fence wait timed out (3 s)\n", k->name);
+         printf("err timeout\n");
+         fflush(stdout);
+         return 3;
+      }
+      double b = now_ms();
+      pc->ml_subgraph_read_output(pc, k->sg, k->n_out, k->out_idx, k->outs, k->out_signed);
+      double c = now_ms();
+      printf("ok %.3f %.3f\n", b - a, c - b);
+      fflush(stdout);
+      served++;
+   }
+   fprintf(stderr, "jb_engine --serve: %u steps served, stdin closed\n", served);
+   munmap(shm, SERVE_IN_MAX + SERVE_OUT_MAX);
+   close(sfd);
+   return 0;
+}
+
 int
 main(int argc, char **argv)
 {
    bool offline = false;
    unsigned rounds = 10, tokens = 256, max_layers = 1000;
-   const char *dir = NULL;
+   const char *dir = NULL, *shm_path = NULL;
    for (int i = 1; i < argc; i++) {
-      if (!strcmp(argv[i], "--offline"))
+      if (!strcmp(argv[i], "--serve") && i + 1 < argc)
+         shm_path = argv[++i];
+      else if (!strcmp(argv[i], "--offline"))
          offline = true;
       else if (!strcmp(argv[i], "-n") && i + 1 < argc)
          rounds = atoi(argv[++i]);
@@ -284,7 +363,8 @@ main(int argc, char **argv)
          dir = argv[i];
    }
    if (!dir || rounds < 1 || rounds > 10000) {
-      fprintf(stderr, "usage: jb_engine [--offline] [-n ROUNDS] [--tokens T] [--layers L] PACK_DIR\n");
+      fprintf(stderr, "usage: jb_engine [--offline] [-n ROUNDS] [--tokens T] [--layers L] PACK_DIR\n"
+                      "       jb_engine [--offline] --serve SHM [--tokens T] PACK_DIR\n");
       return 2;
    }
    static struct pack packs[MAX_PACKS];
@@ -367,6 +447,15 @@ main(int argc, char **argv)
    if (!pc) {
       fprintf(stderr, "context_create failed\n");
       return 3;
+   }
+   if (shm_path) {
+      int rc = serve(ps, pc, packs, np, shm_path);
+      pc->destroy(pc);
+      for (unsigned p = 0; p < np; p++)
+         dev->ml_subgraph_destroy(dev, packs[p].sg);
+      ps->destroy(ps);
+      close(fd);
+      return rc;
    }
    double *t_round = calloc(rounds, sizeof(double));
    int maxdiff = 0;

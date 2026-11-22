@@ -43,3 +43,6 @@ __pycache__/
 
 # perf recordings: they hold kernel addresses (this boot's layout); the text reports next to them are kept
 /runs/**/*.data
+
+# NPU logits of chunk_glue runs (85 MB, regenerable with llm/l3/chunk_glue.py --save-logits): kept on the board
+/runs/llm-wide-ladder-20261121-211302/x1-npu-logits.npz

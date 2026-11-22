@@ -1,0 +1,79 @@
+From 7a950be6a28451ff3d33aeaa176415b101582421 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Sun, 22 Nov 2026 05:23:29 -0500
+Subject: [PATCH] etnaviv/ml: Keep the image cache when the kernels don't fit
+ (LLM engine, test tree only)
+
+When the compressed coefficients alone don't fit the on-chip SRAM,
+create_nn_config also drops the image cache, so the input is fetched
+again from DDR for every superblock (48 times for a 576 -> 3072 1x1 conv
+at 16x16). With ETNA_ML_KEEP_IMAGE_CACHE=1 the image keeps the top of the
+SRAM and the kernels get a partial cache below it, the layout the third
+partial branch already gives when only coefficients + image overflow.
+Only taken when at least 0x20000 is left for the kernels, the smallest
+kernel area that had run on the NPU. Unset = unchanged, byte for byte.
+
+On the A311D (SmolLM2-135M, all 120 layer steps, 256 tokens): 1 job per
+step 211.3 -> 103.8 ms per round, 2 jobs 177.7 -> 123.1, every output
+within 1 level of the reference (alta-npu runs/llm-keepimg-ladder-20261122-051706).
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn.c | 33 ++++++++++++++++++++-
+ 1 file changed, 32 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+index 8da754dd9d98..ac333e42c277 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -19,6 +19,29 @@
+ #define SRAM_CACHE_MODE_FULL_CACHE 0x1
+ #define SRAM_CACHE_MODE_PARTIAL_CACHE 0x2
+ 
++/* LLM engine (test tree only, 2026-11-22): ETNA_ML_KEEP_IMAGE_CACHE=1. When the
++ * coefficients alone don't fit the on-chip SRAM, upstream also drops the image
++ * cache, so the input is fetched again from DDR for every superblock (48 times
++ * for a 576 -> 3072 1x1 conv at 16x16). With the hook the image keeps the top
++ * of the SRAM and the kernels get a partial cache below it: the same layout the
++ * third partial branch already gives when the coefficients fit but not both.
++ * Only taken when the kernel area that is left is at least the smallest one
++ * that has run on the NPU (0x800 .. 0x20000, SmolLM2 down with 2/4 jobs).
++ * Unset = upstream behaviour, bit for bit.
++ */
++#define LLM_KEEP_IMAGE_MIN_KERNEL_END 0x20000
++
++static bool
++llm_keep_image_cache(void)
++{
++   static int keep = -1;
++   if (keep < 0) {
++      const char *v = getenv("ETNA_ML_KEEP_IMAGE_CACHE");
++      keep = v && atoi(v) > 0;
++   }
++   return keep;
++}
++
+ enum pooling_type {
+     ETNA_NN_POOLING_NON,
+     ETNA_NN_POOLING_MAX,
+@@ -1221,7 +1244,15 @@ create_nn_config(struct etna_ml_subgraph *subgraph, const struct etna_operation
+          map->kernel_pattern_low = 0xfffffffe;
+          map->kernel_pattern_high = 0xffffffff;
+       }
+-      if (map->kernel_cache_start_address + coef_cache_size >= oc_sram_size) {
++      if (map->kernel_cache_start_address + coef_cache_size >= oc_sram_size &&
++          llm_keep_image_cache() && image_cache_size > 0 &&
++          image_cache_size <= oc_sram_size - LLM_KEEP_IMAGE_MIN_KERNEL_END) {
++         map->kernel_cache_end_address = oc_sram_size - image_cache_size;
++         ML_DBG("llm keep image cache: kernels 0x%x..0x%x (partial, %d of %d bytes) image 0x%x..0x%x\n",
++                map->kernel_cache_start_address, map->kernel_cache_end_address,
++                map->kernel_cache_end_address - map->kernel_cache_start_address, coef_cache_size,
++                map->kernel_cache_end_address, oc_sram_size);
++      } else if (map->kernel_cache_start_address + coef_cache_size >= oc_sram_size) {
+          map->kernel_cache_end_address = oc_sram_size;
+          image_cache_size = 0;
+       } else if (image_cache_size > oc_sram_size) {
+-- 
+2.43.0
+

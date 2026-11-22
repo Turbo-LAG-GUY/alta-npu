@@ -1,0 +1,9 @@
+SmolLM2-135M-Instruct: 120 steps loaded from /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m; rotation: residual dense random orthogonal 576, per-head Hadamard 64, down input block Hadamard 512; layer 0 qkv weights vs rotated model: max 0.500 levels; fp32 + load 38 s
+  engine: /dev/dri/renderD128: etnaviv
+  engine: compiled 120 steps (30 layers, 256 tokens) in 2576 ms (median 18.9, max 48.3 per step); weights 106.8 MB (freed after compile); resident now anon 98.7 + file 3.0 + shmem 0.0 MB, peak 790.5 MB; test data 104.7 MB
+  engine: ready 120
+steps on their recorded inputs: max 1 levels from the packs, 0 steps > 1 (0.7 s)
+gpl3    ppl 15.86 (fp32 15.62)  top1=fp32 89.1%  KL 0.0173   wall 13.00 s = backend 0.32 + quant/scatter 3.11 + other CPU 9.57   (NPU 137.2 ms, read-out 33.8 ms)
+        (info) glue inputs vs the packs' recorded inputs: max 28 levels, 70.4% of levels differ (rounding ties spread, see the docstring)
+readme  ppl 48.25 (fp32 46.68)  top1=fp32 90.3%  KL 0.0270   wall 12.19 s = backend 0.38 + quant/scatter 1.64 + other CPU 10.17   (NPU 126.8 ms, read-out 41.6 ms)
+wrote /home/jordan/alta-npu/runs/llm-wide-ladder-20261121-211302/x1-npu.json

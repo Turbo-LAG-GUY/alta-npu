@@ -76,6 +76,100 @@ plus measurements on this board.
 - Quantization: per-tensor int8 weights + activations, with smoothing (SmoothQuant-style scaling) and channel
   grouping if quality needs it. Checked on the CPU in numpy before any NPU work depends on it.
 
+## Resume here (2026-11-22: WHY wider jobs are slower; read before the evening section below)
+- **Cause found (CPU only, from the driver source + the offline runs' ML_DBG lines; no NPU job):** Mesa's NN config
+  (mesa-llm etnaviv_ml_nn.c create_nn_config, ~line 1194) puts the job's weights ("kernel cache") and its input image
+  ("image cache") in the 512 KiB VIP SRAM. When 0x800 + compressed weights >= 512 KiB it takes the PARTIAL branch and
+  sets image_cache_size = 0: the input is then NOT cached and is re-read from DDR once per superblock (output-channel
+  group). At 256 tokens the v7 tile is the whole 16x16 image (1 spatial tile), so caching the weights buys nothing,
+  but losing the image cache costs superblocks x input: 1-job gateup = 48 x 147 KB = 7 MB extra per step.
+  DDR model per step (weights + input x (cached ? 1 : superblocks) + output) vs the wide-ladder times: every row
+  fits at 2.0-3.4 GB/s; gateup 2 jobs and 1 job both 9.66 MB -> both 2.86 ms (the odd "2 jobs = 1 job" result).
+  Which jobs lose the image cache: qkv 1 job (548 KB), gateup 2 / 1 jobs (876 / 1752 KB), down 1 job (869 KB).
+  down 4 / 2 jobs (218 / 434 KB weights + 393 KB image > 512 KiB) take the third branch instead: partial weights +
+  FULL image, and ran fine on the NPU (their partial-cache patterns ask for more than the 129 KB weight area: the
+  hardware coped).
+- **FIX 1 BUILT + PROVEN 2026-11-22** (Jordan's OK): mesa-llm hook ETNA_ML_KEEP_IMAGE_CACHE=1 (etnaviv_ml_nn.c, uncommitted
+  in the test tree; jb_run 84bd6ece, jb_engine 39c22a60, sources llm/l3/jb_*-<sha>.c). Offline
+  (npu-llm/runs/offline-keepimg-20261122-045938, llm/l3/keep_image_offline.sh, VERDICT.txt): hook OFF = upstream byte
+  for byte; ON changes only kernel_cache_end + the 3 image-cache fields of the 300 jobs whose weights don't fit (g1 180,
+  g2 120; 4-job and mixed sets untouched), weights identical, weight areas 126-501 KB. NPU ladder
+  runs/llm-keepimg-ladder-20261122-051706 (llm/l3/keepimg-ladder.sh): 6/6 PASS, every output within 1 level, trips 0.
+  ms per 256-token round (all 120 steps, read-out ~30-34 ms included): **1 job 211.3 -> 103.8** (-51%), 2 jobs 177.7 ->
+  123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
+  job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
+  input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+- **AXI SRAM (1 MiB): NOT used by the LLM engine.** jb_engine links mesa-llm, which has no AXI SRAM code (that patch
+  lives in mesa-axi-sram / mesa-strips, kit Teflon only); the ladders also strip ETNA_ML_AXI_SRAM. Even that patch
+  only places INTERMEDIATE tensors between ops of one submit (graph inputs/outputs excluded); a pack has none. The NN
+  core's caches address only the VIP SRAM: nothing spills into the AXI SRAM by itself. Kernel switch axi_sram = Y.
+- **Fix options (none built yet):** (a) Mesa policy: when the weights don't fit, keep the image cache (kernel area =
+  512 KiB - image, partial weights: the config kind down 4/2 jobs already ran) -> predicted 1 job/step ~67 ms NPU
+  per chunk vs 98 (4 jobs), and jobs per step becomes a pure QUALITY choice; test tree hook + offline + an NPU
+  ladder (Jordan's OK). (b) Put the step input in the AXI SRAM (CPU writes it there), so superblock re-reads hit
+  on-chip memory; matters for 1.7B, whose 256-token input (IC 2048 -> 512 KiB, down IC 8192 -> 2 MiB) can never
+  fit the VIP SRAM at tile 16x16 (or use ETNA_ML_V7_TILE_H / smaller chunks). (c) Keep the size rule, but with a
+  margin: the test is on COMPRESSED weights + 2 KiB (gateup 4 jobs 449024 vs 442368 raw); the 1.7B "sram" layout
+  (o / gateup / down jobs exactly 512 KiB raw) would fall into the slow branch.
+- 1.7B quality (l2h-mixed, rows 4,1,sram, 100 min): 4 jobs 2.52 / 25.38 (KL .182 / .089), 1 job 7.18 / 43.87 (KL 1.20
+  / .73: 1 job breaks 1.7B), sram 24/8/64/32 2.48 / 25.87 (KL .155 / .070) = better than 4 jobs. fp32 2.18 / 24.49.
+
+## Resume here (2026-11-21 evening, new session; read with the handoff below)
+- **wide-ladder RAN 2026-11-21 21:13 (Jordan's OK), 7/7 PASS** (runs/llm-wide-ladder-20261121-211302): every output
+  within 1 level, no kernel warnings, hw_job_trips 0 (first jb_engine run at hw_job_limit 4; 4-job numbers = the
+  afternoon's at limit 1: 137.8 vs 140 ms per chunk, 31.7 vs 32.7 per token).
+  Chunk (256 tokens), ms per round (all layer steps) 4 / 2 / 1 jobs: 137.8 / 177.7 / 211.3. Wider is NOT always
+  faster: NPU time per step kind (30 steps), 4 / 2 / 1 jobs: qkv 17.6 / **14.3** / 29.7, o 15.1 / 11.5 / **9.7**,
+  gateup **30.4** / 85.8 / 85.5, down 35.8 / **27.0** / 49.3. Rule: a job gets faster as it widens ONLY while its
+  weights fit the 512 KiB VIP SRAM (best jobs 276-442 KB; past 512 KiB 2-3x slower). Best mix = qkv 2, o 1,
+  gateup 4, down 2 jobs -> ~114 ms per chunk estimated (-18%). One token (weight streaming): fewer jobs slightly
+  faster everywhere, 31.7 / 29.8 / 27.2 ms. Read-out is 32 ms of the 138 (gateup 17.6: 23.6 MB per chunk).
+  X1 = first whole prompt chunk END TO END on the NPU (chunk_glue --backend npu, 4-job packs): GPL-3 ppl 15.86
+  (band 15.74-16.14) KL .0173, README 48.25 (band 47.52-49.57) KL .0270: inside the noise band; NPU vs ref top-1
+  88.7%, KL(ref||NPU) .020 (= the format's own noise size). NPU side per chunk 0.32-0.38 s through the Python pipe
+  (NPU 127-137 ms + read-out 34-42 ms); numpy glue ~12 s.
+  Running (CPU): unit alta-llm-l2h-mixed = l2h_groups.py with L2H_ROWS (new: "mixed" = the best mix above;
+  QuantG.wgroups now honours Quant.WGROUPS_BY): 135M + 360M rows 4,mixed; 1.7B rows 4,1,mixed (logs
+  npu-llm/runs/l2h-mixed-<model>.log). 135M done: 4 jobs 15.81 / 49.24 (KL .0229 / .0324), mixed 15.78 / 47.48
+  (KL .0198 / .0333) = no measurable cost (inside the noise band). Mixed packs built (real_packs.py ... mixed ->
+  npu-llm/models/jb/real-135m-mixed) + offline PASS (0 problems, kpc max 20); NPU rung `llm/l3/mixed-ladder.sh` (M1
+  mixed 256, M2 4-job baseline, M3 mixed 1 token, X2 chunk end to end mixed) written, NOT run (needs Jordan's OK, quiet
+  CPU). The first l2h-mixed unit died after 135M (inline systemd-run bash -c: rc came out empty); 360M + 1.7B rerun
+  via llm/l2h-mixed-chain.sh. 360M (log l2h-mixed-SmolLM2-360M-Instruct-4-mixed.log): 4 jobs 11.14 / 40.12 (KL .0128 /
+  .0215), mixed 11.20 / 41.14 (KL .0159 / .0306) = a small cost, BUT the mix was sized for 135M: on 360M 2 qkv jobs are
+  768 KB each, over the SRAM. The rule is a SIZE: jobs per step = ceil(weight bytes / 512 KiB) (l2h row "sram";
+  135M = mixed 2/1/4/2, 360M qkv 3 o 2 gateup 10 down 5, 1.7B 24 / 8 / 64 / 32): bigger models get MORE jobs, so
+  speed and quality pull the same way there. 360M sram: 11.02 / 39.66 (KL .0153 / .0220) = 4-job quality (better ppl,
+  KL level). Running: 1.7B rows 4,1,sram (unit alta-llm-l2h-mixed, ~1 h).
+  real_packs.py "mixed" = the 135M sizes only (add "sram" before packing a bigger model). Next: if mixed quality is OK, real_packs with per-step groups + its NPU
+  rung; C glue.
+- Handoff step (1), wider jobs: packs with 1 / 2 jobs per step built (`llm/l3/real_packs.py MODEL OUT GROUPS`;
+  npu-llm/models/jb/real-135m-g1, -g2; 240 each, within 1 level of the simulator) and offline PASS on the fake NPU
+  (npu-llm/runs/offline-jb-20261121-real135m-g1 / -g2: 0 problems; kpc max 21 for g1 = L00/L29 gateup_t1, the
+  driver's default cap, which ran clean in L3 rung 1; g2 max 20). NPU ladder `llm/l3/wide-ladder.sh` written, NOT
+  run (needs Jordan's OK; message ai-projects-60 first): W1-W6 = jb_engine-3b2807b6 on 4 / 2 / 1 jobs at 256 and 1
+  tokens, X1 = one chunk end to end on the NPU.
+- Step (2) started early, CPU only: `llm/l3/chunk_glue.py` runs the whole 257-token forward with every linear step
+  from the packs through a backend (ref = exact CPU int8; npu = `jb_engine --serve SHM`, shared file in /run/user
+  because bwrap's empty /dev hides /dev/shm; offline plumbing PASS, 360 steps served). Ref backend, 4-job packs:
+  every step on its recorded input within 1 level of its pack; GPL-3 ppl 15.70 (fp32 15.62) KL .0195, README 49.09
+  (46.68) KL .0327 = the simulator's quality (npu-llm/runs/chunk-glue-ref-135m.json, -logits.npz).
+- Found: the format has a noise floor. A 1-level rounding tie spreads through the block Hadamard and attention
+  (layer 0 gateup 2 ties -> layer 1 down 21% of levels differ -> later layers 70-85%, max ~20 levels), so glue inputs
+  never match the packs' recorded inputs level for level, and any 1-ulp change moves the result. OpenBLAS
+  (DYNAMIC_ARCH) picks its kernel from the core the process STARTS on (cortexa53 vs cortexa73): the same code gave
+  GPL-3 ppl 16.13 started on an A53 vs 15.70 on an A73 (bit-identical within one kernel). chunk_glue pins
+  OPENBLAS_CORETYPE=CORTEXA73. Earlier simulator runs (l2g, l2h) were not pinned: compare rows within one run only.
+  Noise band (`--jitter 6`, 1e-7 nudge on the embeddings, chunk-glue-ref-135m-jitter.json): GPL-3 ppl 15.94 +- 0.18
+  (15.74-16.14), KL .0197-.0228; README 48.44 +- 0.83 (47.52-49.57), KL .0293-.0321. Judge NPU runs and job counts
+  against this band (135M 2 jobs GPL-3 KL .033 is outside it, README .037 just outside).
+- Glue cost (numpy, cProfile): ~10-11 s per chunk without the backend: attention einsum 6.4 s (no BLAS), quantize /
+  scatter ~1.6-3 s, fwht 1.1 s; vs 140 ms of NPU linear steps and llama.cpp's ~2.5 s per 256 tokens. The real glue
+  must be C (NEON, threads); attention ~2.3 GFLOP per chunk may become the largest CPU cost (Mali / shader core
+  later). Prompt reading needs the head for the last position only.
+- Still to do: rerun the 1.7B 1-job groups row (CPU, `systemd-run --user --unit=alta-llm-l2h --collect
+  llm/l2h-chain.sh SmolLM2-1.7B-Instruct`).
+
 ## Resume here (2026-11-21, handoff: context window full)
 - State: boot d6e90679 (rebooted 2026-11-21 by the other session's work), nothing of this session running. The NPU
   driver is now the job-queue build f317fc8f (root step 250, by session ai-projects-60): hw_job_limit is settable at

@@ -13,7 +13,9 @@ come from the int8 reference that matches XNNPACK exactly (jb_pack.ref_conv arit
 for these sizes) and are checked against the levels the simulator itself produced.
 Sizes: 1 token (decode) and 256 tokens as 16 x 16 (prompt chunk).
 
-Usage: real_packs.py MODEL_DIR OUT_DIR       writes OUT_DIR/L<layer>_<step>_t<tokens>.jbp, manifest.json, groups.npz
+Usage: real_packs.py MODEL_DIR OUT_DIR [GROUPS]   writes OUT_DIR/L<layer>_<step>_t<tokens>.jbp, manifest.json, groups.npz
+       GROUPS = jobs per step (default 4; 2026-11-21: 1 and 2 for the wider-jobs speed test), or "mixed" = jobs per
+       step kind as wide as fits the 512 KiB VIP SRAM (runs/llm-wide-ladder-20261121-211302): qkv 2, o 1, gateup 4, down 2
 """
 import json
 import os
@@ -24,6 +26,10 @@ import numpy as np
 
 MD = os.path.abspath(sys.argv[1])
 OUT = os.path.abspath(sys.argv[2])
+GROUPS = sys.argv[3] if len(sys.argv) > 3 else "4"
+MIXED = {"qkv": 2, "o": 1, "gateup": 4, "down": 2}
+GROUPS_BY = MIXED if GROUPS == "mixed" else None
+GROUPS = 4 if GROUPS == "mixed" else int(GROUPS)
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.argv = [sys.argv[0], MD]                       # l2g_outliers reads the model directory from argv at import
 sys.path.insert(0, os.path.join(HERE, "..", "ref"))
@@ -33,7 +39,6 @@ import l2_quality  # noqa: E402
 from smollm import SmolLM, Quant  # noqa: E402
 from jb_pack import Pack, read_pack, run_graph  # noqa: E402
 
-GROUPS = 4
 SIZES = [(1, 1, 1), (256, 16, 16)]                 # tokens, H, W
 STEPS = ("qkv", "o", "gateup", "down")
 
@@ -86,14 +91,14 @@ def main():
     assert len(ids) == 257
     what = G.rotate(m, m.layers)
     rec, chin, chout = G.calibrate3(m, calib)
-    Quant.WGROUPS, Quant.WGROUPS_BY = GROUPS, None
+    Quant.WGROUPS, Quant.WGROUPS_BY = GROUPS, GROUPS_BY
     Quant.WQ.clear()
     G.QuantG.GRP.clear()
     cap = Capture("w8a8", True, rec, chout=chout, per_job_out=True, quant_head=False, fp_first=True)
     m.forward(ids, cap)
     print("%s: %s; captured %d steps from 257 GPL-3 tokens (%.0f s)" % (os.path.basename(MD), what, len(cap.cap),
                                                                          time.monotonic() - t0), flush=True)
-    manifest = {"model": os.path.basename(MD), "rotation": what, "groups": GROUPS, "text": "gpl3 tokens 0..256",
+    manifest = {"model": os.path.basename(MD), "rotation": what, "groups": GROUPS_BY or GROUPS, "text": "gpl3 tokens 0..256",
                 "packs": []}
     perm = {}
     worst_sim = 0
@@ -102,14 +107,15 @@ def main():
             key = "%d.%s" % (li, st)
             c = cap.cap[key]
             OC, IC = c["Wq"].shape
-            idx = [np.sort(np.nonzero(c["gid"] == g)[0]) for g in range(GROUPS)]
+            ng = int(c["gid"].max()) + 1                  # jobs in this step (GROUPS or the mixed count)
+            idx = [np.sort(np.nonzero(c["gid"] == g)[0]) for g in range(ng)]
             perm[key] = c["gid"]
             for T, H, W in SIZES:
                 xq = c["xq"][:T]                           # [T, IC], tokens 1..T
                 p = Pack()
                 xi = p.planar_in(H, W, IC, (c["sx"], c["zx"]))
                 exp, outs = [], []
-                for g in range(GROUPS):
+                for g in range(ng):
                     w = c["Wq"][idx[g]]
                     sw = float(c["sw"][idx[g][0]])
                     sy, zy = float(c["sy"][g]), int(c["zy"][g])

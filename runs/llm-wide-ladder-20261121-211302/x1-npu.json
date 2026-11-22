@@ -1,0 +1,36 @@
+{
+ "model": "SmolLM2-135M-Instruct",
+ "backend": "npu (jb_engine --serve)",
+ "tokens_per_chunk": 256,
+ "texts": {
+  "gpl3": {
+   "ppl": 15.864477431161783,
+   "top1_vs_fp32": 0.8910505836575876,
+   "kl_vs_fp32": 0.017268034811229002,
+   "wall_s": 12.996255074000146,
+   "backend_s": 0.31994228099392785,
+   "quant_scatter_s": 3.110597469012646,
+   "other_cpu_s": 9.565715323993572,
+   "npu_ms": 137.24799999999993,
+   "readout_ms": 33.795999999999985,
+   "input_vs_pack_max": 28,
+   "input_levels_differing": 17640831,
+   "output_vs_pack_max": 1,
+   "fp32_ppl": 15.62338954628302
+  },
+  "readme": {
+   "ppl": 48.25287456128757,
+   "top1_vs_fp32": 0.9027237354085603,
+   "kl_vs_fp32": 0.026988400289480748,
+   "wall_s": 12.193457082999885,
+   "backend_s": 0.38492726999720617,
+   "quant_scatter_s": 1.64232146401082,
+   "other_cpu_s": 10.166208348991859,
+   "npu_ms": 126.78599999999992,
+   "readout_ms": 41.570000000000014,
+   "fp32_ppl": 46.6788321479701
+  }
+ },
+ "steps_vs_pack_max": 1,
+ "steps_bad": []
+}

@@ -1,0 +1,8 @@
+/dev/dri/renderD128: etnaviv
+compiled 120 steps (30 layers, 1 tokens) in 6893 ms (median 22.2, max 75.5 per step); weights 106.8 MB (freed after compile); resident now anon 4.5 + file 3.0 + shmem 0.0 MB, peak 10.4 MB; test data 0.4 MB
+  qkv     30 steps: 5.67 ms per round (NPU incl. submit 4.85, read-out 0.81)
+  o       30 steps: 4.49 ms per round (NPU incl. submit 3.71, read-out 0.79)
+  gateup  30 steps: 11.96 ms per round (NPU incl. submit 11.09, read-out 0.86)
+  down    30 steps: 7.90 ms per round (NPU incl. submit 7.11, read-out 0.79)
+{"offline": false, "steps": 120, "layers": 30, "tokens": 1, "rounds": 20, "compile_ms": 6892.6, "compile_ms_max": 75.54, "weights_mb": 106.79, "peak_rss_mb": 10.4, "rss_anon_mb": 4.5, "rss_file_mb": 3.0, "rss_shmem_mb": 0.0, "test_data_mb": 0.4, "round_ms_median": 31.654, "ms_per_token": 31.6537, "qkv_ms": 5.671, "o_ms": 4.491, "gateup_ms": 11.960, "down_ms": 7.904, "readout_ms": 3.252, "bad_packs": 0, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261121-211444-LLMW-W4-4jobs-1
