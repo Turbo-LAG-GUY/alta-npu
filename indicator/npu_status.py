@@ -1053,7 +1053,12 @@ def run_tray(interval):
         sys.exit("npu-status: no graphical session found. Use --watch for the terminal view.")
     lock = single_instance_lock()
     if lock is None:
-        print("npu-status: the indicator is already running.")
+        # Clicked in the app grid while the indicator already runs (it starts at login): show something
+        # instead of exiting silently - the Job queue window, which is this app's window.
+        print("npu-status: the indicator is already running; opening the Job queue window.")
+        control = os.path.join(os.path.dirname(os.path.abspath(__file__)), "npu_control.py")
+        if npu_queue and os.path.exists(control):
+            subprocess.Popen([sys.executable, control], stdin=subprocess.DEVNULL, start_new_session=True)
         return
     TrayApp(Gtk, GLib, AyatanaAppIndicator3, interval)
     Gtk.main()
@@ -1082,12 +1087,27 @@ def _desktop_quote(arg):
     return '"' + "".join("\\" + ch if ch in '"`$\\' else ch for ch in arg) + '"'
 
 
+CONTROL_ENTRY = """\
+[Desktop Entry]
+Type=Application
+Name=NPU Job Queue
+Comment=NPU job queue, program priority and what to do after a hang
+Exec={exec}
+Icon=preferences-system
+Terminal=false
+Categories=Settings;
+"""
+# named after npu_control.py's application id, so GNOME matches the open window to this entry
+CONTROL_DESKTOP = "org.altanpu.NpuControl.desktop"
+
+
 def install(enable):
     data_home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
     paths = [os.path.join(config_home(), "autostart", f"{APP_ID}.desktop"),
              os.path.join(data_home, "applications", f"{APP_ID}.desktop")]
+    control_path = os.path.join(data_home, "applications", CONTROL_DESKTOP)
     if not enable:
-        for path in paths:
+        for path in paths + [control_path]:
             try:
                 os.remove(path)
                 print(f"removed {path}")
@@ -1101,7 +1121,13 @@ def install(enable):
         with open(path, "w") as f:
             f.write(DESKTOP_ENTRY.format(exec=exec_line))
         print(f"wrote {path}")
-    print("The indicator now starts at login and is listed in the app menu as 'NPU Status'.")
+    control = os.path.join(os.path.dirname(os.path.abspath(__file__)), "npu_control.py")
+    if os.path.exists(control):
+        with open(control_path, "w") as f:
+            f.write(CONTROL_ENTRY.format(exec=" ".join(_desktop_quote(a) for a in (python, control))))
+        print(f"wrote {control_path}")
+    print("The indicator now starts at login and is listed in the app menu as 'NPU Status' "
+          "(click it again to open the Job queue window); the window alone is 'NPU Job Queue'.")
 
 
 # --------------------------------------------------------------------------
