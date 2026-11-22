@@ -99,6 +99,18 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+- **1.7B input in the AXI SRAM (2026-11-22, built + offline PASS, NPU ladder NOT run):** the kernel patch gives the
+  CPU no mapping of the AXI SRAM, so the NPU copies the input there: channels-last graph input -> ONE driver transpose
+  (TP) job shared by all convs (new hook ETNA_ML_SHARE_INPUT_TRANSPOSE=1; upstream adds one per conv) -> output placed
+  in the AXI SRAM by patch 0002 (ported into mesa-llm, ETNA_ML_AXI_SRAM=all; zero-copy read-out guarded too) -> convs
+  read it there. Also a guard: an image of EXACTLY 512 KiB (2048 ch x 256 tokens = every 1.7B step but down) made
+  upstream set kernel_cache_end = 0 < start 0x800 (a layout never run); now the image is not cached (the 1-job gateup
+  layout). jb_run 943bf0c2. Synthetic 1.7B-shaped packs npu-llm/models/jb/axi-1p7b (jb_pack.py synth: A2 / A8 = 2048 ->
+  2 / 8 jobs x 224, 256 tokens; D4 = 8192 -> 4 x 56, 64 tokens). Offline matrix (llm/l3/axi_offline.sh,
+  npu-llm/runs/offline-axi-20261122-053100): 1 TP job, copy placed (512 of 1024 KiB), convs read the TP output address,
+  all cache layouts valid. Alternative without AXI in the same ladder: ETNA_ML_V7_TILE_H 8 + keep-image (tile 16x8:
+  the image cache fits, kpc 14). Down at 256 tokens (2 MiB input) does not fit the AXI SRAM: 64-token packs only.
+  NPU ladder llm/l3/axi-ladder.sh (12 rungs P0 / PT / N1 / N2 per pack) waits for Jordan's OK.
 - **AXI SRAM (1 MiB): NOT used by the LLM engine.** jb_engine links mesa-llm, which has no AXI SRAM code (that patch
   lives in mesa-axi-sram / mesa-strips, kit Teflon only); the ladders also strip ETNA_ML_AXI_SRAM. Even that patch
   only places INTERMEDIATE tensors between ops of one submit (graph inputs/outputs excluded); a pack has none. The NN

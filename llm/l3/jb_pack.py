@@ -24,6 +24,11 @@ Modes:
                                           (numpy reference of the graph, checked against PACK's own): jb_run --alt
   synthetic IC OC G OUT.jbp               random int8 weights IC -> OC (the NPU's share of a split step), G jobs over
                                           contiguous output-channel groups, each with its own scale; one token
+  synth IC OCJ G H W LAYOUT OUT.jbp       (2026-11-22, AXI SRAM test) G jobs of OCJ output channels each on an H x W
+                                          token image, random int8 weights / input; LAYOUT planar = the usual planar
+                                          input + bypass transpose, nhwc = a channels-last graph input read by every
+                                          conv (the driver adds the input transpose job; ETNA_ML_SHARE_INPUT_TRANSPOSE=1
+                                          makes it one, ETNA_ML_AXI_SRAM=all can put its output in the AXI SRAM)
 Expected outputs of groups/chain come from a float reference of the int8 arithmetic (<= 1 level off TFLite).
 """
 import struct
@@ -116,6 +121,39 @@ def synthetic(IC, OC, G, out):
     p.write(out, x, exp)
 
 
+def synth(IC, OCJ, G, H, W, layout, out):
+    """G jobs x OCJ output channels on an H x W token image (expected outputs from run_graph, the int8 reference)."""
+    rng = np.random.default_rng(IC * 1009 + OCJ * 17 + G)
+    xq = (0.05, 0)
+    p = Pack()
+    if layout == "planar":
+        xi = p.planar_in(H, W, IC, xq)
+    elif layout == "nhwc":
+        xi = p.tensor([1, H, W, IC], xq)
+    else:
+        sys.exit("layout: planar | nhwc")
+    for g in range(G):
+        w = rng.integers(-127, 128, size=(OCJ, IC)).astype(np.int8)
+        sw = float(rng.uniform(0.5, 2.0)) / 127.0 / np.sqrt(IC)
+        sy = 4.0 * 74.0 * 73.0 * np.sqrt(IC) * xq[0] * sw / 120.0  # 4 sigma of the accumulator (uniform x, w) = 120 levels
+        wi = p.tensor([OCJ, 1, 1, IC], (sw, 0), data=w)
+        bi = p.tensor([1, 1, 1, OCJ], (xq[0] * sw, 0), data=np.zeros(OCJ, np.int32), size=4)
+        yi = p.tensor([1, H, W, OCJ], (sy, 0))
+        p.conv(xi, wi, bi, yi)
+        p.planar_out(yi, H, W, OCJ, (sy, 0))
+    x = rng.integers(-128, 128, size=IC * H * W).astype(np.int8)  # bytes in the graph input's own layout
+    exp = run_graph(p_tensors(p), p.ops, x.tobytes())
+    sat = np.mean(np.concatenate([np.abs(e.astype(int)) >= 127 for e in exp]))
+    print("synth %s: saturated outputs %.2f%%" % (layout, 100 * sat))
+    p.write(out, x, exp)
+
+
+def p_tensors(p):
+    """Pack.t records -> the dicts read_pack returns (for run_graph)."""
+    return [dict(idx=idx, dims=dims, q=(s, zp), signed=sg, const=const, out=o, data=data)
+            for idx, dims, s, zp, sg, const, size, o, data in p.t]
+
+
 TREC = "<i4IfiBBBBI"   # one tensor record before its data (36 bytes)
 
 
@@ -189,6 +227,9 @@ def main():
     mode = sys.argv[1]
     if mode == "altinput":
         return altinput(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 1)
+    if mode == "synth":
+        a = sys.argv[2:]
+        return synth(int(a[0]), int(a[1]), int(a[2]), int(a[3]), int(a[4]), a[5], a[6])
     if mode == "synthetic":
         return synthetic(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
     c = load_conv(sys.argv[2], sys.argv[3])
