@@ -97,6 +97,18 @@ class Step:
 class RefBackend:
     name = "ref (CPU int8 reference)"
 
+    # async API (2026-11-23, the C glue: position 0 runs while the NPU works): input_view -> submit -> collect
+    def input_view(self, st, T):
+        self._in = np.empty((st.ic, T), np.int8)
+        return self._in
+
+    def submit(self, k, st):
+        self._pending = (k, st)
+
+    def collect(self, st, T, copy=True):
+        k, st = self._pending
+        return self.run(k, st, self._in.T)
+
     def run(self, k, st, xq):
         out = []
         for g in range(len(st.w)):
@@ -152,6 +164,31 @@ class NpuBackend:
         for i in st.idx:
             n = len(i) * T
             out.append(np.array(self.mm[o:o + n]).reshape(len(i), T).T)
+            o += n
+        return out
+
+    # async API (2026-11-23): the C glue writes the planar input straight into the input slot, submits, does the
+    # CPU's position 0 while the NPU runs, then collects the outputs (views into the output slot: valid until the
+    # next submit, which is how the glue uses them)
+    def input_view(self, st, T):
+        assert st.ic * T <= self.IN_MAX
+        return self.mm[:st.ic * T].reshape(st.ic, T)
+
+    def submit(self, k, st):
+        self.p.stdin.write("%d\n" % k)
+        self._pending = st
+
+    def collect(self, st, T, copy=False):
+        ans = self.p.stdout.readline().split()
+        if not ans or ans[0] != "ok":
+            raise RuntimeError("jb_engine: step %s: %r" % (st.name, ans))
+        self.npu_ms += float(ans[1])
+        self.ro_ms += float(ans[2])
+        out, o = [], self.IN_MAX
+        for i in st.idx:
+            n = len(i) * T
+            v = self.mm[o:o + n].reshape(len(i), T)
+            out.append((np.array(v) if copy else v).T)
             o += n
         return out
 
@@ -219,13 +256,13 @@ def main():
                     "on the embeddings: the format's noise floor (rounding ties spread), to judge other runs by")
     ap.add_argument("--offline", action="store_true", help="npu backend against the fake NPU (plumbing only: "
                     "the shim executes nothing, so the levels and the quality are meaningless)")
-    ap.add_argument("--glue", choices=("numpy", "c", "cfused"), default="numpy", help="c / cfused: the CPU glue in C "
+    ap.add_argument("--glue", choices=("numpy", "c", "cfused", "casync"), default="numpy", help="c / cfused: the CPU glue in C "
                     "(cfused: the fused kernels; llm/l3/glue, "
                     "libjbglue.so, OpenMP on the A73s: OMP_NUM_THREADS=4 GOMP_CPU_AFFINITY=2-5 unless set)")
     ap.add_argument("model_dir")
     ap.add_argument("pack_dir")
     a = ap.parse_args()
-    if a.glue in ("c", "cfused"):
+    if a.glue in ("c", "cfused", "casync"):
         os.environ.setdefault("OMP_NUM_THREADS", "4")
         os.environ.setdefault("GOMP_CPU_AFFINITY", "2-5")
         sys.path.insert(0, os.path.join(HERE, "glue"))
@@ -286,9 +323,10 @@ def main():
             be.npu_ms = be.ro_ms = 0.0
         for tn, ids in evals.items():
             t = time.monotonic()
-            if a.glue in ("c", "cfused"):
+            if a.glue in ("c", "cfused", "casync"):
                 q = cforward.PackQuantC(steps, order, be, check=(tn == "gpl3"))
-                lg = (cforward.forward_c_fused if a.glue == "cfused" else cforward.forward_c)(m, ids, q)
+                lg = {"c": cforward.forward_c, "cfused": cforward.forward_c_fused,
+                      "casync": cforward.forward_c_async}[a.glue](m, ids, q)
             else:
                 q = PackQuant(steps, order, be, check=(tn == "gpl3"))
                 lg = m.forward(ids, q)
@@ -312,7 +350,7 @@ def main():
                                               wall, q.t_be, q.t_q, wall - q.t_be - q.t_q,
                                               "   (NPU %.1f ms, read-out %.1f ms)" % (r["npu_ms"], r["readout_ms"])
                                               if "npu_ms" in r else ""), flush=True)
-            if a.glue in ("c", "cfused"):
+            if a.glue in ("c", "cfused", "casync"):
                 r["parts_s"] = dict(q.t)
                 print("        C glue parts (s): " + ", ".join("%s %.2f" % kv for kv in q.t.items()), flush=True)
             if q.check:

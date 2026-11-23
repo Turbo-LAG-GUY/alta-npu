@@ -1,0 +1,6 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loaded + compiled 120 steps in 6912 ms
+chunk: 1077.6 ms = steps 212.2 (NPU incl. submit; read-out 71.2) + glue: embed 153.2, norm+quant 53.1, qkv+rope 44.3, attention 182.9, quantize 15.7, scatter 105.0, ffn 161.8, head 77.5 ms; last token's argmax 284
+{"wall_ms": 1077.6, "steps_ms": 212.2, "readout_ms": 71.2, "glue_ms": 865.4, "argmax": 284, "total_ms": 10015.9}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261123-145958-LLMP-P2-135m-last-2

@@ -1,0 +1,32 @@
+# kmsg-catch start 2026-11-23T14:57:10-0500 uptime=81409.28
+[81427.373484] <4> panfrost_gem_shrinker_scan: 34 callbacks suppressed
+[81427.373497] <6> Purging 565248 bytes
+[81427.693123] <6> Purging 557056 bytes
+[81441.298951] <6> Purging 540672 bytes
+[81443.352185] <6> Purging 524288 bytes
+[81459.414014] <6> Purging 540672 bytes
+[81461.055240] <6> Purging 532480 bytes
+[81461.055721] <6> Purging 565248 bytes
+[81461.056278] <6> Purging 565248 bytes
+[81461.056811] <6> Purging 561152 bytes
+[81461.058390] <6> Purging 585728 bytes
+[81461.059004] <6> Purging 552960 bytes
+[81461.060215] <6> Purging 733184 bytes
+[81461.060638] <6> Purging 528384 bytes
+[81461.060983] <6> Purging 536576 bytes
+[81462.575347] <6> display-wake-gu (798): drop_caches: 3
+[81473.517589] <4> panfrost_gem_shrinker_scan: 38 callbacks suppressed
+[81473.517601] <6> Purging 585728 bytes
+[81474.138725] <6> Purging 524288 bytes
+[81489.223937] <6> Purging 585728 bytes
+[81489.224674] <6> Purging 536576 bytes
+[81489.225233] <6> Purging 565248 bytes
+[81489.225763] <6> Purging 565248 bytes
+[81489.226228] <6> Purging 540672 bytes
+[81489.227306] <6> Purging 524288 bytes
+[81489.227676] <6> Purging 524288 bytes
+[81489.228892] <6> Purging 573440 bytes
+[81489.229463] <6> Purging 573440 bytes
+[81489.229803] <6> Purging 536576 bytes
+[81490.802442] <6> display-wake-gu (798): drop_caches: 3
+# kmsg-catch end uptime=81495.75

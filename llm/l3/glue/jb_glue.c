@@ -79,7 +79,7 @@ exp_f32(float32x4_t x)
 EXPORT void
 jbg_rmsnorm(const float *x, const float *w, float *out, int T, int D, float eps)
 {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
    for (int t = 0; t < T; t++) {
       const float *r = x + (size_t)t * D;
       float64x2_t a0 = vdupq_n_f64(0), a1 = a0;
@@ -120,7 +120,7 @@ EXPORT void
 jbg_quant_planar(const float *x, int T, int IC, float s, int zp, int8_t *out)
 {
    float32x4_t sv = vdupq_n_f32(s), zv = vdupq_n_f32((float)zp), lo = vdupq_n_f32(-128.f), hi = vdupq_n_f32(127.f);
-#pragma omp parallel for schedule(static) collapse(2)
+#pragma omp parallel for schedule(dynamic) collapse(2)
    for (int c0 = 0; c0 < IC; c0 += 16)
       for (int t0 = 0; t0 < T; t0 += 16) {
          if (c0 + 16 <= IC && t0 + 16 <= T) {
@@ -158,7 +158,7 @@ jbg_dequant_scatter(const int8_t *lv, long ts, long js, int T, int n, const int3
                     float *y, int ldy, int accumulate)
 {
    float fz = (float)zp;
-#pragma omp parallel for schedule(static) collapse(2)
+#pragma omp parallel for schedule(dynamic) collapse(2)
    for (int t0 = 0; t0 < T; t0 += 16)
       for (int j0 = 0; j0 < n; j0 += 64) {
          int t1 = t0 + 16 < T ? t0 + 16 : T, j1 = j0 + 64 < n ? j0 + 64 : n;
@@ -227,7 +227,7 @@ jbg_scatter_jobs(int nj, const int8_t *const *lv, const long *ts, const long *js
 #pragma omp parallel
    {
       int8_t *tm = malloc((size_t)16 * tot);              /* per job: [16 tokens][n_j] bytes */
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
       for (int t0 = 0; t0 < T; t0 += 16) {
          int nt = T - t0 < 16 ? T - t0 : 16;
          const int8_t *src[256];
@@ -456,7 +456,7 @@ jbg_norm_quant(const float *x, int T, int D, float eps, float s, int zp, int8_t 
 #pragma omp parallel
    {
       float *blk = malloc((size_t)16 * D * sizeof(float));
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
       for (int t0 = 0; t0 < T; t0 += 16) {
          int nt = T - t0 < 16 ? T - t0 : 16;
          for (int i = 0; i < nt; i++)
@@ -488,7 +488,7 @@ jbg_ffn_fused(int nj, const int8_t *const *lv, const long *ts, const long *js, c
       const int8_t *src[256];
       long sst[256];
       float32x4_t one = vdupq_n_f32(1.0f);
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
       for (int t0 = 0; t0 < T; t0 += 16) {
          int nt = T - t0 < 16 ? T - t0 : 16;
          if (prof) tq = now_s();
@@ -549,7 +549,7 @@ jbg_qkv_rope(int nj, const int8_t *const *lv, const long *ts, const long *js, co
       float *row = malloc((size_t)oc * sizeof(float));
       const int8_t *src[256];
       long sst[256];
-#pragma omp for schedule(static)
+#pragma omp for schedule(dynamic)
       for (int t0 = 0; t0 < T; t0 += 16) {
          int nt = T - t0 < 16 ? T - t0 : 16;
          block_rows(nj, lv, ts, js, n, t0, nt, tm, off, src, sst);
@@ -605,7 +605,7 @@ jbg_gemv_jobs(int nj, const float *x, const int8_t *const *w, const int *n, cons
       int icj = ic[j];
       const int32_t *rj = rows[j];
       float s = sw[j];
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
       for (int r = 0; r < n[j]; r++) {
          const int8_t *wr = wj + (size_t)r * icj;
          float32x4_t s0 = vdupq_n_f32(0), s1 = vdupq_n_f32(0), s2 = vdupq_n_f32(0), s3 = vdupq_n_f32(0);
@@ -631,7 +631,7 @@ jbg_gemv_jobs(int nj, const float *x, const int8_t *const *w, const int *n, cons
 EXPORT void
 jbg_gemv_i8(const float *x, const int8_t *w, int n, int ic, float sw, const int32_t *rows, float *y, int accumulate)
 {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
    for (int j = 0; j < n; j++) {
       const int8_t *r = w + (size_t)j * ic;
       float32x4_t s0 = vdupq_n_f32(0), s1 = vdupq_n_f32(0), s2 = vdupq_n_f32(0), s3 = vdupq_n_f32(0);
@@ -659,7 +659,7 @@ EXPORT void
 jbg_rope(float *x, int T, int heads, int hd, int pos0, const double *inv_freq)
 {
    int h2 = hd / 2;
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
    for (int t = 0; t < T; t++) {
       double cs[256], sn[256];                       /* numpy: float64 cos / sin, products in float64 */
       for (int i = 0; i < h2; i++) {
@@ -694,7 +694,7 @@ jbg_attention(const float *q, const float *k, const float *v, float *out, int T,
    float *kt = malloc((size_t)KV * hd * Sp * sizeof(float));   /* kt[kh][d][s] (keys transposed) */
    float *vh = malloc((size_t)KV * Sp * hd * sizeof(float));   /* vh[kh][s][d] (values, head-major, contiguous) */
    int nsb = Sp / 16 + (Sp % 16 != 0);
-#pragma omp parallel for schedule(static) collapse(2)
+#pragma omp parallel for schedule(dynamic) collapse(2)
    for (int kh = 0; kh < KV; kh++)
       for (int b = 0; b < nsb; b++) {                   /* 16 keys: contiguous row reads, a [hd][16] tile */
          int s0 = b * 16, s1 = s0 + 16 < Sp ? s0 + 16 : Sp;
@@ -882,7 +882,7 @@ jbg_attention(const float *q, const float *k, const float *v, float *out, int T,
 EXPORT void
 jbg_silu_mul(const float *gu, int T, int I, float *h)
 {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
    for (int t = 0; t < T; t++) {
       const float *g = gu + (size_t)t * 2 * I, *u = g + I;
       float *o = h + (size_t)t * I;
@@ -906,12 +906,12 @@ jbg_fwht(float *x, int T, int n, int b, const float *s, int post_signs)
 {
    float norm = (float)(1.0 / sqrt((double)b));          /* = np.float32(1 / np.sqrt(b)) */
    if (b >= 4 && s && !post_signs) {                   /* the radix-4 row kernel (bit-exact) */
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
       for (int t = 0; t < T; t++)
          fwht_row(x + (size_t)t * n, n, b, s);
       return;
    }
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic)
    for (int t = 0; t < T; t++) {
       float *r = x + (size_t)t * n;
       if (s && !post_signs)

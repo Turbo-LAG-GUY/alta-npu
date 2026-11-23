@@ -7,7 +7,7 @@ Base = today's 1.7B layout (llm/l3/real_packs.py 4 4range): 4 jobs per step grou
 scales, static input scale per step, position 0 on the CPU, head fp32; down = 4 input pieces x 4 range-grouped jobs
 (calibrated partial scales; llm/ref/l2j_down_split.py, sim KL .145 / .086).
 Rows (L2K_ROWS, default base,qkv,o,gateup,down,all): base = all 8-bit; <kind> = that step kind in 16 bits; all = every
-step in 16 bits (upper bound for the int16 path).
+step in 16 bits (upper bound for the int16 path); kinds joined by "+" (e.g. qkv+down) = those together.
 Usage: l2k_int16.py MODEL_DIR [TOKENS]     writes npu-llm/runs/l2k-int16-<model>-<stamp>.json
 """
 import json
@@ -148,7 +148,7 @@ def main():
         out["rows"].append({"row": "fp32", "text": tn, **{k: float(v) for k, v in s.items()}})
         print("%-36s %-7s %8.2f" % ("fp32", tn, s["ppl"]), flush=True)
     for row in ROWS:
-        wide = () if row == "base" else KINDS if row == "all" else (row,)
+        wide = () if row == "base" else KINDS if row == "all" else tuple(row.split("+"))
         Quant.WGROUPS, Quant.WGROUPS_BY = JOBS, None
         Quant.WQ.clear()
         G.QuantG.GRP.clear()
@@ -160,7 +160,7 @@ def main():
             out["rows"].append({"row": row, "text": tn, **{k: float(v) for k, v in s.items()}})
             print("%-36s %-7s %8.2f %9.1f%% %10.4f   (%.0f s)" % (
                 "base: all 8-bit (today)" if row == "base" else "all steps 16-bit" if row == "all" else
-                "%s in 16 bits" % row, tn, s["ppl"], 100 * s["top1_vs_fp32"], s["kl_vs_fp32"], time.monotonic() - t),
+                "%s in 16 bits" % row.replace("+", " + "), tn, s["ppl"], 100 * s["top1_vs_fp32"], s["kl_vs_fp32"], time.monotonic() - t),
                 flush=True)
     path = os.path.join(RUNS, "l2k-int16-%s-%s.json" % (name, time.strftime("%Y%m%d-%H%M%S")))
     json.dump(out, open(path, "w"), indent=1)

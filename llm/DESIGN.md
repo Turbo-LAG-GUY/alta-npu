@@ -99,6 +99,25 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+## Resume here (2026-11-23 15:00): the whole prompt-chunk loop in C ran on the NPU
+- **jb_prefill** (llm/l3/jb_prefill.c, build_jb_run.sh jb_prefill, frozen npu-llm/bin/jb_prefill-cb935e3f): one chunk
+  end to end in C: embeddings (bf16) + residual rotation -> per layer RMSNorm -> planar int8 -> qkv (NPU) -> q / k / v +
+  RoPE -> causal attention (position 0's K / V from a .jbp0 file: position 0 only attends to itself; in a chat it is
+  always the template token, so it is computed once) -> o (NPU) -> residual -> RMSNorm -> gateup (NPU) -> fused FFN glue
+  -> down (NPU) -> residual; final norm + tied head (last token, or --all). It #includes jb_engine.c (main renamed) for
+  pack load / compile / invoke / read-out and glue/jb_glue.c; --ref = CPU int8 reference of every job (the packs'
+  arithmetic), --npu (--offline = fake NPU). Inputs from glue/export_aux.py (model.jba: config, bf16 embeddings,
+  rotations, norm, RoPE table, job row maps; <text>.jbp0; <text>.ref = the Python C-glue path's logits + residuals);
+  glue/compare_prefill.py compares. jb_prefill_offline.sh = the fake-NPU run.
+- 135M --ref vs Python: residual identical to 1e-7 for layers 0-2, then the rounding-tie cascade (layer 3: 20 tokens),
+  logits KL .009, top-1 94.5%. **NPU (prefill-ladder.sh, runs/llm-prefill-ladder-20261123-145441, 4/4 PASS): NPU vs
+  the Python reference KL .0199, top-1 90.2%, ppl 15.82 vs 15.82 = the format's own noise.** Chunk (last token only):
+  754-1078 ms = NPU steps 124-212 (incl. read-out 46-71) + glue 630-865 ms; on a quiet board the glue was ~0.25-0.33 s,
+  here xrdp (Jordan's remote desktop) held 64% of an A73 core and the threads wait for the slowest: re-time with the
+  desktop idle. Kernels now schedule(dynamic). Expected on a quiet board: ~0.45 s per 256-token 135M chunk (~570 tok/s).
+- Next: re-time on a quiet board; 1.7B through jb_prefill (export_aux on real-1p7b-split4: Python reference path for
+  1.7B; RAM: 1.7 GB pinned + 200 MB embeddings); then generation (decode) after the prompt: KV cache + 1-token packs.
+
 ## int16 question (2026-11-23, Jordan, from session ai-projects-f4's bf16 analysis)
 - bf16 on the NPU: not possible (hwdb GC8000 rev 7120: NN cores INT8 8 / INT16 8 / FLOAT16 0 / BFLOAT 0, shader fp32
   only); bf16 -> fp32 by `<< 16` is what llm/ref/smollm.py Lazy already does. The int16 NN path (int16 x int16, no
@@ -108,6 +127,11 @@ plus measurements on this board.
   16-bit .0033 / .0122. 1.7B rows base, qkv, o, gateup, down, all running (unit alta-llm-l2k, log
   npu-llm/runs/l2k-int16-SmolLM2-1.7B-Instruct.log, ~5-6 h). Worth an int16 experiment only if one step kind carries
   most of the 1.7B gap.
+- **1.7B results (run on the x86 PC, 31 + 24 min; npu-llm/runs/x86/):** KL GPL-3 / README: base .131 / .103; one kind
+  in 16 bits: qkv .080 / .058, o .130 / .075, gateup .136 / .056, down .111 / .038; all 16-bit .0047 / .0059 (ppl
+  2.20 / 24.63 vs fp32 2.18 / 24.49): int16 closes the gap, no single kind carries it. Combinations: **qkv + down
+  .032 / .019 (ppl 2.24 / 25.54) for +23 MB of weights per layer (+38%)**; + o .025 / .018 (+45%); + gateup .009 /
+  .008 (+93%). If the int16 path is ever reverse engineered, qkv + down is the trade-off point.
 
 ## Resume here (2026-11-23 afternoon): C glue built (CPU side of a chunk), next: fusion + the loop in C
 - **libjbglue.so** (llm/l3/glue/jb_glue.c, build.sh -> npu-llm/bin/libjbglue.so + frozen libjbglue-<sha>.so; ctypes

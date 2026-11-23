@@ -46,9 +46,10 @@ def rmsnorm(x, w, eps):
     return out
 
 
-def quant_planar(x, s, zp):
+def quant_planar(x, s, zp, out=None):
     T, IC = x.shape
-    out = np.empty((IC, T), np.int8)
+    out = np.empty((IC, T), np.int8) if out is None else out
+    assert out.shape == (IC, T)
     _l.jbg_quant_planar(_p(x, np.float32, _f), T, IC, float(np.float32(s)), int(zp), _p(out, np.int8, _i8))
     return out
 
@@ -139,19 +140,22 @@ def _jobs(lvs, rows, s, zp):
             (_I * nj)(*[int(v) for v in zp])]
 
 
-def norm_quant(x, eps, s, zp):
-    """rows 1.. of x [T+1, D]: RMSNorm -> planar int8 [D, T]; returns (planar, row 0 normalized in float)."""
+def norm_quant(x, eps, s, zp, out=None):
+    """rows 1.. of x [T+1, D]: RMSNorm -> planar int8 [D, T] (into out if given, e.g. the engine's input slot);
+    returns (planar, row 0 normalized in float)."""
     T1, D = x.shape
-    out = np.empty((D, T1 - 1), np.int8)
+    out = np.empty((D, T1 - 1), np.int8) if out is None else out
+    assert out.shape == (D, T1 - 1)
     a0 = np.empty(D, np.float32)
     _l.jbg_norm_quant(_p(x, np.float32, _f), T1 - 1, D, eps, float(np.float32(s)), int(zp), _p(out, np.int8, _i8),
                       _p(a0, np.float32, _f))
     return out, a0
 
 
-def ffn_fused(lvs, rows, s, zp, T, I, signs, b, sx, zx):
+def ffn_fused(lvs, rows, s, zp, T, I, signs, b, sx, zx, out=None):
     """gateup job outputs (tokens 1..T) -> SiLU * up -> block FWHT -> down's planar int8 input [I, T]."""
-    out = np.empty((I, T), np.int8)
+    out = np.empty((I, T), np.int8) if out is None else out
+    assert out.shape == (I, T)
     _l.jbg_ffn_fused(*_jobs(lvs, rows, s, zp), T, I, _p(signs, np.float32, _f), int(b), float(np.float32(sx)),
                      int(zx), _p(out, np.int8, _i8))
     return out

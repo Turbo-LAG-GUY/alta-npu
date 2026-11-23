@@ -1,0 +1,7 @@
+layer  0 residual: max |C - ref| / max |ref| = 1.97e-02
+layer  1 residual: max |C - ref| / max |ref| = 1.98e-02
+layer  2 residual: max |C - ref| / max |ref| = 5.84e-02
+layer  9 residual: max |C - ref| / max |ref| = 7.07e-02
+layer 19 residual: max |C - ref| / max |ref| = 8.71e-02
+layer 29 residual: max |C - ref| / max |ref| = 8.16e-02
+residual worst over layers 1.08e-01; logits: top-1 agreement 90.2%, KL(ref || C) 1.99e-02, ppl ref 15.817 / C 15.823
