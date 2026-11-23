@@ -139,4 +139,71 @@ if __name__ == "__main__":
     shapes(576, 9, 3, 1536)                         # SmolLM2-135M
     shapes(2048, 32, 32, 8192)                      # SmolLM2-1.7B
     print("FAIL: " + ", ".join(bad) if bad else "ALL OK")
+
+
+def fused(D, H, KV, I, T=256, hd=64):
+    """the fused kernels must give exactly what the separate kernels give."""
+    rng = np.random.default_rng(7 + D)
+    tag = "D%d fused" % D
+    x = rng.standard_normal((T + 1, D)).astype(np.float32) * 2
+    s, z = 0.017, 2
+    a = J.rmsnorm(x, None, 1e-5)
+    ref = J.quant_planar(np.ascontiguousarray(a[1:]), s, z)
+    got, a0 = J.norm_quant(x, 1e-5, s, z)
+    ok = np.array_equal(ref, got) and np.array_equal(a[0], a0)
+    print("%-34s %s" % (tag + " norm_quant", "exact" if ok else "DIFFERENT"))
+    if not ok:
+        bad.append(tag + " norm_quant")
+    # FFN: gateup jobs (planar NPU buffers) -> SiLU * up -> FWHT -> planar int8
+    perm = rng.permutation(2 * I).astype(np.int32)
+    jobs = [np.sort(j).astype(np.int32) for j in np.array_split(perm, 4)]
+    bufs = [rng.integers(-128, 128, (len(j), T)).astype(np.int8) for j in jobs]
+    sc, zp = [0.02, 0.03, 0.025, 0.05], [1, -2, 0, 3]
+    gu = np.empty((T, 2 * I), np.float32)
+    J.scatter_jobs([b.T for b in bufs], jobs, sc, zp, gu)
+    sg = rng.choice(np.array([-1, 1], np.float32), I)
+    bI = I & -I
+    h = J.silu_mul(gu)
+    J.fwht(h, bI, sg)
+    ref = J.quant_planar(h, 0.04, -1)
+    got = J.ffn_fused([b.T for b in bufs], jobs, sc, zp, T, I, sg, bI, 0.04, -1)
+    ok = np.array_equal(ref, got)
+    print("%-34s %s" % (tag + " ffn_fused", "exact" if ok else "DIFFERENT (%d of %d)" % ((ref != got).sum(), ref.size)))
+    if not ok:
+        bad.append(tag + " ffn_fused")
+    # qkv + RoPE
+    OC = (H + 2 * KV) * hd
+    perm = rng.permutation(OC).astype(np.int32)
+    jobs = [np.sort(j).astype(np.int32) for j in np.array_split(perm, 4)]
+    bufs = [rng.integers(-128, 128, (len(j), T)).astype(np.int8) for j in jobs]
+    y = np.empty((T, OC), np.float32)
+    J.scatter_jobs([b.T for b in bufs], jobs, sc, zp, y)
+    inv = 100000.0 ** (-np.arange(0, hd, 2, dtype=np.float64) / hd)
+    qr = np.ascontiguousarray(y[:, :H * hd]).reshape(T, H, hd)
+    kr = np.ascontiguousarray(y[:, H * hd:(H + KV) * hd]).reshape(T, KV, hd)
+    vr = np.ascontiguousarray(y[:, (H + KV) * hd:]).reshape(T, KV, hd)
+    J.rope(qr, 1, inv)                               # tokens 1..T are positions 1..T
+    J.rope(kr, 1, inv)
+    q = np.zeros((T + 1, H, hd), np.float32)
+    k = np.zeros((T + 1, KV, hd), np.float32)
+    v = np.zeros((T + 1, KV, hd), np.float32)
+    J.qkv_rope([b.T for b in bufs], jobs, sc, zp, q, k, v, 0, inv)
+    ok = np.array_equal(q[1:], qr) and np.array_equal(k[1:], kr) and np.array_equal(v[1:], vr)
+    print("%-34s %s" % (tag + " qkv_rope", "exact" if ok else "DIFFERENT"))
+    if not ok:
+        bad.append(tag + " qkv_rope")
+    t0 = time.monotonic()
+    for _ in range(5):
+        J.ffn_fused([b.T for b in bufs[:0]] or [bb.T for bb in [rng.integers(-128, 128, (len(j), T)).astype(np.int8)
+                                                               for j in np.array_split(np.arange(2 * I, dtype=np.int32), 4)]],
+                    [np.ascontiguousarray(j) for j in np.array_split(np.arange(2 * I, dtype=np.int32), 4)],
+                    sc, zp, T, I, sg, bI, 0.04, -1)
+    print("%-34s %.2f ms per call (incl. making test buffers)" % (tag + " ffn_fused time", (time.monotonic() - t0) / 5 * 1e3))
+
+
+if __name__ == "__main__" and os.environ.get("JBG_FUSED", "1") == "1":
+    fused(576, 9, 3, 1536)
+    fused(2048, 32, 32, 8192)
+    print("FUSED FAIL: " + ", ".join(bad) if bad else "FUSED ALL OK")
+
     sys.exit(1 if bad else 0)

@@ -219,12 +219,13 @@ def main():
                     "on the embeddings: the format's noise floor (rounding ties spread), to judge other runs by")
     ap.add_argument("--offline", action="store_true", help="npu backend against the fake NPU (plumbing only: "
                     "the shim executes nothing, so the levels and the quality are meaningless)")
-    ap.add_argument("--glue", choices=("numpy", "c"), default="numpy", help="c: the CPU glue in C (llm/l3/glue, "
+    ap.add_argument("--glue", choices=("numpy", "c", "cfused"), default="numpy", help="c / cfused: the CPU glue in C "
+                    "(cfused: the fused kernels; llm/l3/glue, "
                     "libjbglue.so, OpenMP on the A73s: OMP_NUM_THREADS=4 GOMP_CPU_AFFINITY=2-5 unless set)")
     ap.add_argument("model_dir")
     ap.add_argument("pack_dir")
     a = ap.parse_args()
-    if a.glue == "c":
+    if a.glue in ("c", "cfused"):
         os.environ.setdefault("OMP_NUM_THREADS", "4")
         os.environ.setdefault("GOMP_CPU_AFFINITY", "2-5")
         sys.path.insert(0, os.path.join(HERE, "glue"))
@@ -285,9 +286,9 @@ def main():
             be.npu_ms = be.ro_ms = 0.0
         for tn, ids in evals.items():
             t = time.monotonic()
-            if a.glue == "c":
+            if a.glue in ("c", "cfused"):
                 q = cforward.PackQuantC(steps, order, be, check=(tn == "gpl3"))
-                lg = cforward.forward_c(m, ids, q)
+                lg = (cforward.forward_c_fused if a.glue == "cfused" else cforward.forward_c)(m, ids, q)
             else:
                 q = PackQuant(steps, order, be, check=(tn == "gpl3"))
                 lg = m.forward(ids, q)
@@ -311,7 +312,7 @@ def main():
                                               wall, q.t_be, q.t_q, wall - q.t_be - q.t_q,
                                               "   (NPU %.1f ms, read-out %.1f ms)" % (r["npu_ms"], r["readout_ms"])
                                               if "npu_ms" in r else ""), flush=True)
-            if a.glue == "c":
+            if a.glue in ("c", "cfused"):
                 r["parts_s"] = dict(q.t)
                 print("        C glue parts (s): " + ", ".join("%s %.2f" % kv for kv in q.t.items()), flush=True)
             if q.check:

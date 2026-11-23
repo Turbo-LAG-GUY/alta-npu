@@ -77,6 +77,91 @@ class PackQuantC:
         return y
 
 
+    def run_planar(self, key, xp, x0):
+        """the step on a planar int8 input xp [IC, T] (tokens 1..T, already quantized with the step's scale) and the
+        float row 0 x0: returns (the jobs' 8-bit outputs [T, n] each, position 0's output y0 [OC])."""
+        st = self.steps[key]
+        rows = self._rows(key, st)
+        t0 = time.monotonic()
+        y0 = np.empty(st.oc, np.float32)
+        J.gemv_jobs(np.ascontiguousarray(x0), st.w, [c.start for c in st.cols], st.sw, rows, y0, False)
+        t1 = time.monotonic()
+        xq = xp.T
+        lv = self.be.run(self.order[key], st, xq)
+        t2 = time.monotonic()
+        if self.check:
+            d = np.abs(xq.astype(int) - st.rec_in.astype(int))
+            self.worst_in = max(self.worst_in, int(d.max()))
+            self.n_in_diff += int((d > 0).sum())
+            if d.max() == 0:
+                self.worst_out = max(self.worst_out, max(int(np.abs(a.astype(int) - b.astype(int)).max())
+                                                         for a, b in zip(lv, st.rec_out)))
+        self.t["linear_pos0"] += t1 - t0
+        self.t["linear_backend"] += t2 - t1
+        return lv, y0, st, rows
+
+
+def forward_c_fused(m, ids, q8):
+    """forward_c with the fused kernels: RMSNorm straight into the planar input, qkv scattered into q / k / v with
+    RoPE, the FFN glue (SiLU * up, block FWHT, down's input quantization) in one pass; only the residual, q / k / v
+    and the attention output are float arrays."""
+    tm = q8.t
+    T1 = len(ids)
+    q8.start = 0
+    Q = m.post_embed.__self__
+    Hd = m.down_in.__self__
+    H, KV, hd = m.H, m.KV, m.hd
+    t = time.monotonic()
+    x = m.embed.rows(np.asarray(ids)).astype(np.float32)
+    x = J.fwht(np.ascontiguousarray(x), x.shape[1], Q.s) if Q.pow2 else np.ascontiguousarray(x @ Q.Q, np.float32)
+    tm["embed_head"] += time.monotonic() - t
+    for li in range(m.L):
+        s_qkv = q8.steps["%d.qkv" % li]
+        t = time.monotonic()
+        ap, a0 = J.norm_quant(x, m.eps, s_qkv.sx, s_qkv.zx)
+        tm["norm"] += time.monotonic() - t
+        lv, y0, st, rows = q8.run_planar("%d.qkv" % li, ap, a0)
+        t = time.monotonic()
+        q = np.empty((T1, H, hd), np.float32)
+        k = np.empty((T1, KV, hd), np.float32)
+        v = np.empty((T1, KV, hd), np.float32)
+        J.qkv_rope(lv, rows, st.sy, st.zy, q, k, v, 0, m.inv_freq, bool(m.use_rope[li]))
+        q[0] = y0[:H * hd].reshape(H, hd)                  # position 0: RoPE at position 0 is the identity
+        k[0] = y0[H * hd:(H + KV) * hd].reshape(KV, hd)
+        v[0] = y0[(H + KV) * hd:].reshape(KV, hd)
+        tm["linear_scatter"] += time.monotonic() - t
+        t = time.monotonic()
+        att = J.attention(q, k, v, 0)
+        tm["attention"] += time.monotonic() - t
+        q8.linear("%d.o" % li, att, add_to=x)
+        s_gu = q8.steps["%d.gateup" % li]
+        t = time.monotonic()
+        ap, a0 = J.norm_quant(x, m.eps, s_gu.sx, s_gu.zx)
+        tm["norm"] += time.monotonic() - t
+        lv, gu0, st, rows = q8.run_planar("%d.gateup" % li, ap, a0)
+        s_dn = q8.steps["%d.down" % li]
+        t = time.monotonic()
+        h0 = J.silu_mul(gu0[None])
+        J.fwht(h0, Hd.b, Hd.s)
+        hp = J.ffn_fused(lv, rows, st.sy, st.zy, T1 - 1, s_dn.ic, Hd.s, Hd.b, s_dn.sx, s_dn.zx)
+        tm["ffn_glue"] += time.monotonic() - t
+        lv, y0, st, rows = q8.run_planar("%d.down" % li, hp, h0[0])
+        t = time.monotonic()
+        x[0] += y0
+        J.scatter_jobs(lv, rows, st.sy, st.zy, x[1:], True)
+        tm["linear_scatter"] += time.monotonic() - t
+    t = time.monotonic()
+    x = J.fwht(x, x.shape[1], Q.s, True) if Q.pow2 else np.ascontiguousarray(x @ Q.Q.T, np.float32)
+    x = J.rmsnorm(x, m.norm, m.eps)
+    V = m.embed.shape[0]
+    if m.embed.shape[0] * m.embed.shape[1] * 4 > 256 << 20:
+        lg = np.concatenate([x @ m.embed.rows(np.arange(a, min(a + 8192, V))).T for a in range(0, V, 8192)], 1)
+    else:
+        lg = x @ m.head().T
+    tm["embed_head"] += time.monotonic() - t
+    return lg
+
+
 def forward_c(m, ids, q8):
     """ids [T] -> logits [T, V] (all positions, for scoring; a prompt needs only the last row)."""
     tm = q8.t

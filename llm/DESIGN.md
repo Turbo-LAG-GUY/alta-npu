@@ -127,9 +127,18 @@ plus measurements on this board.
   floor ~0.5 s per chunk. Lessons: OpenMP threads asleep between calls cost up to 3 ms per call (active wait fixes
   it, but spinning threads starve the ref backend's BLAS: use active only with the NPU backend); GCC spills 2-D
   NEON accumulator arrays (named registers: attention 44 -> 29 ms per 1.7B layer); per-element float64 divides.
-- **Next for the glue**: fuse the float passes (gateup -> SiLU * up straight from the int8 job outputs; qkv scattered
-  into q / k / v; quantize fused into the norms), the position-0 GEMV overlapped with the NPU (independent of it), then
-  the whole loop in C inside jb_engine (no Python between steps), then the 135M chunk end to end on the NPU with it.
+- **Fused (2026-11-23 evening)**: jbg_norm_quant (RMSNorm -> planar int8, row 0 float), jbg_qkv_rope (jobs -> q / k / v
+  + RoPE), jbg_ffn_fused (gateup jobs -> SiLU * up -> block FWHT -> down's planar int8; nothing else written): exact vs
+  the separate kernels. Attention: V repacked per head ([keys][dims], the strided V rows thrashed the TLB: P.V 127 ->
+  17 ms single-thread), K transposed through tiles; 1.7B layer 17 ms (numpy 970). FWHT radix 4 with the first two
+  stages in registers (bit-exact): 28 -> 11 ms per 1.7B FFN. Quantize stays exact division (multiply by 1/s was no
+  faster: memory-bound, and moved ~3 levels per 10^6). Per chunk (bench_layer.py ... fused): **135M 0.47 s, 1.7B
+  1.90 s** (FFN 0.62, attention 0.42, position-0 GEMV 0.38, qkv+RoPE 0.15, scatter 0.15, norm+quant 0.11, quantize
+  0.06). chunk_glue.py --glue cfused (glue/cforward.py forward_c_fused), 135M ref backend: steps max 1 level, GPL-3
+  15.82 KL .0171, README 49.40 KL .0319 (inside the noise band).
+- **Next for the glue**: the position-0 GEMV while the NPU runs (independent; -0.38 s at 1.7B), the loop in C inside
+  jb_engine (no Python / ctypes between steps), then the 135M chunk end to end on the NPU with it; then FFN / attention
+  tuning (4-thread scaling is ~3x: L2 bandwidth).
 
 ## Resume here (2026-11-23 00:05): gated tile rule + 1.7B down split CONFIRMED on the NPU
 - **Gated tile rule** (mesa-llm etnaviv_ml_nn_v7.c, uncommitted on 4eb662fc): ETNA_ML_V7_TILE_FIT=262144 now tiles

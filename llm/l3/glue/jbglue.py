@@ -21,6 +21,11 @@ _l.jbg_threads.restype = _I
 _vp = C.c_void_p
 _l.jbg_scatter_jobs.argtypes = [_I, C.POINTER(_vp), C.POINTER(_L), C.POINTER(_L), C.POINTER(_I), C.POINTER(_vp),
                                 C.POINTER(_F), C.POINTER(_I), _f, _I, _I, _I]
+_JOBARGS = [_I, C.POINTER(_vp), C.POINTER(_L), C.POINTER(_L), C.POINTER(_I), C.POINTER(_vp), C.POINTER(_F),
+            C.POINTER(_I)]
+_l.jbg_norm_quant.argtypes = [_f, _I, _I, _F, _F, _I, _i8, _f]
+_l.jbg_ffn_fused.argtypes = _JOBARGS + [_I, _I, _f, _I, _F, _I, _i8]
+_l.jbg_qkv_rope.argtypes = _JOBARGS + [_I, _I, _I, _I, _I, _d, _I, _f, _f, _f]
 _l.jbg_gemv_jobs.argtypes = [_I, _f, C.POINTER(_vp), C.POINTER(_I), C.POINTER(_I), C.POINTER(_I), C.POINTER(_F),
                              C.POINTER(_vp), _f, _I, _I]
 
@@ -121,3 +126,40 @@ def gemv_jobs(x, ws, cols, sws, rows, y, accumulate=False):
     R = (_vp * nj)(*[r.ctypes.data for r in rows])
     _l.jbg_gemv_jobs(nj, _p(x, np.float32, _f), W, N, IC, COL, SW, R, _p(y, np.float32, _f), y.shape[0],
                      int(accumulate))
+
+
+def _jobs(lvs, rows, s, zp):
+    """the common job arguments of the fused kernels (and keep-alive list)."""
+    nj = len(lvs)
+    for r in rows:
+        assert r.dtype == np.int32 and r.flags.c_contiguous
+    return [nj, (_vp * nj)(*[a.ctypes.data for a in lvs]), (_L * nj)(*[a.strides[0] for a in lvs]),
+            (_L * nj)(*[a.strides[1] for a in lvs]), (_I * nj)(*[a.shape[1] for a in lvs]),
+            (_vp * nj)(*[r.ctypes.data for r in rows]), (_F * nj)(*[float(v) for v in s]),
+            (_I * nj)(*[int(v) for v in zp])]
+
+
+def norm_quant(x, eps, s, zp):
+    """rows 1.. of x [T+1, D]: RMSNorm -> planar int8 [D, T]; returns (planar, row 0 normalized in float)."""
+    T1, D = x.shape
+    out = np.empty((D, T1 - 1), np.int8)
+    a0 = np.empty(D, np.float32)
+    _l.jbg_norm_quant(_p(x, np.float32, _f), T1 - 1, D, eps, float(np.float32(s)), int(zp), _p(out, np.int8, _i8),
+                      _p(a0, np.float32, _f))
+    return out, a0
+
+
+def ffn_fused(lvs, rows, s, zp, T, I, signs, b, sx, zx):
+    """gateup job outputs (tokens 1..T) -> SiLU * up -> block FWHT -> down's planar int8 input [I, T]."""
+    out = np.empty((I, T), np.int8)
+    _l.jbg_ffn_fused(*_jobs(lvs, rows, s, zp), T, I, _p(signs, np.float32, _f), int(b), float(np.float32(sx)),
+                     int(zx), _p(out, np.int8, _i8))
+    return out
+
+
+def qkv_rope(lvs, rows, s, zp, q, k, v, pos0, inv_freq, rope=True):
+    """qkv job outputs (tokens 1..T) -> rows 1.. of q [T+1, H, hd], k / v [T+1, KV, hd], RoPE on q and k."""
+    T1, H, hd = q.shape
+    KV = k.shape[1]
+    _l.jbg_qkv_rope(*_jobs(lvs, rows, s, zp), T1 - 1, H, KV, hd, int(pos0), _p(inv_freq, np.float64, _d), int(rope),
+                    _p(q, np.float32, _f), _p(k, np.float32, _f), _p(v, np.float32, _f))

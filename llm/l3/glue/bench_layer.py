@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """bench_layer.py (2026-11-23, CPU only): the C glue of one 256-token chunk at real shapes without the NPU (random
 int8 job outputs stand in for it), per part, x layers. Answers "what does the CPU side cost per chunk" for a model.
-Usage: OMP_NUM_THREADS=4 GOMP_CPU_AFFINITY=2-5 taskset -c 2-5 bench_layer.py [135m|1p7b] [ROUNDS]"""
+Usage: OMP_NUM_THREADS=4 GOMP_CPU_AFFINITY=2-5 taskset -c 2-5 bench_layer.py [135m|1p7b] [ROUNDS] [fused]"""
 import os
 import sys
 import time
@@ -58,9 +58,66 @@ def linear(name, a, OC, add_to=None):
     return y
 
 
+FUSED = len(sys.argv) > 3 and sys.argv[3] == "fused"
+
+
+def pos0(name, a0, OC, y0=None, acc=False):
+    js = steps[name]
+    y0 = np.empty(OC, np.float32) if y0 is None else y0
+    J.gemv_jobs(a0, [j["w"] for j in js], [j["col"] for j in js], [0.01] * len(js), [j["rows"] for j in js], y0, acc)
+    return y0
+
+
+def outs(name):
+    js = steps[name]
+    return [j["out"].T for j in js], [j["rows"] for j in js], [0.01] * len(js), [0] * len(js)
+
+
+def layer_fused(x):
+    t = time.monotonic()
+    ap, a0 = J.norm_quant(x, 1e-5, 0.03, 0)            # rmsnorm + quantize, row 0 in float
+    t = tick("norm+quant", t)
+    y0 = pos0("qkv", a0, (H + 2 * KV) * hd)
+    t = tick("pos0 gemv", t)
+    q = np.empty((T + 1, H, hd), np.float32)
+    k = np.empty((T + 1, KV, hd), np.float32)
+    v = np.empty((T + 1, KV, hd), np.float32)
+    J.qkv_rope(*outs("qkv"), q, k, v, 0, inv)
+    q[0], k[0], v[0] = (y0[:H * hd].reshape(H, hd), y0[H * hd:(H + KV) * hd].reshape(KV, hd),
+                        y0[(H + KV) * hd:].reshape(KV, hd))   # position 0: RoPE is the identity
+    t = tick("qkv+rope", t)
+    att = J.attention(q, k, v, 0)
+    t = tick("attention", t)
+    pos0("o", np.ascontiguousarray(att[0]), D, x[0], True)
+    t = tick("pos0 gemv", t)
+    J.quant_planar(att[1:], 0.03, 0)
+    t = tick("quantize", t)
+    J.scatter_jobs(*outs("o"), x[1:], True)
+    t = tick("scatter", t)
+    ap, a0 = J.norm_quant(x, 1e-5, 0.03, 0)
+    t = tick("norm+quant", t)
+    gu0 = pos0("gateup", a0, 2 * I)
+    t = tick("pos0 gemv", t)
+    h0 = J.silu_mul(gu0[None])
+    J.fwht(h0, b_I, s_I)
+    hp = J.ffn_fused(*outs("gateup"), T, I, s_I, b_I, 0.03, 0)
+    t = tick("ffn fused", t)
+    pos0("down", h0[0], D, x[0], True)
+    t = tick("pos0 gemv", t)
+    J.scatter_jobs(*outs("down"), x[1:], True)
+    tick("scatter", t)
+
+
 x = rng.standard_normal((T + 1, D)).astype(np.float32)
 t_all = time.monotonic()
-for _ in range(ROUNDS):
+if FUSED:
+    for _ in range(ROUNDS):
+        for li in range(L):
+            layer_fused(x)
+            if not np.isfinite(x).all():
+                x[:] = rng.standard_normal(x.shape)
+    ROUNDS_DONE = True
+for _ in range(0 if FUSED else ROUNDS):
     for li in range(L):
         t = time.monotonic()
         a = J.rmsnorm(x, None, 1e-5)
@@ -89,7 +146,7 @@ for _ in range(ROUNDS):
         tick("silu + fwht", t)
         linear("down", h, D, add_to=x)
 wall = (time.monotonic() - t_all) / ROUNDS
-print("%s, %d layers, 256-token chunk, C glue only (threads %d): %.0f ms per chunk" % (
-    sys.argv[1] if len(sys.argv) > 1 else "1p7b", L, J.threads(), wall * 1e3))
+print("%s, %d layers, 256-token chunk, C glue only%s (threads %d): %.0f ms per chunk" % (
+    sys.argv[1] if len(sys.argv) > 1 else "1p7b", L, ", fused" if FUSED else "", J.threads(), wall * 1e3))
 for k_, v_ in sorted(tm.items(), key=lambda kv: -kv[1]):
     print("  %-12s %7.1f ms" % (k_, v_ / ROUNDS * 1e3))
