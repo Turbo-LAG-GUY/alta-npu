@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 164.62 ms, compile 385.62 ms (34 ops, 16 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-1p7b-split4/L00_down_t1.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 34, "compile_ms": 385.615, "first_ms": 4.695, "ms_median_after_first": 3.2514, "ctx_ms": 0.0017, "invoke_call_ms": 0.0191, "read_ms": 3.2320, "npu_ms": 3.1072, "spins_per_wait": 1010, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0438, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.1205, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261123-124217-LLMR-S1-down-L00-1tok

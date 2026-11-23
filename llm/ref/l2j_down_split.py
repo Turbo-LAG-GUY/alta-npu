@@ -6,6 +6,10 @@ step (tile-ladder 2026-11-22: o 28.7 -> 14.8 ms per 4 layers). Cost: K roundings
 Rows (l2h_groups row 4 setup: rotation, 4 jobs per step, per-job output scales, position 0 on the CPU, head fp32):
   K = 1 (today), then the K values in L2J_K (default 2,4): down = sum of K pieces, each 4 jobs over its own output
   groups (by max |w| of the piece), its own calibrated per-job output ranges; the input is quantized once, as today.
+Grouping (2026-11-23, after the 1.7B run: weight-grouped pieces cost KL .182 -> .251): L2J_GROUP = w (default: equal
+groups by max |w| of the piece) | range (groups by the calibrated output range of each channel, uneven sizes chosen by
+dynamic programming to minimise sum over jobs of rows x range^2, i.e. the outlier channels get small jobs of their own);
+L2J_JOBS = jobs per piece (default 4). With L2J_GROUP=range the K = 1 row uses the same grouping on the whole down step.
 Usage: l2j_down_split.py MODEL_DIR [TOKENS]     writes npu-llm/runs/l2j-down-split-<model>-<stamp>.json
 """
 import json
@@ -24,8 +28,39 @@ from l2_quality import logsoftmax, score  # noqa: E402
 from smollm import SmolLM, Quant, _w  # noqa: E402
 
 RUNS = "/home/jordan/Documents/AI_Projects/npu-llm/runs"
-KS = [1] + [int(k) for k in os.environ.get("L2J_K", "2,4").split(",")]
-JOBS = 4
+JOBS_LIST = [int(j) for j in os.environ.get("L2J_JOBS", "4").split(",")]
+JOBS = JOBS_LIST[0]
+MIN_ROWS = 8                                                     # rows per job at least (one per NN core)
+GROUP = os.environ.get("L2J_GROUP", "w")
+KS = [int(k) for k in os.environ.get("L2J_KS", "1," + os.environ.get("L2J_K", "2,4")).split(",")]
+
+
+def dp_groups(r, G):
+    """channels -> G groups minimising sum of rows x (group's max r)^2 over contiguous runs of the channels sorted by r
+    (the 8-bit step of a job is its range / 255, every row pays its job's step). Returns a group id per channel."""
+    order = np.argsort(r)
+    rs = r[order].astype(np.float64) ** 2
+    N = len(rs)
+    INF = np.inf
+    best = np.full(N + 1, INF)
+    best[0] = 0.0
+    cut = np.zeros((G + 1, N + 1), np.int64)
+    for g in range(1, G + 1):
+        nb = np.full(N + 1, INF)
+        for j in range(1, N + 1):                              # group ends at j: rows i..j-1, cost (j - i) * rs[j-1]
+            i = np.arange(0, j)
+            c = best[:j] + (j - i) * rs[j - 1]
+            c[j - i < MIN_ROWS] = INF                          # no job smaller than MIN_ROWS
+            k = int(np.argmin(c))
+            nb[j], cut[g, j] = c[k], k
+        best = nb
+    gid = np.empty(N, np.int32)
+    j = N
+    for g in range(G, 0, -1):
+        i = cut[g, j]
+        gid[order[i:j]] = g - 1
+        j = i
+    return gid
 
 
 def piece_ranges(m, ids_list, K):
@@ -50,12 +85,13 @@ def piece_ranges(m, ids_list, K):
 
 
 class SplitDown(G.QuantG):
-    def __init__(self, K, prng, *a, **k):
+    def __init__(self, K, prng, *a, jobs=None, **k):
         super().__init__(*a, **k)
-        self.K, self.prng = K, prng
+        self.K, self.prng, self.gcache = K, prng, {}
+        self.jobs = jobs or JOBS
 
     def linear(self, key, x, W):
-        if self.K == 1 or not key.endswith(".down"):
+        if not key.endswith(".down") or (self.K == 1 and GROUP == "w"):
             return super().linear(key, x, W)
         Wf = _w(W)
         y0 = x[:1] @ Wf.T                                        # position 0: CPU
@@ -67,14 +103,22 @@ class SplitDown(G.QuantG):
         for k in range(self.K):
             Wk = Wf[:, k * n:(k + 1) * n]
             r = np.abs(Wk).max(1)
+            lo, hi = self.prng[(key, k)]                         # per-job 8-bit output, calibrated partial ranges
             sw = np.empty(Wk.shape[0])
-            gid = np.empty(Wk.shape[0], np.int32)
-            for j, grp in enumerate(np.array_split(np.argsort(r), JOBS)):
-                sw[grp], gid[grp] = max(float(r[grp].max()), 1e-12) / 127.0, j
+            if GROUP == "range":
+                gid = self.gcache.get((key, k))
+                if gid is None:
+                    gid = self.gcache[(key, k)] = dp_groups(np.maximum(np.abs(lo), np.abs(hi)), self.jobs)
+                for j in range(self.jobs):
+                    grp = np.nonzero(gid == j)[0]
+                    sw[grp] = max(float(r[grp].max()), 1e-12) / 127.0
+            else:
+                gid = np.empty(Wk.shape[0], np.int32)
+                for j, grp in enumerate(np.array_split(np.argsort(r), self.jobs)):
+                    sw[grp], gid[grp] = max(float(r[grp].max()), 1e-12) / 127.0, j
             Wq = np.clip(np.round(Wk / sw[:, None]), -127, 127)
             yk = (xq[:, k * n:(k + 1) * n] @ Wq.T) * (sx * sw[None, :])
-            lo, hi = self.prng[(key, k)]                         # per-job 8-bit output, calibrated partial ranges
-            glo, ghi = np.zeros(JOBS), np.zeros(JOBS)
+            glo, ghi = np.zeros(self.jobs), np.zeros(self.jobs)
             np.minimum.at(glo, gid, lo)
             np.maximum.at(ghi, gid, hi)
             s = np.maximum(ghi - glo, 1e-8) / 255.0
@@ -98,6 +142,7 @@ def main():
     what = G.rotate(m, m.layers)
     rec, chin, chout = G.calibrate3(m, calib)
     prngs = {K: piece_ranges(m, calib, K) for K in KS if K > 1}
+    prngs[1] = {(k, 0): (chout[0][k], chout[1][k]) for k in chout[0] if k.endswith(".down")}   # whole down = 1 piece
     print("%s, %d tokens per text; %s; calibration + fp32 %.0f s" % (name, G.T, what, time.monotonic() - t0), flush=True)
     print("%-36s %-7s %8s %10s %10s" % ("down input split (4 jobs per piece)", "text", "ppl", "top1=fp32", "KL"),
           flush=True)
@@ -106,19 +151,21 @@ def main():
         s = score(refs[tn], refs[tn], np.asarray(ids))
         out["rows"].append({"K": None, "text": tn, **{k: float(v) for k, v in s.items()}})
         print("%-36s %-7s %8.2f" % ("fp32", tn, s["ppl"]), flush=True)
-    for K in KS:
-        Quant.WGROUPS, Quant.WGROUPS_BY = JOBS, None
+    for K, jobs in [(K, j) for j in JOBS_LIST for K in KS if not (K == 1 and GROUP == "w" and j != JOBS_LIST[0])]:
+        Quant.WGROUPS, Quant.WGROUPS_BY = 4, None                  # the other steps: 4 jobs, as today
         Quant.WQ.clear()
         G.QuantG.GRP.clear()
         q = SplitDown(K, prngs.get(K), "w8a8", True, rec, chout=chout, per_job_out=True, quant_head=False,
-                      fp_first=True)
+                      fp_first=True, jobs=jobs)
         for tn, ids in evals.items():
             t = time.monotonic()
             s = score(refs[tn], logsoftmax(m.forward(ids, q)), np.asarray(ids))
-            out["rows"].append({"K": K, "text": tn, **{k: float(v) for k, v in s.items()}})
+            out["rows"].append({"K": K, "jobs": jobs, "text": tn, **{k: float(v) for k, v in s.items()}})
             print("%-36s %-7s %8.2f %9.1f%% %10.4f   (%.0f s)" % (
-                "today (one piece)" if K == 1 else "%d pieces, CPU adds the partials" % K, tn, s["ppl"],
+                ("today (one piece)" if GROUP == "w" else "1 piece, %d range jobs" % jobs) if K == 1 else
+                "%d pieces x %d %s jobs" % (K, jobs, "range" if GROUP == "range" else "w"), tn, s["ppl"],
                 100 * s["top1_vs_fp32"], s["kl_vs_fp32"], time.monotonic() - t), flush=True)
+    out["group"], out["jobs_per_piece"] = GROUP, JOBS
     path = os.path.join(RUNS, "l2j-down-split-%s-%s.json" % (name, time.strftime("%Y%m%d-%H%M%S")))
     json.dump(out, open(path, "w"), indent=1)
     print("wrote %s (%.0f min)" % (path, (time.monotonic() - t0) / 60), flush=True)

@@ -1,0 +1,8 @@
+/dev/dri/renderD128: etnaviv
+compiled 16 steps (4 layers, 256 tokens) in 12255 ms (median 337.7, max 824.4 per step); weights 269.0 MB (freed after compile); resident now anon 91.5 + file 2.9 + shmem 0.0 MB, peak 148.5 MB; test data 81.8 MB
+  qkv     4 steps: 30.97 ms per round (NPU incl. submit 25.67, read-out 4.97)
+  o       4 steps: 13.19 ms per round (NPU incl. submit 11.20, read-out 1.78)
+  gateup  4 steps: 72.12 ms per round (NPU incl. submit 57.17, read-out 14.80)
+  down    4 steps: 52.04 ms per round (NPU incl. submit 44.04, read-out 8.07)
+{"offline": false, "steps": 16, "layers": 4, "tokens": 256, "rounds": 20, "compile_ms": 12254.7, "compile_ms_max": 824.40, "weights_mb": 268.96, "peak_rss_mb": 148.5, "rss_anon_mb": 95.9, "rss_file_mb": 2.7, "rss_shmem_mb": 0.0, "test_data_mb": 81.8, "round_ms_median": 170.674, "ms_per_token": 0.6667, "qkv_ms": 30.967, "o_ms": 13.186, "gateup_ms": 72.124, "down_ms": 52.043, "readout_ms": 29.625, "bad_packs": 0, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261123-124338-LLMR-S2-1p7b-4layers-256

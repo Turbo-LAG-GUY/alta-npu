@@ -48,25 +48,37 @@ STEPS = ("qkv", "o", "gateup", "down")
 
 
 class Step:
-    """One layer step at one size, from its pack: input q, per-job weights / output q, row map."""
+    """One layer step at one size, from its pack: input q, per-job weights / output q, row map. A split step
+    (2026-11-23, real_packs.py DOWN_SPLIT): the input channels in K pieces (pack op 3 = SPLIT), each job reads its
+    piece's columns, and the jobs' outputs are partial sums that add up row by row."""
 
-    def __init__(self, path, gid, tokens):
+    def __init__(self, path, gids, key, tokens):
         T, ops, x, exp, _ = read_pack(path)
         self.name = os.path.basename(path)[:-4]
         convs = [op for op in ops if op[0] == 1]
-        self.sx, self.zx = T[convs[0][1]]["q"]
-        self.sx = float(self.sx)
-        self.ic = T[convs[0][2]]["dims"][3]
-        self.w, self.sw, self.sy, self.zy, self.idx = [], [], [], [], []
-        for g, (_, i, a, b, o) in enumerate(convs):
-            n = T[a]["dims"][0]
-            self.w.append(np.frombuffer(T[a]["data"], np.int8).reshape(n, self.ic))
+        splits = [op for op in ops if op[0] == 3]
+        cin = T[convs[0][1]]
+        self.sx, self.zx = float(cin["q"][0]), cin["q"][1]
+        self.ic = T[splits[0][1]]["dims"][3] if splits else cin["dims"][3]
+        K = splits[0][3] if splits else 1
+        n = self.ic // K
+        self.w, self.sw, self.sy, self.zy, self.idx, self.cols = [], [], [], [], [], []
+        per_piece = {}
+        for _, i, a, b, o in convs:
+            k = i - splits[0][2] if splits else 0
+            g = per_piece.get(k, 0)
+            per_piece[k] = g + 1
+            gid = gids["%s.p%d" % (key, k)] if splits else gids[key]
+            m = T[a]["dims"][0]
+            self.w.append(np.frombuffer(T[a]["data"], np.int8).reshape(m, n))
             self.sw.append(float(T[a]["q"][0]))
             self.sy.append(float(T[o]["q"][0]))
             self.zy.append(int(T[o]["q"][1]))
             self.idx.append(np.sort(np.nonzero(gid == g)[0]))
-            assert len(self.idx[g]) == n, (self.name, g)
-        self.oc = sum(len(i) for i in self.idx)
+            self.cols.append(slice(k * n, (k + 1) * n))
+            assert len(self.idx[-1]) == m, (self.name, k, g)
+        self.split = K
+        self.oc = sum(len(i) for i in self.idx) // K
         self.tokens = tokens
         self.rec_in = np.frombuffer(x, np.int8).reshape(self.ic, tokens).T          # recorded input [T, IC]
         self.rec_out = [np.frombuffer(e, np.int8).reshape(len(i), tokens).T for e, i in zip(exp, self.idx)]
@@ -75,9 +87,9 @@ class Step:
     def wdq(self):
         """Dequantized [OC, IC] weights in model row order (position 0 on the CPU)."""
         if self._wdq is None:
-            W = np.empty((self.oc, self.ic), np.float32)
+            W = np.zeros((self.oc, self.ic), np.float32)
             for g, i in enumerate(self.idx):
-                W[i] = self.w[g].astype(np.float32) * self.sw[g]
+                W[i, self.cols[g]] = self.w[g].astype(np.float32) * self.sw[g]
             self._wdq = W
         return self._wdq
 
@@ -88,7 +100,7 @@ class RefBackend:
     def run(self, k, st, xq):
         out = []
         for g in range(len(st.w)):
-            acc = (xq.astype(np.float64) - st.zx) @ st.w[g].astype(np.float64).T
+            acc = (xq[:, st.cols[g]].astype(np.float64) - st.zx) @ st.w[g].astype(np.float64).T
             out.append(np.clip(np.round(acc * (st.sx * st.sw[g] / st.sy[g])) + st.zy[g], -128, 127).astype(np.int8))
         return out                                                   # per job [T, n_g]
 
@@ -171,7 +183,7 @@ class PackQuant:
             return x @ _w(W).T
         st = self.steps[key]
         t0 = time.monotonic()
-        y = np.empty((x.shape[0], st.oc), np.float32)
+        y = np.zeros((x.shape[0], st.oc), np.float32)
         if self.start == 0:                                   # position 0: the CPU's (attention sink)
             y[0] = x[0] @ st.wdq().T
             xs = x[1:]
@@ -190,8 +202,8 @@ class PackQuant:
                 self.worst_out = max(self.worst_out, max(int(np.abs(a.astype(int) - b.astype(int)).max())
                                                          for a, b in zip(lv, st.rec_out)))
         o = 1 if self.start == 0 else 0
-        for g, i in enumerate(st.idx):
-            y[o:, i] = (lv[g].astype(np.float32) - st.zy[g]) * st.sy[g]
+        for g, i in enumerate(st.idx):                        # split steps: the partials add up
+            y[o:, i] += (lv[g].astype(np.float32) - st.zy[g]) * st.sy[g]
         self.t_be += t2 - t1
         self.t_q += (t1 - t0) + (time.monotonic() - t2)
         return y
@@ -233,7 +245,7 @@ def main():
     for li in range(m.L):
         for s in STEPS:
             key = "%d.%s" % (li, s)
-            steps[key] = Step(os.path.join(PD, "L%02d_%s_t%d.jbp" % (li, s, TOK)), gids[key], TOK)
+            steps[key] = Step(os.path.join(PD, "L%02d_%s_t%d.jbp" % (li, s, TOK)), gids, key, TOK)
             order[key] = len(order)
     # the packs' weights must be the rotated model's weights (same rotation seed): within half a level
     d = m.layers[0]

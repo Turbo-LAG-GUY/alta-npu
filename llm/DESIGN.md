@@ -117,8 +117,36 @@ plus measurements on this board.
   132.0 ms per 256-token round (untiled, as intended); C2 1.7B first 4 layers gated 218.3 ms (= B3); **C3 + split
   down 174.6 ms**: down 110.2 -> 55.4 ms (NPU 108.3 -> 47.1; read-out 1.9 -> 7.8 for 4x the outputs). 1.7B 4 layers:
   keep-only 457.5 -> 174.6 ms (2.6x); all 24 layers ~1.05 s per 256-token chunk for the linear steps.
-- Next: real_packs.py emitting split-down packs with CALIBRATED partial scales (ksplit takes them from the test
-  input), the 1.7B quality result, then a whole-model run (1.7 GB of pinned NPU weights on a 3.7 GB board: needs a
+- **Calibrated split packs (2026-11-23 01:00):** real_packs.py MODEL OUT GROUPS DOWN_SPLIT (4th arg K): per-piece jobs
+  grouped by max |w| of the piece, output scales from the calibrated partial ranges (l2j piece_ranges), the forward
+  simulates the split; expected levels now use float32-rounded scales (as stored; fixed 1 tie in 442368).
+  chunk_glue.py reads split packs. 135M K=3 (npu-llm/models/jb/real-135m-split3): offline PASS; ref backend end to end:
+  every step on its recorded input 0 levels off; GPL-3 16.18 KL .0210, README 48.35 KL .0292 (unsplit 15.70 / .0195,
+  49.09 / .0327; noise band 15.74-16.14 / .0197-.0228, 47.52-49.57 / .0293-.0321) = no measurable cost.
+  1.7B K=4 build queued after the 1.7B sim (unit alta-llm-packs-1p7b-split -> npu-llm/models/jb/real-1p7b-split4).
+- **1.7B quality of the split (2026-11-23 03:26, l2j, weight-grouped jobs): it COSTS on 1.7B**: KL GPL-3 / README
+  one piece .182 / .089; 2 pieces .282 / .129; 4 pieces .251 / .125 (top-1 86.7 -> 82.8%). 4 roundings of partial
+  sums, and the 1.7B down output has huge outlier channels that widen the job scales. The calibrated 1.7B split pack
+  build was stopped before writing anything. Trying range-grouped jobs (llm/ref/l2j_down_split.py L2J_GROUP=range:
+  channels sorted by calibrated output range, uneven groups by DP minimising rows x range^2, >= 8 rows per job):
+  135M one piece .0173 / .0308 (w: .0229 / .0324), 3 pieces .0197 / .0396 (w: .0198 / .0291). 1.7B run (4 and 8 jobs,
+  K 1 and 4) in unit alta-llm-l2j-range, log npu-llm/runs/l2j-SmolLM2-1.7B-Instruct-range.log (~3.5 h).
+- **1.7B range-grouped result (2026-11-23 08:02): the split now IMPROVES quality.** KL GPL-3 / README (ppl):
+  today (1 piece, weight groups) .182 / .089 (2.52 / 25.38); 1 piece x 4 range jobs .149 / .096; **4 pieces x 4 range
+  jobs .145 / .086 (2.41 / 25.13)**; 1 x 8 .163 / .079; 4 x 8 .139 / .083 (2.40 / 26.27). Pick: 4 pieces x 4 range
+  jobs (16 jobs, the shape that ran 2x faster). real_packs.py DOWN_SPLIT=Krange; 135M 3range packs offline PASS (job
+  rows per piece e.g. 287 / 192 / 89 / 8: the outliers in 8-33-row jobs, kpc 1..21). 1.7B 4range packs building (unit
+  alta-llm-packs-1p7b-split -> npu-llm/models/jb/real-1p7b-split4).
+- **1.7B 4range packs (npu-llm/models/jb/real-1p7b-split4, 192, 2 h 7 min): sim max 1, read-back 0, offline PASS**
+  (npu-llm/runs/offline-split4r-1p7b-*; down jobs per piece ~1000 / 630 / 300 / 40-100 rows, kpc 8-16).
+  **NPU 2026-11-23 12:40 (Jordan's OK), runs/llm-rsplit-ladder-20261123-123937, 4/4 PASS, trips 0:** first 4 layers,
+  256 tokens **170.7 ms** (unsplit 218.3, equal-size split 174.6): qkv 31.0, o 13.2, gateup 72.1, **down 52.0** (was
+  110.2); 1 token 57.4 ms (unsplit 58.1; down 14.4 vs 18.5). One down pack: 10.1 ms NPU (256 tokens), 3.1 ms (1 token).
+  => the calibrated, range-grouped split is better in quality (sim KL .145 / .086 vs .182 / .089) AND faster. This is
+  the 1.7B layout now: real_packs.py MODEL OUT 4 4range + ETNA_ML_V7_TILE_FIT=262144 + ETNA_ML_KEEP_IMAGE_CACHE=1.
+  All 24 layers: ~1.02 s per 256-token chunk for the linear steps, ~345 ms per token decode (linear steps).
+- Next: a whole-model 1.7B run (1.7 GB of pinned NPU weights on a 3.7 GB board: needs a plan), chunk_glue end to end
+  on 1.7B (CPU glue in C first: numpy glue is ~10 s per 135M chunk), and range grouping for the other steps (1.7 GB of pinned NPU weights on a 3.7 GB board: needs a
   plan, e.g. the desktop closed, or the 1-token packs dropped from the process).
 
 - **tile-ladder RAN after the reboot 2026-11-22 16:35 (Jordan's OK): 7/7 PASS, trips 0** (runs/llm-tile-ladder-20261122-163507,

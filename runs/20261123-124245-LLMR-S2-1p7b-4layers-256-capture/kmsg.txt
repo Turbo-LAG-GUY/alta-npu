@@ -1,0 +1,47 @@
+# kmsg-catch start 2026-11-23T12:42:46-0500 uptime=73345.41
+[73353.499150] <4> panfrost_gem_shrinker_scan: 10 callbacks suppressed
+[73353.499163] <6> Purging 524288 bytes
+[73353.592145] <6> Purging 1884160 bytes
+[73353.724287] <6> Purging 585728 bytes
+[73353.943056] <6> Purging 540672 bytes
+[73354.326721] <6> Purging 524288 bytes
+[73355.049895] <6> Purging 536576 bytes
+[73359.199724] <6> Purging 536576 bytes
+[73359.515685] <6> Purging 524288 bytes
+[73359.564391] <6> Purging 548864 bytes
+[73361.629330] <6> Purging 524288 bytes
+[73361.630919] <6> Purging 536576 bytes
+[73361.631910] <6> Purging 524288 bytes
+[73361.632750] <6> Purging 557056 bytes
+[73361.633792] <6> Purging 585728 bytes
+[73361.634512] <6> Purging 565248 bytes
+[73361.634964] <6> Purging 1675264 bytes
+[73365.487215] <4> panfrost_gem_shrinker_scan: 31 callbacks suppressed
+[73365.487234] <6> Purging 524288 bytes
+[73365.489720] <6> Purging 561152 bytes
+[73365.869427] <6> Purging 1642496 bytes
+[73365.870469] <6> Purging 540672 bytes
+[73365.871078] <6> Purging 524288 bytes
+[73365.871667] <6> Purging 643072 bytes
+[73365.872239] <6> Purging 528384 bytes
+[73365.872870] <6> Purging 540672 bytes
+[73365.873628] <6> Purging 675840 bytes
+[73365.875886] <6> Purging 532480 bytes
+[73365.975131] <6> display-wake-gu (798): drop_caches: 3
+[73401.201504] <4> panfrost_gem_shrinker_scan: 8 callbacks suppressed
+[73401.201515] <6> Purging 524288 bytes
+[73401.353263] <6> Purging 536576 bytes
+[73401.479952] <6> Purging 540672 bytes
+[73406.851570] <6> Purging 557056 bytes
+[73420.580525] <6> Purging 524288 bytes
+[73420.581394] <6> Purging 528384 bytes
+[73420.582541] <6> Purging 524288 bytes
+[73420.582891] <6> Purging 528384 bytes
+[73420.583242] <6> Purging 1609728 bytes
+[73420.583608] <6> Purging 565248 bytes
+[73420.583855] <6> Purging 528384 bytes
+[73420.584156] <6> Purging 561152 bytes
+[73420.584387] <6> Purging 528384 bytes
+[73420.584579] <6> Purging 524288 bytes
+[73422.137742] <6> display-wake-gu (798): drop_caches: 3
+# kmsg-catch end uptime=73427.20

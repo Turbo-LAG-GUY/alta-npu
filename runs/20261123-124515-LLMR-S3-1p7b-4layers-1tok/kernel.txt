@@ -1,0 +1,10 @@
+[73498.080019] jordan-aml-a311d-cc kernel: panfrost_gem_shrinker_scan: 35 callbacks suppressed
+[73498.080031] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[73498.081825] jordan-aml-a311d-cc kernel: Purging 1753088 bytes
+[73498.082226] jordan-aml-a311d-cc kernel: Purging 532480 bytes
+[73498.082581] jordan-aml-a311d-cc kernel: Purging 536576 bytes
+[73498.084071] jordan-aml-a311d-cc kernel: Purging 544768 bytes
+[73498.084444] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[73498.084884] jordan-aml-a311d-cc kernel: Purging 565248 bytes
+[73498.085429] jordan-aml-a311d-cc kernel: Purging 565248 bytes
+[73500.003785] jordan-aml-a311d-cc kernel: Purging 2064384 bytes
