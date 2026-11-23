@@ -1,0 +1,7 @@
+/dev/dri/renderD128: etnaviv
+compiled 16 steps (4 layers, 256 tokens) in 11737 ms (median 338.0, max 775.7 per step); weights 268.9 MB (freed after compile); resident now anon 82.6 + file 2.8 + shmem 0.0 MB, peak 138.9 MB; test data 69.2 MB
+  qkv     4 steps: 87.20 ms per round (NPU incl. submit 82.52, read-out 4.79)
+  o       4 steps: 30.43 ms per round (NPU incl. submit 28.69, read-out 1.64)
+  gateup  4 steps: 224.03 ms per round (NPU incl. submit 211.19, read-out 12.70)
+  down    4 steps: 112.86 ms per round (NPU incl. submit 111.00, read-out 1.70)
+{"offline": false, "steps": 16, "layers": 4, "tokens": 256, "rounds": 20, "compile_ms": 11737.3, "compile_ms_max": 775.65, "weights_mb": 268.86, "peak_rss_mb": 138.9, "rss_anon_mb": 85.5, "rss_file_mb": 2.8, "rss_shmem_mb": 0.0, "test_data_mb": 69.2, "round_ms_median": 457.510, "ms_per_token": 1.7872, "qkv_ms": 87.199, "o_ms": 30.425, "gateup_ms": 224.028, "down_ms": 112.862, "readout_ms": 20.835, "bad_packs": 0, "diff_vs_expected_max": 1}

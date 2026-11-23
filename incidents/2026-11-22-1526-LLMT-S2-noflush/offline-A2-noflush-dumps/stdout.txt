@@ -1,0 +1,98 @@
+npu shim: fake GC8000 rev 0x7120 on renderD128, submits are not executed
+offline: fake NPU (shim), submits are recorded, not executed
+operation 19 input tensor 0 layouts 1 1.
+type 19 i 0 tensor 1 layout 2 == 2
+operation 1 input tensor 1 layouts 2 2.
+Adding convolution.
+type 1 i 0 tensor 4 layout 2 == 2
+operation 19 input tensor 4 layouts 2 2.
+type 19 i 0 tensor 5 layout 2 == 2
+operation 1 input tensor 1 layouts 2 2.
+Adding convolution.
+type 1 i 0 tensor 8 layout 2 == 2
+operation 19 input tensor 8 layouts 2 2.
+type 19 i 0 tensor 9 layout 2 == 2
+created resource 0xaaab0aa917a0 for tensor 0 with size 524288
+src_tensor 0 (fff7b000) dst_tensor 1 offset 0 size 524288
+created resource 0xaaab0aa918b0 for tensor 4 with size 57344
+src_tensor 4 (fff6d000) dst_tensor 5 offset 0 size 57344
+created resource 0xaaab0aa919c0 for tensor 8 with size 57344
+src_tensor 8 (fff5f000) dst_tensor 9 offset 0 size 57344
+Ensuring all output tensors have their memory backing.
+
+dumping intermediate graph: 5 operations
+
+idx type  in out  operation type-specific
+================================================================================================
+  0 BYPASS   0   1
+  1 NN     1   4 in2:   0
+  2 BYPASS   4   5
+  3 NN     1   8 in2:   0
+  4 BYPASS   8   9
+
+llm: 1 NN jobs without nn_layer_flush (independent of the next job)
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 0 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 1 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 2 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 3 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 4 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 5 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 6 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 7 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+coefficients_size 0x70800 (460800) image_size 0x40000 (262144)
+image_cache_end_address 524288 image_cache_start_address 262144 image_cache_size 262144 oc_sram_size 524288
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 0 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 1 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 2 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 3 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 4 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 5 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 6 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+write_core_6 core 7 zrl_bits 0
+llm tile fit: tile height 16 -> 8 (16 x 8 x 2048 <= 262144 bytes)
+v7 tiling: tile 16x8 interleave 2 superblocks 2
+coefficients_size 0x70800 (460800) image_size 0x40000 (262144)
+image_cache_end_address 524288 image_cache_start_address 262144 image_cache_size 262144 oc_sram_size 524288
+screen 284.80 ms, compile 47.33 ms (5 ops, 2 outputs)
+Dumping buffer from 0xffff80a68000 at offset 0 with size 524288 to mesa-input-000-000.bin
+Dumping buffer from 0xffff829ca000 at offset 0 with size 4096 to mesa-nn-000-000.bin
+Dumping buffer from 0xffff809e8000 at offset 0 with size 524288 to mesa-compressed-000-000.bin
+Dumping buffer from 0xffff80a68000 at offset 0 with size 524288 to mesa-input-001-000.bin
+Dumping buffer from 0xffff829c9000 at offset 0 with size 4096 to mesa-nn-001-000.bin
+Dumping buffer from 0xffff80968000 at offset 0 with size 524288 to mesa-compressed-001-000.bin
+Running the NN job took 1 ms.
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp", "offline": true, "ctx": "persist", "wait": "spin", "invokes": 1, "batch": 1, "ops": 5, "compile_ms": 47.326, "first_ms": 7.596, "ms_median_after_first": 7.5960, "ctx_ms": 0.0765, "invoke_call_ms": 6.2315, "read_ms": 1.2880, "npu_ms": 0.9662, "spins_per_wait": 0, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.8394, "main_cpu": -1, "main_on_a73": 0.000, "readout_ms": 0.2505, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 1, "bad_invokes": 1, "cpu_check": true, "diff_vs_expected_max": 255}

@@ -1,0 +1,103 @@
+From e69bdfa42d68b0d74cf7d2e1116a23702b8e0a7c Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Mon, 23 Nov 2026 00:09:45 -0500
+Subject: [PATCH 1/2] etnaviv/ml: Gated tile-height rule for 1x1 convolutions
+ (LLM engine, test tree only)
+
+ETNA_ML_V7_TILE_FIT=<bytes> lowers the V7 tile height of 1x1 convs so one
+input tile (tile width x height x input channels) is at most that many
+bytes, so the image cache fits the on-chip SRAM next to the kernels
+(with ETNA_ML_KEEP_IMAGE_CACHE=1 when the kernels don't fit).
+
+It only tiles when the untiled image can't be cached next to the
+smallest kernel area that has run (0x20000) with more than one
+superblock, and when a DDR estimate favours tiles: untiled = input x
+superblocks + weights; tiled = input + weights + the weights that don't
+fit the kernel area x (tiles - 1). On SmolLM2 that tiles the 1.7B
+2048-input steps and leaves its down (8192 inputs) and the 135M alone:
+offline the configs are byte-identical to the best measured layouts.
+ETNA_ML_V7_TILE_FIT_ALWAYS=1 drops the gates, ETNA_ML_V7_TILE_FIT_MAX_IC
+leaves wider convs alone. Unset = unchanged, bit for bit.
+
+On the A311D (real SmolLM2-1.7B weights, 4 layers, 256 tokens): 457.5 ->
+218.3 ms per round; qkv 82.5 -> 22.3, gateup 211.2 -> 50.1 ms (alta-npu
+runs/llm-tile-ladder-20261122-163507, runs/llm-confirm-ladder-20261123-000247).
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../drivers/etnaviv/etnaviv_ml_nn_v7.c        | 51 +++++++++++++++++++
+ 1 file changed, 51 insertions(+)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index ef70238d0e74..7d52b2ba065b 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -5,6 +5,7 @@
+ 
+ #include "etnaviv_context.h"
+ #include "etnaviv_debug.h"
++#include "etnaviv_ml.h"
+ #include "etnaviv_ml_nn.h"
+ #include "etnaviv_screen.h"
+ 
+@@ -139,6 +140,56 @@ etna_ml_calculate_tiling_v7(struct etna_screen *screen, const struct etna_operat
+    if (tile_h_cap > 0)
+       tile_height = MIN2(tile_height, (unsigned)tile_h_cap);
+ 
++   /* LLM engine (test tree only, 2026-11-22): ETNA_ML_V7_TILE_FIT=<bytes> lowers
++    * the tile height of 1x1 convolutions so that one input tile (tile width x
++    * height x input channels) is at most that many bytes, so the image cache
++    * fits the on-chip SRAM next to the kernels (with ETNA_ML_KEEP_IMAGE_CACHE=1
++    * when the kernels don't fit). Only ever lowers the height; unset = upstream
++    * behaviour, bit for bit.
++    * Gates (2026-11-22, from runs/llm-tile-ladder-20261122-163507): it only
++    * tiles when (a) the untiled image can't be cached next to the smallest
++    * kernel area that has run (0x20000), with more than one superblock, and
++    * (b) a DDR estimate says the tiles cost less: untiled = input x superblocks
++    * + weights; tiled = input + weights + the weights that don't fit the
++    * kernel area x (tiles - 1). On SmolLM2 that tiles the 1.7B 2048-input
++    * steps and leaves its down (8192 inputs) and all of the 135M alone.
++    * ETNA_ML_V7_TILE_FIT_ALWAYS=1: no gates (the first version);
++    * ETNA_ML_V7_TILE_FIT_MAX_IC=<n>: leave convs with more inputs alone.
++    */
++   static int tile_fit = -1, tile_fit_max_ic = -1, tile_fit_always = -1;
++   if (tile_fit < 0) {
++      tile_fit = llm_env("ETNA_ML_V7_TILE_FIT");
++      tile_fit_max_ic = llm_env("ETNA_ML_V7_TILE_FIT_MAX_IC");
++      tile_fit_always = llm_env("ETNA_ML_V7_TILE_FIT_ALWAYS");
++   }
++   if (tile_fit > 0 && operation->weight_width == 1 && !operation->fully_connected && !operation->addition &&
++       (tile_fit_max_ic <= 0 || input_channels <= (unsigned)tile_fit_max_ic)) {
++      unsigned fit_h = MAX2((unsigned)tile_fit / MAX2(tile_width * input_channels, 1), 1);
++      bool take = fit_h < tile_height;
++      if (take && tile_fit_always <= 0) {
++         const unsigned oc_sram = etna_ml_get_core_info(screen)->on_chip_sram_size;
++         const unsigned min_kernel_end = 0x20000;   /* = LLM_KEEP_IMAGE_MIN_KERNEL_END in etnaviv_ml_nn.c */
++         unsigned full_img = align(align(tile_width * tile_height, 16) * input_channels, 128);
++         unsigned sb_full = calc_superblocks(screen, operation, tile_height, interleave_mode);
++         unsigned tiles = DIV_ROUND_UP(output_height, fit_h);
++         unsigned img_tile = align(align(tile_width * fit_h, 16) * input_channels, 128);
++         uint64_t input = (uint64_t)output_width * output_height * input_channels;
++         uint64_t coef = (uint64_t)output_channels * input_channels;
++         uint64_t karea = img_tile + 0x800 < oc_sram ? oc_sram - 0x800 - img_tile : 0;
++         uint64_t untiled = input * sb_full + coef;
++         uint64_t tiled = input + coef + (coef > karea ? (coef - karea) * (tiles - 1) : 0);
++         take = sb_full > 1 && full_img > oc_sram - min_kernel_end && tiled < untiled;
++         ML_DBG("llm tile fit gate: ic %u oc %u image %u sb %u tiles %u: untiled %llu tiled %llu bytes -> %s\n",
++                input_channels, output_channels, full_img, sb_full, tiles, (unsigned long long)untiled,
++                (unsigned long long)tiled, take ? "tile" : "keep");
++      }
++      if (take) {
++         ML_DBG("llm tile fit: tile height %u -> %u (%u x %u x %u <= %d bytes)\n", tile_height, fit_h,
++                tile_width, fit_h, input_channels, tile_fit);
++         tile_height = fit_h;
++      }
++   }
++
+    tile_height = MAX2(tile_height, 1);
+    superblocks = calc_superblocks(screen, operation, tile_height, interleave_mode);
+    ML_DBG("v7 tiling: tile %ux%u interleave %u superblocks %u\n", tile_width, tile_height, interleave_mode, superblocks);
+-- 
+2.43.0
+

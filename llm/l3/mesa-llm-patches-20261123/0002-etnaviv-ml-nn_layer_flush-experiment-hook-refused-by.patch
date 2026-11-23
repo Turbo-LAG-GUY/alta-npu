@@ -1,0 +1,129 @@
+From 612e677def4984d38f1878ace9a5fe6c744553e2 Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Mon, 23 Nov 2026 00:09:46 -0500
+Subject: [PATCH 2/2] etnaviv/ml: nn_layer_flush experiment hook, refused by
+ default: it hangs (LLM engine, test tree only)
+
+ETNA_ML_NO_FLUSH_INDEPENDENT clears nn_layer_flush on an NN job when the
+next hardware job reads nothing written since the last flush (the
+weight-group jobs of one LLM step). On the A311D's GC8000 that HUNG the
+NPU on every invoke: "MMU 0 fault (page not present) addr 0x00000000",
+20 recovered hangs (alta-npu incidents/2026-11-22-1526-LLMT-S2-noflush).
+The bit is not a plain cache flush; without it the NN unit fetches
+something at address 0. Kept for the record and refused unless the
+variable is set to "I-know-it-hangs". Unset = unchanged, bit for bit.
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c    | 58 +++++++++++++++++++++
+ src/gallium/drivers/etnaviv/etnaviv_ml.h    |  3 ++
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn.c |  2 +-
+ 3 files changed, 62 insertions(+), 1 deletion(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 7a2b305a2849..25438c5b884c 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -1050,6 +1050,63 @@ place_tensors_in_axi_sram(struct etna_ml_subgraph *subgraph, struct list_head *o
+    free(item_tensor);
+ }
+ 
++/* LLM engine (test tree only, 2026-11-22): ETNA_ML_NO_FLUSH_INDEPENDENT=1 clears
++ * nn_layer_flush on an NN job when the next hardware job (NN or TP) reads
++ * nothing written since the last flush: the weight-group jobs of one LLM step
++ * read the same input and write separate outputs, so none waits for another.
++ * The last job of the subgraph always flushes. Unset = upstream, bit for bit.
++ */
++static void
++mark_independent_nn_jobs(struct list_head *operations)
++{
++   /* 2026-11-22: nn_layer_flush = 0 HUNG THE NPU (MMU fault at address 0 on
++    * every invoke, alta-npu incidents/2026-11-22-1526-LLMT-S2-noflush): the bit
++    * is not a plain cache flush. Refused unless asked for explicitly. */
++   const char *env = getenv("ETNA_ML_NO_FLUSH_INDEPENDENT");
++   if (!env || strcmp(env, "I-know-it-hangs"))
++      return;
++
++   unsigned written[64], nwritten = 0;
++   struct etna_operation *prev = NULL;
++
++   list_for_each_entry(struct etna_operation, op, operations, link) {
++      if (op->type != ETNA_JOB_TYPE_NN && op->type != ETNA_JOB_TYPE_TP) {
++         /* a bypass writes nothing but aliases its input: its output counts as
++          * written if its input was (a graph input stays unwritten) */
++         bool aliased = nwritten >= 64;
++         for (unsigned i = 0; i < MAX2(op->input_count, 1) && !aliased; i++)
++            for (unsigned k = 0; k < nwritten; k++)
++               if (op->input_tensors[i] == written[k])
++                  aliased = true;
++         for (unsigned i = 0; aliased && i < MAX2(op->output_count, 1) && nwritten < 64; i++)
++            written[nwritten++] = op->output_tensors[i];
++         continue;
++      }
++
++      if (prev) {
++         bool depends = nwritten >= 64;
++         for (unsigned i = 0; i < MAX2(op->input_count, 1) && !depends; i++)
++            for (unsigned k = 0; k < nwritten; k++)
++               if (op->input_tensors[i] == written[k])
++                  depends = true;
++         if (!depends && prev->type == ETNA_JOB_TYPE_NN) {
++            prev->llm_no_flush = true;
++         } else {
++            nwritten = 0;   /* prev keeps its flush: everything before it is visible */
++         }
++      }
++
++      for (unsigned i = 0; i < MAX2(op->output_count, 1) && nwritten < 64; i++)
++         written[nwritten++] = op->output_tensors[i];
++      prev = op;
++   }
++
++   unsigned n = 0;
++   list_for_each_entry(struct etna_operation, op, operations, link)
++      n += op->llm_no_flush;
++   ML_DBG("llm: %u NN jobs without nn_layer_flush (independent of the next job)\n", n);
++}
++
+ struct pipe_ml_subgraph *
+ etna_ml_subgraph_create(struct pipe_ml_device *pdevice,
+                         const struct pipe_ml_operation *poperations,
+@@ -1082,6 +1139,7 @@ etna_ml_subgraph_create(struct pipe_ml_device *pdevice,
+ 
+    lower_operations(subgraph, poperations, count, &operations);
+    place_tensors_in_axi_sram(subgraph, &operations);
++   mark_independent_nn_jobs(&operations);
+ 
+    list_for_each_entry(struct etna_operation, operation, &operations, link) {
+       struct etna_vip_instruction instruction = {0};
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index 780ffb45fb71..2cae563e213a 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -92,6 +92,9 @@ struct etna_vip_instruction {
+ struct etna_operation {
+    struct list_head link;
+ 
++   /* LLM engine (test tree only): ETNA_ML_NO_FLUSH_INDEPENDENT, see etnaviv_ml.c */
++   bool llm_no_flush;
++
+    enum etna_job_type type;
+    enum etna_ml_tp_type tp_type;
+ 
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+index ee905525b486..f7674c2f25d6 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -1063,7 +1063,7 @@ create_nn_config(struct etna_ml_subgraph *subgraph, const struct etna_operation
+    map->layer_type = 0x0;
+    map->no_z_offset = nn_core_version == 8;
+    map->prelu = 0x0;
+-   map->nn_layer_flush = 0x1;
++   map->nn_layer_flush = operation->llm_no_flush ? 0x0 : 0x1;
+    map->brick_mode = 0x0;
+    map->brick_distance = 0x0;
+    map->relu = operation->relu;
+-- 
+2.43.0
+

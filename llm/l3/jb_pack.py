@@ -8,7 +8,10 @@ output(s). Format (little-endian), file PACK.jbp:
   tensor: i32 index, u32 dims[4] (N H W C), f32 scale, i32 zero_point, u8 is_signed, u8 is_constant, u8 type_size,
           u8 is_output, u32 n_bytes, n_bytes of data (constants only)
   op:     u32 type, i32 in, i32 a, i32 b, i32 out; type 1 = 1x1 conv (a = weight, b = bias or -1), type 2 = TRANSPOSE
-          (a = perm as 4 bytes p0..p3). Graphs are planar like the L1c models: a channels-first input [1, C, H, W] and
+          (a = perm as 4 bytes p0..p3).
+          Type 3 = SPLIT on the channel axis (2026-11-22): in = the tensor, a = its first output tensor, b = the number of
+          outputs (tensors a .. a+b-1, equal channel counts), out = -1; the driver aliases the outputs into the input
+          buffer at offsets (channel blocks of a channels-first tensor), no job. Graphs are planar like the L1c models: a channels-first input [1, C, H, W] and
           an explicit transpose to channels-last, and an explicit transpose back in front of every output, which the
           driver turns into bypasses (no TP job; without them it adds an implicit TP transpose per input).
   then the graph input (u32 n_bytes + bytes) and for each output tensor (in tensor order) u32 n_bytes + expected bytes.
@@ -29,8 +32,21 @@ Modes:
                                           input + bypass transpose, nhwc = a channels-last graph input read by every
                                           conv (the driver adds the input transpose job; ETNA_ML_SHARE_INPUT_TRANSPOSE=1
                                           makes it one, ETNA_ML_AXI_SRAM=all can put its output in the AXI SRAM)
+  ksplit SRC.jbp K OUT.jbp                (2026-11-22) a real step pack with its input CHANNELS split into K pieces
+                                          (SPLIT op, no copy): every job of SRC becomes K jobs over the piece's input
+                                          columns (same int8 weights and weight scale), each with its own 8-bit output
+                                          (scale from that partial's range on the pack's input); the CPU adds the
+                                          partials. For the 1.7B down (8192 inputs: 4 pieces of 2048 tile like o).
+  pieces IC OCJ G H W P OUT.jbp           (2026-11-22, AXI SRAM token pieces) the synth nhwc step split into P token
+                                          pieces of H x W tokens each: P channels-last graph inputs (the pack's input
+                                          blob = the whole P*H*W-token input, split in tensor order by jb_run), and per
+                                          piece the same G conv jobs (weight tensors shared by the pieces). With
+                                          ETNA_ML_SHARE_INPUT_TRANSPOSE=1 + ETNA_ML_AXI_SRAM=all each piece's transposed
+                                          copy is live only during its own convs, so the pieces reuse the same SRAM
+                                          space: the input is read from DDR once, then re-read on chip
 Expected outputs of groups/chain come from a float reference of the int8 arithmetic (<= 1 level off TFLite).
 """
+import os
 import struct
 import sys
 
@@ -54,7 +70,8 @@ def load_conv(model, ref):
 
 
 def ref_conv(x, xq, w, wq, b, yq):
-    acc = (x.astype(np.int64) - xq[1]) @ (w.astype(np.int64) - wq[1]).T + b
+    # float64 BLAS: exact here (|acc| <= 255 * 255 * IC < 2^53), the same integers as int64, much faster
+    acc = np.rint((x.astype(np.float64) - xq[1]) @ (w.astype(np.float64) - wq[1]).T) + b
     return np.clip(np.round(acc * (xq[0] * wq[0] / yq[0])) + yq[1], -128, 127).astype(np.int8)
 
 
@@ -70,6 +87,10 @@ class Pack:
 
     def conv(self, i, w, b, o):
         self.ops.append((1, i, w, b, o))
+
+    def split(self, i, outs):
+        assert list(outs) == list(range(outs[0], outs[0] + len(outs))), "SPLIT outputs must be consecutive tensors"
+        self.ops.append((3, i, outs[0], len(outs), -1))
 
     def transpose(self, i, o, perm):
         self.ops.append((2, i, perm[0] | perm[1] << 8 | perm[2] << 16 | perm[3] << 24, -1, o))
@@ -148,6 +169,80 @@ def synth(IC, OCJ, G, H, W, layout, out):
     p.write(out, x, exp)
 
 
+def pieces(IC, OCJ, G, H, W, P, out):
+    """synth nhwc cut into P token pieces of H x W tokens each, the same weights for every piece."""
+    rng = np.random.default_rng(IC * 1009 + OCJ * 17 + G + 7919 * P)
+    xq = (0.05, 0)
+    p = Pack()
+    xs = [p.tensor([1, H, W, IC], xq) for _ in range(P)]          # graph inputs first: tensor order = blob order
+    jobs = []
+    for g in range(G):
+        w = rng.integers(-127, 128, size=(OCJ, IC)).astype(np.int8)
+        sw = float(rng.uniform(0.5, 2.0)) / 127.0 / np.sqrt(IC)
+        sy = 4.0 * 74.0 * 73.0 * np.sqrt(IC) * xq[0] * sw / 120.0
+        wi = p.tensor([OCJ, 1, 1, IC], (sw, 0), data=w)
+        bi = p.tensor([1, 1, 1, OCJ], (xq[0] * sw, 0), data=np.zeros(OCJ, np.int32), size=4)
+        jobs.append((wi, bi, sy))
+    for xi in xs:                                                  # piece by piece: its transpose, then its convs
+        for wi, bi, sy in jobs:
+            yi = p.tensor([1, H, W, OCJ], (sy, 0))
+            p.conv(xi, wi, bi, yi)
+            p.planar_out(yi, H, W, OCJ, (sy, 0))
+    x = rng.integers(-128, 128, size=P * H * W * IC).astype(np.int8)
+    exp = run_graph(p_tensors(p), p.ops, x.tobytes())
+    sat = np.mean(np.concatenate([np.abs(e.astype(int)) >= 127 for e in exp]))
+    print("pieces %d x %dx%d tokens: saturated outputs %.2f%%" % (P, H, W, 100 * sat))
+    p.write(out, x, exp)
+
+
+def ksplit(src, K, out):
+    """SRC's input channels split into K pieces, every job of SRC repeated per piece over the piece's columns."""
+    T, ops, x, exp, body = read_pack(src)
+    convs = [op for op in ops if op[0] == 1]
+    tr = [op for op in ops if op[0] == 2 and T[op[1]]["dims"][1] != T[op[1]]["dims"][3]]
+    gin = T[convs[0][1]]                                # the conv input (after the planar transpose)
+    _, H, W, C = gin["dims"]
+    assert C % K == 0, "channels %d not divisible by %d" % (C, K)
+    n = C // K
+    xq = gin["q"]
+    xv = np.frombuffer(x, np.int8).reshape(C, H * W).T.astype(np.float64)  # planar blob -> [tokens, C] (exact)
+    p = Pack()
+    xi = p.planar_in(H, W, C, xq)
+    pieces = [p.tensor([1, H, W, n], xq) for _ in range(K)]
+    p.split(xi, pieces)
+    for k, pi in enumerate(pieces):
+        for _, i, wt, bt, o in convs:
+            w = np.frombuffer(T[wt]["data"], np.int8).reshape(T[wt]["dims"][0], C)[:, k * n:(k + 1) * n]
+            assert bt < 0 or not np.frombuffer(T[bt]["data"], np.int32).any(), "real packs have zero bias"
+            sw = T[wt]["q"][0]
+            acc = (xv[:, k * n:(k + 1) * n] - xq[1]) @ w.astype(np.float64).T
+            real = acc * (xq[0] * sw)
+            lo, hi = min(float(real.min()), 0.0), max(float(real.max()), 0.0)
+            sy = max(hi - lo, 1e-8) / 255.0
+            zy = int(np.clip(np.round(-lo / sy) - 128, -128, 127))
+            OC = w.shape[0]
+            wi = p.tensor([OC, 1, 1, n], (sw, 0), data=np.ascontiguousarray(w))
+            bi = p.tensor([1, 1, 1, OC], (xq[0] * sw, 0), data=np.zeros(OC, np.int32), size=4)
+            yi = p.tensor([1, H, W, OC], (sy, zy))
+            p.conv(pi, wi, bi, yi)
+            p.planar_out(yi, H, W, OC, (sy, zy))
+    exp2 = run_graph(p_tensors(p), p.ops, x)
+    # check: the K dequantized partials add up to the source's full outputs (within the extra roundings)
+    full = [np.frombuffer(e, np.int8).astype(np.float64) for e in exp]
+    outs = [t for t in p_tensors(p) if t["out"]]
+    G = len(convs)
+    worst = 0.0
+    for g, op in enumerate(convs):
+        sy0, zy0 = T[op[4]]["q"]
+        tot = sum((exp2[k * G + g].astype(np.float64) - outs[k * G + g]["q"][1]) * outs[k * G + g]["q"][0]
+                  for k in range(K))
+        ref = (full[g] - zy0) * sy0
+        worst = max(worst, float(np.abs(tot - ref).max() / sy0))
+    print("ksplit %s: %d pieces x %d jobs; sum of partials vs the source's outputs max %.2f source levels" % (
+        os.path.basename(src), K, G, worst))
+    p.write(out, np.frombuffer(x, np.int8), exp2)
+
+
 def p_tensors(p):
     """Pack.t records -> the dicts read_pack returns (for run_graph)."""
     return [dict(idx=idx, dims=dims, q=(s, zp), signed=sg, const=const, out=o, data=data)
@@ -185,11 +280,23 @@ def read_pack(path):
 
 def run_graph(T, ops, x):
     """numpy reference of a pack's graph (planar transposes + 1x1 convs, signed int8) -> outputs in tensor order."""
-    written = {op[4] for op in ops}
+    written = {op[4] for op in ops if op[0] != 3}
+    for op in ops:
+        if op[0] == 3:
+            written |= set(range(op[2], op[2] + op[3]))
     inp = [t for t in T if not t["const"] and t["idx"] not in written]
-    assert len(inp) == 1, "one graph input expected"
-    val = {inp[0]["idx"]: np.frombuffer(x, np.int8).reshape(inp[0]["dims"])}
+    assert inp, "no graph input"
+    val, o = {}, 0                                     # several inputs: the blob split in tensor order (jb_run too)
+    for t in inp:
+        n = int(np.prod(t["dims"]))
+        val[t["idx"]] = np.frombuffer(x, np.int8, n, o).reshape(t["dims"])
+        o += n
+    assert o == len(x), "input blob %d bytes, graph inputs %d" % (len(x), o)
     for typ, i, a, b, o in ops:
+        if typ == 3:                                    # SPLIT on the channel axis (last axis of NHWC)
+            for k, piece in enumerate(np.split(val[i], b, axis=3)):
+                val[a + k] = np.ascontiguousarray(piece).reshape(T[a + k]["dims"])
+            continue
         if typ == 2:
             perm = [(a >> (8 * k)) & 0xff for k in range(4)]
             val[o] = np.ascontiguousarray(val[i].transpose(perm)).reshape(T[o]["dims"])
@@ -230,6 +337,11 @@ def main():
     if mode == "synth":
         a = sys.argv[2:]
         return synth(int(a[0]), int(a[1]), int(a[2]), int(a[3]), int(a[4]), a[5], a[6])
+    if mode == "ksplit":
+        return ksplit(sys.argv[2], int(sys.argv[3]), sys.argv[4])
+    if mode == "pieces":
+        a = sys.argv[2:]
+        return pieces(*[int(v) for v in a[:6]], a[6])
     if mode == "synthetic":
         return synthetic(int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5])
     c = load_conv(sys.argv[2], sys.argv[3])

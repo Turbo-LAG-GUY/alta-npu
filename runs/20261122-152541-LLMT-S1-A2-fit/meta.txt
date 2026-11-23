@@ -1,0 +1,14 @@
+label: LLMT-S1-A2-fit
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T15:25:42-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1136
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=1560bb;b=d6e906790e744d9e93de5f493c6a60e7;m=127a328518;t=660e33e9f30b0;x=25181aa012f5c4ad
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+end: 2026-11-22T15:25:43-05:00  rc: 0  wall_s: 2
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

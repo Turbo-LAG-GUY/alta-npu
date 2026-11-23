@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 26.61 ms, compile 23.24 ms (5 ops, 2 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 5, "compile_ms": 23.245, "first_ms": 2.292, "ms_median_after_first": 2.0813, "ctx_ms": 0.0020, "invoke_call_ms": 0.2838, "read_ms": 1.8155, "npu_ms": 1.7006, "spins_per_wait": 512, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0365, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.0995, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-140447-LLMA-A2-P0

@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 3.50 ms, compile 94.99 ms (17 ops, 8 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A8_planar.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 17, "compile_ms": 94.987, "first_ms": 4.331, "ms_median_after_first": 3.4845, "ctx_ms": 0.0019, "invoke_call_ms": 0.2953, "read_ms": 3.1820, "npu_ms": 2.8259, "spins_per_wait": 906, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0567, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.3554, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-163537-LLMT-S3-A8-fit

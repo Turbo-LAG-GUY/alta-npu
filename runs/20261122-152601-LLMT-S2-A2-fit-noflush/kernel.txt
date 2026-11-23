@@ -1,0 +1,80 @@
+[79536.675231] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.675709] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.685273] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 4 -> 1 after a recovered hang (hw_job_auto, trip 1)
+[79536.700174] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.700249] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.721340] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.726032] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.733864] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 2)
+[79536.733878] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.739062] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.760455] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.765208] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.775711] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 3)
+[79536.775734] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.779109] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.799382] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.804389] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.817830] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 4)
+[79536.817855] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.817942] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.838712] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.843698] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.854116] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 5)
+[79536.854133] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.857531] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.878303] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.882874] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.891408] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 6)
+[79536.891463] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.895887] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.917197] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.922051] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.930027] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 7)
+[79536.930056] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.935058] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.956318] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.961223] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.972777] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 8)
+[79536.972800] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.974221] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.995856] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79537.000392] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79537.010045] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 9)
+[79537.010068] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.013394] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.034814] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79537.039572] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79537.047386] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 10)
+[79537.047407] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.052573] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.073818] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 11)
+[79537.073835] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.077984] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.099257] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 12)
+[79537.099281] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.103353] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.124586] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 13)
+[79537.124608] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.128804] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.150242] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 14)
+[79537.150262] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.154166] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.175261] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 15)
+[79537.175275] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.179519] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.200626] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 16)
+[79537.200645] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.204918] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.226169] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 17)
+[79537.226192] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.230315] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.251738] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 18)
+[79537.251764] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.255749] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.276894] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 19)
+[79537.276918] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.281110] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79537.302467] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 20)
+[79537.302489] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79537.306572] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)

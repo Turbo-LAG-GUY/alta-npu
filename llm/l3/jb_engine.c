@@ -40,8 +40,9 @@
 #include "pipe/p_state.h"
 #include "etnaviv/drm/etnaviv_drm_public.h"
 
-#define MAX_T 64
-#define MAX_OPS 32
+#define MAX_T 128     /* 2026-11-22: was 64; a 4-piece split down step has 70 tensors */
+#define MAX_OPS 64    /* was 32; the split down step has 34 ops */
+#define MAX_SPLIT 16  /* outputs of one SPLIT op */
 #define MAX_PACKS 512
 static const char *STEPS[] = {"qkv", "o", "gateup", "down"};
 
@@ -62,7 +63,7 @@ struct pack {
    struct jb_tensor T[MAX_T];
    struct pipe_tensor PT[MAX_T];
    struct pipe_ml_operation OPS[MAX_OPS];
-   struct pipe_tensor *op_in[MAX_OPS][3], *op_out[MAX_OPS][1];
+   struct pipe_tensor *op_in[MAX_OPS][3], *op_out[MAX_OPS][MAX_SPLIT];
    uint8_t *input, *expected[MAX_T];
    uint32_t input_bytes, expected_bytes[MAX_T];
    bool in_signed, out_signed[MAX_T];
@@ -107,7 +108,8 @@ rd(FILE *f, void *p, size_t n)
    return fread(p, 1, n, f) == n;
 }
 
-/* JBP1 (llm/l3/jb_pack.py): tensors, ops (1 = 1x1 conv, 2 = TRANSPOSE), the input, the expected outputs */
+/* JBP1 (llm/l3/jb_pack.py): tensors, ops (1 = 1x1 conv, 2 = TRANSPOSE, 3 = channel SPLIT), the input, the
+ * expected outputs */
 static bool
 load_pack(struct pack *k, const char *path)
 {
@@ -151,10 +153,28 @@ load_pack(struct pack *k, const char *path)
       uint32_t type;
       int32_t in, w, b, out;
       if (!rd(f, &type, 4) || !rd(f, &in, 4) || !rd(f, &w, 4) || !rd(f, &b, 4) || !rd(f, &out, 4) || in < 0 ||
-          out < 0 || (unsigned)in >= k->n_t || (unsigned)out >= k->n_t)
+          (unsigned)in >= k->n_t)
          goto bad;
       struct pipe_ml_operation *op = &k->OPS[i];
       memset(op, 0, sizeof(*op));
+      if (type == 3) {
+         /* SPLIT on the channel axis (2026-11-22): outputs w .. w+b-1; like Teflon, both input slots are the data
+          * tensor (the driver reads input_tensors[1]), one input, axis 3 of NHWC */
+         if (w < 0 || b < 1 || b > MAX_SPLIT || (unsigned)(w + b) > k->n_t)
+            goto bad;
+         k->op_in[i][0] = k->op_in[i][1] = &k->PT[in];
+         for (int j = 0; j < b; j++)
+            k->op_out[i][j] = &k->PT[w + j];
+         op->type = PIPE_ML_OPERATION_TYPE_SPLIT;
+         op->input_tensors = k->op_in[i];
+         op->input_count = 1;
+         op->output_tensors = k->op_out[i];
+         op->output_count = b;
+         op->split.axis = 3;
+         continue;
+      }
+      if (out < 0 || (unsigned)out >= k->n_t)
+         goto bad;
       k->op_in[i][0] = &k->PT[in];
       k->op_out[i][0] = &k->PT[out];
       op->input_tensors = k->op_in[i];
@@ -189,7 +209,8 @@ load_pack(struct pack *k, const char *path)
    bool written[MAX_T] = {0};
    unsigned n_in = 0;
    for (unsigned i = 0; i < k->n_ops; i++)
-      written[k->op_out[i][0]->index] = true;
+      for (unsigned j = 0; j < k->OPS[i].output_count; j++)
+         written[k->OPS[i].output_tensors[j]->index] = true;
    for (unsigned i = 0; i < k->n_t; i++) {
       if (!k->T[i].is_constant && !written[i]) {
          k->in_idx = i;

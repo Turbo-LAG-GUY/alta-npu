@@ -1,0 +1,4 @@
+/dev/dri/renderD128: etnaviv
+screen 2.77 ms, compile 84.66 ms (16 ops, 8 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A8_nhwc.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 16, "compile_ms": 84.656, "first_ms": 10.010, "ms_median_after_first": 9.1891, "ctx_ms": 0.0020, "invoke_call_ms": 0.3036, "read_ms": 8.8854, "npu_ms": 8.5069, "spins_per_wait": 2647, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0644, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.3816, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-140638-LLMA-A8-N1

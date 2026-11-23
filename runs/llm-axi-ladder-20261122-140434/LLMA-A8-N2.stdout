@@ -1,0 +1,5 @@
+/dev/dri/renderD128: etnaviv
+screen 1.89 ms, compile 79.75 ms (16 ops, 8 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A8_nhwc.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 16, "compile_ms": 79.753, "first_ms": 10.296, "ms_median_after_first": 9.5577, "ctx_ms": 0.0020, "invoke_call_ms": 0.2942, "read_ms": 9.2640, "npu_ms": 8.8670, "spins_per_wait": 2719, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0646, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.3925, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}
+etnaviv/ml: AXI SRAM: placed 1 of 1 intermediate tensors, using 512 of 1024 KiB
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-140657-LLMA-A8-N2

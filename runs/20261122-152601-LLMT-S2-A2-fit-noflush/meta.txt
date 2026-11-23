@@ -1,0 +1,18 @@
+label: LLMT-S2-A2-fit-noflush
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp
+cwd: /home/jordan/alta-npu
+start: 2026-11-22T15:26:01-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1152
+deadline_s: 120
+journal_cursor: s=c64c988e44b64ea28d445acf1297f17c;i=1560bb;b=d6e906790e744d9e93de5f493c6a60e7;m=127a328518;t=660e33e9f30b0;x=25181aa012f5c4ad
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_NO_FLUSH_INDEPENDENT=1
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+stopped at the first kernel error (uptime 79537.37 s): Nov 22 15:26:01 jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+end: 2026-11-22T15:26:07-05:00  rc: 0  wall_s: 6
+job_queue_after: limit=1 auto=Y turns=N guard_ms=100 trips=20 trip_from=1 prio=[] clients=[]
+npu-run: hw_job_trips went from 0 to 20: the driver recovered a hang
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)

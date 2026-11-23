@@ -1,0 +1,10 @@
+[27789.937344] jordan-aml-a311d-cc kernel: Purging 2781184 bytes
+[27789.937781] jordan-aml-a311d-cc kernel: Purging 544768 bytes
+[27789.938158] jordan-aml-a311d-cc kernel: Purging 557056 bytes
+[27789.938515] jordan-aml-a311d-cc kernel: Purging 548864 bytes
+[27789.938919] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27789.939231] jordan-aml-a311d-cc kernel: Purging 569344 bytes
+[27789.939655] jordan-aml-a311d-cc kernel: Purging 585728 bytes
+[27789.940134] jordan-aml-a311d-cc kernel: Purging 532480 bytes
+[27789.940561] jordan-aml-a311d-cc kernel: Purging 544768 bytes
+[27789.940972] jordan-aml-a311d-cc kernel: Purging 569344 bytes

@@ -1,0 +1,8 @@
+/dev/dri/renderD128: etnaviv
+compiled 16 steps (4 layers, 256 tokens) in 14028 ms (median 383.7, max 1636.0 per step); weights 268.9 MB (freed after compile); resident now anon 82.7 + file 2.9 + shmem 0.0 MB, peak 138.9 MB; test data 69.2 MB
+  qkv     4 steps: 27.55 ms per round (NPU incl. submit 22.26, read-out 5.03)
+  o       4 steps: 12.31 ms per round (NPU incl. submit 10.46, read-out 1.63)
+  gateup  4 steps: 63.67 ms per round (NPU incl. submit 50.08, read-out 13.08)
+  down    4 steps: 110.21 ms per round (NPU incl. submit 108.33, read-out 1.85)
+{"offline": false, "steps": 16, "layers": 4, "tokens": 256, "rounds": 20, "compile_ms": 14028.2, "compile_ms_max": 1636.01, "weights_mb": 268.86, "peak_rss_mb": 138.9, "rss_anon_mb": 85.7, "rss_file_mb": 2.9, "rss_shmem_mb": 0.0, "test_data_mb": 69.2, "round_ms_median": 218.335, "ms_per_token": 0.8529, "qkv_ms": 27.548, "o_ms": 12.310, "gateup_ms": 63.671, "down_ms": 110.211, "readout_ms": 21.601, "bad_packs": 0, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261123-000358-LLMC-C2-1p7b-gated

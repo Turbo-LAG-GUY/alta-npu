@@ -99,6 +99,77 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+## Resume here (2026-11-23 00:05): gated tile rule + 1.7B down split CONFIRMED on the NPU
+- **Gated tile rule** (mesa-llm etnaviv_ml_nn_v7.c, uncommitted on 4eb662fc): ETNA_ML_V7_TILE_FIT=262144 now tiles
+  only when (a) the untiled image can't be cached next to the 0x20000 kernel area and there is more than one
+  superblock, and (b) a DDR estimate (untiled = input x superblocks + weights; tiled = input + weights + uncached
+  weights x (tiles - 1)) favours tiles. Offline byte-identical to the best measured layouts (1.7B 768/768 configs =
+  tile-ladder B3; 135M 960/960 = keep-only). ETNA_ML_V7_TILE_FIT_ALWAYS=1 = the ungated first version.
+- **1.7B down split into 4 input pieces of 2048** (llm/l3/jb_pack.py `ksplit SRC K OUT`: the same input and int8
+  weights, per-piece jobs with their own 8-bit outputs; the CPU adds the partials into the residual). New pack op 3 =
+  channel SPLIT (jb_pack.py, jb_run.c, jb_engine.c: MAX_T 128, MAX_OPS 64): the driver aliases the pieces into the
+  one input buffer at k x 512 KiB, no job (offline checked). Packs npu-llm/models/jb/real-1p7b-ksplit (L00-L03 down,
+  t256; other steps symlinked). Partials vs the source's outputs within 1.3 levels (19 at 2 outputs the source had
+  clipped). Quality (llm/ref/l2j_down_split.py, 135M): K 1 / 2 / 3 KL .0229/.0324, .0180/.0298, .0198/.0291 = no cost;
+  1.7B (K 2, 4) running (unit alta-llm-l2j-1p7b, log npu-llm/runs/l2j-SmolLM2-1.7B-Instruct.log).
+- **NPU confirmation 2026-11-23 00:03 (Jordan's OK), runs/llm-confirm-ladder-20261123-000247, 4/4 PASS, trips 0**
+  (jb_run 3b8f7fdf, jb_engine 751f40b7; the 1.7B sim paused for it): C0 one split-down pack 9.1 ms NPU; C1 135M gated
+  132.0 ms per 256-token round (untiled, as intended); C2 1.7B first 4 layers gated 218.3 ms (= B3); **C3 + split
+  down 174.6 ms**: down 110.2 -> 55.4 ms (NPU 108.3 -> 47.1; read-out 1.9 -> 7.8 for 4x the outputs). 1.7B 4 layers:
+  keep-only 457.5 -> 174.6 ms (2.6x); all 24 layers ~1.05 s per 256-token chunk for the linear steps.
+- Next: real_packs.py emitting split-down packs with CALIBRATED partial scales (ksplit takes them from the test
+  input), the 1.7B quality result, then a whole-model run (1.7 GB of pinned NPU weights on a 3.7 GB board: needs a
+  plan, e.g. the desktop closed, or the 1-token packs dropped from the process).
+
+- **tile-ladder RAN after the reboot 2026-11-22 16:35 (Jordan's OK): 7/7 PASS, trips 0** (runs/llm-tile-ladder-20261122-163507,
+  boot b887d66c; load ~3.5 from login indexing, same-run comparisons). Real 1.7B weights, first 4 layers, 256 tokens,
+  NPU ms incl. submit, keep-image only (B1) / + tile rule (B2) / rule on IC <= 2048 only (B3):
+  qkv 82.5 / 24.3 / 25.0; o 28.7 / 13.9 / 14.8; gateup 211.2 / 52.7 / 53.3; down 111.0 / **137.8** / 116.1;
+  round (incl. read-out ~21 ms) 457.5 / 254.5 / **233.4** = 2.0x. The 2048-input steps get 2.1-4.0x; down (IC 8192,
+  2 MiB input, 4 jobs x 4.2 MB weights) does NOT: at 16x2 its weights are re-read for each of the 8 tiles (DDR model
+  ~36 MB per job). Best now = TILE_FIT=262144 + TILE_FIT_MAX_IC=2048: ~1.4 s per 256-token chunk for all 24 layers'
+  linear steps, of which down ~0.7 s -> down is the next target (more superblock kernels per tile, or down split).
+  One token (B5): 58.1 ms per 4 layers (~350 ms per token, 1.7 GB of weights at ~4.9 GB/s). Synthetic: S1 0.81 ms,
+  S3 2.83 ms (= the PT runs). 135M: tile rule 143.8 vs 140.9 ms (its down at 16x10 is slightly slower): the rule
+  should fire only when the whole-image cache can't fit (next: refine it), so the 135M stays untiled.
+- **tile-ladder 2026-11-22 15:25 (Jordan's OK, synthetic + 135m): S1 PASS (A2, tile rule: 0.75 ms NPU, = PT); S2 with
+  ETNA_ML_NO_FLUSH_INDEPENDENT HUNG every invoke (MMU fault at address 0, 20 recovered hangs, hw_job_limit auto 4 -> 1),
+  STOP latched: REBOOT before any NPU job (incidents/2026-11-22-1526-LLMT-S2-noflush). nn_layer_flush = 0 is not safe
+  on V7; hook refused in the source unless =I-know-it-hangs; no-flush rungs removed from tile-ladder.sh (left: S1 S3,
+  R1 R2, B1 B2 B3 B5). The 135M rungs did not run.**
+  1.7B packs DONE: 192 (4 jobs, 1 + 256 tokens, 3.3 GB, 61 min), within 1 level of the simulator; offline PASS for
+  the tile rule (2048-input steps 16x8, down 16x2, kpc <= 21), keep-only and rule-without-down layouts
+  (npu-llm/runs/offline-tile-1p7b-*). Next after the reboot (Jordan's OK): tile-ladder.sh synthetic 135m 1p7b.
+- **2026-11-22 afternoon (Jordan: 1.7B packs with the tile rule, then idea 2, then idea 3):**
+  - Tile rule hook ETNA_ML_V7_TILE_FIT=<bytes> (+ _MAX_IC) in mesa-llm etnaviv_ml_nn_v7.c: tile height so one input
+    tile x IC <= N (262144: IC 2048 -> 16x8, IC 8192 -> 16x2; 135M down IC 1536 -> 16x10, a new layout; 135M other
+    steps unchanged). Byte-identical to ETNA_ML_V7_TILE_H=8 / 4 on the axi-1p7b packs (which ran).
+  - Idea 3 step 1 built: ETNA_ML_NO_FLUSH_INDEPENDENT=1 (nn_layer_flush = 0 on every NN job whose next hardware job
+    reads nothing written since the last flush; the last job always flushes; a bypass only aliases). Offline: A8 7 of 8
+    jobs unflushed, the TP job before the convs keeps its flush. jb_run 674d417f, jb_engine 4002516c (uncommitted in
+    mesa-llm on top of 4eb662fc). Research note research/2026-11-22-nn-pipelining-fields.md (all candidate fields).
+  - tile_offline.sh (per-pack offline check of every job's layout, kpc, tile <= image, flush pattern): 135M 4-job PASS.
+    NPU ladder llm/l3/tile-ladder.sh (synthetic S1-S4, 135M R1-R4, 1.7B B1-B5 with --layers 4) written, NOT run.
+  - 1.7B packs: real_packs.py 4 jobs -> npu-llm/models/jb/real-1p7b (llm/l3/packs-1p7b.sh, unit alta-llm-packs-1p7b).
+  - **Idea 2 (gateup -> SiLU*up -> down in one submit) in 8 bits: NOT viable** (llm/ref/l2i_npu_mlp.py, 135M; the NPU
+    has no MUL on NN/TP: the multiply would be mesa-compute's shader-core 8-bit MUL, SiLU a TP lookup table). KL vs
+    fp32 GPL-3 / README: today 4 jobs .0229 / .0324; paired gate/up jobs .0231 / .0357; any 8-bit h before down
+    (no Hadamard .0546 / .0790, + 8-bit SiLU and MUL .0551 / .0789, + Hadamard as an 8-bit conv .0671 / .0820);
+    8 jobs: today .0161 / .0236 vs 8-bit glue .0488 / .0738; 16 jobs .0155 / .0229 vs .0490 / .0815; pairs grouped by h
+    range: .33 / .62 (wrecks the gateup output scales). The loss is the 8-bit h itself (outlier channels quantized
+    BEFORE the rotation spreads them), not SiLU or the multiply. Viable form: one shader-core kernel doing SiLU * up +
+    the block FWHT + the down input quantization in fp32 (= today's arithmetic), inside the submit; needs the
+    mesa-compute shader port in mesa-llm. Cost estimate at 6 GFLOPS: ~8 ms per 1.7B layer (~200 ms per chunk).
+- **AXI SRAM ladder RAN 2026-11-22 14:04 (Jordan's OK): 12/12 PASS, trips 0 (runs/llm-axi-ladder-20261122-140434) -
+  and the AXI SRAM does NOT pay.** NPU ms per invoke, P0 planar input in DDR / PT tile 16x8 + keep-image / N1 shared TP
+  copy into DDR / N2 the copy in the AXI SRAM: A2 (2048 -> 2 x 224, 256 tok) 1.70 / **0.75** / 3.53 / 3.58;
+  A8 (8 jobs) 6.57 / **2.81** / 8.51 / 8.87; D4 (8192 -> 4 x 56, 64 tok, 1 superblock per job) 1.73 / 1.76 / 3.62 / 3.85.
+  Conv jobs re-reading their input from the AXI SRAM are no faster than from DDR (the NN core's input fetch runs ~3 GB/s
+  either way: matches the 2026-11-08 MobileNet result), and the TP transpose of 512 KiB costs ~1.8-1.9 ms (~280 MB/s).
+  What pays is the VIP SRAM image cache: ETNA_ML_V7_TILE_H=8 + ETNA_ML_KEEP_IMAGE_CACHE=1 (tile 16x8, the 256 KiB image
+  tile fits, kpc 14) = 2.3x on the 2048-input steps. For the 1.7B: tile height so that tile x IC <= ~256 KiB (IC 2048:
+  8 rows; down IC 8192: 2 rows) + keep-image; leave the AXI SRAM out of the LLM path. Down (8192 in) gains nothing at
+  64 tokens (1 superblock per job: its input is read once per job already).
 - **1.7B input in the AXI SRAM (2026-11-22, built + offline PASS, NPU ladder NOT run):** the kernel patch gives the
   CPU no mapping of the AXI SRAM, so the NPU copies the input there: channels-last graph input -> ONE driver transpose
   (TP) job shared by all convs (new hook ETNA_ML_SHARE_INPUT_TRANSPOSE=1; upstream adds one per conv) -> output placed
@@ -111,7 +182,29 @@ plus measurements on this board.
   all cache layouts valid. Alternative without AXI in the same ladder: ETNA_ML_V7_TILE_H 8 + keep-image (tile 16x8:
   the image cache fits, kpc 14). Down at 256 tokens (2 MiB input) does not fit the AXI SRAM: 64-token packs only.
   NPU ladder llm/l3/axi-ladder.sh (12 rungs P0 / PT / N1 / N2 per pack) waits for Jordan's OK.
-- **AXI SRAM (1 MiB): NOT used by the LLM engine.** jb_engine links mesa-llm, which has no AXI SRAM code (that patch
+- **SHELVED by the 14:04 AXI ladder above (SRAM reads no faster than DDR, each piece pays a ~1.8 ms TP copy per 512 KiB): expect pieces to LOSE to W1-P0; run pieces-ladder.sh only to confirm. Kept: the 0006 guards, multi-input jb_run. Token pieces through the AXI SRAM (2026-11-22, built + offline PASS, NPU ladder NOT run; Jordan: "it can shuffle
+  data between RAM and SRAM as long as the data is still hot"):** an input bigger than the 1 MiB SRAM (1.7B down at 256
+  tokens: 8192 ch = 2 MiB) is cut into P token pieces in ONE submit: per piece a channels-last graph input, one shared
+  TP copy into the SRAM, then the piece's conv jobs. A piece's copy lives only until its last conv, so the allocator of
+  patch 0002 (already lifetime-aware, no Mesa change needed) gives every piece the SAME SRAM space. DDR per step: input
+  once, weights once PER PIECE (the trade). Full 1.7B down (~37 jobs x 56 ch), DDR model: whole 16.8 MB weights + 37 x
+  2 MiB input ~ 94 MB; 2 pieces of 128 tokens ~ 36 MB; 4 of 64 ~ 69 MB -> 2 pieces (1 MiB each = the whole SRAM) best,
+  if the NN core reads the AXI SRAM faster than DDR (unmeasured). Built: mesa-llm 4b666c08 (the AXI port as found,
+  committed) + 4eb662fc (patch 0006's one-submit guards: SRAM refused under npu_no_batching / npu_parallel and past the
+  0x4000-word command buffer, pre-flush, split warning); jb_run 21b8ac1f (several graph inputs: the pack's input blob is
+  split across them in tensor order; MAX_T 1024, MAX_OPS 512); jb_pack.py `pieces IC OCJ G H W P` (weights shared by
+  the pieces). Packs npu-llm/models/jb/axi-pieces: W1 whole 16x16, P2 2 x 16x8, P4 4 x 8x8 (IC 8192, 4 jobs x 56).
+  Offline llm/l3/pieces_offline.sh -> npu-llm/runs/offline-pieces-20261122-135940 PASS: job order T nnnn per piece, each
+  piece's convs read its own copy, N2 places P of P using one piece's size (1024 / 512 KiB), all copies at one address,
+  one submit per invoke, W1 places nothing; reference = direct conv of the token slices (max 0). One-input packs
+  byte-identical to 943bf0c2 (offline-pieces-regress-20261122-140010). **Tiling trap found offline:** 8x16 (H < W)
+  pieces got a 16-row tile on an 8-row image: the V7 tile is computed from the unswapped sizes and 348aef38 only fixes
+  H > W. So pieces are laid out H >= W (16x8, the fixed path that ran on the NPU); an upstream fix (always tile the
+  configured orientation) would change non-square configs, not done. NPU ladder llm/l3/pieces-ladder.sh (W1-P0,
+  W1-N1, P4-N1, P4-N2, P2-N1, P2-N2) waits for Jordan's OK. Real-model use later needs: weights compiled once per step
+  and shared by the pieces (today Mesa builds a coefficient buffer per conv op, so P pieces = P copies of the weights).
+- **AXI SRAM (1 MiB): NOT used by the LLM engine** (still true on the NPU: the pieces and 1.7B-input builds above are
+  offline only). jb_engine links mesa-llm, which had no AXI SRAM code (that patch
   lives in mesa-axi-sram / mesa-strips, kit Teflon only); the ladders also strip ETNA_ML_AXI_SRAM. Even that patch
   only places INTERMEDIATE tensors between ops of one submit (graph inputs/outputs excluded); a pack has none. The NN
   core's caches address only the VIP SRAM: nothing spills into the AXI SRAM by itself. Kernel switch axi_sram = Y.

@@ -1,0 +1,8 @@
+/dev/dri/renderD128: etnaviv
+compiled 16 steps (4 layers, 1 tokens) in 10838 ms (median 311.0, max 733.6 per step); weights 268.9 MB (freed after compile); resident now anon 33.5 + file 2.9 + shmem 0.0 MB, peak 83.8 MB; test data 0.3 MB
+  qkv     4 steps: 10.21 ms per round (NPU incl. submit 10.06, read-out 0.17)
+  o       4 steps: 4.85 ms per round (NPU incl. submit 4.72, read-out 0.13)
+  gateup  4 steps: 23.47 ms per round (NPU incl. submit 23.26, read-out 0.19)
+  down    4 steps: 18.54 ms per round (NPU incl. submit 18.36, read-out 0.17)
+{"offline": false, "steps": 16, "layers": 4, "tokens": 1, "rounds": 20, "compile_ms": 10838.2, "compile_ms_max": 733.60, "weights_mb": 268.86, "peak_rss_mb": 83.8, "rss_anon_mb": 33.5, "rss_file_mb": 2.9, "rss_shmem_mb": 0.0, "test_data_mb": 0.3, "round_ms_median": 58.080, "ms_per_token": 58.0801, "qkv_ms": 10.211, "o_ms": 4.855, "gateup_ms": 23.471, "down_ms": 18.539, "readout_ms": 0.659, "bad_packs": 0, "diff_vs_expected_max": 1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261122-163829-LLMT-B5-1p7b-1tok

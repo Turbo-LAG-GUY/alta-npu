@@ -38,6 +38,10 @@
  * --consume     read every int8 value of every output once (NEON sum, consume_sum = the first output's) inside the
  *               timed read-out, as the engine's next CPU step would; zero-copy reads the NPU's bytes in place.
  *
+ * Several graph inputs (2026-11-22, token pieces): the pack's one input blob is split across the graph inputs in
+ * tensor order (each takes dims x type_size bytes), so a pack of P token pieces stores the whole channels-last
+ * input once. One-input packs run exactly as before. --cpu-rows needs a one-input pack.
+ *
  * Device runs ONLY through scripts/npu-run with Jordan's OK for that step.
  */
 #ifndef _GNU_SOURCE
@@ -64,8 +68,8 @@
 #include "pipe/p_state.h"
 #include "etnaviv/drm/etnaviv_drm_public.h"
 
-#define MAX_T 256
-#define MAX_OPS 128
+#define MAX_T 1024   /* 2026-11-22: was 256; a whole 1.7B down step in token pieces has ~300 tensors */
+#define MAX_OPS 512  /* was 128 */
 
 struct jb_tensor {
    int32_t index;
@@ -80,7 +84,8 @@ struct jb_tensor {
 static struct jb_tensor T[MAX_T];
 static struct pipe_tensor PT[MAX_T];
 static struct pipe_ml_operation OPS[MAX_OPS];
-static struct pipe_tensor *OP_IN[MAX_OPS][3], *OP_OUT[MAX_OPS][1];
+#define MAX_SPLIT 16   /* outputs of one SPLIT op (2026-11-22) */
+static struct pipe_tensor *OP_IN[MAX_OPS][3], *OP_OUT[MAX_OPS][MAX_SPLIT];
 static unsigned n_t, n_ops;
 static uint8_t *input;
 static uint32_t input_bytes;
@@ -146,6 +151,20 @@ load_pack(const char *path)
       rd(f, &b, 4);
       rd(f, &out, 4);
       struct pipe_ml_operation *op = &OPS[i];
+      if (type == 3 && in >= 0 && (unsigned)in < n_t && w >= 0 && b >= 1 && b <= MAX_SPLIT &&
+          (unsigned)(w + b) <= n_t) {
+         /* SPLIT on the channel axis: outputs w .. w+b-1; both input slots = the data tensor, as Teflon does */
+         op->type = PIPE_ML_OPERATION_TYPE_SPLIT;
+         OP_IN[i][0] = OP_IN[i][1] = &PT[in];
+         for (int j = 0; j < b; j++)
+            OP_OUT[i][j] = &PT[w + j];
+         op->input_tensors = OP_IN[i];
+         op->input_count = 1;
+         op->output_tensors = OP_OUT[i];
+         op->output_count = b;
+         op->split.axis = 3;
+         continue;
+      }
       if (type == 2 && in >= 0 && out >= 0 && (unsigned)in < n_t && (unsigned)out < n_t) {
          /* explicit TRANSPOSE at a graph end: the driver makes it a bypass and marks the tensor channels-first */
          op->type = PIPE_ML_OPERATION_TYPE_TRANSPOSE;
@@ -559,15 +578,27 @@ main(int argc, char **argv)
    unsigned in_idx[MAX_T], out_idx[MAX_T], n_in = 0, n_out = 0;
    bool written[MAX_T] = {0};
    for (unsigned i = 0; i < n_ops; i++)
-      written[OP_OUT[i][0]->index] = true;
+      for (unsigned j = 0; j < OPS[i].output_count; j++)
+         written[OPS[i].output_tensors[j]->index] = true;
    for (unsigned i = 0; i < n_t; i++) {
       if (!T[i].is_constant && !written[i])
          in_idx[n_in++] = i;
       if (T[i].is_output)
          out_idx[n_out++] = i;
    }
-   if (n_in != 1) {
-      fprintf(stderr, "expected one graph input, found %u\n", n_in);
+   if (n_in < 1 || (n_in != 1 && cpu_rows)) {
+      fprintf(stderr, "expected one graph input (or several without --cpu-rows), found %u\n", n_in);
+      return 2;
+   }
+   /* the input blob, split across the graph inputs in tensor order */
+   size_t in_off[MAX_T], in_sum = 0;
+   for (unsigned k = 0; k < n_in; k++) {
+      const struct jb_tensor *t = &T[in_idx[k]];
+      in_off[k] = in_sum;
+      in_sum += (size_t)t->dims[0] * t->dims[1] * t->dims[2] * t->dims[3] * (t->type_size ? t->type_size : 1);
+   }
+   if (in_sum != input_bytes) {
+      fprintf(stderr, "graph inputs take %zu bytes, the pack's input has %u\n", in_sum, input_bytes);
       return 2;
    }
    if (!cpu_setup(cpu_rows, cpu_ic ? cpu_ic : T[in_idx[0]].dims[1] * T[in_idx[0]].dims[2] * T[in_idx[0]].dims[3]))
@@ -602,7 +633,9 @@ main(int argc, char **argv)
    printf("screen %.2f ms, compile %.2f ms (%u ops, %u outputs)\n", t1 - t0, t2 - t1, n_ops, n_out);
 
    void *outs[MAX_T];
-   bool out_signed[MAX_T], in_signed = T[in_idx[0]].is_signed;
+   bool out_signed[MAX_T], in_signed[MAX_T];
+   for (unsigned k = 0; k < n_in; k++)
+      in_signed[k] = T[in_idx[k]].is_signed;
    for (unsigned i = 0; i < n_out; i++) {
       outs[i] = calloc(1, expected_bytes[out_idx[i]]);
       out_signed[i] = T[out_idx[i]].is_signed;
@@ -623,9 +656,12 @@ main(int argc, char **argv)
          return 3;
       }
       double b = now_ms();
-      void *in_buf = (alt_input && (it & 1)) ? alt_input : input;
+      uint8_t *in_base = (alt_input && (it & 1)) ? alt_input : input;
+      void *in_bufs[MAX_T];
+      for (unsigned k = 0; k < n_in; k++)
+         in_bufs[k] = in_base + in_off[k];
       for (unsigned k = 0; k < batch; k++)
-         pc->ml_subgraph_invoke(pc, sg, 1, in_idx, &in_buf, &in_signed);
+         pc->ml_subgraph_invoke(pc, sg, n_in, in_idx, in_bufs, in_signed);
       double c = now_ms(), cpu_end = c, npu_end = c;
       if (wait != WAIT_MESA) {
          struct pipe_fence_handle *fence = NULL;

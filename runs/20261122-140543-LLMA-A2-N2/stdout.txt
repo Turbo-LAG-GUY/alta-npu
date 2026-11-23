@@ -1,0 +1,3 @@
+/dev/dri/renderD128: etnaviv
+screen 3.14 ms, compile 23.82 ms (4 ops, 2 outputs)
+{"pack": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_nhwc.jbp", "offline": false, "ctx": "persist", "wait": "spin", "invokes": 20, "batch": 1, "ops": 4, "compile_ms": 23.824, "first_ms": 4.236, "ms_median_after_first": 3.9391, "ctx_ms": 0.0018, "invoke_call_ms": 0.2693, "read_ms": 3.6794, "npu_ms": 3.5756, "spins_per_wait": 1152, "cpu_rows": 0, "cpu_ms": 0.0000, "cpu_gbs": 0.000, "flush_ms": 0.0305, "main_cpu": -1, "main_on_a73": 1.000, "readout_ms": 0.0929, "readout": "copy", "consume": false, "consume_sum": 0, "alt": false, "checked_invokes": 2, "bad_invokes": 0, "cpu_check": true, "diff_vs_expected_max": 1}

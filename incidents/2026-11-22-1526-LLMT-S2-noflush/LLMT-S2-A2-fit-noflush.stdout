@@ -1,0 +1,23 @@
+npu-run: hw_job_trips went from 0 to 20: the driver recovered a hang
+npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: /home/jordan/alta-npu/runs/20261122-152601-LLMT-S2-A2-fit-noflush/kernel.txt
+[79536.675231] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.675709] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.685273] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 4 -> 1 after a recovered hang (hw_job_auto, trip 1)
+[79536.700174] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.700249] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.721340] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.726032] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.733864] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 2)
+[79536.733878] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.739062] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.760455] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.765208] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.775711] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 3)
+[79536.775734] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.779109] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+[79536.799382] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU fault status 0x00000002
+[79536.804389] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: MMU 0 fault (page not present) addr 0x00000000
+[79536.817830] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 4)
+[79536.817855] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[79536.817942] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_run-674d417f (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_run-674d417f -n 20 --wait spin /home/jordan/Documents/AI_Projects/npu-llm/models/jb/axi-1p7b/A2_planar.jbp)
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)
