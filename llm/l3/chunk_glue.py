@@ -219,9 +219,16 @@ def main():
                     "on the embeddings: the format's noise floor (rounding ties spread), to judge other runs by")
     ap.add_argument("--offline", action="store_true", help="npu backend against the fake NPU (plumbing only: "
                     "the shim executes nothing, so the levels and the quality are meaningless)")
+    ap.add_argument("--glue", choices=("numpy", "c"), default="numpy", help="c: the CPU glue in C (llm/l3/glue, "
+                    "libjbglue.so, OpenMP on the A73s: OMP_NUM_THREADS=4 GOMP_CPU_AFFINITY=2-5 unless set)")
     ap.add_argument("model_dir")
     ap.add_argument("pack_dir")
     a = ap.parse_args()
+    if a.glue == "c":
+        os.environ.setdefault("OMP_NUM_THREADS", "4")
+        os.environ.setdefault("GOMP_CPU_AFFINITY", "2-5")
+        sys.path.insert(0, os.path.join(HERE, "glue"))
+        import cforward
     MD, PD = os.path.abspath(a.model_dir), os.path.abspath(a.pack_dir)
     sys.argv = [sys.argv[0], MD]                     # l2g_outliers reads the model directory from argv at import
     import l2g_outliers as G
@@ -260,7 +267,7 @@ def main():
         be = RefBackend()
     else:
         be = NpuBackend(a.engine, PD, TOK, offline=a.offline)
-    res = {"model": man["model"], "backend": be.name, "tokens_per_chunk": TOK, "texts": {}}
+    res = {"model": man["model"], "backend": be.name, "glue": a.glue, "tokens_per_chunk": TOK, "texts": {}}
     saved = {}
     try:
         t = time.monotonic()
@@ -277,9 +284,13 @@ def main():
         if isinstance(be, NpuBackend):
             be.npu_ms = be.ro_ms = 0.0
         for tn, ids in evals.items():
-            q = PackQuant(steps, order, be, check=(tn == "gpl3"))
             t = time.monotonic()
-            lg = m.forward(ids, q)
+            if a.glue == "c":
+                q = cforward.PackQuantC(steps, order, be, check=(tn == "gpl3"))
+                lg = cforward.forward_c(m, ids, q)
+            else:
+                q = PackQuant(steps, order, be, check=(tn == "gpl3"))
+                lg = m.forward(ids, q)
             wall = time.monotonic() - t
             lp = logsoftmax(lg)
             saved[tn] = lp.astype(np.float32)
@@ -300,6 +311,9 @@ def main():
                                               wall, q.t_be, q.t_q, wall - q.t_be - q.t_q,
                                               "   (NPU %.1f ms, read-out %.1f ms)" % (r["npu_ms"], r["readout_ms"])
                                               if "npu_ms" in r else ""), flush=True)
+            if a.glue == "c":
+                r["parts_s"] = dict(q.t)
+                print("        C glue parts (s): " + ", ".join("%s %.2f" % kv for kv in q.t.items()), flush=True)
             if q.check:
                 print("        (info) glue inputs vs the packs' recorded inputs: max %d levels, %.1f%% of levels differ "
                       "(rounding ties spread, see the docstring)" % (q.worst_in, 100.0 * q.n_in_diff / (

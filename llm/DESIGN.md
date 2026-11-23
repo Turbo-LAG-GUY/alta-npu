@@ -99,6 +99,38 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+## int16 question (2026-11-23, Jordan, from session ai-projects-f4's bf16 analysis)
+- bf16 on the NPU: not possible (hwdb GC8000 rev 7120: NN cores INT8 8 / INT16 8 / FLOAT16 0 / BFLOAT 0, shader fp32
+  only); bf16 -> fp32 by `<< 16` is what llm/ref/smollm.py Lazy already does. The int16 NN path (int16 x int16, no
+  int16 x int8 mix) is real but Mesa never drives it (format reverse engineering + hang risk, 2x weight bytes).
+- Simulation first (llm/ref/l2k_int16.py: today's 1.7B layout, one step kind at a time in 16 bits: input, weights,
+  outputs). 135M (KL GPL-3 / README): base .0196 / .0340; qkv 16-bit .0149 / .0279; down 16-bit .0184 / .0319; all
+  16-bit .0033 / .0122. 1.7B rows base, qkv, o, gateup, down, all running (unit alta-llm-l2k, log
+  npu-llm/runs/l2k-int16-SmolLM2-1.7B-Instruct.log, ~5-6 h). Worth an int16 experiment only if one step kind carries
+  most of the 1.7B gap.
+
+## Resume here (2026-11-23 afternoon): C glue built (CPU side of a chunk), next: fusion + the loop in C
+- **libjbglue.so** (llm/l3/glue/jb_glue.c, build.sh -> npu-llm/bin/libjbglue.so + frozen libjbglue-<sha>.so; ctypes
+  bindings glue/jbglue.py): RMSNorm, quantize + transpose to the NPU's planar int8 (NEON divide + round-to-even +
+  16x16 byte transposes, exact like numpy), whole-step scatter of all jobs' outputs back to model order (planar
+  buffers transposed in 16x16 NEON blocks, then row by row in L1; split pieces add up; can add straight into the
+  residual), whole-step position-0 int8 GEMV from the packs' int8 weights (no fp32 copy: 6.8 GB at 1.7B), RoPE,
+  causal attention (4 queries x 16 keys / 16 dims register micro-kernels, transposed K, NEON exp), SiLU * up (NEON
+  exp), block FWHT (NEON butterflies). glue/test_jbglue.py: every kernel vs the numpy it replaces at 135M and 1.7B
+  shapes: quantize / scatter / FWHT bit-exact, the rest ~1e-7 relative. ALL OK.
+- **chunk_glue.py --glue c** (glue/cforward.py: the rotated forward with the C kernels, Python orchestration):
+  135M with the int8 reference backend: every step on its recorded input 0 levels from the packs; quality = the numpy
+  glue within the noise (GPL-3 15.81 KL .0189 / README 49.03 KL .0342 on real-135m; numpy 15.70 / .0195, 49.09 / .0327).
+- **Per-chunk CPU cost** (glue/bench_layer.py: all kernels at real shapes, random int8 in place of the NPU, 4 A73
+  threads, OMP_WAIT_POLICY=active): 135M 0.72 s (numpy glue ~21.6 s); **1.7B 3.4 s** (attention 1.05, scatter 0.77,
+  position-0 GEMV 0.47, quantize 0.45, SiLU + FWHT 0.43, norm / RoPE / splits 0.2) vs the NPU's ~1.0 s. Memory-traffic
+  floor ~0.5 s per chunk. Lessons: OpenMP threads asleep between calls cost up to 3 ms per call (active wait fixes
+  it, but spinning threads starve the ref backend's BLAS: use active only with the NPU backend); GCC spills 2-D
+  NEON accumulator arrays (named registers: attention 44 -> 29 ms per 1.7B layer); per-element float64 divides.
+- **Next for the glue**: fuse the float passes (gateup -> SiLU * up straight from the int8 job outputs; qkv scattered
+  into q / k / v; quantize fused into the norms), the position-0 GEMV overlapped with the NPU (independent of it), then
+  the whole loop in C inside jb_engine (no Python between steps), then the 135M chunk end to end on the NPU with it.
+
 ## Resume here (2026-11-23 00:05): gated tile rule + 1.7B down split CONFIRMED on the NPU
 - **Gated tile rule** (mesa-llm etnaviv_ml_nn_v7.c, uncommitted on 4eb662fc): ETNA_ML_V7_TILE_FIT=262144 now tiles
   only when (a) the untiled image can't be cached next to the 0x20000 kernel area and there is more than one
