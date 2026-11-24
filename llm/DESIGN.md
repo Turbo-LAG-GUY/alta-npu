@@ -124,9 +124,101 @@ plus measurements on this board.
   scatter 137, qkv+rope 122, norm+quant 64, quantize 36).** llama.cpp Q8_0 on the A73s reads a 1.7B prompt at 7.8
   tokens/s (CPU baseline below): ~9x, ~14x once the head is fixed, at the 8-bit format's quality (ppl +13% vs fp32;
   the int16 qkv+down option closes ~75% of that gap). Load + compile: 75 s per run.
-- Next: (1) the head: keep it off the page cache (an int8 copy of the embedding, 100 MB, or the head on the NPU), (2)
-  the glue on a quiet board (attention, ffn), (3) generation (decode): KV cache + 1-token packs, (4) commit the mesa-llm
-  hook (Generated-by: LLM trailer) when Jordan asks.
+- **C glue after the run (CPU only, every change bit-preserving), jb_prefill 3f403875 / libjbglue 7bed1dc8:**
+  - the chunk is a function (chunk()), --repeat N runs it N times in one process (steady state; each repeat's logits
+    must equal the first's); MADV_WILLNEED on the aux mapping (read in during the load), POSIX_FADV_DONTNEED after each
+    pack is read (jb_engine.c load_pack: the 3.3 GB of packs no longer evict everything else from the page cache).
+  - head: jbg_head_bf16 widens bf16 in registers (4 vocab rows x 2 tokens, token blocks of 32), the same sums as
+    dot_f32: 1.7B last token **24 ms** with the table resident (8.4 GB/s = the board's bandwidth; the old loop widened
+    element by element at ~0.9 GB/s), 135M 65 -> 11.5 ms, 1.7B --all 23 -> 3.6 s (glue/test_head.py).
+  - FFN: each row is quantized right after its FWHT, while in L1, into an int8 tile (the 16 x 8192 float tile, 512 KB
+    per thread, overflowed the A73s' shared 1 MB L2: quantize 22 -> 11 thread-ms per layer); steps whose jobs
+    partition the rows (rows_partition) store dequantized levels converted 8 at a time (scatter 16-21 -> 11); the
+    residual scatter's conversion vectorized too. 1.7B glue (glue/bench_layer.py, excl. the position-0 GEMV that
+    jb_prefill doesn't run): **1302 -> ~1085 ms per chunk** (ffn 509 -> 391, scatter 120 -> 100, qkv+rope 125 -> 105;
+    attention ~345, unchanged: already register-blocked, 17-24% of the A73s' FMA peak).
+  - Proofs: 135M --ref --all logits bit-identical to 91ee17b9; glue/compare_libs.py runs the kernels at 1.7B shapes
+    with two builds and compares bits: the old and new sources built like jb_prefill are bit-identical (split partial
+    sums included). Found on the way: GCC contracted the .so's scalar `o += (l - zp) * s` into fmadd (gnu C mode) but
+    not jb_prefill's (-std=c11), so the Python path and the C engine never agreed on accumulated partial sums; the .so
+    is now built -ffp-contract=off (= jb_prefill = numpy's float32 arithmetic). Old Python-path .ref files can differ
+    from new ones by that last bit (compare_prefill compares within tolerance).
+  - Expected 1.7B chunk now: NPU ~0.96 s + glue ~1.1 s + head 0.02 s = ~2.1 s (~120 tok/s, ~15x llama.cpp); not yet
+    measured on the NPU.
+- **Decode (generation) on the CPU, jb_prefill 944b41e6 (CPU-only so far):** --generate N greedily continues the prompt
+  one token at a time after the chunk: decode_step() = the float path of export_aux's position 0 (int8 weights x the
+  job's weight scale; the steps keep their int8 weights after compile: 107 MB for the 135M) with a KV cache the chunk
+  fills ([L][cap][KV * hd] float), jbg_attn_decode (reads the cache in place), jbg_head_bf16. Activations are
+  quantized to int16 per GEMV (jbg_gemv_jobs_q16: int8 x int16 -> int32 SMLAL, the A73 has no int8 dot product;
+  JB_DECODE_Q16=0 = float activations). Checks: position 0's K / V = the prompt file's (rel 1e-7 float, 1.7e-5
+  int16); --teacher LOGITS runs the prompt's positions through decode_step one by one: vs the NPU-format prefill
+  KL .012, top-1 94.1%, ppl 15.48 vs 15.74 (float activations beat the 8-bit ones); int16 vs float activations KL
+  3e-8, top-1 100%. Greedy text from the GPL-3 prompt is a sensible continuation ("... (1) assert copyright on the
+  software, and (2) make sure that the software is free. ..."). On the fake NPU, --npu --generate submits stay
+  byte-identical. **135M: 39.8 ms per token = 25 tok/s** (GEMVs 22.4 = 4.8 GB/s of the 107 MB, attention 4.9, head
+  10.1: the bf16 table, 56 MB) vs llama.cpp Q8_0 21 ms (47 tok/s) - timed with xrdp holding ~50% of one A73.
+  jbg_gemv_jobs (position 0 / float decode) rewritten: one parallel region per step, 4 rows sharing each x load,
+  results through a per-job line-aligned buffer (no false sharing on y): every row's sum unchanged.
+- **1.7B decode needs a design decision (Jordan):** its int8 weights can't be held twice (1.55 GB next to 1.83 GB
+  pinned on a 3.7 GB board), and a second set of 1-token NPU steps would pin another ~1.8 GB. Options: (a) the CPU
+  reads the weights straight from the NPU's coefficient BOs (v7 pointwise layout from write_core_6, zrl 0: per core and
+  superblock, 6-channel groups interleaved across kernels, a 32-bit bias after the first weight and an offset after
+  the last group; regular enough for a NEON GEMV), needing a mesa-llm hook for CACHED coefficient BOs (they are WC:
+  slow CPU reads) and an accessor - zero extra memory, CPU-speed decode (~4 tok/s, = llama.cpp); (b) Mesa shares
+  coefficient BOs between subgraphs of the same weights (content-hash dedupe): 1-token NPU steps for free memory-wise,
+  but the NPU decodes slower than the CPU (1.7B ~2.9 tok/s measured as 57.4 ms per 4 layers), though (b) would also
+  allow two 128-token streams to overlap the NPU with the CPU glue in a prompt (causal: the first half never needs the
+  second).
+- **prefill4-ladder (Jordan's OK), runs/llm-prefill4-ladder-20261124-031311, 4/4 PASS:** 135M and 1.7B --all logits
+  bit-identical to prefill3's (E2 / R1). **Steady state (--repeat 3, last token): 135M 446 ms per 256-token chunk =
+  574 tok/s (llama.cpp prompt 104); 1.7B 2231 ms = 115 tok/s (NPU 855 + read-out 221, glue ~1.1 s, head 39 ms;
+  llama.cpp 7.8: 14.7x).** The first chunk of a process still pays the embedding page-in (1.7B head 4.8 s: pinning 1.83
+  GB evicts the mapped table despite WILLNEED); 1.7B --all --repeat 2 thrashed on its 2nd repeat (170 s: the table read
+  8 times under memory pressure; a scoring mode only). 135M decode after the NPU chunk: 43.7 ms per token.
+- **Design (a), Jordan's choice: decode on the CPU straight from the NPU's weight buffers (no second copy).**
+  - mesa-llm (test tree, uncommitted): etnaviv_ml_llm.h + etna_ml_llm_coefs(subgraph, i) - the i-th NN job's
+    coefficient BO (CPU map, size) and its layout, recorded at compile time in etna_vip_instruction.llm_coefs (cores,
+    header, kernels per core, superblocks, ic, oc, stride 6 = write_core_6 or 1 = write_core_interleaved, zero-run bits,
+    weight zero point); ETNA_ML_CACHED_COEFFS=1: coefficient BOs CPU-cached (etna_ml_create_coef_bo; they were
+    write-combined).
+  - glue: jbg_gemv_coef_q16 reads the V7 1x1 layout directly (units = (core, superblock) in parallel; middle blocks of
+    6 channels, 8 kernels per step via vld3q_u16 byte pairs, sum u * x - zp * sum x; first / last blocks with the bias
+    and offset fields scalar), jbg_coef_decode (scalar decoder for checks). Both int16 GEMVs now form exact integer
+    dots (int32 lanes flushed to int64, rounded once), so decode from the NPU's buffers and from kept int8 rows give
+    the same bits (and vs the earlier float-summed int16 decode: KL 4.5e-8).
+  - jb_prefill d17bb7cc: --coef-check decodes every job's buffer right after its compile and compares it with the
+    pack's weights (no extra memory); JB_DECODE_COEF=1 decodes from the buffers (the weights are freed after compile).
+  - **Fake NPU: --coef-check 135M 480/480 and 1.7B 672/672 jobs (1610.6 MB) identical to the packs byte for byte;
+    135M teacher-forced decode from the buffers bit-identical to the kept-weights decode (and GEMVs 22.0 vs 23.7 ms per
+    token: the layout streams sequentially). 1.7B decode from the buffers: 325.5 ms per token = 3.07 tok/s (GEMVs 259
+    ms = 6.2 GB/s of the 1.61 GB, attention 34.5: the fp32 KV cache, ~107 MB read per token at 273 positions, head
+    24.8) vs llama.cpp 4.2 tok/s. Quality, teacher-forced over the prompt: vs fp32 KL .028, top-1 95.7%, ppl 2.145
+    (fp32 2.154) - near fp32: the 1.7B's gap is the NPU path's 8-bit activations, not the int8 weights (the NPU
+    prefill: KL .154, ppl 2.440; the int16 simulation said the same).**
+  - **prefill5-ladder (Jordan's OK), runs/llm-prefill5-ladder-20261124-034056, 4/4 PASS, trips 0, no kernel
+    warnings:** with ETNA_ML_CACHED_COEFFS=1 the 135M and 1.7B --all logits are bit-identical to prefill3's (cached
+    coefficient BOs proven on the NPU); --coef-check on the real buffers 480/480 and 672/672 jobs identical to the
+    packs; 135M teacher-forced decode from the NPU's buffers bit-identical to the CPU reference (kept weights).
+    **The first 1.7B generation: NPU prompt chunk + 64 tokens decoded on the CPU from the NPU's own weight buffers, no
+    second copy: 340.5 ms per token = 2.94 tok/s** (GEMVs 253.8, attention 45.1, head 26.7); the text is a coherent
+    continuation of the GPL-3 prompt ("... and (2) offer you a chance to choose under the terms of a license, ensuring
+    your continued freedom to use the software. ..."). 135M: 52.7 ms per token (GEMVs 30.3 vs 22.0 on the fake NPU:
+    to re-measure on a quiet board).
+- **Design (b), kept in view (Jordan: "that shared weight buffer idea sounds interesting"):** Mesa sharing
+  coefficient BOs between subgraphs of the same weights (content hash -> one BO) would give 1-token NPU steps without
+  extra memory and, more interestingly, two 128-token streams per prompt chunk: causal attention means the first half
+  never needs the second, so stream A's glue (CPU) can run while stream B's step runs on the NPU: ~max(NPU, CPU) instead
+  of NPU + CPU per chunk (1.7B: ~1.1 s instead of 2.2 s), at the cost of 128-token images (less efficient per token
+  on the NPU) and a second compiled config set. The (a) accessor already exposes what a dedupe needs (the BO per job).
+  **half-ladder 2026-11-24 (Jordan's OK): 256 tokens 154.2 ms per 4 layers (PASS); 128 tokens (8 x 16) HUNG the NPU
+  twice in layer 0's down step (incidents/2026-11-24-0407-LLMH-H2-half-128; STOP, devcoredump kept).** Both 128-token
+  shapes give an 8-wide tile with the whole 256 KiB image kept in the SRAM's upper half and the kernels partially
+  cached in the lower half - a combination the 256-token path never uses (its 2048-input steps are tiled). The
+  128-token speed is still unmeasured; find a 128-token configuration on the proven path offline first (incident
+  follow-ups), and treat 128-token images as unsafe until then.
+- Next: (1) prefill5 on the NPU (OK needed), (2) the KV cache in fp16 / bf16 (halves attention's traffic), the decode
+  GEMV and an int8 head on a quiet board, (3) a chat loop (prompt chunk on the NPU + decode on the CPU, template
+  position 0), (4) (b).
 
 ## 2026-11-23 15:00: the whole prompt-chunk loop in C ran on the NPU
 - **jb_prefill** (llm/l3/jb_prefill.c, build_jb_run.sh jb_prefill, frozen npu-llm/bin/jb_prefill-cb935e3f): one chunk

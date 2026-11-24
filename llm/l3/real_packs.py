@@ -55,6 +55,12 @@ from smollm import _w  # noqa: E402
 from l2j_down_split import piece_ranges, dp_groups  # noqa: E402  (calibrated partial ranges, range-grouped jobs)
 
 SIZES = [(1, 1, 1), (256, 16, 16)]                 # tokens, H, W
+# 2026-11-24 (design (b) timing test): JB_PACK_SIZES="128:8:16,..." replaces the sizes (tokens:H:W; the test input is
+# tokens 1..T of the same capture), JB_PACK_LAYERS=N writes only layers 0..N-1 (the capture still runs every layer)
+if os.environ.get("JB_PACK_SIZES"):
+    SIZES = [tuple(int(v) for v in z.split(":")) for z in os.environ["JB_PACK_SIZES"].split(",")]
+    assert all(T == H * W for T, H, W in SIZES), SIZES
+PACK_LAYERS = int(os.environ.get("JB_PACK_LAYERS", "0"))
 STEPS = ("qkv", "o", "gateup", "down")
 
 
@@ -222,7 +228,7 @@ def main():
                 "packs": []}
     perm = {}
     worst_sim = 0
-    for li in range(m.L):
+    for li in range(PACK_LAYERS or m.L):
         for st in STEPS:
             key = "%d.%s" % (li, st)
             c = cap.cap[key]

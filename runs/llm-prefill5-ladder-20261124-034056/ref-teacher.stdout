@@ -1,0 +1,21 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend ref (CPU int8)
+loading layer 0 / 30 (0 ms, MemAvailable 2526 MB)
+loading layer 2 / 30 (329 ms, MemAvailable 2513 MB)
+loading layer 4 / 30 (641 ms, MemAvailable 2504 MB)
+loading layer 6 / 30 (925 ms, MemAvailable 2498 MB)
+loading layer 8 / 30 (1251 ms, MemAvailable 2490 MB)
+loading layer 10 / 30 (1567 ms, MemAvailable 2484 MB)
+loading layer 12 / 30 (1858 ms, MemAvailable 2475 MB)
+loading layer 14 / 30 (2183 ms, MemAvailable 2470 MB)
+loading layer 16 / 30 (2511 ms, MemAvailable 2476 MB)
+loading layer 18 / 30 (2836 ms, MemAvailable 2467 MB)
+loading layer 20 / 30 (3148 ms, MemAvailable 2458 MB)
+loading layer 22 / 30 (3480 ms, MemAvailable 2449 MB)
+loading layer 24 / 30 (3789 ms, MemAvailable 2443 MB)
+loading layer 26 / 30 (4117 ms, MemAvailable 2434 MB)
+loading layer 28 / 30 (4427 ms, MemAvailable 2429 MB)
+loaded 120 steps in 4711 ms
+chunk: 3934.0 ms = steps 3630.8 (CPU reference; read-out 0.0) + glue: embed 35.7, norm+quant 14.3, qkv+rope 21.1, attention 131.0, quantize 9.9, scatter 14.1, ffn 65.1, head 11.3 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 3934.0, "steps_ms": 3630.8, "readout_ms": 0.0, "glue_ms": 303.2, "head_ms": 11.3, "argmax": 284, "same_as_rep0": true, "total_ms": 8645.4}
+teacher: position 0 K / V of layer 0 vs the prompt file: max |diff| 3.46e-05 / 2.37e-06 (rel 4.35e-06 / 1.71e-05)
+teacher: positions 0..256 decoded in 9486.8 ms (36.9 ms per token), logits of 1..256 -> /home/jordan/alta-npu/runs/llm-prefill5-ladder-20261124-034056/ref-teacher.f32

@@ -1,0 +1,7 @@
+# kmsg-catch start 2026-11-24T04:06:52-0500 uptime=34357.53
+[34373.265737] <4> etnaviv-gpu ff100000.npu: alta: hw_job_limit 4 -> 1 after a recovered hang (hw_job_auto, trip 1)
+[34373.304819] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+[34373.304875] <3> etnaviv-gpu ff100000.npu: offending task: jb_engine-751f4 (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_engine-751f40b7 -n 20 --tokens 128 --layers 4 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-1p7b-split4-L4-a)
+[34374.387339] <4> etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 2)
+[34374.387355] <3> etnaviv-gpu ff100000.npu: recover hung GPU!
+# kmsg-catch end uptime=34389.16

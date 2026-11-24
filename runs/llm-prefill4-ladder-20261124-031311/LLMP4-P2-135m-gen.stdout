@@ -1,0 +1,28 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 30 (0 ms, MemAvailable 2433 MB)
+loading layer 2 / 30 (457 ms, MemAvailable 2413 MB)
+loading layer 4 / 30 (939 ms, MemAvailable 2395 MB)
+loading layer 6 / 30 (1425 ms, MemAvailable 2374 MB)
+loading layer 8 / 30 (1918 ms, MemAvailable 2355 MB)
+loading layer 10 / 30 (2403 ms, MemAvailable 2335 MB)
+loading layer 12 / 30 (2859 ms, MemAvailable 2316 MB)
+loading layer 14 / 30 (3368 ms, MemAvailable 2296 MB)
+loading layer 16 / 30 (3870 ms, MemAvailable 2278 MB)
+loading layer 18 / 30 (4397 ms, MemAvailable 2259 MB)
+loading layer 20 / 30 (4922 ms, MemAvailable 2242 MB)
+loading layer 22 / 30 (5425 ms, MemAvailable 2241 MB)
+loading layer 24 / 30 (5933 ms, MemAvailable 2216 MB)
+loading layer 26 / 30 (6421 ms, MemAvailable 2185 MB)
+loading layer 28 / 30 (6928 ms, MemAvailable 2184 MB)
+loaded + compiled 120 steps in 7460 ms
+chunk 1/3: 574.3 ms = steps 135.1 (NPU incl. submit; read-out 48.8) + glue: embed 30.0, norm+quant 12.5, qkv+rope 33.4, attention 139.6, quantize 18.2, scatter 46.8, ffn 98.1, head 11.3 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 574.3, "steps_ms": 135.1, "readout_ms": 48.8, "glue_ms": 439.2, "head_ms": 11.3, "argmax": 284, "same_as_rep0": true, "total_ms": 8037.6}
+chunk 2/3: 457.4 ms = steps 123.9 (NPU incl. submit; read-out 40.6) + glue: embed 25.6, norm+quant 12.5, qkv+rope 28.5, attention 117.5, quantize 9.3, scatter 16.8, ffn 72.4, head 9.6 ms; last token's argmax 284; logits identical to repeat 0
+{"rep": 1, "wall_ms": 457.4, "steps_ms": 123.9, "readout_ms": 40.6, "glue_ms": 333.5, "head_ms": 9.6, "argmax": 284, "same_as_rep0": true, "total_ms": 8495.2}
+chunk 3/3: 446.3 ms = steps 113.1 (NPU incl. submit; read-out 49.7) + glue: embed 27.3, norm+quant 11.2, qkv+rope 26.8, attention 109.9, quantize 12.2, scatter 15.0, ffn 70.7, head 9.9 ms; last token's argmax 284; logits identical to repeat 0
+{"rep": 2, "wall_ms": 446.3, "steps_ms": 113.1, "readout_ms": 49.7, "glue_ms": 333.2, "head_ms": 9.9, "argmax": 284, "same_as_rep0": true, "total_ms": 8941.8}
+generated: 284 365 34 25 919 2090 338 260 198 35257 314 1904 30 216 378 808 1833 314 288 2897 8822 335 260 3197 28 198 397 260 1796 1833 314 288 919 2090 338 260 3197 314 1904 30 216 378 198 87 6095 271 3586 282 260 28807 452 8677 314 260 28807 4660 4837 6966 28 527 198 271 253 1904
+decode: 64 tokens in 2795.3 ms = 43.7 ms per token (22.90 tok/s): linear+glue 27.2 (GEMVs 24.9), attention 5.5, head 10.6 ms per token
+{"generate": 64, "decode_ms_per_token": 43.68, "next": 9768}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261124-031354-LLMP4-P2-135m-gen

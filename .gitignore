@@ -50,3 +50,6 @@ __pycache__/
 # Fake-NPU dumps of the AXI SRAM limit fixes (2026-11-22, 236-425 MB each); regenerate with
 # research/sram-limits/offline_check.sh. Each run's verdict is kept next to it (offline-*.VERDICT.txt).
 /research/sram-limits/offline-*/
+
+# Full-vocabulary logits dumps (50 MB each): kept on the board; each ladder directory commits logits.sha256 instead
+/runs/**/*.f32

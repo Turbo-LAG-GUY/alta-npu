@@ -18,6 +18,9 @@ _l.jbg_attention.argtypes = [_f, _f, _f, _f, _I, _I, _I, _I, _I, _I]
 _l.jbg_silu_mul.argtypes = [_f, _I, _I, _f]
 _l.jbg_fwht.argtypes = [_f, _I, _I, _I, _f, _I]
 _l.jbg_threads.restype = _I
+_u16 = C.POINTER(C.c_uint16)
+if hasattr(_l, "jbg_head_bf16"):                  # (older frozen builds lack it)
+    _l.jbg_head_bf16.argtypes = [_f, _I, _I, _u16, _I, _f]
 _vp = C.c_void_p
 _l.jbg_scatter_jobs.argtypes = [_I, C.POINTER(_vp), C.POINTER(_L), C.POINTER(_L), C.POINTER(_I), C.POINTER(_vp),
                                 C.POINTER(_F), C.POINTER(_I), _f, _I, _I, _I]
@@ -89,6 +92,15 @@ def silu_mul(gu):
     return h
 
 
+def head_bf16(x, E):
+    """logits [nl, V] = x [nl, D] @ bf16(E).T, E [V, D] uint16 (bf16 words)"""
+    nl, D = x.shape
+    V = E.shape[0]
+    assert E.shape[1] == D and E.dtype == np.uint16 and E.flags.c_contiguous
+    out = np.empty((nl, V), np.float32)
+    _l.jbg_head_bf16(_p(x, np.float32, _f), nl, D, E.ctypes.data_as(_u16), V, _p(out, np.float32, _f))
+    return out
+
 def fwht(x, b, s=None, post_signs=False):
     """in place on x [T, n]: blockwise normalized FWHT of x * s (or FWHT(x) * s with post_signs)."""
     _l.jbg_fwht(_p(x, np.float32, _f), x.shape[0], x.shape[1], b, None if s is None else _p(s, np.float32, _f),
@@ -112,6 +124,20 @@ def scatter_jobs(lvs, rows, s, zp, y, accumulate=False):
     Z = (_I * nj)(*[int(v) for v in zp])
     _l.jbg_scatter_jobs(nj, LV, TS, JS, N, R, S, Z, _p(y, np.float32, _f), y.shape[0], y.shape[1], int(accumulate))
     del keep
+
+
+def gemv_jobs_q16(x, ws, cols, sws, rows, y, accumulate=False):
+    """decode: as gemv_jobs, x quantized to int16 (one scale) and int8 x int16 -> int32 accumulation."""
+    nj = len(ws)
+    W = (_vp * nj)(*[w.ctypes.data for w in ws])
+    N = (_I * nj)(*[w.shape[0] for w in ws])
+    IC = (_I * nj)(*[w.shape[1] for w in ws])
+    COL = (_I * nj)(*[int(c) for c in cols])
+    SW = (_F * nj)(*[float(v) for v in sws])
+    R = (_vp * nj)(*[r.ctypes.data for r in rows])
+    xq = np.empty(max(int(c) + w.shape[1] for c, w in zip(cols, ws)), np.int16)
+    _l.jbg_gemv_jobs_q16(nj, _p(x, np.float32, _f), W, N, IC, COL, SW, R, _p(y, np.float32, _f), y.shape[0],
+                         int(accumulate), xq.ctypes.data_as(_vp))
 
 
 def gemv_jobs(x, ws, cols, sws, rows, y, accumulate=False):

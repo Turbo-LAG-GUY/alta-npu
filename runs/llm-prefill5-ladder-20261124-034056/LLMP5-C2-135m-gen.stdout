@@ -1,0 +1,27 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 30 (0 ms, MemAvailable 2503 MB)
+loading layer 2 / 30 (605 ms, MemAvailable 2492 MB)
+loading layer 4 / 30 (1172 ms, MemAvailable 2479 MB)
+loading layer 6 / 30 (1771 ms, MemAvailable 2473 MB)
+loading layer 8 / 30 (2348 ms, MemAvailable 2454 MB)
+loading layer 10 / 30 (2924 ms, MemAvailable 2432 MB)
+loading layer 12 / 30 (3469 ms, MemAvailable 2418 MB)
+loading layer 14 / 30 (4045 ms, MemAvailable 2413 MB)
+loading layer 16 / 30 (4663 ms, MemAvailable 2399 MB)
+loading layer 18 / 30 (5208 ms, MemAvailable 2384 MB)
+loading layer 20 / 30 (5775 ms, MemAvailable 2384 MB)
+loading layer 22 / 30 (6380 ms, MemAvailable 2372 MB)
+loading layer 24 / 30 (6950 ms, MemAvailable 2357 MB)
+loading layer 26 / 30 (7532 ms, MemAvailable 2341 MB)
+loading layer 28 / 30 (8058 ms, MemAvailable 2340 MB)
+loaded + compiled 120 steps in 8639 ms
+coef-check: 480 jobs, 106.2 MB of weights decoded from the NPU's buffers in 688 ms: all identical to the packs
+chunk: 501.9 ms = steps 120.4 (NPU incl. submit; read-out 50.8) + glue: embed 36.1, norm+quant 11.7, qkv+rope 26.4, attention 143.2, quantize 12.0, scatter 15.7, ffn 73.2, head 12.0 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 501.9, "steps_ms": 120.4, "readout_ms": 50.8, "glue_ms": 381.4, "head_ms": 12.0, "argmax": 284, "same_as_rep0": true, "total_ms": 9151.7}
+generated: 284 365 34 25 919 2090 338 260 198 35257 314 1904 30 216 378 808 1833 314 288 2897 8822 335 260 3197 28 198 397 260 1796 1833 314 288 919 2090 338 260 3197 314 1904 30 216 378 198 87 6095 271 3586 282 260 28807 452 8677 314 260 28807 4660 4837 6966 28 527 198 271 253 1904
+decode: 64 tokens in 3370.0 ms = 52.7 ms per token (18.99 tok/s): linear+glue 34.5 (GEMVs 30.3), attention 7.0, head 10.9 ms per token
+{"generate": 64, "decode_ms_per_token": 52.66, "next": 9768}
+teacher: position 0 K / V of layer 0 vs the prompt file: max |diff| 3.46e-05 / 2.37e-06 (rel 4.35e-06 / 1.71e-05)
+teacher: positions 0..256 decoded in 10321.4 ms (40.2 ms per token), logits of 1..256 -> /home/jordan/alta-npu/runs/llm-prefill5-ladder-20261124-034056/c2-teacher.f32
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261124-034152-LLMP5-C2-135m-gen

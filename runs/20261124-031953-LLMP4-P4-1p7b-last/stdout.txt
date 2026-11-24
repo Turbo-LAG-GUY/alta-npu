@@ -1,0 +1,21 @@
+jb_prefill: 24 layers, D 2048, H 32 / KV 32 x 64, I 8192, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 24 (0 ms, MemAvailable 2591 MB)
+loading layer 2 / 24 (6265 ms, MemAvailable 2341 MB)
+loading layer 4 / 24 (12604 ms, MemAvailable 2173 MB)
+loading layer 6 / 24 (18775 ms, MemAvailable 1999 MB)
+loading layer 8 / 24 (25115 ms, MemAvailable 1835 MB)
+loading layer 10 / 24 (31324 ms, MemAvailable 1636 MB)
+loading layer 12 / 24 (37468 ms, MemAvailable 1490 MB)
+loading layer 14 / 24 (43832 ms, MemAvailable 1344 MB)
+loading layer 16 / 24 (50052 ms, MemAvailable 1192 MB)
+loading layer 18 / 24 (56405 ms, MemAvailable 1020 MB)
+loading layer 20 / 24 (62696 ms, MemAvailable 885 MB)
+loading layer 22 / 24 (69045 ms, MemAvailable 843 MB)
+loaded + compiled 96 steps in 75454 ms
+chunk 1/3: 7860.5 ms = steps 1087.2 (NPU incl. submit; read-out 236.4) + glue: embed 313.3, norm+quant 94.9, qkv+rope 163.5, attention 443.7, quantize 72.7, scatter 159.0, ffn 450.4, head 4838.6 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 7860.5, "steps_ms": 1087.2, "readout_ms": 236.4, "glue_ms": 6773.3, "head_ms": 4838.6, "argmax": 284, "same_as_rep0": true, "total_ms": 83849.9}
+chunk 2/3: 3955.3 ms = steps 841.6 (NPU incl. submit; read-out 1795.3) + glue: embed 9.0, norm+quant 79.8, qkv+rope 220.5, attention 394.1, quantize 48.8, scatter 121.6, ffn 376.3, head 67.8 ms; last token's argmax 284; logits identical to repeat 0
+{"rep": 1, "wall_ms": 3955.3, "steps_ms": 841.6, "readout_ms": 1795.3, "glue_ms": 3113.6, "head_ms": 67.8, "argmax": 284, "same_as_rep0": true, "total_ms": 87805.7}
+chunk 3/3: 2231.2 ms = steps 854.8 (NPU incl. submit; read-out 221.4) + glue: embed 1.1, norm+quant 69.4, qkv+rope 101.8, attention 377.8, quantize 47.1, scatter 121.7, ffn 396.7, head 38.6 ms; last token's argmax 284; logits identical to repeat 0
+{"rep": 2, "wall_ms": 2231.2, "steps_ms": 854.8, "readout_ms": 221.4, "glue_ms": 1376.4, "head_ms": 38.6, "argmax": 284, "same_as_rep0": true, "total_ms": 90037.2}

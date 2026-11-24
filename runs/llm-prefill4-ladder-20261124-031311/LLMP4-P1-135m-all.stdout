@@ -1,0 +1,23 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 30 (0 ms, MemAvailable 2438 MB)
+loading layer 2 / 30 (492 ms, MemAvailable 2433 MB)
+loading layer 4 / 30 (923 ms, MemAvailable 2427 MB)
+loading layer 6 / 30 (1458 ms, MemAvailable 2432 MB)
+loading layer 8 / 30 (1941 ms, MemAvailable 2413 MB)
+loading layer 10 / 30 (2415 ms, MemAvailable 2317 MB)
+loading layer 12 / 30 (2908 ms, MemAvailable 2306 MB)
+loading layer 14 / 30 (3425 ms, MemAvailable 2295 MB)
+loading layer 16 / 30 (3940 ms, MemAvailable 2274 MB)
+loading layer 18 / 30 (4472 ms, MemAvailable 2259 MB)
+loading layer 20 / 30 (5010 ms, MemAvailable 2252 MB)
+loading layer 22 / 30 (5568 ms, MemAvailable 2331 MB)
+loading layer 24 / 30 (6166 ms, MemAvailable 2231 MB)
+loading layer 26 / 30 (6672 ms, MemAvailable 2220 MB)
+loading layer 28 / 30 (7164 ms, MemAvailable 2300 MB)
+loaded + compiled 120 steps in 7699 ms
+chunk 1/2: 1540.8 ms = steps 120.9 (NPU incl. submit; read-out 41.3) + glue: embed 31.9, norm+quant 13.0, qkv+rope 20.0, attention 112.4, quantize 8.3, scatter 18.5, ffn 65.7, head 1108.2 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 1540.8, "steps_ms": 120.9, "readout_ms": 41.3, "glue_ms": 1419.9, "head_ms": 1108.2, "argmax": 284, "same_as_rep0": true, "total_ms": 9296.1}
+chunk 2/2: 1509.3 ms = steps 127.3 (NPU incl. submit; read-out 41.0) + glue: embed 25.4, norm+quant 15.1, qkv+rope 25.6, attention 129.1, quantize 8.7, scatter 29.7, ffn 71.7, head 1035.1 ms; last token's argmax 284; logits identical to repeat 0
+{"rep": 1, "wall_ms": 1509.3, "steps_ms": 127.3, "readout_ms": 41.0, "glue_ms": 1382.0, "head_ms": 1035.1, "argmax": 284, "same_as_rep0": true, "total_ms": 10836.4}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261124-031324-LLMP4-P1-135m-all

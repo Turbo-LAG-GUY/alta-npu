@@ -1,0 +1,8 @@
+npu-run: hw_job_trips went from 0 to 2: the driver recovered a hang
+npu-run: KERNEL MESSAGES DURING THE RUN -> STOP latch set. Do not retry. Evidence: /home/jordan/alta-npu/runs/20261124-040658-LLMH-H2-1p7b-4layers-128-8x16/kernel.txt
+[34373.265737] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 4 -> 1 after a recovered hang (hw_job_auto, trip 1)
+[34373.304819] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+[34373.304875] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: offending task: jb_engine-751f4 (/home/jordan/Documents/AI_Projects/npu-llm/bin/jb_engine-751f40b7 -n 20 --tokens 128 --layers 4 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-1p7b-split4-L4-a)
+[34374.387339] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: alta: hw_job_limit 1 -> 1 after a recovered hang (hw_job_auto, trip 2)
+[34374.387355] jordan-aml-a311d-cc kernel: etnaviv-gpu ff100000.npu: recover hung GPU!
+devcoredump present: /sys/class/devcoredump/devcd1 (expires ~5 min after the hang; root: cp /sys/class/devcoredump/devcd1/data <incident dir>/devcoredump.bin)

@@ -1,0 +1,15 @@
+# kmsg-catch start 2026-11-24T03:42:27-0500 uptime=32892.15
+[32914.601659] <6> Purging 536576 bytes
+[32914.698588] <6> Purging 524288 bytes
+[32914.753445] <6> Purging 544768 bytes
+[32915.169068] <6> Purging 561152 bytes
+[32916.693211] <6> Purging 585728 bytes
+[32916.945344] <6> Purging 528384 bytes
+[32919.527810] <6> Purging 573440 bytes
+[32919.747089] <6> Purging 585728 bytes
+[32966.622238] <6> Adding 737212k swap on 3.  Priority:-3 extents:2 across:1767300k SS
+[32983.065836] <6> Purging 561152 bytes
+[32983.093097] <6> Purging 532480 bytes
+[32983.094352] <6> Purging 4657152 bytes
+[32983.668593] <6> Purging 327680 bytes
+# kmsg-catch end uptime=32999.68

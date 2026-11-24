@@ -1,0 +1,18 @@
+jb_prefill: 24 layers, D 2048, H 32 / KV 32 x 64, I 8192, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 24 (0 ms, MemAvailable 2531 MB)
+loading layer 2 / 24 (6377 ms, MemAvailable 2278 MB)
+loading layer 4 / 24 (12761 ms, MemAvailable 2094 MB)
+loading layer 6 / 24 (19098 ms, MemAvailable 1945 MB)
+loading layer 8 / 24 (25521 ms, MemAvailable 1722 MB)
+loading layer 10 / 24 (31903 ms, MemAvailable 1597 MB)
+loading layer 12 / 24 (38336 ms, MemAvailable 1466 MB)
+loading layer 14 / 24 (44831 ms, MemAvailable 1410 MB)
+loading layer 16 / 24 (51295 ms, MemAvailable 1192 MB)
+loading layer 18 / 24 (57821 ms, MemAvailable 1043 MB)
+loading layer 20 / 24 (64142 ms, MemAvailable 828 MB)
+loading layer 22 / 24 (70430 ms, MemAvailable 723 MB)
+loaded + compiled 96 steps in 76880 ms
+chunk: 11312.3 ms = steps 797.3 (NPU incl. submit; read-out 166.8) + glue: embed 384.1, norm+quant 61.8, qkv+rope 102.0, attention 388.7, quantize 58.5, scatter 135.3, ffn 433.0, head 8784.2 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 11312.3, "steps_ms": 797.3, "readout_ms": 166.8, "glue_ms": 10515.0, "head_ms": 8784.2, "argmax": 284, "same_as_rep0": true, "total_ms": 88227.1}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261124-034233-LLMP5-C3-1p7b-all

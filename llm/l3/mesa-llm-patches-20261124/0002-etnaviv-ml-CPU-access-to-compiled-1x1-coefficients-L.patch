@@ -1,0 +1,239 @@
+From fe2fb71b64a7e8de19ee4be3f0d4bfbd28c23dfe Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Tue, 24 Nov 2026 18:24:24 -0500
+Subject: [PATCH] etnaviv/ml: CPU access to compiled 1x1 coefficients (LLM
+ engine, test tree only)
+
+etna_ml_llm_coefs() (new header etnaviv_ml_llm.h) returns the i-th NN
+job's coefficient BO, CPU-mapped, with the V7 pointwise layout it was
+written in (cores, header size, kernels per core, superblocks, block
+stride, zero point). etna_ml_create_coeffs_v7() records that layout;
+ETNA_ML_CACHED_COEFFS=1 allocates the coefficient BOs CPU-cached
+instead of write-combined so the CPU can read them at full speed.
+
+The LLM engine uses it to run one-token decode on the CPU straight from
+the NPU's weight buffers, with no second copy of the weights: on the
+A311D, SmolLM2-1.7B decodes at 340 ms per token from these buffers,
+bit-identical to decoding from the original rows (alta-npu
+runs/llm-prefill5-ladder-20261124-034056).
+
+Unset = unchanged: fake-NPU submits byte-identical.
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c      | 47 +++++++++++++++++++
+ src/gallium/drivers/etnaviv/etnaviv_ml.h      |  5 ++
+ src/gallium/drivers/etnaviv/etnaviv_ml_llm.h  | 44 +++++++++++++++++
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn.c   |  3 +-
+ src/gallium/drivers/etnaviv/etnaviv_ml_nn.h   |  3 +-
+ .../drivers/etnaviv/etnaviv_ml_nn_v7.c        | 19 +++++++-
+ 6 files changed, 117 insertions(+), 4 deletions(-)
+ create mode 100644 src/gallium/drivers/etnaviv/etnaviv_ml_llm.h
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 5a1b535e90c1..6fffacafdee2 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -155,6 +155,53 @@ etna_ml_create_bo(struct etna_screen *screen, size_t size)
+    return bo;
+ }
+ 
++/* ETNA_ML_CACHED_COEFFS=1 (LLM engine, test tree only, 2026-11-24): coefficient BOs CPU-cached instead of
++ * write-combined, so the CPU can read the NPU's weights at memory speed (etna_ml_llm_coefs(): one-token decode on the
++ * CPU from the same buffers, no second copy). The CPU writes them once between cpu_prep and cpu_fini (the kernel
++ * cleans the caches for the NPU there); the NPU only reads them. */
++struct etna_bo *
++etna_ml_create_coef_bo(struct etna_screen *screen, size_t size)
++{
++   static int cached = -1;
++
++   if (cached < 0) {
++      const char *v = getenv("ETNA_ML_CACHED_COEFFS");
++      cached = v && atoi(v) > 0;
++   }
++   if (!cached)
++      return etna_ml_create_bo(screen, size);
++
++   struct etna_bo *bo = etna_ml_exact_bo() ?
++                        etna_bo_new_exact(screen->dev, size, DRM_ETNA_GEM_CACHE_CACHED) :
++                        etna_bo_new(screen->dev, size, DRM_ETNA_GEM_CACHE_CACHED);
++
++   etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
++   memset(etna_bo_map(bo), 0, size);
++   etna_bo_cpu_fini(bo);
++
++   return bo;
++}
++
++int
++etna_ml_llm_coefs(struct pipe_ml_subgraph *psubgraph, unsigned i, struct etna_ml_llm_coefs *out)
++{
++   struct etna_ml_subgraph *subgraph = (struct etna_ml_subgraph *)psubgraph;
++   unsigned n = 0;
++
++   util_dynarray_foreach(&subgraph->operations, struct etna_vip_instruction, inst) {
++      if (inst->type != ETNA_JOB_TYPE_NN || !inst->coefficients)
++         continue;
++      if (n++ != i)
++         continue;
++      *out = inst->llm_coefs;
++      out->map = etna_bo_map(inst->coefficients);
++      out->size = etna_bo_size(inst->coefficients);
++      return 0;
++   }
++
++   return -1;
++}
++
+ struct pipe_resource *
+ etna_ml_create_resource(struct pipe_screen *pscreen, size_t size,
+                         bool cpu_read)
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index 2cae563e213a..c50afabe0439 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -10,6 +10,7 @@
+ #include "util/u_dynarray.h"
+ #include "util/macros.h"
+ #include "etnaviv_context.h"
++#include "etnaviv_ml_llm.h"
+ 
+ #define MAX_CONFIG_BOS 4
+ 
+@@ -86,6 +87,9 @@ struct etna_vip_instruction {
+    unsigned output_offset;
+ 
+    struct etna_bo *kernel;
++
++   /* LLM engine (test tree only): the coefficient layout, for etna_ml_llm_coefs() (etnaviv_ml_llm.h) */
++   struct etna_ml_llm_coefs llm_coefs;
+ };
+ 
+ #define MAX_TENSORS 10
+@@ -165,6 +169,7 @@ unsigned etna_ml_get_offset(struct etna_ml_subgraph *subgraph, unsigned idx);
+ unsigned etna_ml_get_size(struct etna_ml_subgraph *subgraph, unsigned idx);
+ 
+ struct etna_bo *etna_ml_create_bo(struct etna_screen *screen, size_t size);
++struct etna_bo *etna_ml_create_coef_bo(struct etna_screen *screen, size_t size);
+ 
+ struct pipe_resource *etna_ml_create_resource(struct pipe_screen *pscreen,
+                                               size_t size, bool cpu_read);
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_llm.h b/src/gallium/drivers/etnaviv/etnaviv_ml_llm.h
+new file mode 100644
+index 000000000000..a2226ee0a933
+--- /dev/null
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_llm.h
+@@ -0,0 +1,44 @@
++/*
++ * SPDX-License-Identifier: MIT
++ */
++
++/* LLM engine hooks (alta-npu, test tree only, 2026-11-24): the CPU reads a compiled NN job's coefficient buffer, so a
++ * program can run a model's linear layers on the CPU (one-token decode) from the very weights the NPU uses, without a
++ * second copy in memory. With ETNA_ML_CACHED_COEFFS=1 the coefficient buffers are CPU-cached (otherwise
++ * write-combined, slow to read).
++ *
++ * V7 1x1 (pointwise, zero-run bits 0) layout, from write_core_6 / write_core_interleaved: a header of `cores` uint32
++ * per-core stream sizes (header_size bytes), then the cores' streams back to back. A stream: zrl_bits (8 bits),
++ * kernels_per_core (16 bits), then per superblock (kernels_in_superblock = DIV_ROUND_UP(kernels_per_core,
++ * superblocks), the last one the rest), per block of `stride` input channels, per kernel: its `stride` weight bytes;
++ * the first block also has a 32-bit bias after its first weight and the last block a 32-bit output offset after its
++ * last weight. Kernel k of superblock sb on core c is output channel c * kis + k + sb * kis0 * cores (kis: this
++ * superblock's kernels, kis0: the first superblock's). Weights are bytes with weight_zero_point (signed weights are
++ * stored ^ 0x80). Output channels >= output_channels are padding.
++ */
++#ifndef ETNAVIV_ML_LLM_H
++#define ETNAVIV_ML_LLM_H
++
++#include <stdint.h>
++
++struct pipe_ml_subgraph;
++
++struct etna_ml_llm_coefs {
++   const uint8_t *map;          /* the coefficient BO, CPU-mapped */
++   uint32_t size;               /* its size in bytes */
++   uint32_t cores;              /* NN cores used */
++   uint32_t header_size;        /* bytes before core 0's stream */
++   uint32_t kernels_per_core;
++   uint32_t superblocks;
++   uint32_t input_channels;
++   uint32_t output_channels;
++   uint32_t stride;             /* input channels per block: 6 (write_core_6) or 1 (write_core_interleaved) */
++   uint32_t zrl_bits;           /* 0 for 1x1: one byte per weight (other values: not described here) */
++   uint32_t weight_zero_point;
++   uint32_t pointwise;          /* 1x1 convolution (the only layout described) */
++};
++
++/* the i-th NN job with coefficients, in execution order: 0, or -1 if there is none */
++int etna_ml_llm_coefs(struct pipe_ml_subgraph *subgraph, unsigned i, struct etna_ml_llm_coefs *out);
++
++#endif
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+index f7674c2f25d6..2b352ca2bf73 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.c
+@@ -1335,7 +1335,8 @@ etna_ml_compile_operation_nn(struct etna_ml_subgraph *subgraph, const struct etn
+    instruction->type = ETNA_JOB_TYPE_NN;
+ 
+    if (nn_core_version == 7)
+-      instruction->coefficients = etna_ml_create_coeffs_v7(subgraph, operation, &coef_cache_size);
++      instruction->coefficients = etna_ml_create_coeffs_v7(subgraph, operation, &coef_cache_size,
++                                                           &instruction->llm_coefs);
+    else
+       instruction->coefficients = etna_ml_create_coeffs_v8(subgraph, operation, &coef_cache_size);
+ 
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
+index 42cdbb2009eb..25ce8b6e03bb 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn.h
+@@ -14,7 +14,8 @@ unsigned
+ etna_ml_calculate_tiling_v7(struct etna_screen *screen, const struct etna_operation *operation, unsigned *tile_width_out, unsigned *tile_height_out);
+ 
+ struct etna_bo *
+-etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size);
++etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size,
++                         struct etna_ml_llm_coefs *layout);
+ 
+ unsigned
+ etna_ml_calculate_tiling_v8(struct etna_screen *screen, const struct etna_operation *operation, unsigned *tile_width_out, unsigned *tile_height_out);
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+index 7d52b2ba065b..a33740374692 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml_nn_v7.c
+@@ -610,7 +610,8 @@ calculate_zrl_bits(struct etna_ml_subgraph *subgraph, const struct etna_operatio
+ }
+ 
+ struct etna_bo *
+-etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size)
++etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_operation *operation, unsigned *cache_size,
++                         struct etna_ml_llm_coefs *layout)
+ {
+    struct etna_screen *screen = subgraph->screen;
+    unsigned nn_core_count = etna_ml_get_core_info(screen)->nn_core_count;
+@@ -658,7 +659,21 @@ etna_ml_create_coeffs_v7(struct etna_ml_subgraph *subgraph, const struct etna_op
+    bo_size = calculate_weight_bo_size(subgraph, operation);
+    zrl_bits = calculate_zrl_bits(subgraph, operation);
+ 
+-   struct etna_bo *compressed = etna_ml_create_bo(screen, bo_size);
++   struct etna_bo *compressed = etna_ml_create_coef_bo(screen, bo_size);
++
++   if (layout) {                     /* LLM engine (test tree only): etnaviv_ml_llm.h */
++      memset(layout, 0, sizeof(*layout));
++      layout->cores = cores_used;
++      layout->header_size = header_size;
++      layout->kernels_per_core = DIV_ROUND_UP(output_channels, cores_used);
++      layout->superblocks = etna_ml_calculate_tiling_v7(screen, operation, NULL, NULL);
++      layout->input_channels = input_channels;
++      layout->output_channels = output_channels;
++      layout->stride = operation->pointwise && output_channels > 8 ? MIN2(input_channels, 6) : 1;
++      layout->zrl_bits = zrl_bits;
++      layout->weight_zero_point = operation->weight_zero_point;
++      layout->pointwise = operation->pointwise && operation->weight_width == 1 && operation->weight_height == 1;
++   }
+ 
+    etna_bo_cpu_prep(compressed, DRM_ETNA_PREP_WRITE);
+ 
+-- 
+2.43.0
+

@@ -1,0 +1,14 @@
+label: LLMH-H1-1p7b-4layers-256
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_engine-751f40b7 -n 20 --tokens 256 --layers 4 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-1p7b-split4-L4-a
+cwd: /home/jordan/alta-npu
+start: 2026-11-24T04:06:30-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2521
+deadline_s: 120
+journal_cursor: s=a392c0d096234443bd3ff43b2cad004f;i=18d1b2;b=cbbc9ac1a3cb4392a35321020a578dcc;m=7b5c34402;t=66101bdec57e6;x=c81b4ded22d3257c
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+end: 2026-11-24T04:06:41-05:00  rc: 0  wall_s: 11
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

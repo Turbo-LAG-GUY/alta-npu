@@ -1,0 +1,2 @@
+/dev/dri/renderD128: etnaviv
+compiled 16 steps (4 layers, 128 tokens) in 8294 ms (median 325.8, max 727.6 per step); weights 269.0 MB (freed after compile); resident now anon 55.5 + file 2.9 + shmem 0.0 MB, peak 121.5 MB; test data 40.9 MB

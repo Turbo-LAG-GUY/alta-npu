@@ -270,8 +270,21 @@ jbg_scatter_jobs(int nj, const int8_t *const *lv, const long *ts, const long *js
                const int8_t *row = src[j] + (size_t)i * sst[j];
                const int32_t *r = rows[j];
                float sj = s[j], zj = (float)zp[j];
-               int nn = n[j];
-               for (int k = 0; k < nn; k++)
+               float32x4_t sv = vdupq_n_f32(sj), zv = vdupq_n_f32(zj);
+               int nn = n[j], k = 0;
+               for (; k + 8 <= nn; k += 8) {
+                  /* (level - zp) * s 8 at a time, then the adds in order: a separate multiply and add, as numpy
+                   * and jb_prefill (built -std=c11: no FMA contraction) do; the .so is now built -ffp-contract=off
+                   * too (before 2026-11-24 GCC fused this loop's multiply-add in the .so only, so the two builds
+                   * differed in the last bit of accumulated partial sums) */
+                  int16x8_t w = vmovl_s8(vld1_s8(row + k));
+                  float f[8];
+                  vst1q_f32(f, vmulq_f32(vsubq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(w))), zv), sv));
+                  vst1q_f32(f + 4, vmulq_f32(vsubq_f32(vcvtq_f32_s32(vmovl_high_s16(w)), zv), sv));
+                  for (int l = 0; l < 8; l++)
+                     o[r[k + l]] += f[l];
+               }
+               for (; k < nn; k++)
                   o[r[k]] += ((float)row[k] - zj) * sj;
             }
          }
@@ -331,11 +344,62 @@ block_offsets(int nj, const int *n, long *off)
    return tot;
 }
 
-/* one token row of a step's output in model order: o[rows] = sum of the jobs' dequantized outputs */
+/* do the jobs' rows cover 0..oc-1 exactly once? (every unsplit step; a split step's partials overlap) */
+static int
+rows_partition(int nj, const int *n, const int32_t *const *rows, int oc)
+{
+   long tot = 0;
+   for (int j = 0; j < nj; j++)
+      tot += n[j];
+   if (tot != oc)
+      return 0;
+   uint8_t *seen = calloc(oc, 1);
+   int ok = 1;
+   for (int j = 0; j < nj && ok; j++)
+      for (int k = 0; k < n[j]; k++) {
+         int r = rows[j][k];
+         if (r < 0 || r >= oc || seen[r]) {
+            ok = 0;
+            break;
+         }
+         seen[r] = 1;
+      }
+   free(seen);
+   return ok;
+}
+
+/* one token row of a step's output in model order: o[rows] = sum of the jobs' dequantized outputs. part (the rows
+ * are a partition, rows_partition): each row is stored once, (level - zp) * s converted 8 at a time; the same bits as
+ * zeroing + adding (0 + v = v; v is never -0: the scales are positive) (2026-11-24) */
 static inline void
 row_from_jobs(int nj, const int8_t *const *src, const long *sst, int i, const int *n, const int32_t *const *rows,
-              const float *s, const int *zp, float *o, int oc)
+              const float *s, const int *zp, float *o, int oc, int part)
 {
+   if (part) {
+      for (int j = 0; j < nj; j++) {
+         const int8_t *row = src[j] + (size_t)i * sst[j];
+         const int32_t *r = rows[j];
+         float sj = s[j], zj = (float)zp[j];
+         float32x4_t sv = vdupq_n_f32(sj), zv = vdupq_n_f32(zj);
+         int k = 0, nn = n[j];
+         for (; k + 8 <= nn; k += 8) {
+            int16x8_t w = vmovl_s8(vld1_s8(row + k));
+            float32x4_t f0 = vmulq_f32(vsubq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(w))), zv), sv);
+            float32x4_t f1 = vmulq_f32(vsubq_f32(vcvtq_f32_s32(vmovl_high_s16(w)), zv), sv);
+            o[r[k]] = vgetq_lane_f32(f0, 0);
+            o[r[k + 1]] = vgetq_lane_f32(f0, 1);
+            o[r[k + 2]] = vgetq_lane_f32(f0, 2);
+            o[r[k + 3]] = vgetq_lane_f32(f0, 3);
+            o[r[k + 4]] = vgetq_lane_f32(f1, 0);
+            o[r[k + 5]] = vgetq_lane_f32(f1, 1);
+            o[r[k + 6]] = vgetq_lane_f32(f1, 2);
+            o[r[k + 7]] = vgetq_lane_f32(f1, 3);
+         }
+         for (; k < nn; k++)
+            o[r[k]] = ((float)row[k] - zj) * sj;
+      }
+      return;
+   }
    memset(o, 0, oc * sizeof(float));
    for (int j = 0; j < nj; j++) {
       const int8_t *row = src[j] + (size_t)i * sst[j];
@@ -379,6 +443,49 @@ quant_block(const float *rows, int ld, int nt, int D, float s, int zp, int8_t *o
             }
       }
    }
+}
+
+/* one token row h [D] (float) -> int8 levels q [D]: the same arithmetic as quant_block (exact division, rint, + zp,
+ * clip), so bit-identical to it; used where the row is still in L1 (2026-11-24) */
+static inline void
+quant_row(const float *h, int D, float s, int zp, int8_t *q)
+{
+   float32x4_t sv = vdupq_n_f32(s), zv = vdupq_n_f32((float)zp), lo = vdupq_n_f32(-128.f), hi = vdupq_n_f32(127.f);
+   int c = 0;
+   for (; c + 16 <= D; c += 16) {
+      int32x4_t v[4];
+      for (int k = 0; k < 4; k++) {
+         float32x4_t f = vaddq_f32(vrndnq_f32(vdivq_f32(vld1q_f32(h + c + 4 * k), sv)), zv);
+         v[k] = vcvtq_s32_f32(vminq_f32(vmaxq_f32(f, lo), hi));
+      }
+      int16x8_t h0 = vcombine_s16(vmovn_s32(v[0]), vmovn_s32(v[1]));
+      int16x8_t h1 = vcombine_s16(vmovn_s32(v[2]), vmovn_s32(v[3]));
+      vst1q_s8(q + c, vcombine_s8(vmovn_s16(h0), vmovn_s16(h1)));
+   }
+   for (; c < D; c++) {
+      float v = rintf(h[c] / s) + (float)zp;
+      v = v < -128.f ? -128.f : (v > 127.f ? 127.f : v);
+      q[c] = (int8_t)v;
+   }
+}
+
+/* the int8 token-major tile q [nt, D] -> the planar output out [D, T] at tokens t0.. (16 x 16 NEON transposes) */
+static void
+tile_to_planar(const int8_t *q, int nt, int D, int8_t *out, int T, int t0)
+{
+   int c0 = 0;
+   if (nt == 16)
+      for (; c0 + 16 <= D; c0 += 16) {
+         uint8x16_t r[16];
+         for (int i = 0; i < 16; i++)
+            r[i] = vld1q_u8((const uint8_t *)q + (size_t)i * D + c0);
+         tr16x16(r);
+         for (int k = 0; k < 16; k++)
+            vst1q_u8((uint8_t *)out + (size_t)(c0 + k) * T + t0, r[k]);
+      }
+   for (int c = c0; c < D; c++)
+      for (int i = 0; i < nt; i++)
+         out[(size_t)c * T + t0 + i] = q[(size_t)i * D + c];
 }
 
 static inline void
@@ -478,13 +585,17 @@ jbg_ffn_fused(int nj, const int8_t *const *lv, const long *ts, const long *js, c
    long off[257];
    long tot = block_offsets(nj, n, off);
    int prof = getenv("JBG_PROF") != NULL;
+   int part = rows_partition(nj, n, rows, 2 * I);
    double ph[5] = {0, 0, 0, 0, 0}, w0 = now_s();
 #pragma omp parallel
    {
       double my[5] = {0, 0, 0, 0, 0}, tq = 0, t2;
       int8_t *tm = malloc((size_t)16 * tot);
       float *gu = malloc((size_t)2 * I * sizeof(float));
-      float *hb = malloc((size_t)16 * I * sizeof(float));
+      float *h = malloc((size_t)I * sizeof(float));
+      int8_t *qt = malloc((size_t)16 * I);          /* the tile's int8 rows (2026-11-24: was a 16 x I float tile,
+                                                     * 512 KB per thread for the 1.7B: 4 of them overflowed the A73s'
+                                                     * 1 MB L2, so SiLU's output went to DRAM and back) */
       const int8_t *src[256];
       long sst[256];
       float32x4_t one = vdupq_n_f32(1.0f);
@@ -495,9 +606,8 @@ jbg_ffn_fused(int nj, const int8_t *const *lv, const long *ts, const long *js, c
          block_rows(nj, lv, ts, js, n, t0, nt, tm, off, src, sst);
          if (prof) { t2 = now_s(); my[0] += t2 - tq; tq = t2; }
          for (int i = 0; i < nt; i++) {
-            row_from_jobs(nj, src, sst, i, n, rows, s, zp, gu, 2 * I);
+            row_from_jobs(nj, src, sst, i, n, rows, s, zp, gu, 2 * I, part);
             if (prof) { t2 = now_s(); my[1] += t2 - tq; tq = t2; }
-            float *h = hb + (size_t)i * I;
             int c = 0;
             for (; c + 8 <= I; c += 8) {                     /* 2 independent exp chains in flight */
                float32x4_t g0 = vld1q_f32(gu + c), g1 = vld1q_f32(gu + c + 4);
@@ -515,8 +625,10 @@ jbg_ffn_fused(int nj, const int8_t *const *lv, const long *ts, const long *js, c
             if (prof) { t2 = now_s(); my[2] += t2 - tq; tq = t2; }
             fwht_row(h, I, b, signs);
             if (prof) { t2 = now_s(); my[3] += t2 - tq; tq = t2; }
+            quant_row(h, I, sx, zx, qt + (size_t)i * I);
+            if (prof) { t2 = now_s(); my[4] += t2 - tq; tq = t2; }
          }
-         quant_block(hb, I, nt, I, sx, zx, out, T, t0);
+         tile_to_planar(qt, nt, I, out, T, t0);
          if (prof) { t2 = now_s(); my[4] += t2 - tq; tq = t2; }
       }
       if (prof) {
@@ -526,7 +638,8 @@ jbg_ffn_fused(int nj, const int8_t *const *lv, const long *ts, const long *js, c
       }
       free(tm);
       free(gu);
-      free(hb);
+      free(h);
+      free(qt);
    }
    if (prof)
       fprintf(stderr, "jbg_ffn_fused: thread-summed transpose %.2f, scatter %.2f, silu %.2f, fwht %.2f, quant %.2f ms; "
@@ -543,6 +656,7 @@ jbg_qkv_rope(int nj, const int8_t *const *lv, const long *ts, const long *js, co
    long off[257];
    long tot = block_offsets(nj, n, off);
    int oc = (H + 2 * KV) * hd, h2 = hd / 2;
+   int part = rows_partition(nj, n, rows, oc);
 #pragma omp parallel
    {
       int8_t *tm = malloc((size_t)16 * tot);
@@ -555,7 +669,7 @@ jbg_qkv_rope(int nj, const int8_t *const *lv, const long *ts, const long *js, co
          block_rows(nj, lv, ts, js, n, t0, nt, tm, off, src, sst);
          for (int i = 0; i < nt; i++) {
             int t = 1 + t0 + i;
-            row_from_jobs(nj, src, sst, i, n, rows, s, zp, row, oc);
+            row_from_jobs(nj, src, sst, i, n, rows, s, zp, row, oc, part);
             double cs[256], sn[256];
             if (rope)
                for (int f = 0; f < h2; f++) {
@@ -583,48 +697,440 @@ jbg_qkv_rope(int nj, const int8_t *const *lv, const long *ts, const long *js, co
    }
 }
 
-/* All jobs of one step, position 0: y[rows_j[r]] = sum over jobs of sw_j * w_j[r, :] . x[col_j .. col_j + ic_j)
- * (y zeroed here). One parallel region over every job's rows. */
+/* one row's dot: the int8 weights widened to float, 4 accumulators over 16-wide steps, their sum, the scalar tail */
+#define GEMV_ROW_DECL(i) float32x4_t s0##i = vdupq_n_f32(0), s1##i = s0##i, s2##i = s0##i, s3##i = s0##i
+#define GEMV_ROW_STEP(i, wr)                                                                                     \
+   do {                                                                                                          \
+      int8x16_t b_ = vld1q_s8((wr) + c);                                                                         \
+      int16x8_t lo_ = vmovl_s8(vget_low_s8(b_)), hi_ = vmovl_s8(vget_high_s8(b_));                               \
+      s0##i = vfmaq_f32(s0##i, vcvtq_f32_s32(vmovl_s16(vget_low_s16(lo_))), x0);                                 \
+      s1##i = vfmaq_f32(s1##i, vcvtq_f32_s32(vmovl_s16(vget_high_s16(lo_))), x1);                                \
+      s2##i = vfmaq_f32(s2##i, vcvtq_f32_s32(vmovl_s16(vget_low_s16(hi_))), x2);                                 \
+      s3##i = vfmaq_f32(s3##i, vcvtq_f32_s32(vmovl_s16(vget_high_s16(hi_))), x3);                                \
+   } while (0)
+
+static inline float
+gemv_tail(float32x4_t s0, float32x4_t s1, float32x4_t s2, float32x4_t s3, const int8_t *wr, const float *x, int c,
+          int ic)
+{
+   float acc = vaddvq_f32(vaddq_f32(vaddq_f32(s0, s1), vaddq_f32(s2, s3)));
+   for (; c < ic; c++)
+      acc += (float)wr[c] * x[c];
+   return acc;
+}
+
+/* All jobs of one step for one token (position 0, decode): y[rows_j[r]] (+)= sw_j * w_j[r, :] . x[col_j ..) (y zeroed
+ * unless accumulate). One parallel region; rows 4 at a time sharing each load of x, in chunks of 16 rows; a barrier
+ * between jobs (the pieces of a split step can share output rows). Every row's sum is formed exactly as before
+ * (2026-11-24: was a parallel region per job with one row per dynamic dispatch: 3 GB/s on the 135M's decode). */
 EXPORT void
 jbg_gemv_jobs(int nj, const float *x, const int8_t *const *w, const int *n, const int *ic, const int *col,
               const float *sw, const int32_t *const *rows, float *y, int oc, int accumulate)
 {
    if (!accumulate)
       memset(y, 0, oc * sizeof(float));
-   long total = 0;
-   long start[256];
-   for (int j = 0; j < nj && j < 256; j++) {
-      start[j] = total;
-      total += n[j];
-   }
-   /* rows of different pieces of a split step can be the same output row: per-thread partial sums would be needed
-    * for parallel accumulation; instead parallelise within a job, jobs in order (a job's rows are distinct) */
+   int maxn = 0;
+   for (int j = 0; j < nj; j++)
+      maxn = n[j] > maxn ? n[j] : maxn;
+   /* each row's dot into dots[r] (16 rows = one cache line per chunk), then y[rows[r]] += dots[r] * s by one thread
+    * after the job's barrier: threads writing y[rows[r]] directly shared y's cache lines (false sharing) */
+   float *dots = aligned_alloc(64, (((size_t)maxn + 15) & ~(size_t)15) * sizeof(float));
+#pragma omp parallel
    for (int j = 0; j < nj; j++) {
       const int8_t *wj = w[j];
       const float *xj = x + col[j];
-      int icj = ic[j];
+      int icj = ic[j], nn = n[j];
       const int32_t *rj = rows[j];
       float s = sw[j];
-#pragma omp parallel for schedule(dynamic)
-      for (int r = 0; r < n[j]; r++) {
-         const int8_t *wr = wj + (size_t)r * icj;
-         float32x4_t s0 = vdupq_n_f32(0), s1 = vdupq_n_f32(0), s2 = vdupq_n_f32(0), s3 = vdupq_n_f32(0);
+#pragma omp for schedule(dynamic, 4)
+      for (int rb = 0; rb < (nn + 3) / 4; rb++) {
+         int r = 4 * rb;
+         if (r + 4 > nn) {                               /* the last 1-3 rows */
+            for (; r < nn; r++) {
+               const int8_t *wr = wj + (size_t)r * icj;
+               GEMV_ROW_DECL(0);
+               int c = 0;
+               for (; c + 16 <= icj; c += 16) {
+                  float32x4_t x0 = vld1q_f32(xj + c), x1 = vld1q_f32(xj + c + 4);
+                  float32x4_t x2 = vld1q_f32(xj + c + 8), x3 = vld1q_f32(xj + c + 12);
+                  GEMV_ROW_STEP(0, wr);
+               }
+               dots[r] = gemv_tail(s00, s10, s20, s30, wr, xj, c, icj);
+            }
+            continue;
+         }
+         const int8_t *w0 = wj + (size_t)r * icj, *w1 = w0 + icj, *w2 = w1 + icj, *w3 = w2 + icj;
+         GEMV_ROW_DECL(0);
+         GEMV_ROW_DECL(1);
+         GEMV_ROW_DECL(2);
+         GEMV_ROW_DECL(3);
          int c = 0;
          for (; c + 16 <= icj; c += 16) {
-            int8x16_t b = vld1q_s8(wr + c);
-            int16x8_t lo = vmovl_s8(vget_low_s8(b)), hi = vmovl_s8(vget_high_s8(b));
-            s0 = vfmaq_f32(s0, vcvtq_f32_s32(vmovl_s16(vget_low_s16(lo))), vld1q_f32(xj + c));
-            s1 = vfmaq_f32(s1, vcvtq_f32_s32(vmovl_s16(vget_high_s16(lo))), vld1q_f32(xj + c + 4));
-            s2 = vfmaq_f32(s2, vcvtq_f32_s32(vmovl_s16(vget_low_s16(hi))), vld1q_f32(xj + c + 8));
-            s3 = vfmaq_f32(s3, vcvtq_f32_s32(vmovl_s16(vget_high_s16(hi))), vld1q_f32(xj + c + 12));
+            float32x4_t x0 = vld1q_f32(xj + c), x1 = vld1q_f32(xj + c + 4);
+            float32x4_t x2 = vld1q_f32(xj + c + 8), x3 = vld1q_f32(xj + c + 12);
+            GEMV_ROW_STEP(0, w0);
+            GEMV_ROW_STEP(1, w1);
+            GEMV_ROW_STEP(2, w2);
+            GEMV_ROW_STEP(3, w3);
          }
-         float acc = vaddvq_f32(vaddq_f32(vaddq_f32(s0, s1), vaddq_f32(s2, s3)));
-         for (; c < icj; c++)
-            acc += (float)wr[c] * xj[c];
-         y[rj[r]] += acc * s;
+         dots[r] = gemv_tail(s00, s10, s20, s30, w0, xj, c, icj);
+         dots[r + 1] = gemv_tail(s01, s11, s21, s31, w1, xj, c, icj);
+         dots[r + 2] = gemv_tail(s02, s12, s22, s32, w2, xj, c, icj);
+         dots[r + 3] = gemv_tail(s03, s13, s23, s33, w3, xj, c, icj);
+      }
+#pragma omp single
+      for (int r = 0; r < nn; r++)
+         y[rj[r]] += dots[r] * s;
+   }
+   free(dots);
+}
+
+/* decode's GEMV (2026-11-24): like jbg_gemv_jobs, but x is first quantized to int16 with one scale for the call
+ * (max |x| -> 32767: 128x finer than the NPU path's 8-bit activations) and the rows are int8 x int16 -> int32
+ * (SMLAL: 2 widenings + 4 multiply-accumulates per 16 weights instead of 14 float operations; the A73 has no int8 dot
+ * product). Each lane takes one product per 16 weights; blocks of 4096 weights (<= 256 products of |w| <= 128 and
+ * |x| <= 32767 per lane: < 2^31) go to an int64 sum, so every dot is the exact integer, rounded to float once (the
+ * same bits whatever the weight layout: jbg_gemv_coef_q16 reads the NPU's). xq: scratch of >= max(col + ic) int16s. */
+#define Q16_BLOCK 4096
+#define Q16_ROW_DECL(i) int32x4_t a0##i = vdupq_n_s32(0), a1##i = a0##i, a2##i = a0##i, a3##i = a0##i
+#define Q16_ROW_STEP(i, wr)                                                                                       \
+   do {                                                                                                          \
+      int8x16_t b_ = vld1q_s8((wr) + c);                                                                         \
+      int16x8_t lo_ = vmovl_s8(vget_low_s8(b_)), hi_ = vmovl_s8(vget_high_s8(b_));                               \
+      a0##i = vmlal_s16(a0##i, vget_low_s16(lo_), vget_low_s16(xa));                                             \
+      a1##i = vmlal_high_s16(a1##i, lo_, xa);                                                                    \
+      a2##i = vmlal_s16(a2##i, vget_low_s16(hi_), vget_low_s16(xb));                                             \
+      a3##i = vmlal_high_s16(a3##i, hi_, xb);                                                                    \
+   } while (0)
+#define Q16_ROW_FLUSH(i)                                                                                         \
+   do {                                                                                                          \
+      f##i += vaddlvq_s32(a0##i) + vaddlvq_s32(a1##i) + vaddlvq_s32(a2##i) + vaddlvq_s32(a3##i);                  \
+      a0##i = a1##i = a2##i = a3##i = vdupq_n_s32(0);                                                            \
+   } while (0)
+
+static inline float
+q16_row1(const int8_t *wr, const int16_t *xq, int ic)
+{
+   Q16_ROW_DECL(0);
+   int64_t f0 = 0;
+   int c = 0;
+   while (c + 16 <= ic) {
+      int end = c + Q16_BLOCK < ic ? c + Q16_BLOCK : ic;
+      for (; c + 16 <= end; c += 16) {
+         int16x8_t xa = vld1q_s16(xq + c), xb = vld1q_s16(xq + c + 8);
+         Q16_ROW_STEP(0, wr);
+      }
+      Q16_ROW_FLUSH(0);
+   }
+   for (; c < ic; c++)
+      f0 += (int32_t)wr[c] * xq[c];
+   return (float)f0;                                    /* the exact integer dot, rounded once */
+}
+
+EXPORT void
+jbg_gemv_jobs_q16(int nj, const float *x, const int8_t *const *w, const int *n, const int *ic, const int *col,
+                  const float *sw, const int32_t *const *rows, float *y, int oc, int accumulate, int16_t *xq)
+{
+   int nx = 0;
+   for (int j = 0; j < nj; j++)
+      nx = col[j] + ic[j] > nx ? col[j] + ic[j] : nx;
+   float mx = 0;
+   for (int i = 0; i < nx; i++)
+      mx = fabsf(x[i]) > mx ? fabsf(x[i]) : mx;
+   float sx = mx > 0 ? mx / 32767.0f : 1.0f, inv = 1.0f / sx;
+   for (int i = 0; i < nx; i++)
+      xq[i] = (int16_t)lrintf(x[i] * inv);
+   if (!accumulate)
+      memset(y, 0, oc * sizeof(float));
+   int maxn = 0;
+   for (int j = 0; j < nj; j++)
+      maxn = n[j] > maxn ? n[j] : maxn;
+   float *dots = aligned_alloc(64, (((size_t)maxn + 15) & ~(size_t)15) * sizeof(float));
+#pragma omp parallel
+   for (int j = 0; j < nj; j++) {
+      const int8_t *wj = w[j];
+      const int16_t *xj = xq + col[j];
+      int icj = ic[j], nn = n[j];
+      const int32_t *rj = rows[j];
+      float s = sw[j] * sx;
+#pragma omp for schedule(dynamic, 4)
+      for (int rb = 0; rb < (nn + 3) / 4; rb++) {
+         int r = 4 * rb;
+         if (r + 4 > nn) {
+            for (; r < nn; r++)
+               dots[r] = q16_row1(wj + (size_t)r * icj, xj, icj);
+            continue;
+         }
+         const int8_t *w0 = wj + (size_t)r * icj, *w1 = w0 + icj, *w2 = w1 + icj, *w3 = w2 + icj;
+         Q16_ROW_DECL(0);
+         Q16_ROW_DECL(1);
+         Q16_ROW_DECL(2);
+         Q16_ROW_DECL(3);
+         int64_t f0 = 0, f1 = 0, f2 = 0, f3 = 0;
+         int c = 0;
+         while (c + 16 <= icj) {
+            int end = c + Q16_BLOCK < icj ? c + Q16_BLOCK : icj;
+            for (; c + 16 <= end; c += 16) {
+               int16x8_t xa = vld1q_s16(xj + c), xb = vld1q_s16(xj + c + 8);
+               Q16_ROW_STEP(0, w0);
+               Q16_ROW_STEP(1, w1);
+               Q16_ROW_STEP(2, w2);
+               Q16_ROW_STEP(3, w3);
+            }
+            Q16_ROW_FLUSH(0);
+            Q16_ROW_FLUSH(1);
+            Q16_ROW_FLUSH(2);
+            Q16_ROW_FLUSH(3);
+         }
+         int64_t acc[4] = {f0, f1, f2, f3};
+         const int8_t *wr4[4] = {w0, w1, w2, w3};
+         for (int i = 0; i < 4; i++) {
+            for (int cc = c; cc < icj; cc++)
+               acc[i] += (int32_t)wr4[i][cc] * xj[cc];
+            dots[r + i] = (float)acc[i];                  /* the exact integer dot, rounded once */
+         }
+      }
+#pragma omp single
+      for (int r = 0; r < nn; r++)
+         y[rj[r]] += dots[r] * s;
+   }
+   free(dots);
+}
+
+/* x [n] -> int16 with one scale (max |x| -> 32767); returns the scale */
+EXPORT float
+jbg_quant16(const float *x, int n, int16_t *xq)
+{
+   float mx = 0;
+   for (int i = 0; i < n; i++)
+      mx = fabsf(x[i]) > mx ? fabsf(x[i]) : mx;
+   float sx = mx > 0 ? mx / 32767.0f : 1.0f, inv = 1.0f / sx;
+   for (int i = 0; i < n; i++)
+      xq[i] = (int16_t)lrintf(x[i] * inv);
+   return sx;
+}
+
+/* One job's weights as the NPU holds them (a V7 1x1 coefficient buffer, layout in mesa-llm etnaviv_ml_llm.h). */
+struct jbg_coef {
+   const uint8_t *map;
+   int cores, header_size, kpc, superblocks, ic, oc, stride, zp;
+};
+
+/* dots of one (core, superblock) unit: the exact integer sum_c (u - zp) * xq[c] of each of its K kernels, through
+ * sum u * x - zp * sum x (u: the stored byte); out[k] = (float)dot of the unit's kernel k. p: the superblock's first
+ * byte; returns the byte after it. Middle blocks of 6: 8 kernels per step (vld3q_u16 splits the 48 bytes into byte
+ * pairs: lane k = kernel k), int32 lanes flushed to int64 every 32 blocks (6 products of <= 255 * 32767 per block). */
+static const uint8_t *
+coef_unit(const uint8_t *p, int K, int ic, int stride, int zp, const int16_t *xq, long sumx, int64_t *acc)
+{
+   int nb = (ic + stride - 1) / stride;
+   for (int k = 0; k < K; k++)
+      acc[k] = 0;
+   for (int b = 0; b < nb; b++) {
+      int c0 = b * stride, w = ic - c0 < stride ? ic - c0 : stride;
+      int first = b == 0, last = b == nb - 1;
+      if (!first && !last && stride == 6) {
+         int b1 = b;                                    /* a run of middle blocks: blocks b .. b1 - 1 */
+         while (b1 < nb - 1)
+            b1++;
+         for (int g = 0; g < K; g += 8) {
+            const uint8_t *q = p + 6 * g;
+            int32x4_t lo = vdupq_n_s32(0), hi = lo;
+            int64_t s64[8] = {0};
+            for (int bb = b; bb < b1; bb++, q += 6 * K) {
+               uint16x8x3_t v = vld3q_u16((const uint16_t *)q);
+               const int16_t *x = xq + bb * 6;
+               int16x8_t w0 = vreinterpretq_s16_u16(vandq_u16(v.val[0], vdupq_n_u16(0xff)));
+               int16x8_t w1 = vreinterpretq_s16_u16(vshrq_n_u16(v.val[0], 8));
+               int16x8_t w2 = vreinterpretq_s16_u16(vandq_u16(v.val[1], vdupq_n_u16(0xff)));
+               int16x8_t w3 = vreinterpretq_s16_u16(vshrq_n_u16(v.val[1], 8));
+               int16x8_t w4 = vreinterpretq_s16_u16(vandq_u16(v.val[2], vdupq_n_u16(0xff)));
+               int16x8_t w5 = vreinterpretq_s16_u16(vshrq_n_u16(v.val[2], 8));
+               lo = vmlal_n_s16(lo, vget_low_s16(w0), x[0]);
+               hi = vmlal_high_n_s16(hi, w0, x[0]);
+               lo = vmlal_n_s16(lo, vget_low_s16(w1), x[1]);
+               hi = vmlal_high_n_s16(hi, w1, x[1]);
+               lo = vmlal_n_s16(lo, vget_low_s16(w2), x[2]);
+               hi = vmlal_high_n_s16(hi, w2, x[2]);
+               lo = vmlal_n_s16(lo, vget_low_s16(w3), x[3]);
+               hi = vmlal_high_n_s16(hi, w3, x[3]);
+               lo = vmlal_n_s16(lo, vget_low_s16(w4), x[4]);
+               hi = vmlal_high_n_s16(hi, w4, x[4]);
+               lo = vmlal_n_s16(lo, vget_low_s16(w5), x[5]);
+               hi = vmlal_high_n_s16(hi, w5, x[5]);
+               if (((bb - b) & 31) == 31) {
+                  int32_t t[8];
+                  vst1q_s32(t, lo);
+                  vst1q_s32(t + 4, hi);
+                  for (int i = 0; i < 8; i++)
+                     s64[i] += t[i];
+                  lo = hi = vdupq_n_s32(0);
+               }
+            }
+            int32_t t[8];
+            vst1q_s32(t, lo);
+            vst1q_s32(t + 4, hi);
+            for (int i = 0; i < 8 && g + i < K; i++)
+               acc[g + i] += s64[i] + t[i];
+         }
+         p += (size_t)(b1 - b) * 6 * K;
+         b = b1 - 1;
+         continue;
+      }
+      for (int k = 0; k < K; k++) {                    /* first / last block (bias, offset), or stride 1: bytes */
+         int64_t a = 0;
+         for (int i = 0; i < w; i++) {
+            a += (int32_t)*p++ * xq[c0 + i];
+            if (first && i == 0)
+               p += 4;                                  /* the bias */
+         }
+         if (last)
+            p += 4;                                     /* the output offset */
+         acc[k] += a;
       }
    }
-   (void)start;
+   for (int k = 0; k < K; k++)
+      acc[k] -= (int64_t)zp * sumx;
+   return p;
+}
+
+/* all jobs of one step for one token from the NPU's coefficient buffers: as jbg_gemv_jobs_q16 (the same int16 x and
+ * exact integer dots, so the same bits), y[rows_j[r]] (+)= sw_j * sx * dot. Units (core, superblock) in parallel. */
+EXPORT void
+jbg_gemv_coef_q16(int nj, const float *x, const struct jbg_coef *cf, const int *col, const float *sw,
+                  const int32_t *const *rows, float *y, int oc, int accumulate, int16_t *xq)
+{
+   int nx = 0, maxo = 0;
+   for (int j = 0; j < nj; j++) {
+      nx = col[j] + cf[j].ic > nx ? col[j] + cf[j].ic : nx;
+      int pad = cf[j].kpc * cf[j].cores;
+      maxo = pad > maxo ? pad : maxo;
+   }
+   float sx = jbg_quant16(x, nx, xq);
+   if (!accumulate)
+      memset(y, 0, oc * sizeof(float));
+   float *dots = aligned_alloc(64, (((size_t)maxo + 15) & ~(size_t)15) * sizeof(float));
+#pragma omp parallel
+   for (int j = 0; j < nj; j++) {
+      const struct jbg_coef *c = &cf[j];
+      const int16_t *xj = xq + col[j];
+      int sb = c->superblocks, kis0 = (c->kpc + sb - 1) / sb;
+      long sumx = 0;
+      for (int i = 0; i < c->ic; i++)
+         sumx += xj[i];
+#pragma omp for schedule(dynamic) collapse(2)
+      for (int core = 0; core < c->cores; core++)
+         for (int u = 0; u < sb; u++) {
+            const uint32_t *hdr = (const uint32_t *)c->map;
+            const uint8_t *p = c->map + c->header_size;
+            for (int cc = 0; cc < core; cc++)
+               p += hdr[cc];
+            p += 3;                                     /* zrl_bits (8 bits), kernels_per_core (16 bits) */
+            for (int s2 = 0; s2 < u; s2++) {            /* skip the earlier superblocks of this core */
+               int kis = s2 == sb - 1 ? c->kpc - kis0 * (sb - 1) : kis0;
+               p += (size_t)kis * (c->ic + 8);
+            }
+            int K = u == sb - 1 ? c->kpc - kis0 * (sb - 1) : kis0;
+            int64_t acc[64];
+            coef_unit(p, K, c->ic, c->stride, c->zp, xj, sumx, acc);
+            for (int k = 0; k < K; k++) {
+               int o = core * K + k + u * kis0 * c->cores;
+               dots[o] = (float)acc[k];
+            }
+         }
+#pragma omp single
+      for (int r = 0; r < c->oc; r++)
+         y[rows[j][r]] += dots[r] * (sw[j] * sx);
+   }
+   free(dots);
+}
+
+/* the int8 weights [oc, ic] of a coefficient buffer, decoded (scalar: a check that the layout is understood) */
+EXPORT void
+jbg_coef_decode(const struct jbg_coef *c, int8_t *w)
+{
+   const uint32_t *hdr = (const uint32_t *)c->map;
+   const uint8_t *p = c->map + c->header_size;
+   int sb = c->superblocks, kis0 = (c->kpc + sb - 1) / sb, nb = (c->ic + c->stride - 1) / c->stride;
+   for (int core = 0; core < c->cores; core++) {
+      const uint8_t *q = p + 3;
+      for (int u = 0; u < sb; u++) {
+         int K = u == sb - 1 ? c->kpc - kis0 * (sb - 1) : kis0;
+         for (int b = 0; b < nb; b++) {
+            int c0 = b * c->stride, wn = c->ic - c0 < c->stride ? c->ic - c0 : c->stride;
+            for (int k = 0; k < K; k++) {
+               int o = core * K + k + u * kis0 * c->cores;
+               for (int i = 0; i < wn; i++) {
+                  int v = *q++ - c->zp;
+                  if (o < c->oc)
+                     w[(size_t)o * c->ic + c0 + i] = (int8_t)v;
+                  if (b == 0 && i == 0)
+                     q += 4;
+               }
+               if (b == nb - 1)
+                  q += 4;
+            }
+         }
+      }
+      p += hdr[core];
+   }
+}
+
+/* attention of one new token (decode): q [H, hd] at the last position over the cache k / v [S, KV, hd] (read in
+ * place) -> out [H * hd]; head h reads kv head h / (H / KV). One head per thread at a time. (2026-11-24) */
+EXPORT void
+jbg_attn_decode(const float *q, const float *k, const float *v, float *out, int S, int H, int KV, int hd)
+{
+   int g = H / KV;
+   float scale = 1.0f / sqrtf((float)hd);
+#pragma omp parallel
+   {
+      float *sc = malloc(((size_t)S + 4) * sizeof(float));
+#pragma omp for schedule(dynamic)
+      for (int h = 0; h < H; h++) {
+         const float *qh = q + (size_t)h * hd;
+         int kh = h / g;
+         float mx = -INFINITY;
+         for (int t = 0; t < S; t++) {
+            float d = dot_f32(qh, k + ((size_t)t * KV + kh) * hd, hd) * scale;
+            sc[t] = d;
+            mx = d > mx ? d : mx;
+         }
+         for (int t = S; t < ((S + 3) & ~3); t++)
+            sc[t] = -INFINITY;
+         float32x4_t m4 = vdupq_n_f32(mx), sum4 = vdupq_n_f32(0);
+         for (int t = 0; t < S; t += 4) {
+            float32x4_t e = exp_neg_f32(vsubq_f32(vld1q_f32(sc + t), m4));
+            vst1q_f32(sc + t, e);
+            sum4 = vaddq_f32(sum4, e);
+         }
+         float inv = 1.0f / vaddvq_f32(sum4);
+         float *o = out + (size_t)h * hd;
+         int d0 = 0;
+         for (; d0 + 16 <= hd; d0 += 16) {               /* 16 dims per pass: 4 independent accumulators */
+            float32x4_t a0 = vdupq_n_f32(0), a1 = a0, a2 = a0, a3 = a0;
+            const float *vt = v + (size_t)kh * hd + d0;
+            for (int t = 0; t < S; t++, vt += (size_t)KV * hd) {
+               float p = sc[t];
+               a0 = vfmaq_n_f32(a0, vld1q_f32(vt), p);
+               a1 = vfmaq_n_f32(a1, vld1q_f32(vt + 4), p);
+               a2 = vfmaq_n_f32(a2, vld1q_f32(vt + 8), p);
+               a3 = vfmaq_n_f32(a3, vld1q_f32(vt + 12), p);
+            }
+            vst1q_f32(o + d0, vmulq_n_f32(a0, inv));
+            vst1q_f32(o + d0 + 4, vmulq_n_f32(a1, inv));
+            vst1q_f32(o + d0 + 8, vmulq_n_f32(a2, inv));
+            vst1q_f32(o + d0 + 12, vmulq_n_f32(a3, inv));
+         }
+         for (; d0 < hd; d0 += 4) {
+            float32x4_t a = vdupq_n_f32(0);
+            for (int t = 0; t < S; t++)
+               a = vfmaq_n_f32(a, vld1q_f32(v + ((size_t)t * KV + kh) * hd + d0), sc[t]);
+            vst1q_f32(o + d0, vmulq_n_f32(a, inv));
+         }
+      }
+      free(sc);
+   }
 }
 
 /* position 0 on the CPU: y[rows[j]] (+)= sw * sum_c w[j, c] * x[c] for one job's int8 weights [n, ic] */
@@ -943,6 +1449,92 @@ jbg_fwht(float *x, int T, int n, int b, const float *s, int post_signs)
       if (s && post_signs)
          for (int i = 0; i < n; i++)
             r[i] *= s[i];
+   }
+}
+
+/* ---- the tied head (2026-11-24) ---- */
+
+static inline void
+bf16x8(const uint16_t *p, float32x4_t *lo, float32x4_t *hi)
+{
+   uint16x8_t u = vld1q_u16(p);
+   *lo = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(u), 16));
+   *hi = vreinterpretq_f32_u32(vshll_high_n_u16(u, 16));
+}
+
+static inline float
+bf16f(uint16_t h)
+{
+   uint32_t u = (uint32_t)h << 16;
+   float f;
+   memcpy(&f, &u, 4);
+   return f;
+}
+
+/* NT tokens (1 or 2) x 4 vocab rows: the same per-pair summation as dot_f32 (lanes 0-3 and 4-7 of each 8-wide step in
+ * two accumulators, vaddvq of their sum, then the scalar tail in order), so the logits are bit-identical to it */
+static inline void
+head_4xn(const float *const *x, int NT, const uint16_t *e, int D, float *const *o)
+{
+   float32x4_t a0[2][4], a1[2][4];
+   for (int t = 0; t < 2; t++)
+      for (int r = 0; r < 4; r++)
+         a0[t][r] = a1[t][r] = vdupq_n_f32(0);
+   int d = 0;
+   for (; d + 8 <= D; d += 8) {
+      float32x4_t el[4], eh[4];
+      for (int r = 0; r < 4; r++)
+         bf16x8(e + (size_t)r * D + d, &el[r], &eh[r]);
+      for (int t = 0; t < NT; t++) {
+         float32x4_t xl = vld1q_f32(x[t] + d), xh = vld1q_f32(x[t] + d + 4);
+         for (int r = 0; r < 4; r++) {
+            a0[t][r] = vfmaq_f32(a0[t][r], xl, el[r]);
+            a1[t][r] = vfmaq_f32(a1[t][r], xh, eh[r]);
+         }
+      }
+   }
+   for (int t = 0; t < NT; t++)
+      for (int r = 0; r < 4; r++) {
+         float s = vaddvq_f32(vaddq_f32(a0[t][r], a1[t][r]));
+         for (int k = d; k < D; k++)
+            s += x[t][k] * bf16f(e[(size_t)r * D + k]);
+         o[t][r] = s;
+      }
+}
+
+/* out[i * V + v] = x[i] . E[v] for i < nl, v < V; E [V, D] bf16 (the raw uint16 words). The bf16 rows are widened
+ * in registers (never stored), 4 rows x 2 tokens at a time; tokens in blocks of 32 (fp32 rows stay in cache while the
+ * table streams by: the 1.7B's 201 MB table is read ceil(nl / 32) times). Bit-identical to dot_f32 on widened rows. */
+EXPORT void
+jbg_head_bf16(const float *x, int nl, int D, const uint16_t *E, int V, float *out)
+{
+   const int TB = 32;
+   for (int tb = 0; tb < nl; tb += TB) {
+      int tn = nl - tb < TB ? nl - tb : TB;
+#pragma omp parallel for schedule(dynamic, 64)
+      for (int vb = 0; vb < V; vb += 4) {
+         const uint16_t *e = E + (size_t)vb * D;
+         if (vb + 4 > V) {                        /* the last few rows (V % 4) */
+            float *row = malloc((size_t)D * sizeof(float));
+            for (int v = vb; v < V; v++) {
+               for (int k = 0; k < D; k++)
+                  row[k] = bf16f(E[(size_t)v * D + k]);
+               for (int t = tb; t < tb + tn; t++)
+                  out[(size_t)t * V + v] = dot_f32(x + (size_t)t * D, row, D);
+            }
+            free(row);
+            continue;
+         }
+         for (int t = tb; t < tb + tn; t += 2) {
+            int NT = t + 1 < tb + tn ? 2 : 1;
+            const float *xs[2] = {x + (size_t)t * D, x + (size_t)(t + NT - 1) * D};
+            float o[2][4];
+            float *os[2] = {o[0], o[1]};
+            head_4xn(xs, NT, e, D, os);
+            for (int i = 0; i < NT; i++)
+               memcpy(out + (size_t)(t + i) * V + vb, o[i], 4 * sizeof(float));
+         }
+      }
    }
 }
 

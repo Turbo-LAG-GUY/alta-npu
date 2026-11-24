@@ -227,6 +227,9 @@ load_pack(struct pack *k, const char *path)
       k->outs[k->n_out] = calloc(1, k->expected_bytes[i]);
       k->out_idx[k->n_out++] = i;
    }
+   /* the pack is read once: drop its pages from the page cache (2026-11-24: loading the 1.7B's 3.3 GB of packs
+    * evicted everything else, the mapped embeddings and the desktop's files among them) */
+   posix_fadvise(fileno(f), 0, 0, POSIX_FADV_DONTNEED);
    fclose(f);
    k->in_signed = k->T[k->in_idx].is_signed;
    if (n_in != 1) {
