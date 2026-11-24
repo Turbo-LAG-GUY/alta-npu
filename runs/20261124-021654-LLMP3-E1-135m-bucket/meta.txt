@@ -1,0 +1,14 @@
+label: LLMP3-E1-135m-bucket
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_prefill-36703f9e --npu --all --out /home/jordan/alta-npu/runs/llm-prefill3-ladder-20261124-021642/e1-logits.f32 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m /home/jordan/Documents/AI_Projects/npu-llm/models/jb/aux-135m/model.jba /home/jordan/Documents/AI_Projects/npu-llm/models/jb/aux-135m/gpl3.jbp0
+cwd: /home/jordan/alta-npu
+start: 2026-11-24T02:16:54-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1605
+deadline_s: 180
+journal_cursor: s=a392c0d096234443bd3ff43b2cad004f;i=18c2ba;b=cbbc9ac1a3cb4392a35321020a578dcc;m=6762499e3;t=661007e4dadc6;x=a02adb05d263f3f1
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+end: 2026-11-24T02:17:12-05:00  rc: 0  wall_s: 18
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

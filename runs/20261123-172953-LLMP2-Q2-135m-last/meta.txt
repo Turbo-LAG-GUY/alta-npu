@@ -1,0 +1,14 @@
+label: LLMP2-Q2-135m-last
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_prefill-6de63573 --npu /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m /home/jordan/Documents/AI_Projects/npu-llm/models/jb/aux-135m/model.jba /home/jordan/Documents/AI_Projects/npu-llm/models/jb/aux-135m/gpl3.jbp0
+cwd: /home/jordan/alta-npu
+start: 2026-11-23T17:29:54-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 1099
+deadline_s: 600
+journal_cursor: s=d8442d2ae5524644ac74a8f936b1804d;i=18a435;b=b887d66c0946435a9d4aa0e6c56b4720;m=1513a54d5a;t=660f91f12a22e;x=48feb5d13a16ede2
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+end: 2026-11-23T17:30:09-05:00  rc: 0  wall_s: 16
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

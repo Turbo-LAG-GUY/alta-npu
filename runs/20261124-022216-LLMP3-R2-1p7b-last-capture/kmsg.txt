@@ -1,0 +1,4 @@
+# kmsg-catch start 2026-11-24T02:22:16-0500 uptime=28081.55
+[28088.853873] <7> rfkill: input handler disabled
+[28108.067013] <6> Purging 524288 bytes
+# kmsg-catch end uptime=28184.13

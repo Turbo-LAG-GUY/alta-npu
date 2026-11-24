@@ -1,0 +1,6 @@
+[27822.385505] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[27823.513188] jordan-aml-a311d-cc kernel: Purging 819200 bytes
+[27823.513380] jordan-aml-a311d-cc kernel: Purging 761856 bytes
+[27823.513741] jordan-aml-a311d-cc kernel: Purging 393216 bytes
+[27823.672913] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[27824.572138] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3

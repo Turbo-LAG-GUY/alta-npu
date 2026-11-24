@@ -1,0 +1,123 @@
+From a4cce1d417aa66579afcf5bd73d6256737e5ea2d Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Tue, 24 Nov 2026 02:30:36 -0500
+Subject: [PATCH] etnaviv/ml: Exact-size coefficient BOs hook (LLM engine, test
+ tree only)
+
+ETNA_ML_EXACT_BO=1 makes etna_ml_create_bo() allocate its BOs with the
+new etna_bo_new_exact(), which bypasses the BO cache: etna_bo_new()
+rounds every size below 64 MiB up to the next quarter power of two. For
+SmolLM2-1.7B's 672 1x1 conv jobs that is 1545 MiB of coefficients in
+1844 MiB of buckets (a gateup job's 8.03 MiB in a 10 MiB BO), all of it
+pinned once the NPU maps it: -299 MiB on a 3.7 GB board, which let the
+whole 1.7B prompt chunk run (alta-npu
+incidents/2026-11-23-1537-LLMP2-prefill2-swap-stall). Exact BOs are never
+put back into the cache (their size fits no bucket).
+
+Unset = unchanged: every fake-NPU submit byte-identical. Set: only BO
+addresses move. On the A311D's NPU, 135M logits are bit-identical with
+and without it, and the 1.7B chunk passed three times (alta-npu
+runs/llm-prefill3-ladder-20261124-021642).
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/etnaviv/drm/etnaviv_bo.c             | 28 ++++++++++++++++++++++++
+ src/etnaviv/drm/etnaviv_drmif.h          |  2 ++
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 25 ++++++++++++++++++---
+ 3 files changed, 52 insertions(+), 3 deletions(-)
+
+diff --git a/src/etnaviv/drm/etnaviv_bo.c b/src/etnaviv/drm/etnaviv_bo.c
+index 1226d1db222b..14da003d947e 100644
+--- a/src/etnaviv/drm/etnaviv_bo.c
++++ b/src/etnaviv/drm/etnaviv_bo.c
+@@ -216,6 +216,34 @@ struct etna_bo *etna_bo_new(struct etna_device *dev, uint32_t size,
+ 	return bo;
+ }
+ 
++/* allocate a buffer object of exactly this size (the kernel rounds it to
++ * pages), bypassing the bucket cache, which rounds sizes up to the next
++ * quarter power of two: up to 25% more memory. The bo is not put back into
++ * the cache when freed (its size fits no bucket).
++ */
++struct etna_bo *etna_bo_new_exact(struct etna_device *dev, uint32_t size,
++		uint32_t flags)
++{
++	struct etna_bo *bo;
++	struct drm_etnaviv_gem_new req = {
++			.flags = flags,
++			.size = size,
++	};
++
++	if (drmCommandWriteRead(dev->fd, DRM_ETNAVIV_GEM_NEW, &req, sizeof(req)))
++		return NULL;
++
++	simple_mtx_lock(&etna_device_lock);
++	bo = bo_from_handle(dev, size, req.handle, flags);
++	bo->reuse = 0;
++	simple_mtx_unlock(&etna_device_lock);
++
++	DEBUG_BO("New exact bo:", bo);
++	VG_BO_ALLOC(bo);
++
++	return bo;
++}
++
+ struct etna_bo *etna_bo_ref(struct etna_bo *bo)
+ {
+ 	p_atomic_inc(&bo->refcnt);
+diff --git a/src/etnaviv/drm/etnaviv_drmif.h b/src/etnaviv/drm/etnaviv_drmif.h
+index 69e3cb59dcf0..dfaab46b6e1e 100644
+--- a/src/etnaviv/drm/etnaviv_drmif.h
++++ b/src/etnaviv/drm/etnaviv_drmif.h
+@@ -131,6 +131,8 @@ int etna_pipe_wait_ns(struct etna_pipe *pipe, uint32_t timestamp, uint64_t ns);
+ 
+ struct etna_bo *etna_bo_new(struct etna_device *dev,
+ 		uint32_t size, uint32_t flags);
++struct etna_bo *etna_bo_new_exact(struct etna_device *dev,
++		uint32_t size, uint32_t flags);
+ struct etna_bo *etna_bo_from_name(struct etna_device *dev, uint32_t name);
+ struct etna_bo *etna_bo_from_dmabuf(struct etna_device *dev, int fd);
+ struct etna_bo *etna_bo_ref(struct etna_bo *bo);
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 25438c5b884c..5a1b535e90c1 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -121,12 +121,31 @@ flip_sign_bits(uint8_t *dst, const uint8_t *src, unsigned size)
+       dst[k] = src[k] ^ 0x80;
+ }
+ 
++/* ETNA_ML_EXACT_BO=1 (LLM engine, test tree only, 2026-11-23): coefficient
++ * (and parameter) BOs of their exact size instead of the BO cache's bucket
++ * size, which rounds up to the next quarter power of two. SmolLM2-1.7B's 672
++ * conv jobs: 1545 MiB of coefficients in 1844 MiB of buckets (-299 MiB of
++ * pinned memory).
++ */
++static bool
++etna_ml_exact_bo(void)
++{
++   static int on = -1;
++
++   if (on < 0) {
++      const char *v = getenv("ETNA_ML_EXACT_BO");
++      on = v && atoi(v) > 0;
++   }
++
++   return on;
++}
++
+ struct etna_bo *
+ etna_ml_create_bo(struct etna_screen *screen, size_t size)
+ {
+-   struct etna_bo *bo = etna_bo_new(screen->dev,
+-                                    size,
+-                                    DRM_ETNA_GEM_CACHE_WC);
++   struct etna_bo *bo = etna_ml_exact_bo() ?
++                        etna_bo_new_exact(screen->dev, size, DRM_ETNA_GEM_CACHE_WC) :
++                        etna_bo_new(screen->dev, size, DRM_ETNA_GEM_CACHE_WC);
+ 
+    etna_bo_cpu_prep(bo, DRM_ETNA_PREP_WRITE);
+    struct etna_nn_params *map = etna_bo_map(bo);
+-- 
+2.43.0
+

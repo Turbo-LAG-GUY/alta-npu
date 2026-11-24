@@ -99,7 +99,36 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
-## Resume here (2026-11-23 15:00): the whole prompt-chunk loop in C ran on the NPU
+## Resume here (2026-11-24 02:30): the first whole 1.7B prompt chunk ran on the NPU (prefill3-ladder 5/5 PASS)
+- **Memory, measured** (fake-NPU BO lists, npu-llm/runs/offline-prefill-1p7b; Mesa's calculate_weight_bo_size
+  reproduces every recorded coefficient BO size with 8 NN cores): the 1.7B steps pinned **2127 MiB** of NPU buffers, not
+  ~1.8 GB. 299 MiB of it was libdrm-etnaviv's BO cache rounding every BO < 64 MiB up to the next quarter power of two
+  (672 conv jobs: 1545 MiB of coefficients in 1844 MiB of buckets; a gateup job's 8.03 MiB of weights in a 10 MiB BO,
+  qkv's 3.01 MiB in 3.5 MiB). Plus ~192 MiB of per-pack read-back buffers in the process: ~2.5 GB in all, so
+  prefill2-ladder's 2300 MB guard was too low (the memory watcher, MemAvailable peaking at 2259 MB, never started it).
+- Two fixes: **jb_prefill 36703f9e** shares one set of read-back buffers per step kind (the steps run one after
+  another; -184 MiB; 135M --ref logits and all 121 fake-NPU submits byte-identical to 91ee17b9). **mesa-llm
+  ETNA_ML_EXACT_BO=1** (test tree, uncommitted: etna_bo_new_exact() in src/etnaviv/drm/etnaviv_bo.c bypasses the bucket
+  cache and is never reused; etna_ml_create_bo() uses it when the variable is set): coefficient BOs of their exact
+  size, **1828 MiB pinned**. Unset: every fake submit byte-identical; set: only BO addresses move (135M: 480 stream
+  words, each an address inside a BO).
+- **llm/l3/prefill3-ladder.sh, runs/llm-prefill3-ladder-20261124-021642, Jordan's OK (memory guard off at his
+  request), 5/5 PASS, trips 0, no kernel warnings:** E1/E2 135M with bucket vs exact BOs: **logits bit-identical**
+  (exact-size coefficient BOs proven on the NPU). R1 1.7B --all: **vs fp32 KL .1538, top-1 88.7%, ppl 2.440 vs 2.154**
+  (= the --ref / simulator quality: KL .152, ppl 2.451); NPU vs --ref KL .169, top-1 88.7% (the format's own noise,
+  as on 135M: NPU vs ref .0199 ~ the KL vs fp32). R1 ran under memory pressure (MemAvailable 1865 -> 404 MB at layer
+  22) and completed: load + compile 77 s, but NPU steps 3.6 s + read-out 10.2 s (R3: 0.8 + 0.16).
+- **Timing, R3 (last token only, 256 tokens after position 0): chunk 3663 ms = 70 tokens/s; NPU steps 801 ms
+  (24 layers, incl. submit) + read-out 159 ms; glue 2862 ms, of which head 1310 + embed 152 are page-ins of the mapped
+  bf16 embeddings (201 MB, evicted during the load: R2's head took 5.8 s); compute glue ~1.4 s (attention 404, ffn 477,
+  scatter 137, qkv+rope 122, norm+quant 64, quantize 36).** llama.cpp Q8_0 on the A73s reads a 1.7B prompt at 7.8
+  tokens/s (CPU baseline below): ~9x, ~14x once the head is fixed, at the 8-bit format's quality (ppl +13% vs fp32;
+  the int16 qkv+down option closes ~75% of that gap). Load + compile: 75 s per run.
+- Next: (1) the head: keep it off the page cache (an int8 copy of the embedding, 100 MB, or the head on the NPU), (2)
+  the glue on a quiet board (attention, ffn), (3) generation (decode): KV cache + 1-token packs, (4) commit the mesa-llm
+  hook (Generated-by: LLM trailer) when Jordan asks.
+
+## 2026-11-23 15:00: the whole prompt-chunk loop in C ran on the NPU
 - **jb_prefill** (llm/l3/jb_prefill.c, build_jb_run.sh jb_prefill, frozen npu-llm/bin/jb_prefill-cb935e3f): one chunk
   end to end in C: embeddings (bf16) + residual rotation -> per layer RMSNorm -> planar int8 -> qkv (NPU) -> q / k / v +
   RoPE -> causal attention (position 0's K / V from a .jbp0 file: position 0 only attends to itself; in a chat it is
@@ -115,8 +144,24 @@ plus measurements on this board.
   754-1078 ms = NPU steps 124-212 (incl. read-out 46-71) + glue 630-865 ms; on a quiet board the glue was ~0.25-0.33 s,
   here xrdp (Jordan's remote desktop) held 64% of an A73 core and the threads wait for the slowest: re-time with the
   desktop idle. Kernels now schedule(dynamic). Expected on a quiet board: ~0.45 s per 256-token 135M chunk (~570 tok/s).
-- Next: re-time on a quiet board; 1.7B through jb_prefill (export_aux on real-1p7b-split4: Python reference path for
-  1.7B; RAM: 1.7 GB pinned + 200 MB embeddings); then generation (decode) after the prompt: KV cache + 1-token packs.
+- **1.7B (2026-11-23 evening):** export_aux.py --light (row maps from groups.npz, position 0 streamed pack by pack; on 135M
+  identical to the full export, K / V within 7e-6) -> npu-llm/models/jb/aux-1p7b. jb_prefill --ref (7 min, CPU) vs
+  fp32 logits computed on the x86 PC (llm/ref/fp32_logits.py; glue/score_prefill.py): **KL .152, top-1 87.5%, ppl 2.451
+  vs 2.154 = the simulator's layout** (npu-llm/runs/prefill-ref-1p7b).
+  **NPU: the 1.7B rung stalled / timed out on memory, twice - incident incidents/2026-11-23-1537-LLMP2-prefill2-swap-stall
+  (with Jordan's desktop-session report).** Run 1 (15:32): Q1-Q3 (135M) PASS, then R1 (1.7B) stalled the board in swap
+  for 1 h 47 min with no output at all (MemAvailable 1076 -> 239 MB, no NPU job ever submitted, 25 tasks in D state,
+  npu-run's own deadline never fired); Jordan stopped it at 17:24 and closed three idle duplicate `claude -r` processes.
+  Run 2 (17:26): Q1-Q3 PASS again (623-1202 ms per chunk, NPU 159-209 incl. read-out, xrdp load on), R1 hit npu-run's
+  600 s deadline still loading / compiling -> STOP latched. No NPU hang in either (trips 0, no etnaviv kernel lines).
+  Cause: the 1.7B chunk keeps its compiled weights pinned for the NPU on a 3.7 GB board that had ~1.1 GB available
+  (two GNOME sessions, Xorg, six Claude sessions). (Corrected 2026-11-24, measured: 2127 MiB pinned, not ~1.8 GB, +
+  ~0.4 GB process = ~2.5 GB; see the 2026-11-24 section above: now 1828 MiB pinned.) **A swap stall is silence, not a failure**: check free -m and the D-state count before blaming
+  the driver. jb_prefill 91ee17b9: the aux file mapped (embeddings out of anonymous memory) + flushed load-progress
+  lines with MemAvailable; prefill2-ladder.sh: MemAvailable guard (MEM_MIN_MB 2300) before every 1.7B rung, 1500 s
+  deadline, SKIP_135M=1. **Needs: Jordan reviews + clears runs/STOP, and runs it without a desktop session logged in
+  (or with one GNOME session closed) and no extra Claude sessions.**
+- Next: that rerun; then generation (decode) after the prompt: KV cache + 1-token packs.
 
 ## int16 question (2026-11-23, Jordan, from session ai-projects-f4's bf16 analysis)
 - bf16 on the NPU: not possible (hwdb GC8000 rev 7120: NN cores INT8 8 / INT16 8 / FLOAT16 0 / BFLOAT 0, shader fp32

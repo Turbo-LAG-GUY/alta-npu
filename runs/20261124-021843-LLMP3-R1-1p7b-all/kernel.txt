@@ -1,0 +1,90 @@
+[27869.993449] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[27870.027126] jordan-aml-a311d-cc kernel: Purging 4263936 bytes
+[27870.027625] jordan-aml-a311d-cc kernel: Purging 950272 bytes
+[27870.027830] jordan-aml-a311d-cc kernel: Purging 761856 bytes
+[27870.027992] jordan-aml-a311d-cc kernel: Purging 327680 bytes
+[27870.035864] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[27870.551861] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27870.553055] jordan-aml-a311d-cc kernel: Purging 4460544 bytes
+[27870.553139] jordan-aml-a311d-cc kernel: Purging 196608 bytes
+[27870.615329] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27879.090505] jordan-aml-a311d-cc kernel: Purging 4784128 bytes
+[27879.090701] jordan-aml-a311d-cc kernel: Purging 458752 bytes
+[27879.271384] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27888.109831] jordan-aml-a311d-cc kernel: Purging 532480 bytes
+[27888.110051] jordan-aml-a311d-cc kernel: Purging 569344 bytes
+[27888.110987] jordan-aml-a311d-cc kernel: Purging 4263936 bytes
+[27888.111328] jordan-aml-a311d-cc kernel: Purging 1093632 bytes
+[27888.111817] jordan-aml-a311d-cc kernel: Purging 761856 bytes
+[27888.111921] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27888.125106] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27896.243548] jordan-aml-a311d-cc kernel: Purging 573440 bytes
+[27896.245064] jordan-aml-a311d-cc kernel: Purging 4460544 bytes
+[27896.245298] jordan-aml-a311d-cc kernel: Purging 598016 bytes
+[27896.245448] jordan-aml-a311d-cc kernel: Purging 471040 bytes
+[27897.482742] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27902.534156] jordan-aml-a311d-cc kernel: Purging 696320 bytes
+[27906.307779] jordan-aml-a311d-cc kernel: Purging 4726784 bytes
+[27906.307931] jordan-aml-a311d-cc kernel: Purging 327680 bytes
+[27906.568973] jordan-aml-a311d-cc kernel: Purging 4661248 bytes
+[27906.569081] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27906.692723] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27914.591265] jordan-aml-a311d-cc kernel: Adding 793724k swap on 1.  Priority:-3 extents:3 across:8116620k SS
+[27915.979349] jordan-aml-a311d-cc kernel: Purging 4726784 bytes
+[27915.979514] jordan-aml-a311d-cc kernel: Purging 327680 bytes
+[27917.178235] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27921.211868] jordan-aml-a311d-cc kernel: Purging 540672 bytes
+[27921.212996] jordan-aml-a311d-cc kernel: Purging 4464640 bytes
+[27921.213090] jordan-aml-a311d-cc kernel: Purging 196608 bytes
+[27926.194268] jordan-aml-a311d-cc kernel: Purging 4722688 bytes
+[27926.194514] jordan-aml-a311d-cc kernel: Purging 618496 bytes
+[27926.194606] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27928.309649] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27930.361387] jordan-aml-a311d-cc kernel: Purging 4767744 bytes
+[27930.376049] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27930.643697] jordan-aml-a311d-cc kernel: Purging 540672 bytes
+[27930.645555] jordan-aml-a311d-cc kernel: Purging 4263936 bytes
+[27934.011478] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[27934.013742] jordan-aml-a311d-cc kernel: Purging 4329472 bytes
+[27934.771095] jordan-aml-a311d-cc kernel: Adding 827592k swap on 2.  Priority:-4 extents:3 across:1614024k SS
+[27936.359492] jordan-aml-a311d-cc kernel: Purging 4722688 bytes
+[27939.419450] jordan-aml-a311d-cc kernel: Purging 303104 bytes
+[27942.400314] jordan-aml-a311d-cc kernel: Purging 16384 bytes
+[27943.724652] jordan-aml-a311d-cc kernel: Purging 4599808 bytes
+[27943.724817] jordan-aml-a311d-cc kernel: Purging 196608 bytes
+[27943.733704] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[27943.878594] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[27944.180164] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27946.937168] jordan-aml-a311d-cc kernel: Purging 4726784 bytes
+[27946.937375] jordan-aml-a311d-cc kernel: Purging 196608 bytes
+[27959.693413] jordan-aml-a311d-cc kernel: Purging 4608000 bytes
+[27959.693540] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27963.179938] jordan-aml-a311d-cc kernel: Purging 4595712 bytes
+[27963.180171] jordan-aml-a311d-cc kernel: Purging 196608 bytes
+[27965.790620] jordan-aml-a311d-cc kernel: Purging 28672 bytes
+[27966.145777] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27966.765633] jordan-aml-a311d-cc kernel: Purging 73728 bytes
+[27967.266922] jordan-aml-a311d-cc kernel: Purging 155648 bytes
+[27967.584580] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27967.937364] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27968.039825] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27968.819685] jordan-aml-a311d-cc kernel: Purging 4329472 bytes
+[27968.819837] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27968.904524] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27971.177134] jordan-aml-a311d-cc kernel: Purging 4595712 bytes
+[27971.177311] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[27975.777660] jordan-aml-a311d-cc kernel: Purging 24576 bytes
+[27997.707565] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[28001.246293] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28001.963343] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28001.964628] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[28008.769540] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[28017.459814] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28020.078769] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28020.773242] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[28037.751406] jordan-aml-a311d-cc kernel: Purging 131072 bytes
+[28039.197030] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28039.782180] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28042.912321] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28043.413605] jordan-aml-a311d-cc kernel: Purging 65536 bytes
+[28043.425590] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3

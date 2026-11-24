@@ -1,0 +1,2 @@
+vs fp32: KL 0.1538, top-1 88.7%, ppl 2.440 (fp32 2.154)
+vs prefill-ref-1p7b: KL 0.1694, top-1 88.7%

@@ -1,0 +1,30 @@
+[27759.954344] jordan-aml-a311d-cc kernel: panfrost_gem_shrinker_scan: 4 callbacks suppressed
+[27759.954354] jordan-aml-a311d-cc kernel: Purging 552960 bytes
+[27759.955966] jordan-aml-a311d-cc kernel: Purging 573440 bytes
+[27759.956512] jordan-aml-a311d-cc kernel: Purging 565248 bytes
+[27759.957029] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27759.957568] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27759.958234] jordan-aml-a311d-cc kernel: Purging 2543616 bytes
+[27759.958593] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27759.958948] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27759.959306] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27759.960791] jordan-aml-a311d-cc kernel: Purging 2609152 bytes
+[27759.972808] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27768.302261] jordan-aml-a311d-cc kernel: panfrost_gem_shrinker_scan: 3 callbacks suppressed
+[27768.302272] jordan-aml-a311d-cc kernel: Purging 544768 bytes
+[27768.302662] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27768.302953] jordan-aml-a311d-cc kernel: Purging 581632 bytes
+[27768.303134] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27768.303780] jordan-aml-a311d-cc kernel: Purging 2609152 bytes
+[27768.307525] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[27768.308408] jordan-aml-a311d-cc kernel: Purging 2609152 bytes
+[27768.308686] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27768.308912] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[27768.309176] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[27768.618806] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3
+[27774.670899] jordan-aml-a311d-cc kernel: panfrost_gem_shrinker_scan: 2 callbacks suppressed
+[27774.670908] jordan-aml-a311d-cc kernel: Purging 532480 bytes
+[27777.225636] jordan-aml-a311d-cc kernel: Purging 4263936 bytes
+[27777.225893] jordan-aml-a311d-cc kernel: Purging 675840 bytes
+[27777.225991] jordan-aml-a311d-cc kernel: Purging 262144 bytes
+[27777.818245] jordan-aml-a311d-cc kernel: display-wake-gu (866): drop_caches: 3

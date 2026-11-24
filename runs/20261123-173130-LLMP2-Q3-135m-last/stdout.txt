@@ -1,0 +1,5 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loaded + compiled 120 steps in 6907 ms
+chunk: 622.7 ms = steps 176.8 (NPU incl. submit; read-out 50.7) + glue: embed 40.7, norm+quant 12.2, qkv+rope 25.3, attention 120.3, quantize 8.6, scatter 25.8, ffn 88.5, head 73.2 ms; last token's argmax 284
+{"wall_ms": 622.7, "steps_ms": 176.8, "readout_ms": 50.7, "glue_ms": 445.8, "argmax": 284, "total_ms": 8759.1}

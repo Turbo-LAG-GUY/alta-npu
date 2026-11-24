@@ -11,6 +11,7 @@
  * Usage: jb_prefill [--npu|--ref] [--offline] [--all] [--dump DIR] [--out LOGITS] PACK_DIR AUX PROMPT
  * Build: llm/l3/build_jb_run.sh jb_prefill (adds -fopenmp for the glue)
  */
+#include <sys/stat.h>
 #define main jb_engine_main
 #include "jb_engine.c"
 #undef main
@@ -29,37 +30,45 @@ struct jba {
    struct rec *r;
 };
 
+/* the file is mapped, not copied: the records point into the mapping (page cache the kernel can drop and re-read:
+ * the 1.7B's 200 MB of bf16 embeddings stay out of the process's anonymous memory, next to 1.7 GB of NPU buffers) */
 static bool
 read_jba(const char *path, struct jba *a)
 {
-   FILE *f = fopen(path, "rb");
-   char magic[4];
-   if (!f || fread(magic, 1, 4, f) != 4 || memcmp(magic, "JBA1", 4)) {
+   int fd = open(path, O_RDONLY | O_CLOEXEC);
+   struct stat st;
+   if (fd < 0 || fstat(fd, &st)) {
+      fprintf(stderr, "%s: cannot open\n", path);
+      return false;
+   }
+   uint8_t *m = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+   close(fd);
+   if (m == MAP_FAILED || st.st_size < 4 || memcmp(m, "JBA1", 4)) {
       fprintf(stderr, "%s: not a JBA1 file\n", path);
       return false;
    }
    unsigned cap = 64;
    a->n = 0;
    a->r = malloc(cap * sizeof(*a->r));
-   for (;;) {
+   size_t o = 4;
+   while (o + 80 <= (size_t)st.st_size) {
       struct rec r;
-      if (fread(r.name, 1, 48, f) != 48)
-         break;
-      if (fread(&r.dtype, 4, 1, f) != 1 || fread(&r.ndim, 4, 1, f) != 1 || fread(r.dims, 4, 4, f) != 4 ||
-          fread(&r.nbytes, 8, 1, f) != 1) {
-         fprintf(stderr, "%s: short record header\n", path);
+      memcpy(r.name, m + o, 48);
+      memcpy(&r.dtype, m + o + 48, 4);
+      memcpy(&r.ndim, m + o + 52, 4);
+      memcpy(r.dims, m + o + 56, 16);
+      memcpy(&r.nbytes, m + o + 72, 8);
+      o += 80;
+      if (o + r.nbytes > (size_t)st.st_size) {
+         fprintf(stderr, "%s: short record %.48s\n", path, r.name);
          return false;
       }
-      r.data = malloc(r.nbytes ? r.nbytes : 1);
-      if (fread(r.data, 1, r.nbytes, f) != r.nbytes) {
-         fprintf(stderr, "%s: short record %s\n", path, r.name);
-         return false;
-      }
+      r.data = m + o;                             /* 8-byte aligned? records are copied where alignment matters */
+      o += r.nbytes;
       if (a->n == cap)
          a->r = realloc(a->r, (cap *= 2) * sizeof(*a->r));
       a->r[a->n++] = r;
    }
-   fclose(f);
    return true;
 }
 
@@ -79,6 +88,11 @@ need(struct jba *a, const char *name, uint32_t dtype)
    if (!r || r->dtype != dtype) {
       fprintf(stderr, "aux: record %s missing or wrong type\n", name);
       exit(2);
+   }
+   if (((uintptr_t)r->data & 15) && r->nbytes < (64u << 20)) {   /* unaligned small record: an aligned copy, once */
+      void *c = aligned_alloc(16, (r->nbytes + 15) & ~(size_t)15);
+      memcpy(c, r->data, r->nbytes);
+      r->data = c;
    }
    return r->data;
 }
@@ -284,7 +298,20 @@ main(int argc, char **argv)
       }
    }
    double tc = now_ms();
-   for (int l = 0; l < L; l++)
+   for (int l = 0; l < L; l++) {
+      if (l % 2 == 0) {                          /* progress, flushed: a swap stall shows up as a stopped counter
+                                                  * (incidents/2026-11-23-1537-LLMP2-prefill2-swap-stall) */
+         long avail = -1;
+         FILE *mf = fopen("/proc/meminfo", "r");
+         char ln[128];
+         while (mf && fgets(ln, sizeof(ln), mf))
+            if (sscanf(ln, "MemAvailable: %ld", &avail) == 1)
+               break;
+         if (mf)
+            fclose(mf);
+         printf("loading layer %d / %d (%.0f ms, MemAvailable %ld MB)\n", l, L, now_ms() - tc, avail / 1024);
+         fflush(stdout);
+      }
       for (int s = 0; s < 4; s++) {
          struct pack *k = &packs[l * 4 + s];
          char path[512];
@@ -293,6 +320,20 @@ main(int argc, char **argv)
          k->step = s;
          if (!load_pack(k, path))
             return 2;
+         if (l > 0) {                             /* one set of read-back buffers per step kind, not per layer: the
+                                                   * steps run one after another and each output is consumed before
+                                                   * the next layer's same step (1.7B: -184 MiB; incident
+                                                   * 2026-11-23-1537-LLMP2-prefill2-swap-stall) */
+            struct pack *k0 = &packs[s];
+            bool same = k->n_out == k0->n_out;
+            for (unsigned o = 0; same && o < k->n_out; o++)
+               same = k->out_idx[o] == k0->out_idx[o] &&
+                      k->expected_bytes[k->out_idx[o]] == k0->expected_bytes[k0->out_idx[o]];
+            for (unsigned o = 0; same && o < k->n_out; o++) {
+               free(k->outs[o]);
+               k->outs[o] = k0->outs[o];
+            }
+         }
          if (!ref) {
             k->sg = dev->ml_subgraph_create(dev, k->OPS, k->n_ops);
             if (!k->sg) {
@@ -314,6 +355,7 @@ main(int argc, char **argv)
                   k->T[i].data = k->PT[i].data = NULL;
                }
       }
+   }
    printf("loaded%s %d steps in %.0f ms\n", ref ? "" : " + compiled", 4 * L, now_ms() - tc);
    fflush(stdout);
    if (!ref) {

@@ -1,0 +1,17 @@
+jb_prefill: 24 layers, D 2048, H 32 / KV 32 x 64, I 8192, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 24 (0 ms, MemAvailable 2739 MB)
+loading layer 2 / 24 (5869 ms, MemAvailable 2285 MB)
+loading layer 4 / 24 (12154 ms, MemAvailable 2135 MB)
+loading layer 6 / 24 (18378 ms, MemAvailable 1966 MB)
+loading layer 8 / 24 (24614 ms, MemAvailable 1953 MB)
+loading layer 10 / 24 (30897 ms, MemAvailable 1813 MB)
+loading layer 12 / 24 (37262 ms, MemAvailable 1578 MB)
+loading layer 14 / 24 (43645 ms, MemAvailable 1413 MB)
+loading layer 16 / 24 (49860 ms, MemAvailable 1277 MB)
+loading layer 18 / 24 (56121 ms, MemAvailable 1174 MB)
+loading layer 20 / 24 (62398 ms, MemAvailable 1045 MB)
+loading layer 22 / 24 (68574 ms, MemAvailable 860 MB)
+loaded + compiled 96 steps in 74835 ms
+chunk: 8238.1 ms = steps 789.8 (NPU incl. submit; read-out 161.7) + glue: embed 363.6, norm+quant 59.0, qkv+rope 111.5, attention 361.4, quantize 41.8, scatter 90.1, ffn 491.2, head 5767.5 ms; last token's argmax 284
+{"wall_ms": 8238.1, "steps_ms": 789.8, "readout_ms": 161.7, "glue_ms": 7448.4, "argmax": 284, "total_ms": 83299.6}

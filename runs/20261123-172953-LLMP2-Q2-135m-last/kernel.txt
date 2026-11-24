@@ -1,0 +1,21 @@
+[90574.278761] jordan-aml-a311d-cc kernel: panfrost_gem_shrinker_scan: 43 callbacks suppressed
+[90574.278773] jordan-aml-a311d-cc kernel: Purging 536576 bytes
+[90574.280760] jordan-aml-a311d-cc kernel: Purging 532480 bytes
+[90574.281485] jordan-aml-a311d-cc kernel: Purging 561152 bytes
+[90574.282208] jordan-aml-a311d-cc kernel: Purging 561152 bytes
+[90574.282804] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[90574.458200] jordan-aml-a311d-cc kernel: Purging 557056 bytes
+[90575.064766] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[90575.167187] jordan-aml-a311d-cc kernel: Purging 573440 bytes
+[90575.220129] jordan-aml-a311d-cc kernel: Purging 565248 bytes
+[90580.444572] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[90580.447061] jordan-aml-a311d-cc kernel: Purging 1732608 bytes
+[90580.447738] jordan-aml-a311d-cc kernel: Purging 552960 bytes
+[90580.448390] jordan-aml-a311d-cc kernel: Purging 1806336 bytes
+[90580.448878] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[90580.449401] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[90580.449825] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[90580.450227] jordan-aml-a311d-cc kernel: Purging 524288 bytes
+[90580.450674] jordan-aml-a311d-cc kernel: Purging 528384 bytes
+[90580.453509] jordan-aml-a311d-cc kernel: Purging 548864 bytes
+[90584.372800] jordan-aml-a311d-cc kernel: display-wake-gu (798): drop_caches: 3

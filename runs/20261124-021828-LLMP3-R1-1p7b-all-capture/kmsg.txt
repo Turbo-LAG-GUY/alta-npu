@@ -1,0 +1,100 @@
+# kmsg-catch start 2026-11-24T02:18:28-0500 uptime=27853.51
+[27861.724280] <6> Purging 548864 bytes
+[27861.724524] <6> Purging 524288 bytes
+[27861.725935] <6> Purging 4395008 bytes
+[27861.726044] <6> Purging 262144 bytes
+[27862.024725] <6> display-wake-gu (866): drop_caches: 3
+[27869.993449] <6> Purging 528384 bytes
+[27870.027126] <6> Purging 4263936 bytes
+[27870.027625] <6> Purging 950272 bytes
+[27870.027830] <6> Purging 761856 bytes
+[27870.027992] <6> Purging 327680 bytes
+[27870.035864] <6> Purging 65536 bytes
+[27870.551861] <6> Purging 524288 bytes
+[27870.553055] <6> Purging 4460544 bytes
+[27870.553139] <6> Purging 196608 bytes
+[27870.615329] <6> display-wake-gu (866): drop_caches: 3
+[27879.090505] <6> Purging 4784128 bytes
+[27879.090701] <6> Purging 458752 bytes
+[27879.271384] <6> display-wake-gu (866): drop_caches: 3
+[27888.109831] <6> Purging 532480 bytes
+[27888.110051] <6> Purging 569344 bytes
+[27888.110987] <6> Purging 4263936 bytes
+[27888.111328] <6> Purging 1093632 bytes
+[27888.111817] <6> Purging 761856 bytes
+[27888.111921] <6> Purging 262144 bytes
+[27888.125106] <6> display-wake-gu (866): drop_caches: 3
+[27896.243548] <6> Purging 573440 bytes
+[27896.245064] <6> Purging 4460544 bytes
+[27896.245298] <6> Purging 598016 bytes
+[27896.245448] <6> Purging 471040 bytes
+[27897.482742] <6> display-wake-gu (866): drop_caches: 3
+[27902.534156] <6> Purging 696320 bytes
+[27906.307779] <6> Purging 4726784 bytes
+[27906.307931] <6> Purging 327680 bytes
+[27906.568973] <6> Purging 4661248 bytes
+[27906.569081] <6> Purging 262144 bytes
+[27906.692723] <6> display-wake-gu (866): drop_caches: 3
+[27914.591265] <6> Adding 793724k swap on 1.  Priority:-3 extents:3 across:8116620k SS
+[27915.979349] <6> Purging 4726784 bytes
+[27915.979514] <6> Purging 327680 bytes
+[27917.178235] <6> display-wake-gu (866): drop_caches: 3
+[27921.211868] <6> Purging 540672 bytes
+[27921.212996] <6> Purging 4464640 bytes
+[27921.213090] <6> Purging 196608 bytes
+[27926.194268] <6> Purging 4722688 bytes
+[27926.194514] <6> Purging 618496 bytes
+[27926.194606] <6> Purging 262144 bytes
+[27928.309649] <6> display-wake-gu (866): drop_caches: 3
+[27930.361387] <6> Purging 4767744 bytes
+[27930.376049] <6> Purging 262144 bytes
+[27930.643697] <6> Purging 540672 bytes
+[27930.645555] <6> Purging 4263936 bytes
+[27934.011478] <6> Purging 528384 bytes
+[27934.013742] <6> Purging 4329472 bytes
+[27934.771095] <6> Adding 827592k swap on 2.  Priority:-4 extents:3 across:1614024k SS
+[27936.359492] <6> Purging 4722688 bytes
+[27939.419450] <6> Purging 303104 bytes
+[27942.400314] <6> Purging 16384 bytes
+[27943.724652] <6> Purging 4599808 bytes
+[27943.724817] <6> Purging 196608 bytes
+[27943.733704] <6> Purging 65536 bytes
+[27943.878594] <6> Purging 65536 bytes
+[27944.180164] <6> display-wake-gu (866): drop_caches: 3
+[27946.937168] <6> Purging 4726784 bytes
+[27946.937375] <6> Purging 196608 bytes
+[27959.693413] <6> Purging 4608000 bytes
+[27959.693540] <6> Purging 262144 bytes
+[27963.179938] <6> Purging 4595712 bytes
+[27963.180171] <6> Purging 196608 bytes
+[27965.790620] <6> Purging 28672 bytes
+[27966.145777] <6> Purging 131072 bytes
+[27966.765633] <6> Purging 73728 bytes
+[27967.266922] <6> Purging 155648 bytes
+[27967.584580] <6> Purging 131072 bytes
+[27967.937364] <6> Purging 131072 bytes
+[27968.039825] <6> Purging 131072 bytes
+[27968.819685] <6> Purging 4329472 bytes
+[27968.819837] <6> Purging 131072 bytes
+[27968.904524] <6> display-wake-gu (866): drop_caches: 3
+[27971.177134] <6> Purging 4595712 bytes
+[27971.177311] <6> Purging 131072 bytes
+[27975.777660] <6> Purging 24576 bytes
+[27997.707565] <6> Purging 524288 bytes
+[28001.246293] <6> Purging 65536 bytes
+[28001.963343] <6> Purging 65536 bytes
+[28001.964628] <6> display-wake-gu (866): drop_caches: 3
+[28008.769540] <6> Purging 131072 bytes
+[28017.459814] <6> Purging 65536 bytes
+[28020.078769] <6> Purging 65536 bytes
+[28020.773242] <6> display-wake-gu (866): drop_caches: 3
+[28037.751406] <6> Purging 131072 bytes
+[28039.197030] <6> Purging 65536 bytes
+[28039.782180] <6> Purging 65536 bytes
+[28042.912321] <6> Purging 65536 bytes
+[28043.413605] <6> Purging 65536 bytes
+[28043.425590] <6> display-wake-gu (866): drop_caches: 3
+[28051.845495] <6> Purging 131072 bytes
+[28051.854537] <6> display-wake-gu (866): drop_caches: 3
+[28054.363496] <6> Purging 131072 bytes
+# kmsg-catch end uptime=28062.87

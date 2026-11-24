@@ -1,0 +1,29 @@
+# kmsg-catch start 2026-11-24T02:17:38-0500 uptime=27803.22
+[27805.538938] <6> Purging 4726784 bytes
+[27805.539141] <6> Purging 610304 bytes
+[27805.539239] <6> Purging 262144 bytes
+[27806.290335] <6> Purging 266240 bytes
+[27806.426990] <6> Purging 4722688 bytes
+[27806.427221] <6> Purging 196608 bytes
+[27806.605359] <6> display-wake-gu (866): drop_caches: 3
+[27814.933135] <6> Purging 544768 bytes
+[27814.933349] <6> Purging 524288 bytes
+[27814.934831] <6> Purging 4395008 bytes
+[27814.934959] <6> Purging 262144 bytes
+[27815.488829] <6> display-wake-gu (866): drop_caches: 3
+[27822.385505] <6> Purging 528384 bytes
+[27823.513188] <6> Purging 819200 bytes
+[27823.513380] <6> Purging 761856 bytes
+[27823.513741] <6> Purging 393216 bytes
+[27823.672913] <6> Purging 65536 bytes
+[27824.572138] <6> display-wake-gu (866): drop_caches: 3
+[27834.337299] <6> Purging 1155072 bytes
+[27834.337580] <6> Purging 761856 bytes
+[27834.338786] <6> Purging 4591616 bytes
+[27834.338907] <6> Purging 131072 bytes
+[27834.362605] <6> Purging 65536 bytes
+[27834.366953] <6> Purging 65536 bytes
+[27834.371065] <6> display-wake-gu (866): drop_caches: 3
+[27842.413067] <6> Purging 753664 bytes
+[27842.413260] <6> Purging 761856 bytes
+# kmsg-catch end uptime=27843.33

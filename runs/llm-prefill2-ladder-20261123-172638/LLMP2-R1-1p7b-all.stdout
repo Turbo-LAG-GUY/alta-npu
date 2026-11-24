@@ -1,0 +1,2 @@
+npu-run: DEADLINE (600s) hit -> STOP latch set. Evidence: /home/jordan/alta-npu/runs/20261123-173308-LLMP2-R1-1p7b-all
+npu-run: rc=124 record=/home/jordan/alta-npu/runs/20261123-173308-LLMP2-R1-1p7b-all

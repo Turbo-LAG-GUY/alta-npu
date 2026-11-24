@@ -1,0 +1,2 @@
+[28088.853873] jordan-aml-a311d-cc kernel: rfkill: input handler disabled
+[28108.067013] jordan-aml-a311d-cc kernel: Purging 524288 bytes
