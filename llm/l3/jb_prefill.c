@@ -20,6 +20,7 @@
  *     pack's weights, each pack right after its compile (no extra memory)
  * Build: llm/l3/build_jb_run.sh jb_prefill (adds -fopenmp for the glue)
  */
+#include <stdarg.h>
 #include <sys/stat.h>
 #define main jb_engine_main
 #include "jb_engine.c"
@@ -262,14 +263,32 @@ struct model {
 struct bufs {
    float *x, *a0, *q, *kk, *vv, *att, *xf, *lg;   /* xf [nl, D], lg [nl, V] */
    int8_t *in;
-   float *kc, *vc;                                /* KV cache [L][cap][KV * hd] (decode; NULL: none) */
-   int cap;
+   void *kc, *vc;                                 /* decode KV cache, head-major [L][KV][cap][hd] (NULL: none),
+                                                   * float or (kv16, JB_KV16=1) IEEE half: jbg_kv_store */
+   int cap, kv16;
 };
 
-/* tokens ids[1..T] (position 0's K / V from the prompt file pr); logits of the last nl tokens into b->lg; tp[8] +=
+/* layer l's base in the decode cache */
+static void *
+kv_layer(const struct bufs *b, void *c, int l, int KV, int hd)
+{
+   return (char *)c + (size_t)l * b->cap * KV * hd * (b->kv16 ? 2 : 4);
+}
+
+/* one cached value (checks) */
+static float
+kv_get(const struct bufs *b, void *c, int l, int pos, int kh, int i, int KV, int hd)
+{
+   size_t o = ((size_t)kh * b->cap + pos) * hd + i;
+   const void *base = kv_layer(b, c, l, KV, hd);
+   return b->kv16 ? (float)((const __fp16 *)base)[o] : ((const float *)base)[o];
+}
+
+/* tokens ids[1..T] (position 0's K / V from the prompt file pr, or with pr NULL from the decode cache: --serve);
+ * logits of nl tokens from position r0 (r0 <= 0: the last nl) into b->lg; tp[8] +=
  * embed, norm+quant, qkv+rope, attention, quantize, scatter, ffn, head (ms); returns 0 or a step's error */
 static int
-chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, const int32_t *ids, int nl,
+chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, const int32_t *ids, int nl, int r0,
       const char *dump, double tp[8])
 {
    const int L = m->L, D = m->D, H = m->H, KV = m->KV, hd = m->hd, I = m->I, V = m->V, T = m->T;
@@ -327,16 +346,23 @@ chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, cons
       t = now_ms();
       jbg_qkv_rope(Sq->nj, Sq->lv, Sq->ts, Sq->js, Sq->n, Sq->rows, Sq->sy, Sq->zy, T, H, KV, hd, 0, inv_freq,
                    rope[l], q, kk, vv);
-      snprintf(nm, sizeof(nm), "k0.%d", l);
-      memcpy(kk, need(pr, nm, 0), (size_t)KV * hd * sizeof(float));
-      snprintf(nm, sizeof(nm), "v0.%d", l);
-      memcpy(vv, need(pr, nm, 0), (size_t)KV * hd * sizeof(float));
+      if (pr) {
+         snprintf(nm, sizeof(nm), "k0.%d", l);
+         memcpy(kk, need(pr, nm, 0), (size_t)KV * hd * sizeof(float));
+         snprintf(nm, sizeof(nm), "v0.%d", l);
+         memcpy(vv, need(pr, nm, 0), (size_t)KV * hd * sizeof(float));
+      } else {
+         for (int i = 0; i < KV * hd; i++) {
+            kk[i] = kv_get(b, b->kc, l, 0, i / hd, i % hd, KV, hd);
+            vv[i] = kv_get(b, b->vc, l, 0, i / hd, i % hd, KV, hd);
+         }
+      }
       tp[2] += now_ms() - t;
       t = now_ms();
       jbg_attention(q + (size_t)H * hd, kk, vv, att, T, T + 1, 1, H, KV, hd);   /* queries 1..T over keys 0..T */
       if (b->kc) {                                /* keys / values 0..T of this layer into the decode cache */
-         memcpy(b->kc + (size_t)l * b->cap * KV * hd, kk, (size_t)(T + 1) * KV * hd * sizeof(float));
-         memcpy(b->vc + (size_t)l * b->cap * KV * hd, vv, (size_t)(T + 1) * KV * hd * sizeof(float));
+         jbg_kv_store(kv_layer(b, b->kc, l, KV, hd), kk, 0, T + 1, KV, hd, b->cap, b->kv16);
+         jbg_kv_store(kv_layer(b, b->vc, l, KV, hd), vv, 0, T + 1, KV, hd, b->cap, b->kv16);
       }
       tp[3] += now_ms() - t;
       t = now_ms();
@@ -370,7 +396,7 @@ chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, cons
    /* final: Q back, RMSNorm with the weight, the tied head (bf16 embeddings) for the last token or all of them */
    t = now_ms();
    float *xf = b->xf;
-   memcpy(xf, x + (size_t)(T + 1 - nl) * D, (size_t)nl * D * sizeof(float));
+   memcpy(xf, x + (size_t)(r0 > 0 ? r0 : T + 1 - nl) * D, (size_t)nl * D * sizeof(float));
    if (qpow2) {
       jbg_fwht(xf, nl, D, D, Q, 1);
    } else {
@@ -395,6 +421,9 @@ chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, cons
  * job's weight scale, float activations: no 8-bit activations), with the KV cache; the weights must be kept ---- */
 struct dbufs {
    float *x, *a, *y, *q, *att, *h, *xf;
+   int8_t *e8;                                     /* JB_HEAD8=1: int8 head [V, D] + per-row scales (NULL: bf16) */
+   float *sv;
+   int16_t *xq;
 };
 
 static struct dbufs
@@ -407,6 +436,14 @@ dbufs_new(const struct model *m)
       .y = malloc(big * sizeof(float)), .q = malloc(m->H * m->hd * sizeof(float)),
       .att = malloc(m->H * m->hd * sizeof(float)), .h = malloc(I * sizeof(float)), .xf = malloc(D * sizeof(float)),
    };
+   if (getenv("JB_HEAD8") && atoi(getenv("JB_HEAD8")) > 0 && D % 16 == 0) {
+      double t = now_ms();
+      d.e8 = malloc((size_t)m->V * D);
+      d.sv = malloc((size_t)m->V * sizeof(float));
+      d.xq = malloc((size_t)D * sizeof(int16_t));
+      jbg_head_i8_build(m->embed, m->V, D, d.e8, d.sv);
+      printf("int8 head: %.1f MB built in %.0f ms\n", (double)m->V * D / 1e6, now_ms() - t);
+   }
    return d;
 }
 
@@ -433,7 +470,6 @@ decode_step(const struct model *m, struct bufs *b, struct dbufs *d, int pos, int
 {
    const int L = m->L, D = m->D, H = m->H, KV = m->KV, hd = m->hd, I = m->I, V = m->V;
    const struct step *steps = m->steps;
-   size_t kvw = (size_t)KV * hd;
    double t = now_ms(), t1;
    const uint16_t *e = m->embed + (size_t)id * D;
    for (int i = 0; i < D; i++) {
@@ -452,18 +488,18 @@ decode_step(const struct model *m, struct bufs *b, struct dbufs *d, int pos, int
    }
    for (int l = 0; l < L; l++) {
       const struct step *Sq = &steps[4 * l], *So = &steps[4 * l + 1], *Sg = &steps[4 * l + 2], *Sd = &steps[4 * l + 3];
-      float *kc = b->kc + (size_t)l * b->cap * kvw, *vc = b->vc + (size_t)l * b->cap * kvw;
+      void *kc = kv_layer(b, b->kc, l, KV, hd), *vc = kv_layer(b, b->vc, l, KV, hd);
       jbg_rmsnorm(d->x, NULL, d->a, 1, D, m->eps);
       gemv_step(Sq, d->a, d->y, (H + 2 * KV) * hd, 0);
       memcpy(d->q, d->y, (size_t)H * hd * sizeof(float));
-      memcpy(kc + pos * kvw, d->y + (size_t)H * hd, kvw * sizeof(float));
-      memcpy(vc + pos * kvw, d->y + (size_t)(H + KV) * hd, kvw * sizeof(float));
       if (m->rope[l]) {
          jbg_rope(d->q, 1, H, hd, pos, m->inv_freq);
-         jbg_rope(kc + pos * kvw, 1, KV, hd, pos, m->inv_freq);
+         jbg_rope(d->y + (size_t)H * hd, 1, KV, hd, pos, m->inv_freq);
       }
+      jbg_kv_store(kc, d->y + (size_t)H * hd, pos, 1, KV, hd, b->cap, b->kv16);
+      jbg_kv_store(vc, d->y + (size_t)(H + KV) * hd, pos, 1, KV, hd, b->cap, b->kv16);
       t1 = now_ms(); tp[0] += t1 - t; t = t1;
-      jbg_attn_decode(d->q, kc, vc, d->att, pos + 1, H, KV, hd);
+      jbg_attn_decode_hm(d->q, kc, vc, d->att, pos + 1, H, KV, hd, b->cap, b->kv16);
       t1 = now_ms(); tp[1] += t1 - t; t = t1;
       gemv_step(So, d->att, d->x, D, 1);
       jbg_rmsnorm(d->x, NULL, d->a, 1, D, m->eps);
@@ -484,7 +520,10 @@ decode_step(const struct model *m, struct bufs *b, struct dbufs *d, int pos, int
       memcpy(d->xf, d->a, D * sizeof(float));
    }
    jbg_rmsnorm(d->xf, m->normw, d->xf, 1, D, m->eps);
-   jbg_head_bf16(d->xf, 1, D, m->embed, V, lg);
+   if (d->e8)
+      jbg_head_i8(d->xf, D, d->e8, d->sv, V, lg, d->xq);
+   else
+      jbg_head_bf16(d->xf, 1, D, m->embed, V, lg);
    tp[2] += now_ms() - t;
 }
 
@@ -498,12 +537,390 @@ argmax_f32(const float *a, int n)
    return best;
 }
 
+/* ---- --serve (2026-11-24): the chat engine. One client at a time on a Unix socket (the Alta Chat app); the model
+ * stays loaded between clients. Lines in:  GEN max_new temp top_k top_p rep_pen seed n id_0 .. id_n-1  (the whole
+ * conversation as token ids; position 0 = the template's <|im_start|>), STOP (during a GEN), INFO, QUIT.
+ * Lines out: READY {json}, PREFILL ms path tokens, TOK id, END reason generated decode_ms_per_token prefill_ms, ERR msg.
+ * The cache keeps the K / V of the last conversation: a GEN that extends it only processes the new tokens, either on
+ * the CPU (decode steps) or, if cheaper, as a fresh NPU chunk over positions 1..T (+ decode steps for the rest). ---- */
+#include <poll.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+static const char *status_path;                    /* --serve: SOCK.status, one line of load progress for the app */
+
+static void
+status_write(const char *fmt, ...)
+{
+   if (!status_path)
+      return;
+   char tmp[600], line[512];
+   va_list ap;
+   va_start(ap, fmt);
+   vsnprintf(line, sizeof(line), fmt, ap);
+   va_end(ap);
+   snprintf(tmp, sizeof(tmp), "%s.tmp", status_path);
+   FILE *f = fopen(tmp, "w");
+   if (!f)
+      return;
+   fprintf(f, "%s\n", line);
+   fclose(f);
+   rename(tmp, status_path);
+}
+
+struct conn {
+   int fd;
+   char buf[1 << 16];
+   int n;
+};
+
+static int
+conn_send(struct conn *k, const char *fmt, ...)
+{
+   char line[1024];
+   va_list ap;
+   va_start(ap, fmt);
+   int len = vsnprintf(line, sizeof(line), fmt, ap);
+   va_end(ap);
+   if (len >= (int)sizeof(line))
+      len = sizeof(line) - 1;
+   for (int o = 0; o < len;) {
+      ssize_t w = send(k->fd, line + o, len - o, MSG_NOSIGNAL);
+      if (w <= 0)
+         return -1;
+      o += w;
+   }
+   return 0;
+}
+
+/* next line (without the newline) into out; timeout_ms < 0: wait. 1 = a line, 0 = timeout, -1 = closed */
+static int
+conn_line(struct conn *k, char **out, int timeout_ms)
+{
+   static char *line;
+   static size_t cap;
+   for (;;) {
+      char *nl = memchr(k->buf, '\n', k->n);
+      if (nl) {
+         size_t len = nl - k->buf;
+         if (len + 1 > cap) {
+            cap = len + 1;
+            line = realloc(line, cap);
+         }
+         memcpy(line, k->buf, len);
+         line[len] = 0;
+         memmove(k->buf, nl + 1, k->n - len - 1);
+         k->n -= len + 1;
+         *out = line;
+         return 1;
+      }
+      if (k->n == (int)sizeof(k->buf))
+         return -1;                                /* a line longer than the buffer: drop the client */
+      struct pollfd pf = {k->fd, POLLIN, 0};
+      int r = poll(&pf, 1, timeout_ms);
+      if (r == 0)
+         return 0;
+      if (r < 0)
+         return -1;
+      ssize_t got = recv(k->fd, k->buf + k->n, sizeof(k->buf) - k->n, 0);
+      if (got <= 0)
+         return -1;
+      k->n += got;
+   }
+}
+
+static uint64_t rng_s;
+
+static double
+rng_u(void)                                        /* xorshift64*, [0, 1) */
+{
+   rng_s ^= rng_s >> 12;
+   rng_s ^= rng_s << 25;
+   rng_s ^= rng_s >> 27;
+   return (double)((rng_s * 2685821657736338717ULL) >> 11) / 9007199254740992.0;
+}
+
+/* next token from logits lg [V] (modified in place): repetition penalty over the last 256 ids of hist, then greedy
+ * (temp <= 0) or temperature + top-k + top-p sampling */
+static int
+sample(float *lg, int V, const int32_t *hist, int nh, float temp, int top_k, float top_p, float rep_pen)
+{
+   static unsigned char *seen;
+   if (!seen)
+      seen = calloc(V, 1);
+   if (rep_pen > 1.0f) {
+      int h0 = nh > 256 ? nh - 256 : 0;
+      for (int i = h0; i < nh; i++) {
+         int id = hist[i];
+         if (id < 0 || id >= V || seen[id])
+            continue;
+         seen[id] = 1;
+         lg[id] = lg[id] > 0 ? lg[id] / rep_pen : lg[id] * rep_pen;
+      }
+      for (int i = h0; i < nh; i++)
+         if (hist[i] >= 0 && hist[i] < V)
+            seen[hist[i]] = 0;
+   }
+   if (temp <= 0)
+      return argmax_f32(lg, V);
+   enum { KMAX = 256 };
+   int k = top_k > 0 && top_k < KMAX ? top_k : KMAX;
+   int idx[KMAX], n = 0;                            /* the k largest, sorted descending */
+   for (int v = 0; v < V; v++) {
+      if (n == k && lg[v] <= lg[idx[n - 1]])
+         continue;
+      int j = n < k ? n++ : n - 1;
+      while (j > 0 && lg[idx[j - 1]] < lg[v]) {
+         idx[j] = idx[j - 1];
+         j--;
+      }
+      idx[j] = v;
+   }
+   double pr[KMAX], sum = 0;
+   for (int i = 0; i < n; i++)
+      sum += pr[i] = exp((lg[idx[i]] - lg[idx[0]]) / temp);
+   double acc = 0;
+   int m = n;
+   for (int i = 0; i < n; i++) {                    /* top-p: the smallest prefix with mass >= top_p */
+      acc += pr[i] / sum;
+      if (top_p > 0 && top_p < 1 && acc >= top_p) {
+         m = i + 1;
+         break;
+      }
+   }
+   double tot = 0;
+   for (int i = 0; i < m; i++)
+      tot += pr[i];
+   double r = rng_u() * tot;
+   for (int i = 0; i < m; i++) {
+      r -= pr[i];
+      if (r <= 0)
+         return idx[i];
+   }
+   return idx[m - 1];
+}
+
+static int
+chat_serve(const char *sock, double max_s, struct ctx *c, const struct model *m, struct bufs *b, const char *backend,
+      const char *pd)
+{
+   const int T = m->T, V = m->V, cap = b->cap;
+   struct dbufs d = dbufs_new(m);
+   float *lg = malloc((size_t)V * sizeof(float));
+   int32_t *cid = malloc((size_t)cap * sizeof(int32_t)), *req = malloc((size_t)cap * sizeof(int32_t));
+   int32_t *ids = malloc((size_t)(T + 1) * sizeof(int32_t));
+   int ncached = 0;
+   double chunk_est = 0, dec_est = 0;               /* running estimates (ms): one chunk, one decode step */
+   double t_start = now_ms();
+
+   if (strlen(sock) >= sizeof(((struct sockaddr_un *)0)->sun_path)) {
+      fprintf(stderr, "serve: socket path too long (%zu bytes): %s\n", strlen(sock), sock);
+      status_write("error socket path too long");
+      return 2;
+   }
+   unlink(sock);
+   int ls = socket(AF_UNIX, SOCK_STREAM, 0);
+   struct sockaddr_un sa = {.sun_family = AF_UNIX};
+   snprintf(sa.sun_path, sizeof(sa.sun_path), "%s", sock);
+   if (ls < 0 || bind(ls, (struct sockaddr *)&sa, sizeof(sa)) || listen(ls, 1)) {
+      perror("serve: socket");
+      return 2;
+   }
+   char info[512];
+   snprintf(info, sizeof(info), "{\"backend\": \"%s\", \"packs\": \"%s\", \"layers\": %d, \"dim\": %d, \"vocab\": %d, "
+            "\"chunk\": %d, \"ctx\": %d, \"kv16\": %d, \"head8\": %d, \"max_s\": %.0f}", backend, pd, m->L, m->D, V, T,
+            cap, b->kv16, d.e8 != NULL, max_s);
+   status_write("ready %s", info);
+   printf("serve: listening on %s %s\n", sock, info);
+   fflush(stdout);
+   int quit = 0;
+   while (!quit) {
+      struct pollfd pf = {ls, POLLIN, 0};
+      if (max_s > 0 && now_ms() - t_start > max_s * 1e3) {
+         printf("serve: session time limit (%.0f s) reached\n", max_s);
+         break;
+      }
+      if (poll(&pf, 1, 1000) <= 0)
+         continue;
+      struct conn *k = calloc(1, sizeof(*k));
+      k->fd = accept(ls, NULL, NULL);
+      if (k->fd < 0) {
+         free(k);
+         continue;
+      }
+      printf("serve: client connected\n");
+      fflush(stdout);
+      if (conn_send(k, "READY %s\n", info))
+         goto drop;
+      for (;;) {
+         char *ln;
+         int r = conn_line(k, &ln, 1000);
+         if (r < 0)
+            break;
+         if (r == 0) {
+            if (max_s > 0 && now_ms() - t_start > max_s * 1e3) {
+               conn_send(k, "ERR session time limit reached: the engine stops\n");
+               quit = 1;
+               break;
+            }
+            continue;
+         }
+         if (!strcmp(ln, "QUIT")) {
+            quit = 1;
+            break;
+         }
+         if (!strcmp(ln, "INFO")) {
+            conn_send(k, "INFO {\"cached\": %d, \"chunk_ms\": %.1f, \"decode_ms\": %.1f, \"uptime_s\": %.0f}\n",
+                      ncached, chunk_est, dec_est, (now_ms() - t_start) / 1e3);
+            continue;
+         }
+         if (!strcmp(ln, "STOP"))
+            continue;                              /* nothing running */
+         if (!strcmp(ln, "RESET")) {
+            ncached = 0;
+            conn_send(k, "OK\n");
+            continue;
+         }
+         int max_new, top_k, n;
+         float temp, top_p, rep_pen;
+         unsigned long long seed;
+         int off;
+         if (strncmp(ln, "GEN ", 4) ||
+             sscanf(ln + 4, "%d %f %d %f %f %llu %d%n", &max_new, &temp, &top_k, &top_p, &rep_pen, &seed, &n, &off) != 7) {
+            conn_send(k, "ERR bad request\n");
+            continue;
+         }
+         if (n < 1 || n >= cap) {
+            conn_send(k, "ERR context full: %d tokens, the cache holds %d\n", n, cap);
+            continue;
+         }
+         char *p = ln + 4 + off;
+         int bad = 0;
+         for (int i = 0; i < n; i++) {
+            char *e;
+            long v = strtol(p, &e, 10);
+            if (e == p || v < 0 || v >= V) {
+               bad = 1;
+               break;
+            }
+            req[i] = (int32_t)v;
+            p = e;
+         }
+         if (bad) {
+            conn_send(k, "ERR bad token ids\n");
+            continue;
+         }
+         rng_s = seed ? seed : 0x9E3779B97F4A7C15ULL;
+
+         /* prompt: reuse the cached prefix, then the cheaper of (decode steps) and (a chunk + decode steps) */
+         int pfx = 0;
+         while (pfx < ncached && pfx < n && cid[pfx] == req[pfx])
+            pfx++;
+         if (pfx >= n)
+            pfx = n - 1;                           /* the last token again: its logits */
+         double tq = now_ms(), tp[4] = {0}, tc[8] = {0};
+         int newt = n - pfx, mch = n < T + 1 ? n : T + 1;
+         double cost_dec = dec_est > 0 ? newt * dec_est : newt * 1e9;
+         double cost_chunk = chunk_est > 0 ? chunk_est + (n - mch) * dec_est : (newt >= 16 ? 0 : 2e9 * newt);
+         const char *path = "decode";
+         int from = pfx;
+         /* --ref: never the chunk (it emulates the NPU's 8-bit arithmetic: slower and less exact than decode) */
+         if (!c->ref && n >= 2 && newt > 1 && cost_chunk < cost_dec) {
+            if (pfx < 1)                           /* position 0 (the template token) on the CPU */
+               decode_step(m, b, &d, 0, req[0], NULL, tp);
+            for (int i = 0; i <= T; i++)
+               ids[i] = i < mch ? req[i] : 2;     /* padding after the prompt (causal: never seen by it) */
+            double t0 = now_ms();
+            int rc = chunk(c, m, b, NULL, ids, 1, mch - 1, NULL, tc);
+            if (rc) {
+               conn_send(k, "ERR chunk failed (%d)\n", rc);
+               quit = 1;
+               break;
+            }
+            double cm = now_ms() - t0;
+            chunk_est = chunk_est > 0 ? 0.5 * chunk_est + 0.5 * cm : cm;
+            memcpy(lg, b->lg, (size_t)V * sizeof(float));
+            path = "npu-chunk";
+            if (c->ref)
+               path = "cpu-chunk";
+            from = mch;
+         }
+         for (int pos = from; pos < n; pos++) {
+            double t0 = now_ms();
+            decode_step(m, b, &d, pos, req[pos], pos == n - 1 ? lg : NULL, tp);
+            double dm = now_ms() - t0;
+            dec_est = dec_est > 0 ? 0.8 * dec_est + 0.2 * dm : dm;
+         }
+         memcpy(cid, req, (size_t)n * sizeof(int32_t));
+         ncached = n;
+         double pms = now_ms() - tq;
+         if (conn_send(k, "PREFILL %.1f %s %d\n", pms, path, newt))
+            break;
+
+         /* generate */
+         int pos = n, gen = 0;
+         const char *why = "length";
+         double tg = now_ms();
+         int dropped = 0;
+         while (gen < max_new) {
+            int tok = sample(lg, V, cid, pos, temp, top_k, top_p, rep_pen);
+            gen++;
+            if (conn_send(k, "TOK %d\n", tok)) {
+               dropped = 1;
+               break;
+            }
+            if (tok == 2 || tok == 0) {            /* <|im_end|>, <|endoftext|> */
+               why = "stop";
+               break;
+            }
+            if (pos >= cap) {
+               why = "context";
+               break;
+            }
+            char *sl;
+            int r2 = conn_line(k, &sl, 0);
+            if (r2 < 0) {
+               dropped = 1;
+               break;
+            }
+            if (r2 == 1 && !strcmp(sl, "STOP")) {
+               why = "user";
+               break;
+            }
+            double t0 = now_ms();
+            decode_step(m, b, &d, pos, tok, lg, tp);
+            double dm = now_ms() - t0;
+            dec_est = 0.8 * dec_est + 0.2 * dm;
+            cid[pos++] = tok;
+            ncached = pos;
+         }
+         if (dropped)
+            break;
+         double gms = now_ms() - tg;
+         conn_send(k, "END %s %d %.1f %.1f\n", why, gen, gen ? gms / gen : 0.0, pms);
+         printf("serve: prompt %d tokens (%d new, %s) %.0f ms; %d generated, %.1f ms per token (%s)\n", n, newt, path,
+                pms, gen, gen ? gms / gen : 0.0, why);
+         fflush(stdout);
+      }
+   drop:
+      close(k->fd);
+      free(k);
+      printf("serve: client gone\n");
+      fflush(stdout);
+   }
+   close(ls);
+   unlink(sock);
+   status_write("stopped");
+   return 0;
+}
+
 int
 main(int argc, char **argv)
 {
    bool ref = true, offline = false, all = false;
-   int repeat = 1, generate = 0, coef_check = 0;
-   const char *teacher = NULL;
+   int repeat = 1, generate = 0, coef_check = 0, ctxn = 1024;
+   double max_s = 0;
+   const char *teacher = NULL, *serve_sock = NULL;
    const char *pd = NULL, *auxp = NULL, *promptp = NULL, *outp = NULL, *dump = NULL;
    for (int i = 1; i < argc; i++) {
       if (!strcmp(argv[i], "--npu"))
@@ -518,6 +935,12 @@ main(int argc, char **argv)
          generate = atoi(argv[++i]) > 0 ? atoi(argv[i]) : 0;
       else if (!strcmp(argv[i], "--coef-check"))
          coef_check = 1;
+      else if (!strcmp(argv[i], "--serve") && i + 1 < argc)
+         serve_sock = argv[++i];
+      else if (!strcmp(argv[i], "--ctx") && i + 1 < argc)
+         ctxn = atoi(argv[++i]);
+      else if (!strcmp(argv[i], "--max-s") && i + 1 < argc)
+         max_s = atof(argv[++i]);
       else if (!strcmp(argv[i], "--teacher") && i + 1 < argc)
          teacher = argv[++i];
       else if (!strcmp(argv[i], "--repeat") && i + 1 < argc)
@@ -533,14 +956,21 @@ main(int argc, char **argv)
       else
          promptp = argv[i];
    }
-   if (!pd || !auxp || !promptp) {
+   if (!pd || !auxp || (!promptp && !serve_sock)) {
       fprintf(stderr, "usage: jb_prefill [--npu|--ref] [--offline] [--all] [--repeat N] [--generate N] [--teacher LOGITS] "
-                      "[--dump DIR] [--out LOGITS] PACK_DIR AUX PROMPT\n");
+                      "[--dump DIR] [--out LOGITS] PACK_DIR AUX PROMPT\n"
+                      "       jb_prefill [--npu|--ref] --serve SOCKET [--ctx N] [--max-s S] PACK_DIR AUX  (chat engine)\n");
       return 2;
    }
+   static char stp[600];
+   if (serve_sock) {
+      snprintf(stp, sizeof(stp), "%s.status", serve_sock);
+      status_path = stp;
+      status_write("starting");
+   }
    double t_start = now_ms();
-   struct jba aux, pr;
-   if (!read_jba(auxp, &aux) || !read_jba(promptp, &pr))
+   struct jba aux, pr = {0};
+   if (!read_jba(auxp, &aux) || (promptp && !read_jba(promptp, &pr)))
       return 2;
    const int32_t *cfg = need(&aux, "cfg", 2);
    int L = cfg[0], D = cfg[1], H = cfg[2], KV = cfg[3], hd = cfg[4], I = cfg[5], V = cfg[6], qpow2 = cfg[7];
@@ -550,12 +980,12 @@ main(int argc, char **argv)
    const float *Q = need(&aux, "Q", 0), *Hs = need(&aux, "Hs", 0), *normw = need(&aux, "norm", 0);
    const double *inv_freq = need(&aux, "inv_freq", 1);
    const int32_t *rope = need(&aux, "rope", 2);
-   struct rec *idsr = find(&pr, "ids");
-   if (!idsr || (int)idsr->dims[0] != T + 1) {
+   struct rec *idsr = promptp ? find(&pr, "ids") : NULL;
+   if (promptp && (!idsr || (int)idsr->dims[0] != T + 1)) {
       fprintf(stderr, "prompt: need %d token ids\n", T + 1);
       return 2;
    }
-   const int32_t *ids = idsr->data;
+   const int32_t *ids = idsr ? idsr->data : NULL;
    printf("jb_prefill: %d layers, D %d, H %d / KV %d x %d, I %d, vocab %d, %d tokens after position 0, backend %s\n",
           L, D, H, KV, hd, I, V, T, ref ? "ref (CPU int8)" : offline ? "npu (fake)" : "npu");
 
@@ -573,7 +1003,8 @@ main(int argc, char **argv)
          return 2;
       }
    }
-   int decode_coef = !ref && getenv("JB_DECODE_COEF") && atoi(getenv("JB_DECODE_COEF")) > 0;
+   /* --serve on the NPU decodes from the NPU's buffers unless JB_DECODE_COEF=0 */
+   int decode_coef = !ref && (getenv("JB_DECODE_COEF") ? atoi(getenv("JB_DECODE_COEF")) > 0 : serve_sock != NULL);
    long ck_jobs = 0, ck_bad = 0, ck_bytes = 0;     /* --coef-check, per pack right after its compile */
    double ck_ms = 0;
    double tc = now_ms();
@@ -589,6 +1020,7 @@ main(int argc, char **argv)
          if (mf)
             fclose(mf);
          printf("loading layer %d / %d (%.0f ms, MemAvailable %ld MB)\n", l, L, now_ms() - tc, avail / 1024);
+         status_write("loading %d %d %.0f %ld", l, L, now_ms() - tc, avail / 1024);
          fflush(stdout);
       }
       for (int s = 0; s < 4; s++) {
@@ -664,7 +1096,7 @@ main(int argc, char **argv)
             free(k->expected[k->out_idx[o]]);
             k->expected[k->out_idx[o]] = NULL;
          }
-         if (!ref && ((!generate && !teacher) || decode_coef))   /* decode from kept weights: keep them */
+         if (!ref && ((!generate && !teacher && !serve_sock) || decode_coef))   /* decode from kept weights: keep them */
             for (unsigned i = 0; i < k->n_t; i++)
                if (k->T[i].is_constant) {
                   free(k->T[i].data);
@@ -705,22 +1137,31 @@ main(int argc, char **argv)
    };
    /* decode's GEMVs: int16 activations by default (135M: 56.9 -> 39.8 ms per token; teacher-forced logits vs float
     * activations KL 3e-8, top-1 100%, ppl 15.482 vs 15.481); JB_DECODE_Q16=0: float activations */
-   if ((generate || teacher) && !(getenv("JB_DECODE_Q16") && !strcmp(getenv("JB_DECODE_Q16"), "0")))
+   int dec = generate || teacher || serve_sock;
+   if (dec && !(getenv("JB_DECODE_Q16") && !strcmp(getenv("JB_DECODE_Q16"), "0")))
       gemv_xq = malloc((size_t)(I > D ? I : D) * sizeof(int16_t));
-   if ((generate || teacher) && decode_coef) {
+   if (dec && decode_coef) {
       gemv_coef = 1;
       if (!gemv_xq)
          gemv_xq = malloc((size_t)(I > D ? I : D) * sizeof(int16_t));
    }
-   if (generate || teacher) {
-      b.cap = T + 1 + generate;
-      b.kc = malloc((size_t)L * b.cap * KV * hd * sizeof(float));
-      b.vc = malloc((size_t)L * b.cap * KV * hd * sizeof(float));
+   if (dec) {
+      b.cap = serve_sock ? (ctxn > T + 1 ? ctxn : T + 1) : T + 1 + generate;
+      /* JB_KV16=1: half-precision cache (half the attention's memory traffic; 135M teacher logits vs float KL 5e-7,
+       * top-1 100%); default float (bit-identical), --serve: half unless JB_KV16=0 */
+      b.kv16 = getenv("JB_KV16") ? atoi(getenv("JB_KV16")) > 0 : serve_sock != NULL;
+      b.kc = malloc((size_t)L * b.cap * KV * hd * (b.kv16 ? 2 : 4));
+      b.vc = malloc((size_t)L * b.cap * KV * hd * (b.kv16 ? 2 : 4));
    }
    struct model mdl = {
       .L = L, .D = D, .H = H, .KV = KV, .hd = hd, .I = I, .V = V, .qpow2 = qpow2, .bdown = bdown, .T = T, .eps = eps,
       .embed = embed, .Q = Q, .Hs = Hs, .normw = normw, .inv_freq = inv_freq, .rope = rope, .steps = steps,
    };
+   if (serve_sock) {
+      char be[64];
+      snprintf(be, sizeof(be), "%s%s", ref ? "cpu" : offline ? "npu-fake" : "npu", gemv_coef ? "+coef" : "");
+      return chat_serve(serve_sock, max_s, &c, &mdl, &b, be, pd);
+   }
    /* --repeat N: the same chunk N times in this process (steady state: the first pays page-ins of the mapped
     * embeddings and first touches of the NPU buffers); every repeat's logits must equal the first's */
    float *lg0 = repeat > 1 ? malloc((size_t)nl * V * sizeof(float)) : NULL;
@@ -729,7 +1170,7 @@ main(int argc, char **argv)
       for (int p = 0; p < 4 * L; p++)
          steps[p].t_npu = steps[p].t_ro = 0;
       double t0 = now_ms();
-      int rc = chunk(&c, &mdl, &b, &pr, ids, nl, rep == 0 ? dump : NULL, tp);
+      int rc = chunk(&c, &mdl, &b, &pr, ids, nl, 0, rep == 0 ? dump : NULL, tp);
       if (rc)
          return rc;
       double wall = now_ms() - t0;
@@ -792,8 +1233,8 @@ main(int argc, char **argv)
       double ek = 0, ev = 0, mk = 0, mv = 0;
       const float *k0 = need(&pr, "k0.0", 0), *v0 = need(&pr, "v0.0", 0);
       for (int i = 0; i < KV * hd; i++) {
-         ek = fmax(ek, fabs(b.kc[i] - k0[i]));
-         ev = fmax(ev, fabs(b.vc[i] - v0[i]));
+         ek = fmax(ek, fabs(kv_get(&b, b.kc, 0, 0, i / hd, i % hd, KV, hd) - k0[i]));
+         ev = fmax(ev, fabs(kv_get(&b, b.vc, 0, 0, i / hd, i % hd, KV, hd) - v0[i]));
          mk = fmax(mk, fabs(k0[i]));
          mv = fmax(mv, fabs(v0[i]));
       }

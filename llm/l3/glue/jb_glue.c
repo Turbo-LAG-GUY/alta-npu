@@ -1133,6 +1133,140 @@ jbg_attn_decode(const float *q, const float *k, const float *v, float *out, int 
    }
 }
 
+/* decode KV cache, head-major (2026-11-24): layer base [KV][cap][hd], element float (f16 = 0) or IEEE half (f16 = 1,
+ * stored as uint16; the A73 converts in hardware, arithmetic stays float32). Each head's keys / values are contiguous,
+ * so the decode attention streams them (the [t][KV][hd] layout strided by KV * hd and ran at ~2.8 GB/s). */
+static inline float32x4_t
+kv_ld4(const void *base, size_t i, int f16)
+{
+   if (f16)
+      return vcvt_f32_f16(vreinterpret_f16_u16(vld1_u16((const uint16_t *)base + i)));
+   return vld1q_f32((const float *)base + i);
+}
+
+/* rows src [n, KV, hd] (positions pos0 .. pos0+n-1) into the cache layer base dst */
+EXPORT void
+jbg_kv_store(void *dst, const float *src, int pos0, int n, int KV, int hd, int cap, int f16)
+{
+   for (int t = 0; t < n; t++)
+      for (int h = 0; h < KV; h++) {
+         const float *s = src + ((size_t)t * KV + h) * hd;
+         size_t o = ((size_t)h * cap + pos0 + t) * hd;
+         if (!f16) {
+            memcpy((float *)dst + o, s, (size_t)hd * sizeof(float));
+            continue;
+         }
+         uint16_t *d = (uint16_t *)dst + o;
+         int i = 0;
+         for (; i + 4 <= hd; i += 4)
+            vst1_u16(d + i, vreinterpret_u16_f16(vcvt_f16_f32(vld1q_f32(s + i))));
+         for (; i < hd; i++) {
+            __fp16 hv = (__fp16)s[i];
+            memcpy(d + i, &hv, 2);
+         }
+      }
+}
+
+static inline __attribute__((always_inline)) void
+attn_head_hm(const float *qh, const void *kb, const void *vb, float *o, float *sc, int S, int hd, float scale,
+             int f16)
+{
+   float mx = -INFINITY;
+   int t = 0;
+   if (hd % 8 == 0) {
+      for (; t + 4 <= S; t += 4) {                  /* 4 keys at a time; each key's sum in dot_f32's order */
+         float32x4_t a0 = vdupq_n_f32(0), b0 = a0, a1 = a0, b1 = a0, a2 = a0, b2 = a0, a3 = a0, b3 = a0;
+         size_t k0 = (size_t)t * hd;
+         for (int i = 0; i < hd; i += 8) {
+            float32x4_t qa = vld1q_f32(qh + i), qb = vld1q_f32(qh + i + 4);
+            a0 = vfmaq_f32(a0, qa, kv_ld4(kb, k0 + i, f16));
+            b0 = vfmaq_f32(b0, qb, kv_ld4(kb, k0 + i + 4, f16));
+            a1 = vfmaq_f32(a1, qa, kv_ld4(kb, k0 + hd + i, f16));
+            b1 = vfmaq_f32(b1, qb, kv_ld4(kb, k0 + hd + i + 4, f16));
+            a2 = vfmaq_f32(a2, qa, kv_ld4(kb, k0 + 2 * hd + i, f16));
+            b2 = vfmaq_f32(b2, qb, kv_ld4(kb, k0 + 2 * hd + i + 4, f16));
+            a3 = vfmaq_f32(a3, qa, kv_ld4(kb, k0 + 3 * hd + i, f16));
+            b3 = vfmaq_f32(b3, qb, kv_ld4(kb, k0 + 3 * hd + i + 4, f16));
+         }
+         float d0 = vaddvq_f32(vaddq_f32(a0, b0)) * scale, d1 = vaddvq_f32(vaddq_f32(a1, b1)) * scale;
+         float d2 = vaddvq_f32(vaddq_f32(a2, b2)) * scale, d3 = vaddvq_f32(vaddq_f32(a3, b3)) * scale;
+         sc[t] = d0; sc[t + 1] = d1; sc[t + 2] = d2; sc[t + 3] = d3;
+         mx = d0 > mx ? d0 : mx; mx = d1 > mx ? d1 : mx; mx = d2 > mx ? d2 : mx; mx = d3 > mx ? d3 : mx;
+      }
+   }
+   for (; t < S; t++) {
+      float32x4_t s0 = vdupq_n_f32(0), s1 = s0;
+      size_t k0 = (size_t)t * hd;
+      int i = 0;
+      for (; i + 8 <= hd; i += 8) {
+         s0 = vfmaq_f32(s0, vld1q_f32(qh + i), kv_ld4(kb, k0 + i, f16));
+         s1 = vfmaq_f32(s1, vld1q_f32(qh + i + 4), kv_ld4(kb, k0 + i + 4, f16));
+      }
+      float d = vaddvq_f32(vaddq_f32(s0, s1));
+      for (; i < hd; i++)
+         d += qh[i] * (f16 ? (float)((const __fp16 *)kb)[k0 + i] : ((const float *)kb)[k0 + i]);
+      d *= scale;
+      sc[t] = d;
+      mx = d > mx ? d : mx;
+   }
+   for (t = S; t < ((S + 3) & ~3); t++)
+      sc[t] = -INFINITY;
+   float32x4_t m4 = vdupq_n_f32(mx), sum4 = vdupq_n_f32(0);
+   for (t = 0; t < S; t += 4) {
+      float32x4_t e = exp_neg_f32(vsubq_f32(vld1q_f32(sc + t), m4));
+      vst1q_f32(sc + t, e);
+      sum4 = vaddq_f32(sum4, e);
+   }
+   float inv = 1.0f / vaddvq_f32(sum4);
+   int d0 = 0;
+   for (; d0 + 16 <= hd; d0 += 16) {
+      float32x4_t a0 = vdupq_n_f32(0), a1 = a0, a2 = a0, a3 = a0;
+      size_t vi = d0;
+      for (t = 0; t < S; t++, vi += hd) {
+         float p = sc[t];
+         a0 = vfmaq_n_f32(a0, kv_ld4(vb, vi, f16), p);
+         a1 = vfmaq_n_f32(a1, kv_ld4(vb, vi + 4, f16), p);
+         a2 = vfmaq_n_f32(a2, kv_ld4(vb, vi + 8, f16), p);
+         a3 = vfmaq_n_f32(a3, kv_ld4(vb, vi + 12, f16), p);
+      }
+      vst1q_f32(o + d0, vmulq_n_f32(a0, inv));
+      vst1q_f32(o + d0 + 4, vmulq_n_f32(a1, inv));
+      vst1q_f32(o + d0 + 8, vmulq_n_f32(a2, inv));
+      vst1q_f32(o + d0 + 12, vmulq_n_f32(a3, inv));
+   }
+   for (; d0 < hd; d0 += 4) {
+      float32x4_t a = vdupq_n_f32(0);
+      for (t = 0; t < S; t++)
+         a = vfmaq_n_f32(a, kv_ld4(vb, (size_t)t * hd + d0, f16), sc[t]);
+      vst1q_f32(o + d0, vmulq_n_f32(a, inv));
+   }
+}
+
+/* jbg_attn_decode on the head-major cache: k / v = this layer's base [KV][cap][hd] (f16: halves). With f16 = 0 the
+ * result is bit-identical to jbg_attn_decode on the same values. hd % 4 == 0. */
+EXPORT void
+jbg_attn_decode_hm(const float *q, const void *k, const void *v, float *out, int S, int H, int KV, int hd, int cap,
+                   int f16)
+{
+   int g = H / KV;
+   float scale = 1.0f / sqrtf((float)hd);
+   size_t es = f16 ? 2 : 4;
+#pragma omp parallel
+   {
+      float *sc = malloc(((size_t)S + 4) * sizeof(float));
+#pragma omp for schedule(dynamic)
+      for (int h = 0; h < H; h++) {
+         int kh = h / g;
+         const char *kb = (const char *)k + (size_t)kh * cap * hd * es, *vb = (const char *)v + (size_t)kh * cap * hd * es;
+         if (f16)
+            attn_head_hm(q + (size_t)h * hd, kb, vb, out + (size_t)h * hd, sc, S, hd, scale, 1);
+         else
+            attn_head_hm(q + (size_t)h * hd, kb, vb, out + (size_t)h * hd, sc, S, hd, scale, 0);
+      }
+      free(sc);
+   }
+}
+
 /* position 0 on the CPU: y[rows[j]] (+)= sw * sum_c w[j, c] * x[c] for one job's int8 weights [n, ic] */
 EXPORT void
 jbg_gemv_i8(const float *x, const int8_t *w, int n, int ic, float sw, const int32_t *rows, float *y, int accumulate)
@@ -1535,6 +1669,65 @@ jbg_head_bf16(const float *x, int nl, int D, const uint16_t *E, int V, float *ou
                memcpy(out + (size_t)(t + i) * V + vb, o[i], 4 * sizeof(float));
          }
       }
+   }
+}
+
+/* int8 head (decode, 2026-11-24): E8 [V, D] = rint(E / sv[v]), sv[v] = max |E[v]| / 127 (per row, from the bf16
+ * table) -- half the bytes per token of jbg_head_bf16 (1.7B: 101 vs 201 MB) */
+EXPORT void
+jbg_head_i8_build(const uint16_t *E, int V, int D, int8_t *E8, float *sv)
+{
+#pragma omp parallel for schedule(dynamic, 64)
+   for (int v = 0; v < V; v++) {
+      const uint16_t *e = E + (size_t)v * D;
+      float mx = 0;
+      for (int k = 0; k < D; k++)
+         mx = fabsf(bf16f(e[k])) > mx ? fabsf(bf16f(e[k])) : mx;
+      float s = mx > 0 ? mx / 127.0f : 1.0f, inv = 1.0f / s;
+      for (int k = 0; k < D; k++)
+         E8[(size_t)v * D + k] = (int8_t)lrintf(bf16f(e[k]) * inv);
+      sv[v] = s;
+   }
+}
+
+/* out[v] = x . E[v] from the int8 table: x to int16 (one scale), exact integer dots (as jbg_gemv_jobs_q16), each
+ * scaled by sv[v] * sx. xq: scratch of D int16s. D % 16 == 0. */
+EXPORT void
+jbg_head_i8(const float *x, int D, const int8_t *E8, const float *sv, int V, float *out, int16_t *xq)
+{
+   float sx = jbg_quant16(x, D, xq);
+#pragma omp parallel for schedule(dynamic, 16)
+   for (int vb = 0; vb < V; vb += 4) {
+      if (vb + 4 > V) {
+         for (int v = vb; v < V; v++)
+            out[v] = q16_row1(E8 + (size_t)v * D, xq, D) * (sv[v] * sx);
+         continue;
+      }
+      const int8_t *w0 = E8 + (size_t)vb * D, *w1 = w0 + D, *w2 = w1 + D, *w3 = w2 + D;
+      Q16_ROW_DECL(0);
+      Q16_ROW_DECL(1);
+      Q16_ROW_DECL(2);
+      Q16_ROW_DECL(3);
+      int64_t f0 = 0, f1 = 0, f2 = 0, f3 = 0;
+      int c = 0;
+      while (c + 16 <= D) {
+         int end = c + Q16_BLOCK < D ? c + Q16_BLOCK : D;
+         for (; c + 16 <= end; c += 16) {
+            int16x8_t xa = vld1q_s16(xq + c), xb = vld1q_s16(xq + c + 8);
+            Q16_ROW_STEP(0, w0);
+            Q16_ROW_STEP(1, w1);
+            Q16_ROW_STEP(2, w2);
+            Q16_ROW_STEP(3, w3);
+         }
+         Q16_ROW_FLUSH(0);
+         Q16_ROW_FLUSH(1);
+         Q16_ROW_FLUSH(2);
+         Q16_ROW_FLUSH(3);
+      }
+      out[vb] = (float)f0 * (sv[vb] * sx);
+      out[vb + 1] = (float)f1 * (sv[vb + 1] * sx);
+      out[vb + 2] = (float)f2 * (sv[vb + 2] * sx);
+      out[vb + 3] = (float)f3 * (sv[vb + 3] * sx);
    }
 }
 

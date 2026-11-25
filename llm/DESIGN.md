@@ -99,6 +99,27 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+## 2026-11-24 evening: faster decode + Alta Chat (chat/), first chat sessions on the NPU
+- **Decode KV cache** (jb_prefill 21e4e4e9): head-major [L][KV][cap][hd] (each head's keys contiguous; the old
+  [t][KV][hd] layout strided by 8 KB and ran at 2.8 GB/s), optional IEEE half (JB_KV16=1; --serve default). CPU
+  microbench at 1.7B shapes, 24 layers: S=320 44.0 -> 18.0 (f32) -> 8.5 ms (f16); S=1024 151 -> 64 -> 31 ms. f32
+  head-major is bit-identical to d17bb7cc (135M --ref teacher logits, generated ids, chunk logits); f16 vs f32
+  teacher logits KL 5.4e-7, top-1 100%.
+- **int8 head** (JB_HEAD8=1, opt-in): per-row int8 table built from the bf16 one, exact int16 dots: 24.3 -> 16.8 ms
+  per token at 1.7B; KL 9.5e-4, top-1 99.6% (135M).
+- GEMVs (254 ms of the 1.7B's 340) already stream 1.61 GB at 6.3 GB/s, near the CPU's ~6.7: little left there.
+- **--serve SOCKET** (chat engine): Unix socket, model stays loaded; GEN carries the whole conversation's ids, the
+  engine reuses the cached prefix and runs only new tokens, as CPU decode steps or a fresh NPU chunk (positions
+  1..T, padded; position 0's K / V from the cache), whichever its running timings say is cheaper; --ref never
+  chunks (the chunk emulates the 8-bit NPU arithmetic). Sampling: rep. penalty, temperature, top-k, top-p.
+- **Alta Chat** (chat/alta_chat.py, GTK 4 + libadwaita, launcher chat/alta-chat under no-npu-guard, install.sh =
+  menu entry + icon in ~/.local/share): engine as systemd user unit alta-chat-engine; NPU mode via npu-attempt
+  (lock, kernel watch, STOP latch, PROGRESS record), engine --max-s 3 h < npu-run deadline (3.5 h).
+- **NPU sessions (Jordan's OK):** CHAT-135M rc 0 (load 13 s, 3 coherent turns, prompt 0.7-2.6 s);
+  CHAT-1p7b rc 0 (load 83 s, 3 coherent turns) but MemAvailable 2175 -> ~650 MB, 1 GB swap in use: decode 3.0 s per
+  token in turns 1-2, 0.67 s in turn 3, the 2nd chunk 111 s (1st 10 s). The head re-reads the 201 MB bf16 table
+  (file pages) every token, and they are evicted under pressure. -> 1.7B memory fixes next.
+
 ## Resume here (2026-11-24 02:30): the first whole 1.7B prompt chunk ran on the NPU (prefill3-ladder 5/5 PASS)
 - **Memory, measured** (fake-NPU BO lists, npu-llm/runs/offline-prefill-1p7b; Mesa's calculate_weight_bo_size
   reproduces every recorded coefficient BO size with 8 NN cores): the 1.7B steps pinned **2127 MiB** of NPU buffers, not

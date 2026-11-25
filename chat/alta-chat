@@ -1,0 +1,6 @@
+#!/bin/sh
+# Alta Chat launcher: the window runs under the NPU guard (GTK / Vulkan device discovery can never open the NPU's
+# DRM node; panvk 1.3 probes every render node). The engine is started separately as a systemd user unit.
+G=/home/jordan/Documents/AI_Projects/npu-upscale/gpu-speed/build/no-npu-guard.so
+[ -f "$G" ] || { echo "alta-chat: NPU guard $G missing" >&2; exit 1; }
+LD_PRELOAD="$G${LD_PRELOAD:+:$LD_PRELOAD}" exec python3 "$(dirname "$(readlink -f "$0")")/alta_chat.py" "$@"

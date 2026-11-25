@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a7bd5"/><stop offset="1" stop-color="#2a4fa8"/>
+    </linearGradient>
+    <linearGradient id="chip" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b2f3a"/><stop offset="1" stop-color="#1b1e26"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#bg)"/>
+  <g stroke="#cfd8e6" stroke-width="4" stroke-linecap="round">
+    <path d="M42 30v-8M54 30v-8M66 30v-8M78 30v-8M42 98v8M54 98v8M66 98v8M78 98v8"/>
+    <path d="M26 46h-8M26 58h-8M26 70h-8M26 82h-8M94 46h8M94 58h8M94 70h8M94 82h8"/>
+  </g>
+  <rect x="26" y="30" width="68" height="68" rx="10" fill="url(#chip)" stroke="#9fb3d1" stroke-width="2"/>
+  <path d="M38 46a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v18a8 8 0 0 1-8 8H56l-11 9v-9a8 8 0 0 1-7-8z" fill="#ffffff"/>
+  <circle cx="50" cy="55" r="3.6" fill="#2a4fa8"/><circle cx="60" cy="55" r="3.6" fill="#2a4fa8"/>
+  <circle cx="70" cy="55" r="3.6" fill="#2a4fa8"/>
+  <circle cx="98" cy="98" r="15" fill="#ffb238" stroke="#ffffff" stroke-width="3"/>
+  <text x="98" y="103" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#3a2600">8</text>
+</svg>
