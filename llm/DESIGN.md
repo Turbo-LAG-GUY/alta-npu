@@ -99,6 +99,23 @@ plus measurements on this board.
   123.1, 4 jobs (unchanged, same-session baseline) 139.2. One pack: 1-job gateup NPU 0.79 ms (was ~2.85). One token: 1
   job 27.9 ms (OFF 27.2: no change, its input is 9 KB). So FEWER, WIDER jobs are now fastest (each job re-reads the
   input once); jobs per step is a quality choice: 1 job costs quality (135M KL .053 vs .023; breaks 1.7B).
+## 2026-11-25: 1.7B memory fixes (share-ladder 4/4 PASS) and the app at full speed
+- **mesa-llm ETNA_ML_SHARE_TENSORS=1** (test tree, patch 0003): the k-th tensor of every subgraph reuses one pooled
+  buffer of its size (the engine's steps run one after another, each step's outputs read before the next): fake NPU
+  1.7B 97 submits identical except 668 words, all addresses inside the submit's BOs, BOs 1825.6 -> 1603.3 MiB (135M
+  167.4 -> 104.4). NPU (llm/l3/share-ladder.sh, runs/llm-share-ladder-20261125-034154, 4/4 PASS): 135M and 1.7B --all
+  logits bit-identical to prefill5 C1 / C3; 1.7B load used 1808 -> 1480 MB of MemAvailable.
+- **JB_HEAD8 at startup** (jb_prefill 4bfd0dc8): the int8 head for the chunk and decode; the bf16 table's pages are
+  dropped (madvise DONTNEED + RANDOM: lookups fault single 4 KB rows), so the 201 MB table is no longer in the working
+  set (MemAvailable counts those file pages as free, which hid the cost). 1.7B quality on the float model's own hidden
+  states (llm/ref/head8_quality.py, x86 PC): KL 5.6e-4 / 1.8e-3, top-1 98.8 / 97.3%, ppl 2.176 -> 2.186 / 24.19 -> 24.10.
+- **Decode now** (S4, fp16 cache + int8 head + GOMP_CPU_AFFINITY=2-5): 1.7B **253.0 ms per token (3.95 tok/s)** =
+  GEMVs 223.9 + attention 8.4 + head 15.1 (prefill5 C4: 340.5 = 253.8 + 45.1 + 26.7); 135M 28.7 ms (52.7).
+- **The app's engine had no CPU affinity**: OpenMP threads landed on the A53s (135M 88-185 ms per token in the app vs
+  33 on the CPU test). Now GOMP_CPU_AFFINITY=2-5 (no OMP_WAIT_POLICY=active: it would spin 4 cores while the chat is
+  idle). App chats: 135M 33-34 ms per token; 1.7B 243-278 ms per token, prompts 2.1-2.6 s on the NPU, MemAvailable ~880
+  MB during the session (CHAT-1p7b 2026-11-24: ~3 s per token at ~650 MB).
+
 ## 2026-11-24 evening: faster decode + Alta Chat (chat/), first chat sessions on the NPU
 - **Decode KV cache** (jb_prefill 21e4e4e9): head-major [L][KV][cap][hd] (each head's keys contiguous; the old
   [t][KV][hd] layout strided by 8 KB and ran at 2.8 GB/s), optional IEEE half (JB_KV16=1; --serve default). CPU

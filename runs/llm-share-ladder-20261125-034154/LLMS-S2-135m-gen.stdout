@@ -1,0 +1,25 @@
+int8 head: 28.3 MB built in 47 ms (bf16 table pages dropped)
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 30 (0 ms, MemAvailable 2612 MB)
+loading layer 2 / 30 (410 ms, MemAvailable 2597 MB)
+loading layer 4 / 30 (823 ms, MemAvailable 2590 MB)
+loading layer 6 / 30 (1209 ms, MemAvailable 2583 MB)
+loading layer 8 / 30 (1612 ms, MemAvailable 2573 MB)
+loading layer 10 / 30 (2016 ms, MemAvailable 2568 MB)
+loading layer 12 / 30 (2391 ms, MemAvailable 2560 MB)
+loading layer 14 / 30 (2778 ms, MemAvailable 2551 MB)
+loading layer 16 / 30 (3194 ms, MemAvailable 2544 MB)
+loading layer 18 / 30 (3602 ms, MemAvailable 2537 MB)
+loading layer 20 / 30 (4004 ms, MemAvailable 2527 MB)
+loading layer 22 / 30 (4419 ms, MemAvailable 2522 MB)
+loading layer 24 / 30 (4843 ms, MemAvailable 2512 MB)
+loading layer 26 / 30 (5259 ms, MemAvailable 2505 MB)
+loading layer 28 / 30 (5688 ms, MemAvailable 2499 MB)
+loaded + compiled 120 steps in 6133 ms
+chunk: 406.9 ms = steps 117.8 (NPU incl. submit; read-out 34.2) + glue: embed 26.2, norm+quant 11.6, qkv+rope 16.9, attention 117.0, quantize 8.5, scatter 11.4, ffn 58.2, head 4.6 ms; last token's argmax 284
+{"rep": 0, "wall_ms": 406.9, "steps_ms": 117.8, "readout_ms": 34.2, "glue_ms": 289.1, "head_ms": 4.6, "argmax": 284, "same_as_rep0": true, "total_ms": 6590.5}
+generated: 284 365 34 25 919 2090 338 260 198 35257 314 1904 30 216 378 28807 452 8677 314 253 1767 3586 282 260 28807 198 12522 4837 6966 28 527 314 253 1767 3586 282 260 28807 198 14070 12316 6966 30 216 378 28807 452 8677 314 253 1767 3586 282 260 198 14070 12316 6208 506 6966 28 527 314 253
+decode: 64 tokens in 1838.1 ms = 28.7 ms per token (34.82 tok/s): linear+glue 21.4 (GEMVs 19.6), attention 2.5, head 4.5 ms per token
+{"generate": 64, "decode_ms_per_token": 28.72, "next": 1767}
+npu-run: rc=0 record=/home/jordan/alta-npu/runs/20261125-034235-LLMS-S2-135m-gen

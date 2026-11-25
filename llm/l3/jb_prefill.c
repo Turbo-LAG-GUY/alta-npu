@@ -268,6 +268,24 @@ struct bufs {
    int cap, kv16;
 };
 
+/* JB_HEAD8=1 (2026-11-24): the tied head from an int8 copy of the table (per-row scales), for the chunk's logits and
+ * decode's; the bf16 table's pages are then dropped, so the 1.7B's head streams 101 MB of anonymous memory per token
+ * instead of 201 MB of file pages that memory pressure evicts (CHAT-1p7b: 3 s per token at MemAvailable ~650 MB) */
+static int8_t *head_e8;
+static float *head_sv;
+static int16_t *head_xq;
+
+static void
+head_logits(const float *xf, int nl, int D, const uint16_t *embed, int V, float *lg)
+{
+   if (!head_e8) {
+      jbg_head_bf16(xf, nl, D, embed, V, lg);
+      return;
+   }
+   for (int i = 0; i < nl; i++)
+      jbg_head_i8(xf + (size_t)i * D, D, head_e8, head_sv, V, lg + (size_t)i * V, head_xq);
+}
+
 /* layer l's base in the decode cache */
 static void *
 kv_layer(const struct bufs *b, void *c, int l, int KV, int hd)
@@ -411,7 +429,7 @@ chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, cons
    }
    jbg_rmsnorm(xf, normw, xf, nl, D, eps);
    float *lg = b->lg;
-   jbg_head_bf16(xf, nl, D, embed, V, lg);       /* bf16 rows widened in registers (2026-11-24: was a scalar
+   head_logits(xf, nl, D, embed, V, lg);         /* bf16 rows widened in registers (2026-11-24: was a scalar
                                                    * widening loop, 0.9 GB/s); bit-identical to dot_f32 */
    tp[7] += now_ms() - t;
    return 0;
@@ -421,9 +439,6 @@ chunk(struct ctx *c, const struct model *m, struct bufs *b, struct jba *pr, cons
  * job's weight scale, float activations: no 8-bit activations), with the KV cache; the weights must be kept ---- */
 struct dbufs {
    float *x, *a, *y, *q, *att, *h, *xf;
-   int8_t *e8;                                     /* JB_HEAD8=1: int8 head [V, D] + per-row scales (NULL: bf16) */
-   float *sv;
-   int16_t *xq;
 };
 
 static struct dbufs
@@ -436,14 +451,6 @@ dbufs_new(const struct model *m)
       .y = malloc(big * sizeof(float)), .q = malloc(m->H * m->hd * sizeof(float)),
       .att = malloc(m->H * m->hd * sizeof(float)), .h = malloc(I * sizeof(float)), .xf = malloc(D * sizeof(float)),
    };
-   if (getenv("JB_HEAD8") && atoi(getenv("JB_HEAD8")) > 0 && D % 16 == 0) {
-      double t = now_ms();
-      d.e8 = malloc((size_t)m->V * D);
-      d.sv = malloc((size_t)m->V * sizeof(float));
-      d.xq = malloc((size_t)D * sizeof(int16_t));
-      jbg_head_i8_build(m->embed, m->V, D, d.e8, d.sv);
-      printf("int8 head: %.1f MB built in %.0f ms\n", (double)m->V * D / 1e6, now_ms() - t);
-   }
    return d;
 }
 
@@ -520,10 +527,7 @@ decode_step(const struct model *m, struct bufs *b, struct dbufs *d, int pos, int
       memcpy(d->xf, d->a, D * sizeof(float));
    }
    jbg_rmsnorm(d->xf, m->normw, d->xf, 1, D, m->eps);
-   if (d->e8)
-      jbg_head_i8(d->xf, D, d->e8, d->sv, V, lg, d->xq);
-   else
-      jbg_head_bf16(d->xf, 1, D, m->embed, V, lg);
+   head_logits(d->xf, 1, D, m->embed, V, lg);
    tp[2] += now_ms() - t;
 }
 
@@ -729,7 +733,7 @@ chat_serve(const char *sock, double max_s, struct ctx *c, const struct model *m,
    char info[512];
    snprintf(info, sizeof(info), "{\"backend\": \"%s\", \"packs\": \"%s\", \"layers\": %d, \"dim\": %d, \"vocab\": %d, "
             "\"chunk\": %d, \"ctx\": %d, \"kv16\": %d, \"head8\": %d, \"max_s\": %.0f}", backend, pd, m->L, m->D, V, T,
-            cap, b->kv16, d.e8 != NULL, max_s);
+            cap, b->kv16, head_e8 != NULL, max_s);
    status_write("ready %s", info);
    printf("serve: listening on %s %s\n", sock, info);
    fflush(stdout);
@@ -980,6 +984,21 @@ main(int argc, char **argv)
    const float *Q = need(&aux, "Q", 0), *Hs = need(&aux, "Hs", 0), *normw = need(&aux, "norm", 0);
    const double *inv_freq = need(&aux, "inv_freq", 1);
    const int32_t *rope = need(&aux, "rope", 2);
+   if (getenv("JB_HEAD8") && atoi(getenv("JB_HEAD8")) > 0 && D % 16 == 0) {
+      double th = now_ms();
+      head_e8 = malloc((size_t)V * D);
+      head_sv = malloc((size_t)V * sizeof(float));
+      head_xq = malloc((size_t)D * sizeof(int16_t));
+      jbg_head_i8_build(embed, V, D, head_e8, head_sv);
+      long pg = sysconf(_SC_PAGESIZE);              /* drop the bf16 table's pages; lookups fault single rows */
+      uintptr_t a0 = ((uintptr_t)embed + pg - 1) & ~(uintptr_t)(pg - 1);
+      uintptr_t a1 = ((uintptr_t)embed + (size_t)V * D * 2) & ~(uintptr_t)(pg - 1);
+      if (a1 > a0) {
+         madvise((void *)a0, a1 - a0, MADV_DONTNEED);
+         madvise((void *)a0, a1 - a0, MADV_RANDOM);
+      }
+      printf("int8 head: %.1f MB built in %.0f ms (bf16 table pages dropped)\n", (double)V * D / 1e6, now_ms() - th);
+   }
    struct rec *idsr = promptp ? find(&pr, "ids") : NULL;
    if (promptp && (!idsr || (int)idsr->dims[0] != T + 1)) {
       fprintf(stderr, "prompt: need %d token ids\n", T + 1);

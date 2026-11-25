@@ -17,7 +17,7 @@ from tokenizers import Tokenizer  # noqa: E402
 
 AI = "/home/jordan/Documents/AI_Projects"
 KIT = "/home/jordan/alta-npu"
-ENGINE = AI + "/npu-llm/bin/jb_prefill-21e4e4e9"
+ENGINE = AI + "/npu-llm/bin/jb_prefill-4bfd0dc8"
 UNIT = "alta-chat-engine"
 RUNDIR = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "alta-chat")
 SOCK = os.path.join(RUNDIR, "engine.sock")
@@ -25,14 +25,21 @@ STATUS = SOCK + ".status"
 
 MODELS = {
     "SmolLM2 135M": dict(packs=AI + "/npu-llm/models/jb/real-135m", aux=AI + "/npu-llm/models/jb/aux-135m/model.jba",
-                         tok=AI + "/npu-llm/models/SmolLM2-135M-Instruct/tokenizer.json", ctx=2048, label="135M"),
+                         tok=AI + "/npu-llm/models/SmolLM2-135M-Instruct/tokenizer.json", ctx=2048, label="135M",
+                         env=[], mem_mb=600),
     "SmolLM2 1.7B": dict(packs=AI + "/npu-llm/models/jb/real-1p7b-split4",
                          aux=AI + "/npu-llm/models/jb/aux-1p7b/model.jba",
-                         tok=AI + "/npu-llm/models/SmolLM2-1.7B-Instruct/tokenizer.json", ctx=1024, label="1p7b"),
+                         tok=AI + "/npu-llm/models/SmolLM2-1.7B-Instruct/tokenizer.json", ctx=1024, label="1p7b",
+                         # int8 head: 101 MB per token instead of 201 MB of evictable file pages (x86 PC, the float
+                         # model's own hidden states: KL 5.6e-4 / 1.8e-3, ppl 2.176 -> 2.186 / 24.19 -> 24.10)
+                         env=["JB_HEAD8=1"], mem_mb=2500),
 }
-# the driver settings every passing LLM ladder used (prefill5-ladder.sh)
+# the driver settings of the passing LLM ladders (prefill5-ladder.sh, share-ladder.sh)
 NPU_ENV = ["ETNA_ML_KEEP_IMAGE_CACHE=1", "ETNA_ML_V7_TILE_FIT=262144", "ETNA_ML_EXACT_BO=1",
-           "ETNA_ML_CACHED_COEFFS=1"]
+           "ETNA_ML_CACHED_COEFFS=1", "ETNA_ML_SHARE_TENSORS=1"]
+# the 4 big cores (A73: CPUs 2-5); without it threads land on the A53s and every parallel loop waits for them. No
+# OMP_WAIT_POLICY=active (the ladders' setting): it would spin 4 cores while the chat sits idle.
+CPU_ENV = ["OMP_NUM_THREADS=4", "GOMP_CPU_AFFINITY=2-5"]
 SESSION_S = 3 * 3600          # the engine stops itself after this long; npu-run's deadline is 30 min later
 IM_START, IM_END = 1, 2
 SYSTEM = "You are a helpful AI assistant named SmolLM, trained by Hugging Face"
@@ -51,6 +58,22 @@ def preflight(backend):
     return bad
 
 
+def mem_available_mb():
+    for ln in open("/proc/meminfo"):
+        if ln.startswith("MemAvailable:"):
+            return int(ln.split()[1]) // 1024
+    return -1
+
+
+def warnings(model):
+    """not blockers (Jordan: don't hold runs back for RAM), shown before loading"""
+    w, need, avail = [], MODELS[model]["mem_mb"], mem_available_mb()
+    if avail < need:
+        w.append("Only %d MB of memory free; %s wants about %d MB. It will run, but slowly if the board swaps "
+                 "(close other programs, e.g. a second Claude session)." % (avail, model, need))
+    return w
+
+
 def unit_active():
     r = subprocess.run(["systemctl", "--user", "is-active", UNIT], capture_output=True, text=True)
     return r.stdout.strip() in ("active", "activating")
@@ -67,10 +90,10 @@ def start(model, backend):
     eng = [ENGINE, "--npu" if backend == "npu" else "--ref", "--serve", SOCK, "--ctx", str(m["ctx"]),
            "--max-s", str(SESSION_S), m["packs"], m["aux"]]
     if backend == "npu":
-        cmd = ["env"] + NPU_ENV + ["OMP_NUM_THREADS=4", "NPU_DEADLINE=%d" % (SESSION_S + 1800),
-                                   KIT + "/scripts/npu-attempt", "CHAT-" + m["label"], "--"] + eng
+        cmd = ["env"] + NPU_ENV + CPU_ENV + m["env"] + ["NPU_DEADLINE=%d" % (SESSION_S + 1800),
+                                                       KIT + "/scripts/npu-attempt", "CHAT-" + m["label"], "--"] + eng
     else:
-        cmd = ["env", "OMP_NUM_THREADS=4"] + eng
+        cmd = ["env"] + CPU_ENV + m["env"] + eng
     subprocess.run(["systemctl", "--user", "reset-failed", UNIT], capture_output=True)
     return subprocess.run(["systemd-run", "--user", "--unit=" + UNIT, "--collect", "--working-directory=" + KIT,
                            "--description=Alta Chat engine (%s, %s)" % (model, backend)] + cmd,

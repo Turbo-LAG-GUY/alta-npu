@@ -185,6 +185,12 @@ class Window(Adw.ApplicationWindow):
         if bad:
             self.load_status.set_text("\n".join(bad))
             return
+        warn = E.warnings(self.model)
+        if warn and not getattr(self, "warned", False):
+            self.warned = True                        # shown once; pressing Load again goes ahead
+            self.load_status.set_text("\n".join(warn) + "\n\nPress Load model again to go ahead.")
+            return
+        self.warned = False
         r = E.start(self.model, self.backend)
         if r.returncode:
             self.load_status.set_text("could not start the engine: " + (r.stderr or r.stdout).strip())

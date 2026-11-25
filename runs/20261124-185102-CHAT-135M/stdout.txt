@@ -1,0 +1,24 @@
+jb_prefill: 30 layers, D 576, H 9 / KV 3 x 64, I 1536, vocab 49152, 256 tokens after position 0, backend npu
+/dev/dri/renderD128: etnaviv
+loading layer 0 / 30 (0 ms, MemAvailable 2203 MB)
+loading layer 2 / 30 (416 ms, MemAvailable 2185 MB)
+loading layer 4 / 30 (815 ms, MemAvailable 2174 MB)
+loading layer 6 / 30 (1208 ms, MemAvailable 2160 MB)
+loading layer 8 / 30 (1584 ms, MemAvailable 2150 MB)
+loading layer 10 / 30 (1980 ms, MemAvailable 2139 MB)
+loading layer 12 / 30 (2370 ms, MemAvailable 2125 MB)
+loading layer 14 / 30 (2757 ms, MemAvailable 2114 MB)
+loading layer 16 / 30 (3173 ms, MemAvailable 2100 MB)
+loading layer 18 / 30 (3588 ms, MemAvailable 2092 MB)
+loading layer 20 / 30 (4013 ms, MemAvailable 2072 MB)
+loading layer 22 / 30 (4405 ms, MemAvailable 2061 MB)
+loading layer 24 / 30 (4810 ms, MemAvailable 2044 MB)
+loading layer 26 / 30 (5205 ms, MemAvailable 2027 MB)
+loading layer 28 / 30 (5590 ms, MemAvailable 2013 MB)
+loaded + compiled 120 steps in 6000 ms
+serve: listening on /run/user/1000/alta-chat/engine.sock {"backend": "npu+coef", "packs": "/home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m", "layers": 30, "dim": 576, "vocab": 49152, "chunk": 256, "ctx": 2048, "kv16": 1, "head8": 0, "max_s": 10800}
+serve: client connected
+serve: prompt 37 tokens (37 new, npu-chunk) 2623 ms; 51 generated, 185.0 ms per token (stop)
+serve: prompt 105 tokens (18 new, npu-chunk) 814 ms; 55 generated, 133.5 ms per token (stop)
+serve: prompt 178 tokens (19 new, npu-chunk) 738 ms; 89 generated, 87.5 ms per token (stop)
+serve: client gone

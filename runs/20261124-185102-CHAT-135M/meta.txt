@@ -1,0 +1,16 @@
+label: CHAT-135M
+cmd: /home/jordan/Documents/AI_Projects/npu-llm/bin/jb_prefill-21e4e4e9 --npu --serve /run/user/1000/alta-chat/engine.sock --ctx 2048 --max-s 10800 /home/jordan/Documents/AI_Projects/npu-llm/models/jb/real-135m /home/jordan/Documents/AI_Projects/npu-llm/models/jb/aux-135m/model.jba
+cwd: /home/jordan/alta-npu
+start: 2026-11-24T18:51:02-05:00
+kernel: 6.12.73-g6b2d05eda916
+etnaviv: patched: 0x7120 + reset on power-up (alta: reset on every power-up, kept powered (keep_powered=1); power/control=on); srcversion=
+mem_available_mb: 2201
+deadline_s: 12600
+journal_cursor: s=0c81879dde6b48c39c7c6ff689cf25cc;i=191d2a;b=51cd581f2c324a5ab5a0c7bb7b5d7f03;m=a02bd28a;t=6610e5fe298a2;x=a5da42a57014c3dc
+job_queue_before: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]
+ETNA_ML_EXACT_BO=1
+ETNA_ML_CACHED_COEFFS=1
+ETNA_ML_V7_TILE_FIT=262144
+ETNA_ML_KEEP_IMAGE_CACHE=1
+end: 2026-11-24T18:51:39-05:00  rc: 0  wall_s: 37
+job_queue_after: limit=4 auto=Y turns=N guard_ms=100 trips=0 trip_from=0 prio=[] clients=[]

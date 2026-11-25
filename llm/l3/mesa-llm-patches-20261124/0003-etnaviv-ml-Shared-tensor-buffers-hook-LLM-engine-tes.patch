@@ -1,0 +1,136 @@
+From f5a4a93ceb551daa49ab335d8544eb1a63b80bac Mon Sep 17 00:00:00 2001
+From: Jordan Williams Johnson <jordandwj@gmail.com>
+Date: Wed, 25 Nov 2026 03:51:06 -0500
+Subject: [PATCH] etnaviv/ml: Shared tensor buffers hook (LLM engine, test tree
+ only)
+
+ETNA_ML_SHARE_TENSORS=1 makes the k-th tensor a subgraph creates reuse
+one pooled buffer, shared with the k-th tensor of every other subgraph
+that has the same size and read-back flag, instead of allocating its
+own. Within a subgraph every tensor still gets its own buffer. Sharing
+across subgraphs is only correct when they never run at the same time
+and none needs another's tensors to persist. The LLM engine meets both:
+it runs its steps one after another and reads each step's outputs
+before the next. A reused buffer is not zeroed again.
+
+SmolLM2-1.7B's 96 subgraphs then share one set of input and output
+tensors instead of 24 sets: on the fake NPU the same 97 submits, which
+differ only in 668 words, all addresses inside the submit's buffers;
+pinned buffers 1825.6 -> 1603.3 MiB. On the A311D's NPU, the 135M and
+1.7B prompt-chunk logits are bit-identical with and without it (alta-npu
+runs/llm-share-ladder-20261125-034154).
+
+Unset = unchanged.
+
+Generated-by: LLM
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/gallium/drivers/etnaviv/etnaviv_ml.c | 63 +++++++++++++++++++++++-
+ src/gallium/drivers/etnaviv/etnaviv_ml.h |  3 ++
+ 2 files changed, 64 insertions(+), 2 deletions(-)
+
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.c b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+index 6fffacafdee2..69db01bf77bb 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.c
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.c
+@@ -9,6 +9,7 @@
+ #include "pipe/p_state.h"
+ #include <sys/time.h>
+ 
++#include "util/simple_mtx.h"
+ #include "util/u_inlines.h"
+ 
+ #include "etnaviv_context.h"
+@@ -68,6 +69,64 @@ etna_ml_allocate_tensor(struct etna_ml_subgraph *subgraph)
+    return util_dynarray_num_elements(&subgraph->tensors, struct etna_ml_tensor *) - 1;
+ }
+ 
++/* ETNA_ML_SHARE_TENSORS=1 (LLM engine, test tree only, 2026-11-24): the k-th tensor any subgraph creates
++ * reuses the pooled buffer of the k-th tensor of an earlier subgraph with the same size and read-back flag,
++ * instead of a buffer of its own. Within a subgraph every tensor still has its own buffer (distinct k); across
++ * subgraphs the buffers are shared, which is only correct when the subgraphs never run at the same time and no
++ * subgraph needs another's tensors to persist: the LLM engine runs its steps one after another and reads each
++ * step's outputs before the next (SmolLM2-1.7B: 96 subgraphs, ~11.5 MiB of input / output tensors per layer, 276
++ * MiB -> ~12 MiB pinned). A reused buffer is not zeroed again. The pool holds a reference to each buffer.
++ */
++struct share_ent {
++   struct pipe_screen *screen;
++   unsigned ordinal, size;
++   bool cpu_read;
++   struct pipe_resource *res;
++};
++
++static bool
++etna_ml_share_tensors(void)
++{
++   static int on = -1;
++
++   if (on < 0) {
++      const char *v = getenv("ETNA_ML_SHARE_TENSORS");
++      on = v && atoi(v) > 0;
++   }
++
++   return on;
++}
++
++static struct pipe_resource *
++share_pool_get(struct etna_ml_subgraph *subgraph, unsigned size, bool cpu_read)
++{
++   static struct share_ent *pool;
++   static unsigned n, cap;
++   static simple_mtx_t mtx = SIMPLE_MTX_INITIALIZER;
++   struct pipe_screen *pscreen = &subgraph->screen->base;
++   unsigned ordinal = subgraph->share_next++;
++   struct pipe_resource *res = NULL;
++
++   simple_mtx_lock(&mtx);
++   for (unsigned i = 0; i < n && !res; i++)
++      if (pool[i].screen == pscreen && pool[i].ordinal == ordinal && pool[i].size == size &&
++          pool[i].cpu_read == cpu_read)
++         pipe_resource_reference(&res, pool[i].res);
++   if (!res) {
++      if (n == cap) {
++         cap = cap ? 2 * cap : 64;
++         pool = realloc(pool, cap * sizeof(*pool));
++      }
++      pool[n] = (struct share_ent){pscreen, ordinal, size, cpu_read, NULL};
++      pool[n].res = etna_ml_create_resource(pscreen, size, cpu_read);
++      pipe_resource_reference(&res, pool[n].res);
++      n++;
++   }
++   simple_mtx_unlock(&mtx);
++
++   return res;
++}
++
+ void
+ etna_ml_create_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned size)
+ {
+@@ -83,8 +142,8 @@ etna_ml_create_tensor(struct etna_ml_subgraph *subgraph, unsigned idx, unsigned
+       return;
+    }
+ 
+-   res = etna_ml_create_resource(&subgraph->screen->base, size,
+-                                 tensor->cpu_read);
++   res = etna_ml_share_tensors() ? share_pool_get(subgraph, size, tensor->cpu_read) :
++         etna_ml_create_resource(&subgraph->screen->base, size, tensor->cpu_read);
+    tensor->resource = res;
+    tensor->size = size;
+ 
+diff --git a/src/gallium/drivers/etnaviv/etnaviv_ml.h b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+index c50afabe0439..05ba64fe50e8 100644
+--- a/src/gallium/drivers/etnaviv/etnaviv_ml.h
++++ b/src/gallium/drivers/etnaviv/etnaviv_ml.h
+@@ -72,6 +72,9 @@ struct etna_ml_subgraph {
+    /* alta: upper bound of the command words one invoke emits, set when tensors are in the AXI SRAM.
+     * The whole invoke must go out in one submit (see place_tensors_in_axi_sram). */
+    unsigned axi_sram_words;
++
++   /* alta: ETNA_ML_SHARE_TENSORS=1, the number of tensors this subgraph has created (the pool key) */
++   unsigned share_next;
+ };
+ 
+ struct etna_vip_instruction {
+-- 
+2.43.0
+
